@@ -287,43 +287,105 @@
         return container;
     }
 
-    function playEpisode(title, iframeUrl) {
+    async function playEpisode(title, iframeUrl) {
         if (!iframeUrl) {
-            showToast('❌ Немає URL плеєра');
+            showToast('❌ Немає плеєра');
             return;
         }
         DOM.playerModalTitle.textContent = title;
         DOM.playerModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-
         const container = getPlayerContainer();
-        container.innerHTML = '<div class="loader" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;"><i class="fas fa-spinner fa-pulse"></i> Завантаження плеєра...</div>';
-
-        const iframe = document.createElement('iframe');
-        iframe.src = iframeUrl;
-        iframe.frameBorder = '0';
-        iframe.allowFullscreen = true;
-        iframe.allow = 'autoplay; fullscreen';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.onload = () => {
-            const spinner = container.querySelector('.loader');
-            if (spinner) spinner.style.display = 'none';
-        };
-        iframe.onerror = () => {
-            showToast('❌ Помилка завантаження плеєра');
-            container.innerHTML = '<div class="loader" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"><i class="fas fa-exclamation-circle"></i> Помилка завантаження</div>';
-        };
-        container.appendChild(iframe);
+        container.innerHTML = `
+            <video id="animeVideo"
+                controls
+                autoplay
+                playsinline
+                style="position:absolute;top:0;left:0;width:100%;height:100%;background:#000">
+            </video>
+            <div id="voiceSelectBox"
+                style="
+                    position:absolute;
+                    top:10px;
+                    left:10px;
+                    z-index:10;
+                    background:rgba(0,0,0,.7);
+                    padding:8px;
+                    border-radius:10px;
+                ">
+                <select id="voiceSelect"
+                    style="
+                        background:#111;
+                        color:#fff;
+                        border:none;
+                        padding:8px;
+                        border-radius:8px;
+                    ">
+                    <option>Завантаження озвучок...</option>
+                </select>
+            </div>
+        `;
+        try {
+            const proxyUrl = getProxyUrl(iframeUrl);
+            const html = await fetch(proxyUrl).then(r => r.text());
+            const m3u8Matches = [...html.matchAll(/https?:\/\/[^"' ]+\.m3u8[^"' ]*/g)];
+            if (!m3u8Matches.length) {
+                showToast('❌ m3u8 не знайдено');
+                return;
+            }
+            const streams = [];
+            m3u8Matches.forEach((m, index) => {
+                streams.push({
+                    name: `Озвучка ${index + 1}`,
+                    url: m[0]
+                });
+            });
+            const uniqueStreams = streams.filter(
+                (v, i, a) => a.findIndex(t => t.url === v.url) === i
+            );
+            const select = document.getElementById('voiceSelect');
+            select.innerHTML = uniqueStreams.map((s, i) => `
+                <option value="${i}">
+                    ${s.name}
+                </option>
+            `).join('');
+            const video = document.getElementById('animeVideo');
+            function loadStream(index) {
+                const stream = uniqueStreams[index];
+                const proxied = getProxyUrl(stream.url);
+                if (Hls.isSupported()) {
+                    if (window.currentHls) {
+                        window.currentHls.destroy();
+                    }
+                    const hls = new Hls();
+                    window.currentHls = hls;
+                    hls.loadSource(proxied);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        video.play();
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = proxied;
+                    video.play();
+                }
+            }
+            loadStream(0);
+            select.addEventListener('change', () => {
+                loadStream(select.value);
+            });
+        } catch (e) {
+            console.error(e);
+            showToast('❌ Помилка плеєра');
+        }
     }
 
     function closePlayerModal() {
         DOM.playerModal.style.display = 'none';
         document.body.style.overflow = '';
+        if (window.currentHls) {
+            window.currentHls.destroy();
+            window.currentHls = null;
+        }
         const container = document.getElementById('playerIframeContainer');
         if (container) container.innerHTML = '';
     }
