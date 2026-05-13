@@ -269,8 +269,11 @@
         const sources = [];
         const m1 = text.match(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/);
         if (m1) sources.push({ label: 'm3u8', file: m1[1].trim() });
-        const m2 = text.match(/['"]file['"]\s*:\s*(\[[\s\S]{0,8000}?\])/);
+        // 🟢 ЗАМІНА РЕГУЛЯРНОГО ВИРАЗУ — тепер без обмеження в 8000 символів
+        const m2 = text.match(/['"]file['"]\s*:\s*(\[[\s\S]*?\])/);
         if (m2) {
+            // 🟢 ДЕБАГ-ЛОГ перед парсингом
+            console.log('PLAYLIST RAW:', m2?.[1]);
             try {
                 const arr = JSON.parse(m2[1]);
                 const walk = (items, dub) => {
@@ -280,7 +283,10 @@
                     });
                 };
                 walk(arr, '');
-            } catch (e) {}
+            } catch (e) {
+                // 🟢 ОБОВ'ЯЗКОВИЙ CATCH з логуванням помилки
+                console.error('PLAYLIST JSON ERROR:', e);
+            }
         }
         const urls = text.match(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*/g) || [];
         urls.forEach(url => { if (!sources.some(s => s.file === url)) sources.push({ label: 'direct', file: url }); });
