@@ -6,12 +6,11 @@
     <title>MONOANIME | чорно-білий перегляд аніме</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 <div class="app-container">
-    <!-- HEADER -->
     <div class="header">
         <div class="logo" id="logoHome">
             <div class="logo-icon">⎈</div>
@@ -27,35 +26,29 @@
         </div>
     </div>
 
-    <!-- ЖАНРИ -->
     <div class="category-section">
         <div class="category-scroll" id="categoryScroll">
             <span class="category-label">Жанри:</span>
         </div>
     </div>
 
-    <!-- ВКЛАДКИ -->
     <div class="tabs-row">
         <button class="tab-btn active-tab" data-tab="main">🏠 Головна</button>
         <button class="tab-btn" data-tab="bookmarks">⭐ Обрані</button>
         <button class="tab-btn" data-tab="history">🕒 Історія</button>
     </div>
 
-    <!-- СІТКА АНІМЕ -->
     <div id="animeContainer" class="anime-grid">
         <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження аніме...</div>
     </div>
 
-    <!-- ПАГІНАЦІЯ -->
     <div class="pagination-row" id="paginationRow"></div>
 
     <footer><span>⚫ монохромний дизайн · джерело: AnimeUA · плеєр HLS</span></footer>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- МОДАЛЬНЕ ВІКНО ДЕТАЛЕЙ -->
 <div id="animeModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h2 id="modalTitle">...</h2><button class="close-modal" id="closeModalBtn">&times;</button></div>
@@ -63,7 +56,6 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНЕ ВІКНО ПЛЕЄРА -->
 <div id="playerModal" class="modal">
     <div class="modal-content" style="max-width: 900px;">
         <div class="modal-header"><h2 id="playerModalTitle">🎬 Плеєр</h2><button class="close-modal" id="closePlayerBtn">&times;</button></div>
@@ -73,7 +65,6 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНЕ ВІКНО ПРОФІЛЮ -->
 <div id="profileModal" class="modal">
     <div class="modal-content" style="max-width: 700px;">
         <div class="modal-header"><h2>👤 Профіль користувача</h2><button class="close-modal" id="closeProfileBtn">&times;</button></div>
@@ -97,6 +88,6 @@
     </div>
 </div>
 
-<script src="script.js"></script>
+<script src="js/script.js"></script>
 </body>
 </html>
