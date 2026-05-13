@@ -327,8 +327,22 @@
         `;
         try {
             const proxyUrl = getProxyUrl(iframeUrl);
-            const html = await fetch(proxyUrl).then(r => r.text());
-            const m3u8Matches = [...html.matchAll(/https?:\/\/[^"' ]+\.m3u8[^"' ]*/g)];
+            // Безпечний запит із заголовком для уникнення деяких рекламних редіректів
+            const html = await fetch(proxyUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(r => r.text());
+
+            // Очищення HTML від рекламних скриптів, popunder, redirect
+            const cleanedHtml = html
+                .replace(/<script[\s\S]*?<\/script>/gi, '')
+                .replace(/window\.open\([\s\S]*?\)/gi, '')
+                .replace(/document\.location[\s\S]*?;/gi, '')
+                .replace(/popunder/gi, '')
+                .replace(/ads?/gi, '');
+
+            const m3u8Matches = [...cleanedHtml.matchAll(/https?:\/\/[^"' ]+\.m3u8[^"' ]*/g)];
             if (!m3u8Matches.length) {
                 showToast('❌ m3u8 не знайдено');
                 return;
