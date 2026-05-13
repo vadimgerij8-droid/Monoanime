@@ -269,11 +269,10 @@
         const sources = [];
         const m1 = text.match(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/);
         if (m1) sources.push({ label: 'm3u8', file: m1[1].trim() });
-        // 🟢 ЗАМІНА РЕГУЛЯРНОГО ВИРАЗУ — тепер без обмеження в 8000 символів
+        // 🟢 Виправлений регулярний вираз: без обмеження 8000 символів
         const m2 = text.match(/['"]file['"]\s*:\s*(\[[\s\S]*?\])/);
         if (m2) {
-            // 🟢 ДЕБАГ-ЛОГ перед парсингом
-            console.log('PLAYLIST RAW:', m2?.[1]);
+            console.log('PLAYLIST RAW:', m2?.[1]); // Дебаг-лог
             try {
                 const arr = JSON.parse(m2[1]);
                 const walk = (items, dub) => {
@@ -284,8 +283,7 @@
                 };
                 walk(arr, '');
             } catch (e) {
-                // 🟢 ОБОВ'ЯЗКОВИЙ CATCH з логуванням помилки
-                console.error('PLAYLIST JSON ERROR:', e);
+                console.error('PLAYLIST JSON ERROR:', e); // Обов'язковий catch
             }
         }
         const urls = text.match(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*/g) || [];
@@ -307,7 +305,18 @@
             hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
             hlsInstance.loadSource(finalUrl);
             hlsInstance.attachMedia(DOM.mainVideoPlayer);
-            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => DOM.mainVideoPlayer.play().catch(() => {}));
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                // 🟢 Автовибір української аудіодоріжки
+                const tracks = hlsInstance.audioTracks;
+                console.log("AUDIO:", tracks);
+                if (tracks && tracks.length > 1) {
+                    const ua = tracks.findIndex(t =>
+                        (t.name || '').toLowerCase().includes('ua')
+                    );
+                    hlsInstance.audioTrack = ua !== -1 ? ua : 0;
+                }
+                DOM.mainVideoPlayer.play().catch(() => {});
+            });
             hlsInstance.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
                     switch (data.type) {
