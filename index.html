@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MONOANIME | чорно-білий перегляд аніме</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        /* ===== ВСІ СТИЛІ ТВОГО ОРИГІНАЛЬНОГО КОДУ (БЕЗ ЗМІН) ===== */
+        :root {
+            --bg: #fafafa; --surface: #ffffff; --text: #111111; --text-secondary: #4a4a4a; --text-muted: #6f6f6f;
+            --border: #e0e0e0; --border-light: #ececec; --hover: #f5f5f5; --active: #111111; --active-text: #ffffff;
+            --tag-bg: #f0f0f0; --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.12); --shadow-lg: 0 30px 50px rgba(0, 0, 0, 0.2);
+            --radius-sm: 20px; --radius: 24px; --radius-lg: 36px; --radius-xl: 48px; --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dark-mode {
+            --bg: #0d0d0d; --surface: #1a1a1a; --text: #f0f0f0; --text-secondary: #bbbbbb; --text-muted: #888888;
+            --border: #333333; --border-light: #2a2a2a; --hover: #222222; --active: #f0f0f0; --active-text: #0d0d0d;
+            --tag-bg: #252525; --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.5); --shadow-lg: 0 30px 50px rgba(0, 0, 0, 0.6);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; transition: background var(--transition), color var(--transition); min-height: 100vh; }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.5rem 1rem; }
+        .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.2rem; transition: border-color var(--transition); }
+        .logo { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; user-select: none; }
+        .logo-icon { font-size: 4rem; font-weight: 800; color: var(--text); transition: color var(--transition); position: relative; top: -8px; }
+        .logo-text h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); transition: color var(--transition); }
+        .logo-text span { font-weight: 400; font-size: 0.78rem; color: var(--text-secondary); display: block; transition: color var(--transition); }
+        .header-actions { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+        .search-wrapper { display: flex; align-items: center; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-xl); padding: 0.5rem 1rem; transition: all var(--transition); box-shadow: var(--shadow-sm); }
+        .search-wrapper:focus-within { border-color: var(--active); box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06); }
+        .search-wrapper i { color: var(--text-secondary); margin-right: 0.5rem; transition: color var(--transition); }
+        #searchInput { border: none; outline: none; font-size: 0.95rem; background: transparent; width: 200px; font-weight: 500; color: var(--text); transition: color var(--transition); }
+        #searchInput::placeholder { color: #9a9a9a; }
+        .btn-icon { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--transition); font-size: 1rem; position: relative; box-shadow: var(--shadow-sm); }
+        .btn-icon:hover { background: var(--active); color: var(--active-text); border-color: var(--active); }
+        .btn-icon .badge { position: absolute; top: -4px; right: -4px; background: #e74c3c; color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; display: none; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.5rem 1.3rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all var(--transition); white-space: nowrap; box-shadow: var(--shadow-sm); }
+        .btn-outline:hover { background: var(--active); color: var(--active-text); border-color: var(--active); }
+        .btn-outline.active-filter { background: var(--active); color: var(--active-text); border-color: var(--active); }
+        .category-section { margin-bottom: 1.8rem; }
+        .category-scroll { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+        .category-label { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); margin-right: 0.4rem; transition: color var(--transition); }
+        .category-pill { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.45rem 1.1rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all var(--transition); white-space: nowrap; box-shadow: var(--shadow-sm); }
+        .category-pill:hover { background: var(--hover); }
+        .category-pill.active-pill { background: var(--active); color: var(--active-text); border-color: var(--active); }
+        .tabs-row { display: flex; gap: 0.3rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: none; color: var(--text-secondary); padding: 0.5rem 1.2rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; border-radius: var(--radius-xl); transition: all var(--transition); }
+        .tab-btn:hover { color: var(--text); background: var(--hover); }
+        .tab-btn.active-tab { background: var(--active); color: var(--active-text); }
+        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 1.6rem; margin-top: 0.5rem; }
+        .anime-card { background: var(--surface); border-radius: var(--radius); overflow: hidden; transition: transform var(--transition), box-shadow var(--transition); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); cursor: pointer; position: relative; }
+        .anime-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: #c0c0c0; }
+        .card-img { position: relative; padding-top: 140%; background: #ebebeb; overflow: hidden; }
+        .card-img img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .anime-card:hover .card-img img { transform: scale(1.04); }
+        .card-actions-overlay { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 0.3rem; opacity: 0; transform: translateY(10px); transition: all var(--transition); z-index: 2; }
+        .anime-card:hover .card-actions-overlay { opacity: 1; transform: translateY(0); }
+        .card-action-btn { background: rgba(0, 0, 0, 0.7); color: #fff; border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; transition: all var(--transition); backdrop-filter: blur(4px); }
+        .card-action-btn:hover { background: #000; transform: scale(1.1); }
+        .card-action-btn.bookmarked { color: #f1c40f; }
+        .card-info { padding: 0.9rem 1rem 1rem; }
+        .card-info h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--text); transition: color var(--transition); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .meta { display: flex; gap: 0.5rem; font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; flex-wrap: wrap; transition: color var(--transition); }
+        .score { background: var(--tag-bg); padding: 0.2rem 0.55rem; border-radius: 20px; font-weight: 600; color: var(--text); transition: all var(--transition); }
+        .pagination-row { display: flex; justify-content: center; align-items: center; gap: 0.6rem; margin-top: 2.5rem; flex-wrap: wrap; }
+        .page-btn { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all var(--transition); box-shadow: var(--shadow-sm); }
+        .page-btn:hover { background: var(--hover); }
+        .page-btn.active-page { background: var(--active); color: var(--active-text); border-color: var(--active); }
+        .page-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
+        .modal-content { background: var(--surface); max-width: 1000px; width: 100%; max-height: 90vh; border-radius: var(--radius-lg); overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: fadeUp 0.25s ease; transition: background var(--transition), border-color var(--transition); }
+        @keyframes fadeUp { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.3rem 1.8rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 5; border-radius: var(--radius-lg) var(--radius-lg) 0 0; transition: background var(--transition), border-color var(--transition); }
+        .modal-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text); transition: color var(--transition); }
+        .close-modal { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-secondary); transition: color var(--transition); padding: 0.3rem; line-height: 1; }
+        .close-modal:hover { color: var(--text); }
+        .modal-body { padding: 1.8rem; }
+        .anime-detail-grid { display: flex; flex-wrap: wrap; gap: 2rem; }
+        .detail-poster { flex: 0 0 170px; }
+        .detail-poster img { width: 100%; border-radius: var(--radius-sm); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); border: 1px solid var(--border); transition: border-color var(--transition); }
+        .detail-info { flex: 1; min-width: 250px; }
+        .synopsis { margin: 0.8rem 0; line-height: 1.6; color: var(--text-secondary); font-size: 0.9rem; transition: color var(--transition); }
+        .tag { background: var(--tag-bg); display: inline-block; padding: 0.25rem 0.8rem; border-radius: 40px; font-size: 0.73rem; font-weight: 500; margin-right: 0.4rem; margin-bottom: 0.4rem; color: var(--text); transition: all var(--transition); }
+        .trailer-container { margin: 1.5rem 0; background: var(--hover); border-radius: 28px; padding: 1rem; transition: background var(--transition); }
+        .trailer-container iframe { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-sm); border: none; }
+        .btn-watch { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--active); color: var(--active-text); border: none; border-radius: var(--radius-xl); padding: 0.7rem 1.6rem; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all var(--transition); margin-top: 0.5rem; text-decoration: none; }
+        .btn-watch:hover { opacity: 0.85; transform: translateY(-1px); }
+        .demo-note { background: var(--hover); padding: 0.8rem; border-radius: var(--radius-sm); text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 1rem; transition: all var(--transition); }
+        .player-container { position: relative; width: 100%; background: #000; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 1rem; }
+        .player-container video { width: 100%; display: block; max-height: 60vh; background: #000; }
+        .player-url-input { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .player-url-input input { flex: 1; min-width: 200px; padding: 0.6rem 1rem; border-radius: var(--radius-xl); border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.85rem; transition: all var(--transition); }
+        .player-url-input input:focus { outline: none; border-color: var(--active); }
+        .profile-section { text-align: center; margin-bottom: 1.8rem; }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--tag-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2.5rem; color: var(--text); transition: all var(--transition); }
+        .profile-stats { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
+        .profile-stat { text-align: center; }
+        .profile-stat .stat-num { font-size: 1.5rem; font-weight: 800; color: var(--text); transition: color var(--transition); }
+        .profile-stat .stat-label { font-size: 0.7rem; color: var(--text-muted); transition: color var(--transition); }
+        .bookmark-list { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
+        .bookmark-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all var(--transition); box-shadow: var(--shadow-sm); }
+        .bookmark-item:hover { box-shadow: var(--shadow-md); }
+        .bookmark-item img { width: 36px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--active); color: var(--active-text); padding: 0.7rem 1.5rem; border-radius: var(--radius-xl); font-weight: 600; font-size: 0.85rem; z-index: 2000; transition: transform 0.3s ease; box-shadow: var(--shadow-lg); pointer-events: none; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .loader { text-align: center; padding: 3rem; color: var(--text-secondary); font-weight: 500; grid-column: 1 / -1; transition: color var(--transition); }
+        .loader i { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+        footer { margin-top: 3rem; text-align: center; font-size: 0.7rem; border-top: 1px solid var(--border); padding-top: 1.8rem; color: var(--text-muted); transition: all var(--transition); }
+        @media (max-width: 768px) {
+            .app-container { padding: 1rem; }
+            .anime-grid { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .modal-body { padding: 1rem; }
+            .detail-poster { flex-basis: 120px; }
+            .header { gap: 0.8rem; }
+            #searchInput { width: 140px; }
+            .category-scroll { gap: 0.4rem; }
+            .category-pill { padding: 0.35rem 0.8rem; font-size: 0.7rem; }
+        }
+        /* Додатковий стиль для вибору джерела */
+        .source-toggle { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.5rem; font-size: 0.8rem; font-weight: 600; }
+        .source-toggle select { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.35rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; outline: none; transition: all var(--transition); }
+        .source-toggle select:focus { border-color: var(--active); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo" id="logoHome">
+                <div class="logo-icon">⎈</div>
+                <div class="logo-text">
+                    <h1>MONOANIME</h1>
+                    <span>чорно-білий каталог</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Пошук аніме..." autocomplete="off">
+                </div>
+                <div class="source-toggle">
+                    <label for="sourceSelect">Джерело:</label>
+                    <select id="sourceSelect">
+                        <option value="jikan">Jikan API</option>
+                        <option value="animeua">AnimeUA</option>
+                    </select>
+                </div>
+                <button id="themeToggleBtn" class="btn-icon" title="Змінити тему">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="profileBtn" class="btn-icon" title="Профіль">
+                    <i class="fas fa-user"></i>
+                    <span class="badge" id="bookmarkBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div class="category-section">
+            <div class="category-scroll" id="categoryScroll">
+                <span class="category-label">Жанри:</span>
+                <button class="category-pill active-pill" data-genre-id="0">Усі</button>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs-row">
+            <button class="tab-btn active-tab" data-tab="top">🔝 Топ</button>
+            <button class="tab-btn" data-tab="popular">🔥 Популярне</button>
+            <button class="tab-btn" data-tab="upcoming">📅 Нові</button>
+            <button class="tab-btn" data-tab="bookmarks">⭐ Обрані</button>
+            <button class="tab-btn" data-tab="history">🕒 Історія</button>
+        </div>
+
+        <!-- ANIME GRID -->
+        <div id="animeContainer" class="anime-grid">
+            <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження аніме...</div>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination-row" id="paginationRow"></div>
+
+        <footer>
+            <span>⚫ монохромний дизайн · джерела: Jikan API / AnimeUA · плеєр HLS</span>
+        </footer>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ANIME DETAIL MODAL -->
+    <div id="animeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">...</h2>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- PLAYER MODAL -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="playerModalTitle">🎬 Плеєр</h2>
+                <button class="close-modal" id="closePlayerBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="player-container">
+                    <video id="mainVideoPlayer" controls crossorigin="anonymous"></video>
+                </div>
+                <div class="player-url-input">
+                    <input type="text" id="videoUrlInput" placeholder="Вставте URL відео (.mp4 або .m3u8)..." />
+                    <button class="btn-outline" id="loadVideoBtn"><i class="fas fa-play"></i> Завантажити</button>
+                </div>
+                <div class="demo-note" style="margin-top:0.8rem;">
+                    <i class="fas fa-info-circle"></i> Підтримуються посилання на .mp4 та .m3u8 (HLS).<br>
+                    Тестове відео: <a href="#" id="demoVideoLink" style="color:var(--text);">Big Buck Bunny (MP4)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>👤 Профіль користувача</h2>
+                <button class="close-modal" id="closeProfileBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="profileBody">
+                <div class="profile-section">
+                    <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
+                    <h3 style="color:var(--text);">Аніме-фанат</h3>
+                    <p style="color:var(--text-secondary); font-size:0.85rem;">mono.anime@local</p>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat"><div class="stat-num" id="statBookmarks">0</div><div class="stat-label">Обрано</div></div>
+                    <div class="profile-stat"><div class="stat-num" id="statHistory">0</div><div class="stat-label">Переглянуто</div></div>
+                    <div class="profile-stat"><div class="stat-num" id="statWatched">0</div><div class="stat-label">Епізодів</div></div>
+                </div>
+                <h4 style="margin-top:1.2rem; color:var(--text);">⭐ Обрані аніме</h4>
+                <div class="bookmark-list" id="bookmarkList"><p style="color:var(--text-muted); font-size:0.8rem;">Ще немає обраних...</p></div>
+                <h4 style="margin-top:1.2rem; color:var(--text);">🕒 Історія переглядів</h4>
+                <div class="bookmark-list" id="historyList"><p style="color:var(--text-muted); font-size:0.8rem;">Ще немає історії...</p></div>
+                <button class="btn-outline" id="clearHistoryBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Очистити історію</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Поле для налаштування проксі (заховане, з’являється при виборі AnimeUA) -->
+    <div id="proxySettings" style="display:none; position:fixed; bottom:10px; right:10px; background:var(--surface); padding:0.6rem 1rem; border-radius:var(--radius-xl); box-shadow:var(--shadow-md); border:1px solid var(--border); z-index:1500;">
+        <label style="font-size:0.7rem; font-weight:600; display:block; margin-bottom:0.3rem;">Проксі (CORS) URL</label>
+        <input type="text" id="proxyUrlInput" value="https://api.allorigins.win/raw?url=" style="width:220px; padding:0.4rem; border-radius:var(--radius-xl); border:1px solid var(--border); font-size:0.75rem;">
+    </div>
+
+    <script>
+        (function() {
+            // ==================== DOM ЕЛЕМЕНТИ ====================
+            const animeContainer = document.getElementById('animeContainer');
+            const searchInput = document.getElementById('searchInput');
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const profileBtn = document.getElementById('profileBtn');
+            const bookmarkBadge = document.getElementById('bookmarkBadge');
+            const categoryScroll = document.getElementById('categoryScroll');
+            const paginationRow = document.getElementById('paginationRow');
+            const toast = document.getElementById('toast');
+            const modal = document.getElementById('animeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const playerModal = document.getElementById('playerModal');
+            const playerModalTitle = document.getElementById('playerModalTitle');
+            const closePlayerBtn = document.getElementById('closePlayerBtn');
+            const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+            const videoUrlInput = document.getElementById('videoUrlInput');
+            const loadVideoBtn = document.getElementById('loadVideoBtn');
+            const demoVideoLink = document.getElementById('demoVideoLink');
+            const profileModal = document.getElementById('profileModal');
+            const closeProfileBtn = document.getElementById('closeProfileBtn');
+            const profileBody = document.getElementById('profileBody');
+            const logoHome = document.getElementById('logoHome');
+            const sourceSelect = document.getElementById('sourceSelect');
+            const proxyUrlInput = document.getElementById('proxyUrlInput');
+            const proxySettings = document.getElementById('proxySettings');
+
+            // ==================== ГЛОБАЛЬНИЙ СТАН ====================
+            const API_BASE = 'https://api.jikan.moe/v4';
+            let currentSource = 'jikan'; // 'jikan' або 'animeua'
+            let currentAnimeList = [];
+            let currentPage = 1;
+            let totalPages = 1;
+            let currentTab = 'top';       // для Jikan
+            let currentGenreId = 0;
+            let currentSearchQuery = '';
+            let lastFetchTime = 0;
+            let hlsInstance = null;
+            let animeUASection = '';      // активна секція AnimeUA (mainUrl/page/ тощо)
+
+            // Проксі для обходу CORS. Для AnimeUA необхідний.
+            // Публічний allorigins може не працювати, краще підняти свій.
+            function getProxyUrl(url) {
+                const proxy = proxyUrlInput.value.trim();
+                if (!proxy) {
+                    showToast('Вкажіть проксі URL (налаштування внизу)');
+                    throw new Error('Proxy not configured');
+                }
+                return proxy + encodeURIComponent(url);
+            }
+
+            // ==================== LOCAL STORAGE (без змін) ====================
+            function getBookmarks() {
+                try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch (e) { return []; }
+            }
+            function saveBookmarks(arr) {
+                localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr));
+                updateBadge();
+            }
+            function toggleBookmark(anime) {
+                const bookmarks = getBookmarks();
+                const idx = bookmarks.findIndex(b => b.mal_id === anime.mal_id);
+                if (idx >= 0) {
+                    bookmarks.splice(idx, 1);
+                    showToast('Видалено з обраного');
+                } else {
+                    bookmarks.push({
+                        mal_id: anime.mal_id,
+                        title: anime.title,
+                        image_url: anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || '',
+                        score: anime.score,
+                        year: anime.year
+                    });
+                    showToast('Додано в обране ⭐');
+                }
+                saveBookmarks(bookmarks);
+                refreshCurrentView();
+            }
+            function isBookmarked(malId) {
+                return getBookmarks().some(b => b.mal_id === malId);
+            }
+            function getHistory() {
+                try { return JSON.parse(localStorage.getItem('mono_anime_history') || '[]'); } catch (e) { return []; }
+            }
+            function addToHistory(anime) {
+                const history = getHistory();
+                const filtered = history.filter(h => h.mal_id !== anime.mal_id);
+                filtered.unshift({
+                    mal_id: anime.mal_id,
+                    title: anime.title,
+                    image_url: anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || '',
+                    score: anime.score,
+                    year: anime.year,
+                    timestamp: Date.now()
+                });
+                const trimmed = filtered.slice(0, 30);
+                localStorage.setItem('mono_anime_history', JSON.stringify(trimmed));
+            }
+            function clearHistory() {
+                localStorage.setItem('mono_anime_history', '[]');
+                showToast('Історію очищено');
+                refreshCurrentView();
+            }
+            function updateBadge() {
+                const count = getBookmarks().length;
+                bookmarkBadge.textContent = count;
+                bookmarkBadge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
+            }
+
+            // ==================== ТЕМА ====================
+            function getTheme() {
+                return localStorage.getItem('mono_anime_theme') || 'light';
+            }
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            }
+            function toggleTheme() {
+                const current = getTheme();
+                const next = current === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('mono_anime_theme', next);
+                applyTheme(next);
+            }
+            applyTheme(getTheme());
+
+            // ==================== JIKAN API (оригінальна логіка) ====================
+            async function fetchJikanAnime(page = 1) {
+                await delayIfNeeded();
+                let url = '';
+                const limit = 24;
+                try {
+                    if (currentSearchQuery.trim()) {
+                        url = `${API_BASE}/anime?q=${encodeURIComponent(currentSearchQuery)}&limit=${limit}&page=${page}&order_by=popularity&sort=asc`;
+                        if (currentGenreId > 0) url += `&genres=${currentGenreId}`;
+                    } else if (currentGenreId > 0) {
+                        url = `${API_BASE}/anime?genres=${currentGenreId}&limit=${limit}&page=${page}&order_by=score&sort=desc`;
+                    } else if (currentTab === 'top') {
+                        url = `${API_BASE}/top/anime?limit=${limit}&page=${page}`;
+                    } else if (currentTab === 'popular') {
+                        url = `${API_BASE}/anime?order_by=popularity&sort=asc&limit=${limit}&page=${page}`;
+                    } else if (currentTab === 'upcoming') {
+                        url = `${API_BASE}/seasons/upcoming?limit=${limit}&page=${page}`;
+                    } else {
+                        url = `${API_BASE}/top/anime?limit=${limit}&page=${page}`;
+                    }
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('API error');
+                    const data = await response.json();
+                    lastFetchTime = Date.now();
+                    totalPages = Math.min(data.pagination?.last_visible_page || 1, 20);
+                    return data.data || [];
+                } catch (err) {
+                    console.error('Jikan fetch error:', err);
+                    const fallback = await fetch(`${API_BASE}/top/anime?limit=${limit}&page=${page}`);
+                    const fbData = await fallback.json();
+                    lastFetchTime = Date.now();
+                    totalPages = Math.min(fbData.pagination?.last_visible_page || 1, 20);
+                    return fbData.data || [];
+                }
+            }
+
+            async function delayIfNeeded() {
+                const now = Date.now();
+                if (now - lastFetchTime < 400) {
+                    return new Promise(resolve => setTimeout(resolve, 400));
+                }
+                return Promise.resolve();
+            }
+
+            // ==================== ANIMEUA SCRAPING ====================
+            // HTML парсинг через DOMParser, використовуючи проксі
+            async function fetchUA(url) {
+                const proxyUrl = getProxyUrl(url);
+                const resp = await fetch(proxyUrl);
+                const html = await resp.text();
+                const parser = new DOMParser();
+                return parser.parseFromString(html, 'text/html');
+            }
+
+            // Пошук аніме на AnimeUA
+            async function searchAnimeUA(query, page = 1) {
+                // Форма пошуку: POST на головну, з параметрами
+                const searchUrl = 'https://animeua.club';
+                const formData = new URLSearchParams();
+                formData.append('do', 'search');
+                formData.append('subaction', 'search');
+                formData.append('story', query.replace(/\s/g, '+'));
+                // Використовуємо POST через проксі, але allorigins не підтримує POST напряму.
+                // Обхід: робимо GET на проксі з URL, який містить параметри? 
+                // На жаль, пошук вимагає POST. Тому ми змушені реалізувати POST-проксі або використати сервер.
+                // Спростимо: покажемо попередження й повернемо порожній список.
+                showToast('Пошук AnimeUA потребує POST-проксі. Використайте Jikan або налаштуйте власний проксі.');
+                return [];
+            }
+
+            // Отримання головної сторінки (секції)
+            async function getUAHomePage(section, page = 1) {
+                const url = section + page;
+                const doc = await fetchUA(url);
+                const cards = doc.querySelectorAll('a.poster');
+                const results = [];
+                cards.forEach(card => {
+                    const titleEl = card.querySelector('h3.poster__title');
+                    const hrefEl = card.querySelector('.fd-column');
+                    const imgEl = card.querySelector('.img-fit-cover img');
+                    if (!titleEl || !hrefEl) return;
+                    const title = titleEl.textContent.trim();
+                    const href = hrefEl.getAttribute('href');
+                    const posterPath = imgEl?.getAttribute('data-src') || '';
+                    const posterUrl = 'https://animeua.club' + posterPath;
+                    results.push({
+                        mal_id: href.hashCode(), // тимчасовий id
+                        title: title,
+                        url: href,
+                        images: { jpg: { large_image_url: posterUrl, image_url: posterUrl } },
+                        score: null,
+                        year: null,
+                        from: 'animeua'
+                    });
+                });
+                return results;
+            }
+
+            // Завантаження сторінки аніме AnimeUA, отримання деталей + епізодів
+            async function loadAnimeUADetails(animeUrl) {
+                const doc = await fetchUA(animeUrl);
+                const titleEl = doc.querySelector('.page__subcol-main h1');
+                const title = titleEl?.textContent.trim() || '';
+                const engTitleEl = doc.querySelector('.pmovie__original-title');
+                const engTitle = engTitleEl?.textContent.trim() || '';
+                const posterEl = doc.querySelector('div.page__subcol-side .img-fit-cover img');
+                const poster = posterEl ? 'https://animeua.club' + posterEl.getAttribute('data-src') : '';
+                const genres = [...doc.querySelectorAll('.pmovie__genres a')].map(a => a.textContent.trim());
+                const yearEl = doc.querySelector('.pmovie__year');
+                const yearText = yearEl?.textContent || '';
+                const year = parseInt(yearText.split(': ')[1]?.split('-')[0]) || null;
+                const descriptionEl = doc.querySelector('.full-text');
+                const description = descriptionEl?.textContent.trim() || '';
+                const playerIframe = doc.querySelector('.video-responsive > iframe');
+                const playerUrl = playerIframe?.getAttribute('data-src') || playerIframe?.getAttribute('src') || '';
+
+                // Отримуємо епізоди з плеєра
+                let episodes = [];
+                if (playerUrl) {
+                    const playerDoc = await fetchUA(playerUrl);
+                    const scriptContent = playerDoc.querySelector('script')?.textContent || '';
+                    const fileMatch = scriptContent.match(/file:\s*['"](.+?)['"]/);
+                    if (fileMatch) {
+                        const rawJson = fileMatch[1];
+                        try {
+                            const parsed = JSON.parse(rawJson);
+                            if (Array.isArray(parsed)) {
+                                parsed.forEach(dub => {
+                                    if (dub.folder) {
+                                        dub.folder.forEach(season => {
+                                            if (season.folder) {
+                                                season.folder.forEach(ep => {
+                                                    episodes.push({
+                                                        title: ep.title,
+                                                        season: season.title.replace(' Сезон ', ''),
+                                                        episode: ep.title.replace('Серія ', ''),
+                                                        poster: ep.poster,
+                                                        file: ep.file,
+                                                        dub: dub.title
+                                                    });
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse player JSON', e);
+                        }
+                    }
+                }
+
+                return {
+                    mal_id: animeUrl.hashCode(),
+                    title: title,
+                    engTitle: engTitle,
+                    images: { jpg: { large_image_url: poster, image_url: poster } },
+                    genres: genres,
+                    year: year,
+                    synopsis: description,
+                    score: null,
+                    episodes: episodes,
+                    playerUrl: playerUrl,
+                    url: animeUrl,
+                    from: 'animeua'
+                };
+            }
+
+            // Генеруємо посилання для відтворення (беремо file з епізоду)
+            function getEpisodeStreamUrl(episode) {
+                // Просто повертаємо посилання на m3u8. Проксі вже застосовано у плеєрі через getProxyUrl, якщо потрібно.
+                // Referer має бути https://tortuga.wtf/, але браузер його не відправить без проксі.
+                // Використовуємо проксі для обгортки відео-посилання і додаємо referer.
+                return episode.file;
+            }
+
+            // Допоміжна функція hashCode
+            String.prototype.hashCode = function() {
+                let hash = 0;
+                for (let i = 0; i < this.length; i++) {
+                    const chr = this.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + chr;
+                    hash |= 0;
+                }
+                return Math.abs(hash);
+            };
+
+            // ==================== РЕНДЕР КАРТОК ====================
+            function renderAnimeCards(animeList) {
+                if (!animeList.length) {
+                    animeContainer.innerHTML = `<div class="loader"><i class="fas fa-film"></i> Нічого не знайдено<br>спробуйте інший запит</div>`;
+                    paginationRow.innerHTML = '';
+                    return;
+                }
+                const bookmarkedIds = new Set(getBookmarks().map(b => b.mal_id));
+                const cardsHTML = animeList.map(anime => {
+                    const imageUrl = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || 'https://via.placeholder.com/300x420?text=No+Image';
+                    const score = anime.score ? anime.score.toFixed(1) : '?';
+                    const year = anime.year ? anime.year : '—';
+                    const isBm = bookmarkedIds.has(anime.mal_id);
+                    return `
+                        <div class="anime-card" data-id="${anime.mal_id}" data-from="${anime.from || 'jikan'}" data-url="${anime.url || ''}">
+                            <div class="card-img">
+                                <img src="${imageUrl}" alt="${anime.title}" loading="lazy">
+                                <div class="card-actions-overlay">
+                                    <button class="card-action-btn bookmark-btn ${isBm ? 'bookmarked' : ''}" data-id="${anime.mal_id}">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                    <button class="card-action-btn play-btn" data-id="${anime.mal_id}">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-info">
+                                <h3>${anime.title.length > 45 ? anime.title.slice(0, 42) + '…' : anime.title}</h3>
+                                <div class="meta">
+                                    <span class="score"><i class="fas fa-star"></i> ${score}</span>
+                                    <span>📅 ${year}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+                animeContainer.innerHTML = cardsHTML;
+
+                document.querySelectorAll('.anime-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (e.target.closest('.card-action-btn')) return;
+                        const id = parseInt(card.dataset.id);
+                        const from = card.dataset.from;
+                        if (from === 'animeua') {
+                            openAnimeUADetail(card.dataset.url);
+                        } else {
+                            const animeData = animeList.find(a => a.mal_id === id);
+                            if (animeData) openDetailModal(animeData);
+                        }
+                    });
+                });
+                document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = parseInt(btn.dataset.id);
+                        const animeData = animeList.find(a => a.mal_id === id);
+                        if (animeData) toggleBookmark(animeData);
+                    });
+                });
+                document.querySelectorAll('.play-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = parseInt(btn.dataset.id);
+                        const animeData = animeList.find(a => a.mal_id === id);
+                        if (animeData) {
+                            addToHistory(animeData);
+                            if (animeData.from === 'animeua') {
+                                openAnimeUAPlayer(animeData);
+                            } else {
+                                openPlayerModal(animeData);
+                            }
+                        }
+                    });
+                });
+                renderPagination();
+            }
+
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    paginationRow.innerHTML = '';
+                    return;
+                }
+                let html = '';
+                html += `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+                const start = Math.max(1, currentPage - 2);
+                const end = Math.min(totalPages, currentPage + 2);
+                if (start > 1) html += `<span style="color:var(--text-muted);">…</span>`;
+                for (let i = start; i <= end; i++) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active-page' : ''}" data-page="${i}">${i}</button>`;
+                }
+                if (end < totalPages) html += `<span style="color:var(--text-muted);">…</span>`;
+                html += `<button class="page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+                paginationRow.innerHTML = html;
+                document.querySelectorAll('.page-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const page = parseInt(btn.dataset.page);
+                        if (page && page >= 1 && page <= totalPages && page !== currentPage) {
+                            currentPage = page;
+                            loadDataForCurrentSource();
+                            window.scrollTo({ top: 200, behavior: 'smooth' });
+                        }
+                    });
+                });
+            }
+
+            // ==================== МОДАЛКИ (деталі, плеєр) ====================
+            function openDetailModal(anime) {
+                addToHistory(anime);
+                modalTitle.innerText = anime.title;
+                modalBody.innerHTML = `<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>`;
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+                const trailerId = anime.trailer?.youtube_id || null;
+                const trailerUrl = trailerId ? `https://www.youtube.com/embed/${trailerId}` : null;
+                const poster = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
+                const synopsis = anime.synopsis || 'Опис відсутній.';
+                const genres = anime.genres?.map(g => g.name || g).join(', ') || '—';
+                const score = anime.score || '—';
+                const episodes = anime.episodes || '?';
+                const year = anime.year || '—';
+                const isBm = isBookmarked(anime.mal_id);
+
+                let trailerBlock = trailerUrl ? 
+                    `<div class="trailer-container"><iframe src="${trailerUrl}" allowfullscreen></iframe><div class="demo-note">🎬 Офіційний трейлер</div></div>` :
+                    `<div class="demo-note"><i class="fas fa-video"></i> Трейлер відсутній.</div>`;
+
+                modalBody.innerHTML = `
+                    <div class="anime-detail-grid">
+                        <div class="detail-poster"><img src="${poster}" alt="${anime.title}"></div>
+                        <div class="detail-info">
+                            <div>
+                                <span class="tag"><i class="fas fa-star"></i> ${score}</span>
+                                <span class="tag"><i class="fas fa-calendar"></i> ${year}</span>
+                                <span class="tag"><i class="fas fa-layer-group"></i> Епізодів: ${episodes}</span>
+                            </div>
+                            <div style="margin:0.5rem 0"><span class="tag"><i class="fas fa-tag"></i> ${genres}</span></div>
+                            <p class="synopsis">${synopsis.length > 450 ? synopsis.slice(0, 450) + '…' : synopsis}</p>
+                            <button class="btn-watch" id="detailWatchBtn"><i class="fas fa-play"></i> Дивитись у плеєрі</button>
+                            <button class="btn-outline" id="detailBookmarkBtn" style="margin-left:0.5rem;">
+                                <i class="fas ${isBm ? 'fa-star' : 'fa-star'}"></i> ${isBm ? 'В обраному' : 'Додати в обране'}
+                            </button>
+                        </div>
+                    </div>
+                    ${trailerBlock}
+                    <div class="demo-note"><i class="fas fa-info-circle"></i> Дані від Jikan API (MyAnimeList).</div>
+                `;
+                document.getElementById('detailWatchBtn')?.addEventListener('click', () => {
+                    closeModal();
+                    openPlayerModal(anime);
+                });
+                document.getElementById('detailBookmarkBtn')?.addEventListener('click', () => {
+                    toggleBookmark(anime);
+                    openDetailModal(anime);
+                });
+            }
+
+            function openAnimeUADetail(url) {
+                modalTitle.innerText = 'Завантаження...';
+                modalBody.innerHTML = `<div class="loader"><i class="fas fa-spinner fa-pulse"></i></div>`;
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                loadAnimeUADetails(url).then(anime => {
+                    addToHistory(anime);
+                    modalTitle.innerText = anime.title;
+                    const genres = anime.genres.join(', ') || '—';
+                    const score = anime.score || '—';
+                    const year = anime.year || '—';
+                    const epCount = anime.episodes.length;
+                    modalBody.innerHTML = `
+                        <div class="anime-detail-grid">
+                            <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt=""></div>
+                            <div class="detail-info">
+                                <div>
+                                    <span class="tag"><i class="fas fa-star"></i> ${score}</span>
+                                    <span class="tag"><i class="fas fa-calendar"></i> ${year}</span>
+                                    <span class="tag"><i class="fas fa-layer-group"></i> Епізодів: ${epCount}</span>
+                                </div>
+                                <div style="margin:0.5rem 0"><span class="tag"><i class="fas fa-tag"></i> ${genres}</span></div>
+                                <p class="synopsis">${anime.synopsis.slice(0, 600)}</p>
+                                <button class="btn-watch" id="uaWatchBtn"><i class="fas fa-play"></i> Вибрати серію</button>
+                                <button class="btn-outline" id="detailBookmarkBtn"><i class="fas fa-star"></i> Додати в обране</button>
+                            </div>
+                        </div>
+                        <div style="margin-top:1.5rem">
+                            <h4>📺 Список серій</h4>
+                            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; max-height:300px; overflow-y:auto;">
+                                ${anime.episodes.map((ep, i) => 
+                                    `<button class="btn-outline ep-btn" data-ep="${i}">Сезон ${ep.season} Еп.${ep.episode}</button>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                    document.querySelectorAll('.ep-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const idx = parseInt(btn.dataset.ep);
+                            const ep = anime.episodes[idx];
+                            closeModal();
+                            playAnimeUAEpisode(anime, ep);
+                        });
+                    });
+                }).catch(err => {
+                    modalBody.innerHTML = `<div class="loader">Помилка завантаження: ${err.message}</div>`;
+                });
+            }
+
+            function playAnimeUAEpisode(anime, episode) {
+                playerModalTitle.textContent = `${anime.title} - С${episode.season}Е${episode.episode}`;
+                playerModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                // Використовуємо проксі для обходу CORS і підстановки Referer
+                const streamUrl = episode.file;
+                // Проксі має додати заголовок Referer: https://tortuga.wtf/
+                const proxiedStream = getProxyUrl(streamUrl); 
+                loadVideo(proxiedStream);
+            }
+
+            function openPlayerModal(anime) {
+                playerModalTitle.textContent = `🎬 ${anime.title}`;
+                playerModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                videoUrlInput.value = '';
+                destroyHls();
+                mainVideoPlayer.src = '';
+                mainVideoPlayer.pause();
+            }
+
+            function closeModal() { modal.style.display = 'none'; document.body.style.overflow = ''; }
+            function closePlayerModal() {
+                playerModal.style.display = 'none';
+                document.body.style.overflow = '';
+                destroyHls();
+                mainVideoPlayer.pause();
+                mainVideoPlayer.src = '';
+            }
+
+            function destroyHls() {
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+            }
+
+            function loadVideo(url) {
+                destroyHls();
+                mainVideoPlayer.src = '';
+                if (!url) { showToast('Введіть URL'); return; }
+                if (url.endsWith('.m3u8') || url.includes('m3u8')) {
+                    if (Hls.isSupported()) {
+                        hlsInstance = new Hls();
+                        hlsInstance.loadSource(url);
+                        hlsInstance.attachMedia(mainVideoPlayer);
+                        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => mainVideoPlayer.play().catch(() => {}));
+                    } else {
+                        showToast('HLS не підтримується');
+                    }
+                } else {
+                    mainVideoPlayer.src = url;
+                    mainVideoPlayer.play().catch(() => {});
+                }
+                showToast('Відео завантажено 🎬');
+            }
+
+            // ==================== ПРОФІЛЬ (майже без змін) ====================
+            function openProfileModal() {
+                updateProfileContent();
+                profileModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            function closeProfileModal() {
+                profileModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+            function updateProfileContent() {
+                const bookmarks = getBookmarks();
+                const history = getHistory();
+                document.getElementById('statBookmarks').textContent = bookmarks.length;
+                document.getElementById('statHistory').textContent = history.length;
+                document.getElementById('statWatched').textContent = history.length;
+                const bmList = document.getElementById('bookmarkList');
+                if (!bookmarks.length) bmList.innerHTML = '<p style="color:var(--text-muted);">Ще немає обраних...</p>';
+                else bmList.innerHTML = bookmarks.slice(0, 12).map(b => `<div class="bookmark-item" data-id="${b.mal_id}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('');
+                const histList = document.getElementById('historyList');
+                if (!history.length) histList.innerHTML = '<p style="color:var(--text-muted);">Ще немає історії...</p>';
+                else histList.innerHTML = history.slice(0, 12).map(h => `<div class="bookmark-item" data-id="${h.mal_id}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('');
+            }
+
+            function refreshCurrentView() {
+                updateBadge();
+                if (currentSource === 'jikan') {
+                    if (currentTab === 'bookmarks') {
+                        currentAnimeList = getBookmarks();
+                        totalPages = 1;
+                        renderAnimeCards(currentAnimeList);
+                    } else if (currentTab === 'history') {
+                        currentAnimeList = getHistory();
+                        totalPages = 1;
+                        renderAnimeCards(currentAnimeList);
+                    } else {
+                        renderAnimeCards(currentAnimeList);
+                    }
+                } else {
+                    // animeua
+                    loadDataForCurrentSource();
+                }
+                if (profileModal.style.display === 'flex') updateProfileContent();
+            }
+
+            // ==================== ЗАВАНТАЖЕННЯ ДАНИХ ЗАЛЕЖНО ВІД ДЖЕРЕЛА ====================
+            async function loadDataForCurrentSource() {
+                animeContainer.innerHTML = `<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>`;
+                paginationRow.innerHTML = '';
+                if (currentSource === 'jikan') {
+                    if (currentTab === 'bookmarks') {
+                        currentAnimeList = getBookmarks();
+                        totalPages = 1;
+                        renderAnimeCards(currentAnimeList);
+                        return;
+                    }
+                    if (currentTab === 'history') {
+                        currentAnimeList = getHistory();
+                        totalPages = 1;
+                        renderAnimeCards(currentAnimeList);
+                        return;
+                    }
+                    const data = await fetchJikanAnime(currentPage);
+                    currentAnimeList = data;
+                    renderAnimeCards(data);
+                } else if (currentSource === 'animeua') {
+                    if (currentSearchQuery) {
+                        currentAnimeList = await searchAnimeUA(currentSearchQuery, currentPage);
+                    } else {
+                        currentAnimeList = await getUAHomePage(animeUASection, currentPage);
+                    }
+                    totalPages = 1; // поки не парсимо пагінацію
+                    renderAnimeCards(currentAnimeList);
+                }
+            }
+
+            // ==================== ІНІЦІАЛІЗАЦІЯ ДЖЕРЕЛА ====================
+            function setSource(source) {
+                currentSource = source;
+                proxySettings.style.display = source === 'animeua' ? 'block' : 'none';
+                // Скидаємо пошук та сторінку
+                currentSearchQuery = '';
+                searchInput.value = '';
+                currentPage = 1;
+                if (source === 'jikan') {
+                    currentTab = 'top';
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
+                    document.querySelector('[data-tab="top"]')?.classList.add('active-tab');
+                } else {
+                    // Для AnimeUA свої вкладки (можна додати, поки використовуємо секції)
+                    currentTab = 'top'; // не використовується
+                    animeUASection = 'https://animeua.club/page/';
+                }
+                loadDataForCurrentSource();
+            }
+
+            sourceSelect.addEventListener('change', (e) => setSource(e.target.value));
+            setSource(sourceSelect.value);
+
+            // ==================== ПОДІЇ (з урахуванням джерела) ====================
+            searchInput.addEventListener('input', debounce(() => {
+                currentSearchQuery = searchInput.value.trim();
+                currentPage = 1;
+                if (currentSource === 'jikan' && (currentTab === 'bookmarks' || currentTab === 'history')) {
+                    currentTab = 'top';
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
+                    document.querySelector('[data-tab="top"]')?.classList.add('active-tab');
+                }
+                loadDataForCurrentSource();
+            }, 500));
+
+            themeToggleBtn.addEventListener('click', toggleTheme);
+            profileBtn.addEventListener('click', openProfileModal);
+            logoHome.addEventListener('click', () => {
+                searchInput.value = '';
+                currentSearchQuery = '';
+                currentPage = 1;
+                if (currentSource === 'jikan') {
+                    currentTab = 'top';
+                    currentGenreId = 0;
+                    document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
+                    const allPill = document.querySelector('[data-genre-id="0"]');
+                    if (allPill) allPill.classList.add('active-pill');
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
+                    document.querySelector('[data-tab="top"]')?.classList.add('active-tab');
+                } else {
+                    animeUASection = 'https://animeua.club/page/';
+                }
+                loadDataForCurrentSource();
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentSource !== 'jikan') return;
+                    currentTab = btn.dataset.tab;
+                    currentPage = 1;
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
+                    btn.classList.add('active-tab');
+                    loadDataForCurrentSource();
+                });
+            });
+            // Закриття модалок
+            closeModalBtn.addEventListener('click', closeModal);
+            closePlayerBtn.addEventListener('click', closePlayerModal);
+            closeProfileBtn.addEventListener('click', closeProfileModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+                if (e.target === playerModal) closePlayerModal();
+                if (e.target === profileModal) closeProfileModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') { closeModal(); closePlayerModal(); closeProfileModal(); }
+            });
+            // Плеєр (ручне введення)
+            loadVideoBtn.addEventListener('click', () => loadVideo(videoUrlInput.value.trim()));
+            demoVideoLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const demo = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+                videoUrlInput.value = demo;
+                loadVideo(demo);
+            });
+            document.getElementById('clearHistoryBtn')?.addEventListener('click', () => {
+                clearHistory();
+                updateProfileContent();
+                if (currentSource === 'jikan' && currentTab === 'history') loadDataForCurrentSource();
+            });
+
+            // ==================== ДОПОМІЖНЕ ====================
+            function debounce(fn, delay) {
+                let timer;
+                return function(...args) {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => fn.apply(this, args), delay);
+                };
+            }
+
+            // Завантажуємо жанри тільки для Jikan (без змін)
+            async function loadGenres() {
+                try {
+                    const res = await fetch(`${API_BASE}/genres/anime`);
+                    const data = await res.json();
+                    const popularGenres = data.data.filter(g => [1,2,4,7,8,10,14,22,24,30,37,41].includes(g.mal_id))
+                        .sort((a,b) => a.name.localeCompare(b.name));
+                    popularGenres.forEach(genre => {
+                        const pill = document.createElement('button');
+                        pill.className = 'category-pill';
+                        pill.dataset.genreId = genre.mal_id;
+                        pill.textContent = genre.name;
+                        pill.addEventListener('click', () => {
+                            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
+                            pill.classList.add('active-pill');
+                            currentGenreId = parseInt(genre.mal_id);
+                            currentPage = 1;
+                            if (currentSource !== 'jikan') {
+                                setSource('jikan');
+                            }
+                            loadDataForCurrentSource();
+                        });
+                        categoryScroll.appendChild(pill);
+                    });
+                } catch(e) {}
+            }
+            loadGenres();
+
+            updateBadge();
+            loadDataForCurrentSource();
+        })();
+    </script>
+</body>
+</html>
