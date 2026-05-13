@@ -93,9 +93,6 @@
         .demo-note { background: var(--hover); padding: 0.8rem; border-radius: var(--radius-sm); text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 1rem; transition: all var(--transition); }
         .player-container { position: relative; width: 100%; background: #000; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 1rem; }
         .player-container video { width: 100%; display: block; max-height: 60vh; background: #000; }
-        .player-url-input { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
-        .player-url-input input { flex: 1; min-width: 200px; padding: 0.6rem 1rem; border-radius: var(--radius-xl); border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.85rem; transition: all var(--transition); }
-        .player-url-input input:focus { outline: none; border-color: var(--active); }
         .profile-section { text-align: center; margin-bottom: 1.8rem; }
         .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--tag-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2.5rem; color: var(--text); transition: all var(--transition); }
         .profile-stats { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
@@ -121,7 +118,6 @@
             .category-scroll { gap: 0.4rem; }
             .category-pill { padding: 0.35rem 0.8rem; font-size: 0.7rem; }
         }
-        /* Додатковий стиль для вибору джерела */
         .source-toggle { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.5rem; font-size: 0.8rem; font-weight: 600; }
         .source-toggle select { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.35rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; outline: none; transition: all var(--transition); }
         .source-toggle select:focus { border-color: var(--active); }
@@ -215,13 +211,8 @@
                 <div class="player-container">
                     <video id="mainVideoPlayer" controls crossorigin="anonymous"></video>
                 </div>
-                <div class="player-url-input">
-                    <input type="text" id="videoUrlInput" placeholder="Вставте URL відео (.mp4 або .m3u8)..." />
-                    <button class="btn-outline" id="loadVideoBtn"><i class="fas fa-play"></i> Завантажити</button>
-                </div>
                 <div class="demo-note" style="margin-top:0.8rem;">
-                    <i class="fas fa-info-circle"></i> Підтримуються посилання на .mp4 та .m3u8 (HLS).<br>
-                    Тестове відео: <a href="#" id="demoVideoLink" style="color:var(--text);">Big Buck Bunny (MP4)</a>
+                    <i class="fas fa-info-circle"></i> Автоматичне завантаження з AnimeUA через проксі
                 </div>
             </div>
         </div>
@@ -254,12 +245,6 @@
         </div>
     </div>
 
-    <!-- Поле для налаштування проксі (заховане, з’являється при виборі AnimeUA) -->
-    <div id="proxySettings" style="display:none; position:fixed; bottom:10px; right:10px; background:var(--surface); padding:0.6rem 1rem; border-radius:var(--radius-xl); box-shadow:var(--shadow-md); border:1px solid var(--border); z-index:1500;">
-        <label style="font-size:0.7rem; font-weight:600; display:block; margin-bottom:0.3rem;">Проксі (CORS) URL</label>
-        <input type="text" id="proxyUrlInput" value="https://api.allorigins.win/raw?url=" style="width:220px; padding:0.4rem; border-radius:var(--radius-xl); border:1px solid var(--border); font-size:0.75rem;">
-    </div>
-
     <script>
         (function() {
             // ==================== DOM ЕЛЕМЕНТИ ====================
@@ -279,42 +264,34 @@
             const playerModalTitle = document.getElementById('playerModalTitle');
             const closePlayerBtn = document.getElementById('closePlayerBtn');
             const mainVideoPlayer = document.getElementById('mainVideoPlayer');
-            const videoUrlInput = document.getElementById('videoUrlInput');
-            const loadVideoBtn = document.getElementById('loadVideoBtn');
-            const demoVideoLink = document.getElementById('demoVideoLink');
             const profileModal = document.getElementById('profileModal');
             const closeProfileBtn = document.getElementById('closeProfileBtn');
             const profileBody = document.getElementById('profileBody');
             const logoHome = document.getElementById('logoHome');
             const sourceSelect = document.getElementById('sourceSelect');
-            const proxyUrlInput = document.getElementById('proxyUrlInput');
-            const proxySettings = document.getElementById('proxySettings');
+
+            // ==================== ТВІЙ ПРОКСІ (ОНОВЛЕНО) ====================
+            const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
 
             // ==================== ГЛОБАЛЬНИЙ СТАН ====================
             const API_BASE = 'https://api.jikan.moe/v4';
-            let currentSource = 'jikan'; // 'jikan' або 'animeua'
+            let currentSource = 'jikan';
             let currentAnimeList = [];
             let currentPage = 1;
             let totalPages = 1;
-            let currentTab = 'top';       // для Jikan
+            let currentTab = 'top';
             let currentGenreId = 0;
             let currentSearchQuery = '';
             let lastFetchTime = 0;
             let hlsInstance = null;
-            let animeUASection = '';      // активна секція AnimeUA (mainUrl/page/ тощо)
+            let animeUASection = 'https://animeua.club/page/';
 
-            // Проксі для обходу CORS. Для AnimeUA необхідний.
-            // Публічний allorigins може не працювати, краще підняти свій.
+            // Проксі-обгортка (worker очікує ?url=)
             function getProxyUrl(url) {
-                const proxy = proxyUrlInput.value.trim();
-                if (!proxy) {
-                    showToast('Вкажіть проксі URL (налаштування внизу)');
-                    throw new Error('Proxy not configured');
-                }
-                return proxy + encodeURIComponent(url);
+                return PROXY_URL + '?url=' + encodeURIComponent(url);
             }
 
-            // ==================== LOCAL STORAGE (без змін) ====================
+            // ==================== LOCAL STORAGE ====================
             function getBookmarks() {
                 try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch (e) { return []; }
             }
@@ -399,7 +376,7 @@
             }
             applyTheme(getTheme());
 
-            // ==================== JIKAN API (оригінальна логіка) ====================
+            // ==================== JIKAN API ====================
             async function fetchJikanAnime(page = 1) {
                 await delayIfNeeded();
                 let url = '';
@@ -444,60 +421,53 @@
             }
 
             // ==================== ANIMEUA SCRAPING ====================
-            // HTML парсинг через DOMParser, використовуючи проксі
             async function fetchUA(url) {
                 const proxyUrl = getProxyUrl(url);
                 const resp = await fetch(proxyUrl);
+                if (!resp.ok) throw new Error('Помилка проксі: ' + resp.status);
                 const html = await resp.text();
                 const parser = new DOMParser();
                 return parser.parseFromString(html, 'text/html');
             }
 
-            // Пошук аніме на AnimeUA
             async function searchAnimeUA(query, page = 1) {
-                // Форма пошуку: POST на головну, з параметрами
-                const searchUrl = 'https://animeua.club';
-                const formData = new URLSearchParams();
-                formData.append('do', 'search');
-                formData.append('subaction', 'search');
-                formData.append('story', query.replace(/\s/g, '+'));
-                // Використовуємо POST через проксі, але allorigins не підтримує POST напряму.
-                // Обхід: робимо GET на проксі з URL, який містить параметри? 
-                // На жаль, пошук вимагає POST. Тому ми змушені реалізувати POST-проксі або використати сервер.
-                // Спростимо: покажемо попередження й повернемо порожній список.
-                showToast('Пошук AnimeUA потребує POST-проксі. Використайте Jikan або налаштуйте власний проксі.');
+                showToast('Пошук AnimeUA наразі недоступний. Скористайтесь Jikan або налаштуйте POST-проксі.');
                 return [];
             }
 
-            // Отримання головної сторінки (секції)
             async function getUAHomePage(section, page = 1) {
                 const url = section + page;
-                const doc = await fetchUA(url);
-                const cards = doc.querySelectorAll('a.poster');
-                const results = [];
-                cards.forEach(card => {
-                    const titleEl = card.querySelector('h3.poster__title');
-                    const hrefEl = card.querySelector('.fd-column');
-                    const imgEl = card.querySelector('.img-fit-cover img');
-                    if (!titleEl || !hrefEl) return;
-                    const title = titleEl.textContent.trim();
-                    const href = hrefEl.getAttribute('href');
-                    const posterPath = imgEl?.getAttribute('data-src') || '';
-                    const posterUrl = 'https://animeua.club' + posterPath;
-                    results.push({
-                        mal_id: href.hashCode(), // тимчасовий id
-                        title: title,
-                        url: href,
-                        images: { jpg: { large_image_url: posterUrl, image_url: posterUrl } },
-                        score: null,
-                        year: null,
-                        from: 'animeua'
+                try {
+                    const doc = await fetchUA(url);
+                    const cards = doc.querySelectorAll('a.poster');
+                    const results = [];
+                    cards.forEach(card => {
+                        const titleEl = card.querySelector('h3.poster__title');
+                        const hrefEl = card.querySelector('.fd-column');
+                        const imgEl = card.querySelector('.img-fit-cover img');
+                        if (!titleEl || !hrefEl) return;
+                        const title = titleEl.textContent.trim();
+                        const href = hrefEl.getAttribute('href');
+                        const posterPath = imgEl?.getAttribute('data-src') || '';
+                        const posterUrl = 'https://animeua.club' + posterPath;
+                        results.push({
+                            mal_id: href.hashCode(),
+                            title: title,
+                            url: href,
+                            images: { jpg: { large_image_url: posterUrl, image_url: posterUrl } },
+                            score: null,
+                            year: null,
+                            from: 'animeua'
+                        });
                     });
-                });
-                return results;
+                    return results;
+                } catch (e) {
+                    console.error(e);
+                    showToast('Не вдалося завантажити AnimeUA. Перевірте проксі.');
+                    return [];
+                }
             }
 
-            // Завантаження сторінки аніме AnimeUA, отримання деталей + епізодів
             async function loadAnimeUADetails(animeUrl) {
                 const doc = await fetchUA(animeUrl);
                 const titleEl = doc.querySelector('.page__subcol-main h1');
@@ -515,7 +485,6 @@
                 const playerIframe = doc.querySelector('.video-responsive > iframe');
                 const playerUrl = playerIframe?.getAttribute('data-src') || playerIframe?.getAttribute('src') || '';
 
-                // Отримуємо епізоди з плеєра
                 let episodes = [];
                 if (playerUrl) {
                     const playerDoc = await fetchUA(playerUrl);
@@ -567,15 +536,6 @@
                 };
             }
 
-            // Генеруємо посилання для відтворення (беремо file з епізоду)
-            function getEpisodeStreamUrl(episode) {
-                // Просто повертаємо посилання на m3u8. Проксі вже застосовано у плеєрі через getProxyUrl, якщо потрібно.
-                // Referer має бути https://tortuga.wtf/, але браузер його не відправить без проксі.
-                // Використовуємо проксі для обгортки відео-посилання і додаємо referer.
-                return episode.file;
-            }
-
-            // Допоміжна функція hashCode
             String.prototype.hashCode = function() {
                 let hash = 0;
                 for (let i = 0; i < this.length; i++) {
@@ -652,7 +612,7 @@
                         if (animeData) {
                             addToHistory(animeData);
                             if (animeData.from === 'animeua') {
-                                openAnimeUAPlayer(animeData);
+                                openAnimeUADetail(animeData.url);
                             } else {
                                 openPlayerModal(animeData);
                             }
@@ -690,7 +650,7 @@
                 });
             }
 
-            // ==================== МОДАЛКИ (деталі, плеєр) ====================
+            // ==================== МОДАЛКИ ====================
             function openDetailModal(anime) {
                 addToHistory(anime);
                 modalTitle.innerText = anime.title;
@@ -795,10 +755,8 @@
                 playerModalTitle.textContent = `${anime.title} - С${episode.season}Е${episode.episode}`;
                 playerModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
-                // Використовуємо проксі для обходу CORS і підстановки Referer
                 const streamUrl = episode.file;
-                // Проксі має додати заголовок Referer: https://tortuga.wtf/
-                const proxiedStream = getProxyUrl(streamUrl); 
+                const proxiedStream = getProxyUrl(streamUrl);
                 loadVideo(proxiedStream);
             }
 
@@ -806,7 +764,6 @@
                 playerModalTitle.textContent = `🎬 ${anime.title}`;
                 playerModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
-                videoUrlInput.value = '';
                 destroyHls();
                 mainVideoPlayer.src = '';
                 mainVideoPlayer.pause();
@@ -828,7 +785,7 @@
             function loadVideo(url) {
                 destroyHls();
                 mainVideoPlayer.src = '';
-                if (!url) { showToast('Введіть URL'); return; }
+                if (!url) { showToast('Відео недоступне'); return; }
                 if (url.endsWith('.m3u8') || url.includes('m3u8')) {
                     if (Hls.isSupported()) {
                         hlsInstance = new Hls();
@@ -845,7 +802,7 @@
                 showToast('Відео завантажено 🎬');
             }
 
-            // ==================== ПРОФІЛЬ (майже без змін) ====================
+            // ==================== ПРОФІЛЬ ====================
             function openProfileModal() {
                 updateProfileContent();
                 profileModal.style.display = 'flex';
@@ -884,13 +841,12 @@
                         renderAnimeCards(currentAnimeList);
                     }
                 } else {
-                    // animeua
                     loadDataForCurrentSource();
                 }
                 if (profileModal.style.display === 'flex') updateProfileContent();
             }
 
-            // ==================== ЗАВАНТАЖЕННЯ ДАНИХ ЗАЛЕЖНО ВІД ДЖЕРЕЛА ====================
+            // ==================== ЗАВАНТАЖЕННЯ ДАНИХ ====================
             async function loadDataForCurrentSource() {
                 animeContainer.innerHTML = `<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>`;
                 paginationRow.innerHTML = '';
@@ -916,16 +872,13 @@
                     } else {
                         currentAnimeList = await getUAHomePage(animeUASection, currentPage);
                     }
-                    totalPages = 1; // поки не парсимо пагінацію
+                    totalPages = 1;
                     renderAnimeCards(currentAnimeList);
                 }
             }
 
-            // ==================== ІНІЦІАЛІЗАЦІЯ ДЖЕРЕЛА ====================
             function setSource(source) {
                 currentSource = source;
-                proxySettings.style.display = source === 'animeua' ? 'block' : 'none';
-                // Скидаємо пошук та сторінку
                 currentSearchQuery = '';
                 searchInput.value = '';
                 currentPage = 1;
@@ -934,8 +887,7 @@
                     document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active-tab'));
                     document.querySelector('[data-tab="top"]')?.classList.add('active-tab');
                 } else {
-                    // Для AnimeUA свої вкладки (можна додати, поки використовуємо секції)
-                    currentTab = 'top'; // не використовується
+                    currentTab = 'top';
                     animeUASection = 'https://animeua.club/page/';
                 }
                 loadDataForCurrentSource();
@@ -944,7 +896,7 @@
             sourceSelect.addEventListener('change', (e) => setSource(e.target.value));
             setSource(sourceSelect.value);
 
-            // ==================== ПОДІЇ (з урахуванням джерела) ====================
+            // ==================== ПОДІЇ ====================
             searchInput.addEventListener('input', debounce(() => {
                 currentSearchQuery = searchInput.value.trim();
                 currentPage = 1;
@@ -985,7 +937,6 @@
                     loadDataForCurrentSource();
                 });
             });
-            // Закриття модалок
             closeModalBtn.addEventListener('click', closeModal);
             closePlayerBtn.addEventListener('click', closePlayerModal);
             closeProfileBtn.addEventListener('click', closeProfileModal);
@@ -997,21 +948,12 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') { closeModal(); closePlayerModal(); closeProfileModal(); }
             });
-            // Плеєр (ручне введення)
-            loadVideoBtn.addEventListener('click', () => loadVideo(videoUrlInput.value.trim()));
-            demoVideoLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                const demo = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-                videoUrlInput.value = demo;
-                loadVideo(demo);
-            });
             document.getElementById('clearHistoryBtn')?.addEventListener('click', () => {
                 clearHistory();
                 updateProfileContent();
                 if (currentSource === 'jikan' && currentTab === 'history') loadDataForCurrentSource();
             });
 
-            // ==================== ДОПОМІЖНЕ ====================
             function debounce(fn, delay) {
                 let timer;
                 return function(...args) {
@@ -1020,7 +962,7 @@
                 };
             }
 
-            // Завантажуємо жанри тільки для Jikan (без змін)
+            // Завантажуємо жанри для Jikan
             async function loadGenres() {
                 try {
                     const res = await fetch(`${API_BASE}/genres/anime`);
