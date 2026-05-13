@@ -308,7 +308,7 @@
                 mal_id: anime.mal_id,
                 title: anime.title,
                 image_url: anime.images?.jpg?.large_image_url || '',
-                url: anime.url || '',   // ДОДАНО: зберігаємо URL
+                url: anime.url || '',
                 score: anime.score,
                 year: anime.year,
                 timestamp: Date.now()
@@ -670,53 +670,83 @@
         }
     }
 
+    // ⚡️ ОНОВЛЕНА ФУНКЦІЯ loadVideo
     function loadVideo(url) {
         destroyHls();
-        DOM.mainVideoPlayer.src = '';
 
-        if (!url || typeof url !== 'string' || url.trim() === '') {
-            console.warn('[MONOANIME] loadVideo: порожній URL відео');
-            showToast('❌ Відео недоступне (некоректне посилання)');
+        DOM.mainVideoPlayer.pause();
+        DOM.mainVideoPlayer.removeAttribute('src');
+        DOM.mainVideoPlayer.load();
+
+        if (!url) {
+            showToast('❌ Немає URL відео');
             return;
         }
 
-        console.log('[MONOANIME] Завантаження відео:', url);
         const finalUrl = getProxyUrl(url);
-        if (!finalUrl) {
-            showToast('❌ Помилка створення посилання');
-            return;
-        }
 
-        const isHLS = url.includes('.m3u8');
+        console.log('[VIDEO]', finalUrl);
 
-        if (isHLS && Hls.isSupported()) {
+        if (Hls.isSupported()) {
+
             hlsInstance = new Hls({
                 enableWorker: true,
                 lowLatencyMode: false,
                 backBufferLength: 90
             });
+
             hlsInstance.loadSource(finalUrl);
             hlsInstance.attachMedia(DOM.mainVideoPlayer);
+
             hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                 DOM.mainVideoPlayer.play().catch(() => {});
-                showToast('▶ Відтворення');
             });
-            hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+
+            hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+
+                console.log('HLS ERROR', data);
+
                 if (data.fatal) {
-                    console.warn('[MONOANIME] HLS fatal error, спроба відновлення');
-                    destroyHls();
-                    DOM.mainVideoPlayer.src = finalUrl;
-                    DOM.mainVideoPlayer.play().catch(() => {});
+
+                    switch (data.type) {
+
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.log('network error -> recover');
+                            hlsInstance.startLoad();
+                            break;
+
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.log('media error -> recover');
+                            hlsInstance.recoverMediaError();
+                            break;
+
+                        default:
+                            destroyHls();
+                            break;
+                    }
                 }
             });
-        } else if (isHLS && DOM.mainVideoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+
+        } else if (
+            DOM.mainVideoPlayer.canPlayType(
+                'application/vnd.apple.mpegurl'
+            )
+        ) {
+
             DOM.mainVideoPlayer.src = finalUrl;
-            DOM.mainVideoPlayer.play().catch(() => {});
-            showToast('▶ Відтворення (native HLS)');
+
+            DOM.mainVideoPlayer.addEventListener(
+                'loadedmetadata',
+                () => {
+                    DOM.mainVideoPlayer.play().catch(() => {});
+                }
+            );
+
         } else {
+
             DOM.mainVideoPlayer.src = finalUrl;
+
             DOM.mainVideoPlayer.play().catch(() => {});
-            showToast('▶ Відтворення');
         }
     }
 
@@ -750,7 +780,6 @@
         DOM.animeContainer.innerHTML = list.map(anime => {
             const img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || 'https://via.placeholder.com/300x420?text=No+Image';
             const isBm = bookmarkedIds.has(anime.mal_id);
-            // ДОДАНО: url тепер є в об'єктах історії та закладок
             return `
             <div class="anime-card" data-id="${anime.mal_id}" data-url="${anime.url || ''}">
                 <div class="card-img">
@@ -848,7 +877,7 @@
                 mal_id: anime.mal_id,
                 title: anime.title,
                 image_url: anime.images?.jpg?.large_image_url || '',
-                url: anime.url || '',   // ДОДАНО: зберігаємо URL
+                url: anime.url || '',
                 score: anime.score,
                 year: anime.year
             });
@@ -975,7 +1004,6 @@
             ? history.slice(0, 12).map(h => `<div class="bookmark-item" data-url="${h.url || ''}"><img src="${h.image_url}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 36 50%22%3E%3Crect fill=%22%23ccc%22 width=%2236%22 height=%2250%22/%3E%3C/svg%3E'"><span>${h.title}</span></div>`).join('')
             : '<p>Немає історії</p>';
 
-        // Додаємо можливість клікати по закладках/історії
         bmList.querySelectorAll('.bookmark-item').forEach(item => {
             item.addEventListener('click', () => {
                 const url = item.dataset.url;
