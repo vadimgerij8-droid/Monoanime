@@ -16,14 +16,6 @@
         return Math.abs(hash);
     };
 
-    function safeQuery(selector, parent = document) {
-        try { return parent.querySelector(selector); } catch (e) { return null; }
-    }
-
-    function safeQueryAll(selector, parent = document) {
-        try { return Array.from(parent.querySelectorAll(selector)); } catch (e) { return []; }
-    }
-
     function debounce(fn, delay) {
         let timer;
         return function(...args) {
@@ -51,7 +43,6 @@
         mainVideoPlayer: document.getElementById('mainVideoPlayer'),
         profileModal: document.getElementById('profileModal'),
         closeProfileBtn: document.getElementById('closeProfileBtn'),
-        profileBody: document.getElementById('profileBody')
     };
 
     function showToast(msg) {
@@ -111,15 +102,16 @@
         return new DOMParser().parseFromString(html, 'text/html');
     }
 
+    // Парсинг каталогу
     function parseCards(doc) {
-        const cards = safeQueryAll('.poster', doc);
+        const cards = doc.querySelectorAll('.poster');
         if (cards.length) {
-            return cards.map(card => {
-                const linkEl = card.tagName === 'A' ? card : safeQuery('a', card);
+            return Array.from(cards).map(card => {
+                const linkEl = card.tagName === 'A' ? card : card.querySelector('a');
                 const href = linkEl?.getAttribute('href') || '';
-                const img = safeQuery('img', card);
+                const img = card.querySelector('img');
                 const posterSrc = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
-                const titleEl = safeQuery('.poster__title', card) || safeQuery('h3', card);
+                const titleEl = card.querySelector('.poster__title') || card.querySelector('h3');
                 const title = (titleEl?.textContent || '').trim() || 'Без назви';
                 return {
                     mal_id: href.hashCode(),
@@ -130,13 +122,13 @@
                 };
             });
         }
-        const links = safeQueryAll('a[href*="/anime/"]', doc);
+        const links = doc.querySelectorAll('a[href*="/anime/"]');
         const unique = new Map();
         links.forEach(a => { if (!unique.has(a.href)) unique.set(a.href, a); });
         return Array.from(unique.values()).map(a => {
-            const img = safeQuery('img', a);
+            const img = a.querySelector('img');
             const src = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
-            const title = (safeQuery('.poster__title', a)?.textContent || a.textContent || '').trim();
+            const title = (a.querySelector('.poster__title')?.textContent || a.textContent || '').trim();
             return {
                 mal_id: a.href.hashCode(),
                 title: title || 'Без назви',
@@ -165,8 +157,8 @@
     async function fetchGenres() {
         try {
             const doc = await fetchUA(ANIMEUA_BASE);
-            const genreLinks = safeQueryAll('.genre-nav a, .genres-list a, a[href*="/genre/"]', doc);
-            const genres = genreLinks.map(a => {
+            const genreLinks = doc.querySelectorAll('.genre-nav a, .genres-list a, a[href*="/genre/"]');
+            const genres = Array.from(genreLinks).map(a => {
                 const href = a.getAttribute('href');
                 const slug = href.match(/\/genre\/([^/]+)/)?.[1] || '';
                 const name = a.textContent.trim();
@@ -183,190 +175,125 @@
         }
     }
 
-    // ================== 🔥 НОВИЙ УНІВЕРСАЛЬНИЙ ПАРСЕР ДЖЕРЕЛ ==================
-    function extractSourcesFromText(text) {
-        const sources = [];
-
-        // 1. JSON-масив з ключем file (найпоширеніший формат Kodik/Alloha)
-        const jsonMatches = text.matchAll(/['"]file['"]\s*:\s*(\[[\s\S]{0,20000}?\])/g);
-        for (const match of jsonMatches) {
-            try {
-                const arr = JSON.parse(match[1]);
-                const walk = (items, dub = '') => {
-                    items.forEach(item => {
-                        if (item.folder) {
-                            walk(item.folder, item.title || dub);
-                        } else if (item.file) {
-                            sources.push({
-                                label: (dub ? dub + ' / ' : '') + (item.title || 'Озвучка'),
-                                file: item.file,
-                                poster: item.poster || ''
-                            });
-                        }
-                    });
-                };
-                walk(arr);
-            } catch (e) { /* ігноруємо биті JSON */ }
-        }
-
-        // 2. Прямі URL m3u8/mp4 у всьому тексті
-        const urlMatches = text.matchAll(/(https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*)/g);
-        for (const m of urlMatches) {
-            const url = m[0];
-            if (!sources.some(s => s.file === url)) {
-                sources.push({ label: 'Прямий потік', file: url });
+    // ================== НОВА ОБРОБКА ПЛЕЄРІВ ==================
+    function extractPlayerIframes(doc) {
+        const iframes = [];
+        doc.querySelectorAll('iframe[src]').forEach(el => {
+            let src = el.getAttribute('src') || el.getAttribute('data-src');
+            if (!src) return;
+            if (src.startsWith('//')) src = 'https:' + src;
+            if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
+            iframes.push({ url: src, type: detectPlayerType(src) });
+        });
+        const scripts = doc.querySelectorAll('script:not([src])');
+        scripts.forEach(s => {
+            const text = s.textContent;
+            const match = text.match(/(?:playerUrl|iframeUrl|src)\s*[:=]\s*['"]([^'"]+)['"]/);
+            if (match) {
+                let url = match[1];
+                if (url.startsWith('//')) url = 'https:' + url;
+                iframes.push({ url, type: detectPlayerType(url) });
             }
-        }
-
-        // 3. Одиночні ключі file (без масиву)
-        const singleFileMatches = text.matchAll(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/g);
-        for (const m of singleFileMatches) {
-            const url = m[1];
-            if (!sources.some(s => s.file === url)) {
-                sources.push({ label: 'Озвучка', file: url });
-            }
-        }
-
-        // 4. Ключі source / playlist (деякі плеєри)
-        for (const key of ['source', 'playlist', 'src']) {
-            const re = new RegExp(`['"]${key}['"]\\s*:\\s*['"]([^'"]+\\.m3u8[^'"]*)['"]`, 'g');
-            const matches = text.matchAll(re);
-            for (const m of matches) {
-                const url = m[1];
-                if (!sources.some(s => s.file === url)) {
-                    sources.push({ label: key, file: url });
-                }
-            }
-        }
-
-        // 5. Якщо нічого не знайдено, спробуємо витягти все, що схоже на URL потоку
-        if (sources.length === 0) {
-            const anyStream = text.matchAll(/(https?:\/\/[^"'\s]+\.(m3u8|mp4|ts)[^"'\s]*)/g);
-            for (const m of anyStream) {
-                const url = m[0];
-                if (!sources.some(s => s.file === url)) {
-                    sources.push({ label: 'Потік', file: url });
-                }
-            }
-        }
-
-        return sources;
+        });
+        return iframes;
     }
 
-    // ================== ЗБІР УСІХ IFRAME ЗІ СТОРІНКИ ==================
-    function extractPlayerIframeUrls(doc) {
-        const selectors = [
-            '.video-responsive iframe',
-            '.player-responsive iframe',
-            '#player iframe',
-            'iframe[src]'
-        ];
-        const urls = [];
-        for (const sel of selectors) {
-            safeQueryAll(sel, doc).forEach(el => {
-                let src = el.getAttribute('src') || el.getAttribute('data-src');
-                if (!src) return;
-                if (src.startsWith('//')) src = 'https:' + src;
-                if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
-                urls.push(src);
-            });
+    function detectPlayerType(url) {
+        if (/kodik\.(info|biz|cc|su)/i.test(url)) return 'kodik';
+        if (/alloha\.(tv|su|cc)/i.test(url)) return 'alloha';
+        return 'unknown';
+    }
+
+    function extractKodikToken(html) {
+        const match = html.match(/token\s*[:=]\s*['"]([^'"]+)['"]/);
+        return match ? match[1] : null;
+    }
+
+    async function fetchKodikEpisodes(iframeUrl) {
+        const response = await fetch(getProxyUrl(iframeUrl));
+        const html = await response.text();
+        const token = extractKodikToken(html);
+        if (!token) {
+            console.warn('Kodik token not found');
+            return [];
         }
-        // Шукаємо в скриптах
-        const scripts = safeQueryAll('script:not([src])', doc);
-        for (const s of scripts) {
-            const text = s.textContent;
-            // playerUrl, iframeUrl
-            const match = text.match(/(?:playerUrl|iframeUrl|src)\s*[:=]\s*['"]([^'"]+)['"]/g);
-            if (match) {
-                match.forEach(m => {
-                    const url = m.replace(/.*['"]([^'"]+)['"].*/, '$1');
-                    if (url.startsWith('//')) urls.push('https:' + url);
-                    else if (url.startsWith('http')) urls.push(url);
+        const idMatch = iframeUrl.match(/\/(?:serial|seria)\/(\d+)/);
+        if (!idMatch) return [];
+        const serialId = idMatch[1];
+        const apiUrl = `https://kodik.info/api/series/${serialId}?token=${token}`;
+        const apiResp = await fetch(getProxyUrl(apiUrl));
+        if (!apiResp.ok) return [];
+        const data = await apiResp.json();
+        return parseKodikApiResponse(data);
+    }
+
+    function parseKodikApiResponse(data) {
+        const episodes = [];
+        // Адаптовано під структуру: data.results.seasons -> { "1": { "Озвучка": [ {episode: 1, url: "..."}, ... ] } }
+        const seasons = data.results?.seasons || data.seasons || {};
+        for (const [season, dubs] of Object.entries(seasons)) {
+            for (const [dub, files] of Object.entries(dubs)) {
+                // files може бути масивом або об'єктом з ключами-епізодами
+                const episodesList = Array.isArray(files) ? files : Object.values(files);
+                episodesList.forEach(file => {
+                    episodes.push({
+                        title: `${dub} / Сезон ${season} / Серія ${file.episode || file.id}`,
+                        season: season,
+                        episode: String(file.episode || file.id),
+                        file: file.url || file.src || file.file,
+                        dub: dub,
+                    });
                 });
             }
-            // Kodik/Alloha прямі посилання
-            const kodikMatch = text.match(/(?:https?:)?\/\/(?:kodik|alloha|tortuga)[^"'\s]+/g);
-            if (kodikMatch) {
-                kodikMatch.forEach(u => {
-                    let url = u;
-                    if (!url.startsWith('http')) url = 'https:' + url;
-                    urls.push(url);
-                });
-            }
         }
-        return [...new Set(urls)];
+        return episodes;
     }
 
     async function loadAnimeDetails(animeUrl) {
         const doc = await fetchUA(animeUrl);
         let title = '';
         for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
-            const el = safeQuery(sel, doc);
+            const el = doc.querySelector(sel);
             if (el?.textContent.trim()) { title = el.textContent.trim(); break; }
         }
         let poster = '';
         for (const sel of ['div.page__subcol-side .img-fit-cover img', '.pmovie__poster img', '.anime__poster img']) {
-            const el = safeQuery(sel, doc);
+            const el = doc.querySelector(sel);
             if (el) {
                 const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
                 if (src) { poster = src.startsWith('http') ? src : ANIMEUA_BASE + src; break; }
             }
         }
-        const genres = safeQueryAll('.pmovie__genres a, .genres a', doc).map(a => a.textContent.trim()).filter(Boolean);
-        const yearEl = safeQuery('.pmovie__year, .release-year', doc);
+        const genres = Array.from(doc.querySelectorAll('.pmovie__genres a, .genres a')).map(a => a.textContent.trim()).filter(Boolean);
+        const yearEl = doc.querySelector('.pmovie__year, .release-year');
         const yearMatch = (yearEl?.textContent || '').match(/\d{4}/);
         const year = yearMatch ? parseInt(yearMatch[0]) : null;
         let synopsis = '';
         for (const sel of ['.full-text', '.pmovie__description', '.anime__description']) {
-            const el = safeQuery(sel, doc);
+            const el = doc.querySelector(sel);
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
 
-        const playerUrls = extractPlayerIframeUrls(doc);
-        const allSources = [];
-        for (const playerUrl of playerUrls) {
+        const iframes = extractPlayerIframes(doc);
+        let allEpisodes = [];
+
+        for (const iframe of iframes) {
             try {
-                const playerHtml = await fetchUA(playerUrl);
-                const text = playerHtml.body?.innerHTML || '';
-                const sources = extractSourcesFromText(text);
-                allSources.push(...sources);
-            } catch (e) {}
-        }
-        // Якщо нічого немає, пробуємо вкладені iframe
-        if (allSources.length === 0 && playerUrls.length > 0) {
-            try {
-                const firstHtml = await fetchUA(playerUrls[0]);
-                const nestedIframe = safeQuery('iframe[src]', firstHtml);
-                if (nestedIframe) {
-                    let nestedUrl = nestedIframe.getAttribute('src');
-                    if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
-                    if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
-                    const nestedHtml = await fetchUA(nestedUrl);
-                    const nestedText = nestedHtml.body?.innerHTML || '';
-                    allSources.push(...extractSourcesFromText(nestedText));
+                if (iframe.type === 'kodik') {
+                    const eps = await fetchKodikEpisodes(iframe.url);
+                    allEpisodes = allEpisodes.concat(eps);
+                } else {
+                    // Для невідомих плеєрів – fallback (можна залишити пустим або спробувати старий метод)
+                    // Тут можна вставити стару логіку, але вона скоріш за все не спрацює
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn('Помилка обробки плеєра', iframe.url, e);
+            }
         }
 
-        const episodes = allSources.map((s, idx) => {
-            const parts = (s.label || '').split('/').map(p => p.trim());
-            const season = (s.label || '').match(/[Сс]езон\s*(\d+)/)?.[1] || '1';
-            const epMatch = (s.label || '').match(/[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
-            const episode = epMatch ? (epMatch[1] || epMatch[2]) : String(idx + 1);
-            return {
-                title: s.label || `Серія ${idx+1}`,
-                season,
-                episode,
-                poster: s.poster || poster,
-                file: s.file,
-                dub: parts[0] || 'UA',
-                quality: s.label?.match(/\[(\d+p)\]/)?.[1] || ''
-            };
-        }).filter(ep => ep.file);
-
-        // Групування для селекторів
+        // Групування за сезонами та озвучками
         const seasons = {};
-        episodes.forEach(ep => {
+        allEpisodes.forEach(ep => {
             const s = ep.season || '1';
             const d = ep.dub || 'UA';
             if (!seasons[s]) seasons[s] = {};
@@ -382,7 +309,7 @@
             year,
             synopsis,
             score: null,
-            episodes,
+            episodes: allEpisodes,
             seasons,
             url: animeUrl,
             from: 'animeua'
@@ -399,7 +326,7 @@
         }
     }
 
-    function loadVideo(url, videoElement = DOM.mainVideoPlayer) {
+    function loadVideo(url, videoElement) {
         destroyHlsForVideo(videoElement);
         videoElement.pause();
         videoElement.removeAttribute('src');
@@ -432,6 +359,7 @@
 
     // ================== UI ==================
     let currentTab = 'main', currentPage = 1, totalPages = 1, currentList = [], currentSearchQuery = '', currentGenreSlug = null;
+    let currentDetailAnime = null, detailVideoEl = null;
 
     function renderCards(list) {
         if (!list || !list.length) {
@@ -460,6 +388,7 @@
                 if (card.dataset.url) openDetailModal(card.dataset.url);
             });
         });
+
         DOM.animeContainer.querySelectorAll('.bookmark-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -467,13 +396,18 @@
                 if (anime) toggleBookmark(anime);
             });
         });
+
         DOM.animeContainer.querySelectorAll('.play-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const anime = currentList.find(a => a.mal_id === parseInt(btn.dataset.id));
-                if (anime && anime.url) { Storage.addHistory(anime); openDetailModal(anime.url); }
+                if (anime && anime.url) {
+                    Storage.addHistory(anime);
+                    openDetailModal(anime.url);
+                }
             });
         });
+
         renderPagination();
     }
 
@@ -499,17 +433,21 @@
         const idx = bookmarks.findIndex(b => b.mal_id === anime.mal_id);
         if (idx !== -1) { bookmarks.splice(idx, 1); showToast('Видалено з обраного'); }
         else {
-            bookmarks.push({ mal_id: anime.mal_id, title: anime.title, image_url: anime.images?.jpg?.large_image_url || '', url: anime.url || '', score: anime.score, year: anime.year });
+            bookmarks.push({
+                mal_id: anime.mal_id,
+                title: anime.title,
+                image_url: anime.images?.jpg?.large_image_url || '',
+                url: anime.url || '',
+                score: anime.score,
+                year: anime.year
+            });
             showToast('⭐ Додано в обране');
         }
         Storage.saveBookmarks(bookmarks);
         updateBadge();
-        if (currentTab === 'bookmarks') loadContent(); else renderCards(currentList);
+        if (currentTab === 'bookmarks') loadContent();
+        else renderCards(currentList);
     }
-
-    // ================== МОДАЛЬНЕ ВІКНО ==================
-    let currentDetailAnime = null;
-    let detailVideoEl = null;
 
     function closeDetailModal() {
         DOM.modal.style.display = 'none';
@@ -534,16 +472,16 @@
             DOM.modalTitle.textContent = anime.title;
 
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
-            const seasons = Object.keys(anime.seasons).sort((a,b) => a - b);
+            const seasons = Object.keys(anime.seasons).sort((a, b) => a - b);
             const firstSeason = seasons[0] || '1';
             const dubs = anime.seasons[firstSeason] ? Object.keys(anime.seasons[firstSeason]) : [];
             const firstDub = dubs[0] || '';
             const episodesForFirst = firstDub ? anime.seasons[firstSeason][firstDub] : [];
 
-            let dubOptions = dubs.map(d => `<option value="${d}">${d}</option>`).join('');
-            let episodeOptions = episodesForFirst.map(ep => `<option value="${ep.file}" data-episode="${ep.episode}">Еп. ${ep.episode}</option>`).join('');
+            const dubOptions = dubs.map(d => `<option value="${d}">${d}</option>`).join('');
+            const episodeOptions = episodesForFirst.map(ep => `<option value="${ep.file}" data-episode="${ep.episode}">Еп. ${ep.episode}</option>`).join('');
 
-            const html = `
+            DOM.modalBody.innerHTML = `
                 <div class="anime-detail-grid">
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
                     <div class="detail-info">
@@ -577,7 +515,6 @@
                 </div>
             `;
 
-            DOM.modalBody.innerHTML = html;
             detailVideoEl = document.getElementById('detailVideoPlayer');
 
             function updateEpisodes() {
@@ -620,27 +557,31 @@
         }
     }
 
-    DOM.closeModalBtn.addEventListener('click', closeDetailModal);
-    DOM.closePlayerBtn.addEventListener('click', () => {
-        DOM.playerModal.style.display = 'none';
-        document.body.style.overflow = '';
-        destroyHlsForVideo(DOM.mainVideoPlayer);
-    });
-    DOM.closeProfileBtn.addEventListener('click', () => {
-        DOM.profileModal.style.display = 'none';
-        document.body.style.overflow = '';
-    });
-
     function openProfileModal() {
-        const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
+        const bookmarks = Storage.getBookmarks();
+        const history = Storage.getHistory();
         document.getElementById('statBookmarks').textContent = bookmarks.length;
         document.getElementById('statHistory').textContent = history.length;
         document.getElementById('statWatched').textContent = history.length;
-        document.getElementById('bookmarkList').innerHTML = bookmarks.length ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}" onerror="this.src='data:image/svg+xml,...'"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>';
-        document.getElementById('historyList').innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}" onerror="..."><span>${h.title}</span></div>`).join('') : '<p>Немає історії</p>';
+
+        const bmList = document.getElementById('bookmarkList');
+        bmList.innerHTML = bookmarks.length
+            ? bookmarks.slice(0, 12).map(b => `<div class="bookmark-item" data-url="${b.url || ''}"><img src="${b.image_url}" onerror="this.src='data:image/svg+xml,...'"><span>${b.title}</span></div>`).join('')
+            : '<p>Немає обраних</p>';
+
+        const histList = document.getElementById('historyList');
+        histList.innerHTML = history.length
+            ? history.slice(0, 12).map(h => `<div class="bookmark-item" data-url="${h.url || ''}"><img src="${h.image_url}" onerror="..."><span>${h.title}</span></div>`).join('')
+            : '<p>Немає історії</p>';
+
         document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => {
-            item.addEventListener('click', () => { closeProfileModal(); openDetailModal(item.dataset.url); });
+            item.addEventListener('click', () => {
+                DOM.profileModal.style.display = 'none';
+                document.body.style.overflow = '';
+                if (item.dataset.url) openDetailModal(item.dataset.url);
+            });
         });
+
         DOM.profileModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
@@ -703,9 +644,22 @@
         });
     }
 
+    // Обробники подій
     DOM.themeToggleBtn.addEventListener('click', toggleTheme);
     DOM.profileBtn.addEventListener('click', openProfileModal);
+    DOM.closeModalBtn.addEventListener('click', closeDetailModal);
+    DOM.closePlayerBtn.addEventListener('click', () => {
+        DOM.playerModal.style.display = 'none';
+        document.body.style.overflow = '';
+        destroyHlsForVideo(DOM.mainVideoPlayer);
+    });
+    DOM.closeProfileBtn.addEventListener('click', () => {
+        DOM.profileModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
     document.getElementById('logoHome').addEventListener('click', resetToMain);
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             currentTab = btn.dataset.tab; currentPage = 1; currentSearchQuery = ''; currentGenreSlug = null; DOM.searchInput.value = '';
@@ -717,6 +671,7 @@
             loadContent();
         });
     });
+
     DOM.searchInput.addEventListener('input', debounce(() => {
         currentSearchQuery = DOM.searchInput.value.trim(); currentPage = 1; currentGenreSlug = null; currentTab = 'main';
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
@@ -726,6 +681,7 @@
         if (allPill) allPill.classList.add('active-pill');
         loadContent();
     }, 500));
+
     window.addEventListener('click', (e) => {
         if (e.target === DOM.modal) closeDetailModal();
         if (e.target === DOM.playerModal) {
@@ -733,19 +689,30 @@
             document.body.style.overflow = '';
             destroyHlsForVideo(DOM.mainVideoPlayer);
         }
-        if (e.target === DOM.profileModal) closeProfileModal();
+        if (e.target === DOM.profileModal) {
+            DOM.profileModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
     });
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeDetailModal();
             DOM.playerModal.style.display = 'none';
             document.body.style.overflow = '';
             destroyHlsForVideo(DOM.mainVideoPlayer);
-            closeProfileModal();
+            DOM.profileModal.style.display = 'none';
+            document.body.style.overflow = '';
         }
     });
-    document.getElementById('clearHistoryBtn').addEventListener('click', () => { Storage.clearHistory(); openProfileModal(); if (currentTab === 'history') loadContent(); });
 
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+        Storage.clearHistory();
+        openProfileModal();
+        if (currentTab === 'history') loadContent();
+    });
+
+    // Старт
     applyTheme(Storage.getTheme());
     updateBadge();
     initGenres().then(() => loadContent());
