@@ -592,6 +592,39 @@ body {
     background: #000;
 }
 
+/* Селектор озвучок */
+.voice-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+}
+
+.voice-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-xl);
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.voice-btn:hover {
+    background: var(--hover);
+}
+
+.voice-btn.active {
+    background: var(--active);
+    color: var(--active-text);
+    border-color: var(--active);
+}
+
 /* ПРОФІЛЬ */
 .profile-section {
     text-align: center;
@@ -736,5 +769,8 @@ footer {
     }
     #searchInput {
         width: 140px;
+    }
+    .voice-selector {
+        justify-content: flex-start;
     }
 }
