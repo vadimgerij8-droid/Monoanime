@@ -57,23 +57,21 @@
 
     let hls = null;
 
-    // Кастомний завантажувач для HLS.js, що пропускає всі запити через проксі
-    class ProxyLoader {
+    // --- ВИПРАВЛЕНИЙ ProxyLoader ---
+    const DefaultLoader = Hls.DefaultConfig.loader;          // зберегли оригінал
+    class ProxyLoader extends DefaultLoader {
         constructor(config) {
-            this.config = config;
+            super(config);
         }
         load(context, config, callbacks) {
             let url = context.url;
             if (url && !url.startsWith(PROXY_URL) && !url.startsWith('blob:')) {
                 context.url = getProxyUrl(url);
             }
-            // Використовуємо стандартний fetch‑завантажувач
-            const defaultLoader = new Hls.DefaultConfig.loader(config);
-            defaultLoader.load(context, config, callbacks);
+            super.load(context, config, callbacks);           // викликаємо батьківський метод
         }
-        destroy() {}
-        abort() {}
     }
+    // --------------------------------
 
     function showToast(msg) {
         DOM.toast.textContent = msg;
@@ -281,19 +279,17 @@
             mal_id: animeUrl.hashCode(), title,
             images: { jpg: { large_image_url: poster, image_url: poster } },
             genres, year, synopsis, score: null,
-            playerPageUrl,   // фінальна сторінка плеєра
+            playerPageUrl,
             url: animeUrl, from: 'animeua'
         };
     }
 
-    // Пошук усіх .m3u8‑посилань на сторінці плеєра
     async function extractVoices(playerPageUrl) {
         try {
             const doc = await fetchUA(playerPageUrl);
             const html = doc.documentElement.outerHTML;
             const m3u8Matches = html.match(/https?:\/\/[^"'\s]+\.m3u8[^"'\s]*/gi) || [];
             const uniqueUrls = [...new Set(m3u8Matches)].filter(u => u.includes('.m3u8'));
-            // Можна спробувати витягти назви (з data‑атрибутів або тексту поруч), але спрощено:
             return uniqueUrls.map((url, i) => ({
                 label: `Озвучка ${i+1}`,
                 url: url
@@ -328,7 +324,7 @@
 
         if (Hls.isSupported()) {
             hls = new Hls({
-                loader: ProxyLoader   // всі запити через проксі
+                loader: ProxyLoader
             });
             hls.loadSource(voiceUrl);
             hls.attachMedia(video);
@@ -350,6 +346,7 @@
     }
 
     function buildVoiceSelector(voices, currentIndex, onSelect) {
+        if (!DOM.voiceSelector) return;           // безпечна перевірка
         DOM.voiceSelector.innerHTML = '';
         DOM.voiceSelector.style.display = voices.length > 1 ? 'flex' : 'none';
         voices.forEach((voice, idx) => {
@@ -357,7 +354,6 @@
             btn.className = 'voice-btn' + (idx === currentIndex ? ' active' : '');
             btn.textContent = voice.label;
             btn.addEventListener('click', () => {
-                // Оновити активний стан
                 DOM.voiceSelector.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 onSelect(idx);
@@ -370,8 +366,10 @@
         DOM.playerModalTitle.textContent = title;
         DOM.playerModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        DOM.voiceSelector.style.display = 'none';
-        DOM.playerLoading.style.display = 'block';
+
+        // безпечне приховування/показ, якщо елементів немає
+        if (DOM.voiceSelector) DOM.voiceSelector.style.display = 'none';
+        if (DOM.playerLoading) DOM.playerLoading.style.display = 'block';
         const video = document.getElementById('mainVideoPlayer');
         video.style.display = 'none';
 
@@ -379,7 +377,7 @@
             const voices = await extractVoices(playerPageUrl);
             if (!voices.length) {
                 showToast('❌ Не знайдено m3u8 потоків');
-                DOM.playerLoading.style.display = 'none';
+                if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
                 video.style.display = 'block';
                 return;
             }
@@ -392,10 +390,10 @@
 
             buildVoiceSelector(voices, currentIdx, playVoice);
             playVoice(0);
-            DOM.playerLoading.style.display = 'none';
+            if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
             video.style.display = 'block';
         } catch (err) {
-            DOM.playerLoading.style.display = 'none';
+            if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
             video.style.display = 'block';
             showToast('❌ Помилка отримання озвучок');
         }
@@ -405,9 +403,11 @@
         DOM.playerModal.style.display = 'none';
         document.body.style.overflow = '';
         destroyHls();
-        DOM.voiceSelector.innerHTML = '';
-        DOM.voiceSelector.style.display = 'none';
-        DOM.playerLoading.style.display = 'none';
+        if (DOM.voiceSelector) {
+            DOM.voiceSelector.innerHTML = '';
+            DOM.voiceSelector.style.display = 'none';
+        }
+        if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
         const video = document.getElementById('mainVideoPlayer');
         if (video) video.style.display = 'block';
     }
@@ -503,7 +503,7 @@
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
                     <div class="detail-info">
                         <div><span class="tag"><i class="fas fa-calendar"></i> ${anime.year || '—'}</span></div>
-                        <div style="margin:0.5rem 0">${anime.genres.map(g => `<span class="tag">${g}</span>`).join('') || '<span class="tag">—</span>'}</div>
+                        <div style="margin:0.5rem 0">${anime.genres.map(g => `<span class="tag">${g}</span>`).join('') || '<span class="tag">—'}</div>
                         <p class="synopsis">${(anime.synopsis || 'Опис відсутній.').slice(0, 500)}</p>
                         <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
                         ${anime.playerPageUrl ? `<button class="btn-outline" id="watchBtn"><i class="fas fa-play"></i> Дивитися онлайн</button>` : '<p style="color:#ff6b6b;">⚠️ Плеєр не знайдено</p>'}
