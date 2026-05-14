@@ -186,13 +186,12 @@
     // ==================== PLAYERJS PARSER ====================
 
     function fixJsonLikeString(str) {
-        // Fix JS object to be JSON parseable
         let fixed = str
-            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":') // keys to double quotes
-            .replace(/'/g, '"') // single quotes to double
-            .replace(/,\s*([}\]])/g, '$1') // trailing commas
-            .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":') // unquoted keys
-            .replace(/\\x([0-9A-Fa-f]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16))) // hex escapes
+            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
+            .replace(/'/g, '"')
+            .replace(/,\s*([}\]])/g, '$1')
+            .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
+            .replace(/\\x([0-9A-Fa-f]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16)))
             .replace(/\n/g, ' ')
             .replace(/\r/g, ' ')
             .replace(/\t/g, ' ');
@@ -216,14 +215,12 @@
                     return JSON.parse(fixed);
                 } catch (e) {
                     console.warn('PlayerJS parse failed, trying alternative:', e.message);
-                    // Try to extract just the file/playlist part
                     const fileMatch = match[1].match(/["']?file["']?\s*:\s*(\[[\s\S]*?\]|["'][^"']+["'])/);
                     if (fileMatch) {
                         try {
                             const fixed = fixJsonLikeString(fileMatch[1]);
                             return { file: JSON.parse(fixed) };
                         } catch (e2) {
-                            // Direct string
                             const url = fileMatch[1].replace(/["']/g, '').trim();
                             if (url) return { file: url };
                         }
@@ -234,131 +231,179 @@
         return null;
     }
 
-    function walkPlaylist(items, parentTitle = '', results = []) {
-        if (!Array.isArray(items)) {
-            if (typeof items === 'string' && items.match(/\.(m3u8|mp4|mkv|avi)/)) {
-                results.push({ title: parentTitle || 'Default', file: items, poster: '' });
-            }
+    function parsePlaylistItem(item, parentTitle = '', results = []) {
+        if (!item) return results;
+
+        // Папка = сезон
+        if (item.folder && Array.isArray(item.folder)) {
+            const seasonTitle = item.title || item.name || parentTitle;
+            const seasonNum = seasonTitle.match(/\d+/)?.[0] || '1';
+            
+            item.folder.forEach(ep => {
+                parseEpisodeItem(ep, seasonNum, results);
+            });
             return results;
         }
 
-        items.forEach(item => {
-            if (!item) return;
+        // Прямий файл
+        if (item.file) {
+            parseEpisodeItem(item, parentTitle, results);
+            return results;
+        }
 
-            // Folder = season or dub group
-            if (item.folder) {
-                const folderTitle = item.title || item.id || parentTitle;
-                walkPlaylist(item.folder, folderTitle, results);
-                return;
-            }
-
-            // Direct file
-            if (item.file) {
-                results.push({
-                    title: item.title || parentTitle || 'Episode',
-                    file: item.file,
-                    poster: item.poster || '',
-                    subtitle: item.subtitle || '',
-                    season: item.season || '',
-                    episode: item.episode || '',
-                    translation: item.translation || item.title || parentTitle
-                });
-            }
-
-            // Nested playlist
-            if (item.playlist) {
-                walkPlaylist(item.playlist, item.title || parentTitle, results);
-            }
-        });
+        // Вкладений плейліст
+        if (item.playlist && Array.isArray(item.playlist)) {
+            item.playlist.forEach(pl => {
+                parsePlaylistItem(pl, parentTitle, results);
+            });
+            return results;
+        }
 
         return results;
     }
 
-    function extractSourcesFromText(text) {
-        console.log('=== PLAYER HTML ===');
-        console.log(text.substring(0, 3000));
-        console.log('===================');
+    function parseEpisodeItem(item, seasonNum = '1', results = []) {
+        if (!item) return results;
 
+        const episodeTitle = item.title || item.name || 'Епізод';
+        
+        // Якщо это масив - озвучки
+        if (Array.isArray(item.file)) {
+            const epNum = extractEpisodeNumber(episodeTitle);
+            
+            item.file.forEach((dubItem, dubIdx) => {
+                const dubTitle = dubItem.title || dubItem.name || `Озвучка ${dubIdx + 1}`;
+                const dubFile = dubItem.file || dubItem.url || dubItem;
+
+                if (typeof dubFile === 'string' && dubFile.match(/\.(m3u8|mp4|mkv|avi|webm)/)) {
+                    results.push({
+                        title: episodeTitle,
+                        season: seasonNum,
+                        episode: epNum,
+                        dub: dubTitle,
+                        file: dubFile,
+                        poster: item.poster || dubItem.poster || '',
+                        subtitle: item.subtitle || dubItem.subtitle || '',
+                        quality: extractQuality(dubTitle + ' ' + dubFile)
+                    });
+                }
+            });
+            return results;
+        }
+
+        // Один файл
+        if (typeof item.file === 'string' && item.file.match(/\.(m3u8|mp4|mkv|avi|webm)/)) {
+            const epNum = extractEpisodeNumber(episodeTitle);
+            results.push({
+                title: episodeTitle,
+                season: seasonNum,
+                episode: epNum,
+                dub: 'Основна озвучка',
+                file: item.file,
+                poster: item.poster || '',
+                subtitle: item.subtitle || '',
+                quality: extractQuality(episodeTitle + ' ' + item.file)
+            });
+            return results;
+        }
+
+        return results;
+    }
+
+    function extractEpisodeNumber(str) {
+        const match = str.match(/[ЕеEp\.]*(?:пізод|pisode|p\.)?[\s-]*(\d+)|(\d+)[\s]*(?:серія|ep|series)?/i);
+        return match ? (match[1] || match[2]) : '1';
+    }
+
+    function extractQuality(str) {
+        const qMatch = str.match(/(\d{3,4})p/);
+        return qMatch ? qMatch[1] + 'p' : '';
+    }
+
+    function extractSourcesFromText(text) {
+        console.log('=== EXTRACTING SOURCES ===');
         const sources = [];
 
-        // 1. Try PlayerJS config first
+        // 1. PlayerJS конфіг
         const playerConfig = extractPlayerJSConfig(text);
         if (playerConfig) {
-            console.log('FOUND PLAYERJS CONFIG:', playerConfig);
+            console.log('PLAYERJS CONFIG:', playerConfig);
 
             if (playerConfig.file) {
                 if (Array.isArray(playerConfig.file)) {
-                    const walked = walkPlaylist(playerConfig.file);
-                    console.log('WALKED PLAYLIST:', walked);
-                    sources.push(...walked);
+                    playerConfig.file.forEach((item, idx) => {
+                        parsePlaylistItem(item, '', sources);
+                    });
                 } else if (typeof playerConfig.file === 'string') {
-                    sources.push({ title: 'Default', file: playerConfig.file, poster: '' });
+                    sources.push({
+                        title: 'Епізод 1',
+                        season: '1',
+                        episode: '1',
+                        dub: 'Основна озвучка',
+                        file: playerConfig.file,
+                        poster: '',
+                        quality: extractQuality(playerConfig.file)
+                    });
                 }
             }
 
             if (playerConfig.playlist && Array.isArray(playerConfig.playlist)) {
-                const walked = walkPlaylist(playerConfig.playlist);
-                console.log('WALKED PLAYLIST:', walked);
-                sources.push(...walked);
+                playerConfig.playlist.forEach(item => {
+                    parsePlaylistItem(item, '', sources);
+                });
             }
         }
 
-        // 2. Try to find playlist array directly
+        // 2. Прямий плейліст
         const playlistMatches = text.matchAll(/["']?playlist["']?\s*:\s*(\[[\s\S]{0,15000}?\])(?=\s*[,}])/g);
         for (const match of playlistMatches) {
             try {
                 const fixed = fixJsonLikeString(match[1]);
                 const playlist = JSON.parse(fixed);
-                const walked = walkPlaylist(playlist);
-                console.log('FOUND DIRECT PLAYLIST:', walked);
-                sources.push(...walked);
+                if (Array.isArray(playlist)) {
+                    playlist.forEach(item => {
+                        parsePlaylistItem(item, '', sources);
+                    });
+                }
             } catch (e) {
                 console.warn('Direct playlist parse failed:', e.message);
             }
         }
 
-        // 3. Try to find file array directly
+        // 3. Файли масив
         const fileMatches = text.matchAll(/["']?file["']?\s*:\s*(\[[\s\S]{0,15000}?\])(?=\s*[,}])/g);
         for (const match of fileMatches) {
             try {
                 const fixed = fixJsonLikeString(match[1]);
                 const files = JSON.parse(fixed);
-                const walked = walkPlaylist(files);
-                console.log('FOUND DIRECT FILE ARRAY:', walked);
-                sources.push(...walked);
+                if (Array.isArray(files)) {
+                    files.forEach(item => {
+                        parseEpisodeItem(item, '1', sources);
+                    });
+                }
             } catch (e) {
                 console.warn('Direct file parse failed:', e.message);
             }
         }
 
-        // 4. Fallback: direct m3u8/mp4 URLs
-        const directUrls = text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4|mkv|avi)[^\s'"<>]*/g);
+        // 4. Пряме посилання на відео
+        const directUrls = text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4|mkv|avi|webm)[^\s'"<>]*/g);
         for (const match of directUrls) {
             const url = match[0];
             if (!sources.some(s => s.file === url)) {
-                sources.push({ title: 'Direct', file: url, poster: '' });
+                sources.push({
+                    title: 'Епізод',
+                    season: '1',
+                    episode: '1',
+                    dub: 'Основна озвучка',
+                    file: url,
+                    poster: '',
+                    quality: extractQuality(url)
+                });
             }
         }
 
-        // 5. Kodik specific
-        const kodikMatch = text.match(/var\s+kodik\s*=\s*({[\s\S]*?});/);
-        if (kodikMatch) {
-            try {
-                const fixed = fixJsonLikeString(kodikMatch[1]);
-                const kodik = JSON.parse(fixed);
-                if (kodik.links) {
-                    Object.entries(kodik.links).forEach(([quality, data]) => {
-                        if (data.src) {
-                            sources.push({ title: `Kodik ${quality}`, file: data.src, poster: '' });
-                        }
-                    });
-                }
-            } catch (e) {
-                console.warn('Kodik parse failed:', e.message);
-            }
-        }
-
-        console.log('FOUND SOURCES:', sources);
+        console.log('TOTAL SOURCES:', sources);
         return sources;
     }
 
@@ -377,7 +422,7 @@
         if (src.startsWith('//')) src = 'https:' + src;
         if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
 
-        console.log(`Resolving nested iframe (depth ${depth}):`, src);
+        console.log(`Resolving iframe (depth ${depth}):`, src);
 
         try {
             const nestedDoc = await fetchUA(src);
@@ -387,7 +432,7 @@
             }
             return nestedDoc;
         } catch (e) {
-            console.error('Nested iframe error:', e);
+            console.error('Iframe error:', e);
             return null;
         }
     }
@@ -416,7 +461,6 @@
             }
         }
 
-        // Try to find in scripts
         const scripts = safeQueryAll('script:not([src])', doc);
         for (const s of scripts) {
             const patterns = [
@@ -471,7 +515,6 @@
                 let playerDoc = await fetchUA(playerUrl);
                 let text = playerDoc.body?.innerHTML || '';
 
-                // Try nested iframes
                 const nestedDoc = await resolveNestedIframe(playerDoc);
                 if (nestedDoc) {
                     text = nestedDoc.body?.innerHTML || '';
@@ -479,7 +522,6 @@
 
                 let allSources = extractSourcesFromText(text);
 
-                // If no sources found, try scripts in nested doc
                 if (!allSources.length && nestedDoc) {
                     const scripts = safeQueryAll('script:not([src])', nestedDoc);
                     for (const s of scripts) {
@@ -490,7 +532,6 @@
                     }
                 }
 
-                // If still no sources, try direct scripts from original player doc
                 if (!allSources.length) {
                     const scripts = safeQueryAll('script:not([src])', playerDoc);
                     for (const s of scripts) {
@@ -501,51 +542,8 @@
                     }
                 }
 
-                console.log('ALL SOURCES:', allSources);
-
-                // Group by season and translation
-                const bySeasonDub = {};
-
-                allSources.forEach((s, idx) => {
-                    const title = s.title || `Серія ${idx + 1}`;
-                    const translation = s.translation || title;
-
-                    // Try to extract season from title
-                    const seasonMatch = title.match(/[СсCc]езон\s*(\d+)|Season\s*(\d+)|S(\d+)/);
-                    const season = seasonMatch ? (seasonMatch[1] || seasonMatch[2] || seasonMatch[3]) : '1';
-
-                    // Try to extract episode from title
-                    const epMatch = title.match(/[СсCc]ері[яіяа]\s*(\d+)|[ЕеEe]п\.?\s*(\d+)|Episode\s*(\d+)|\s(\d+)\s*серія/);
-                    const episode = epMatch ? (epMatch[1] || epMatch[2] || epMatch[3] || epMatch[4]) : String(idx + 1);
-
-                    // Quality detection
-                    const quality = title.match(/\[(\d+p)\]/)?.[1] || s.file.match(/(\d+p)/)?.[1] || '';
-
-                    if (!bySeasonDub[season]) bySeasonDub[season] = {};
-                    if (!bySeasonDub[season][translation]) bySeasonDub[season][translation] = [];
-
-                    bySeasonDub[season][translation].push({
-                        title: title,
-                        season: season,
-                        episode: episode,
-                        poster: s.poster || poster,
-                        file: s.file,
-                        dub: translation,
-                        quality: quality,
-                        subtitle: s.subtitle || ''
-                    });
-                });
-
-                // Flatten to episodes array with proper structure
-                episodes = [];
-                Object.keys(bySeasonDub).sort((a, b) => parseInt(a) - parseInt(b)).forEach(season => {
-                    Object.keys(bySeasonDub[season]).forEach(translation => {
-                        const eps = bySeasonDub[season][translation].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
-                        episodes.push(...eps);
-                    });
-                });
-
-                console.log('PARSED EPISODES:', episodes);
+                console.log('FINAL EPISODES:', allSources);
+                episodes = allSources;
 
             } catch (e) {
                 console.error('Episode parsing error:', e);
@@ -700,17 +698,17 @@
             Storage.addHistory(anime);
             DOM.modalTitle.textContent = anime.title;
 
-            // Group episodes: Season -> Dub -> Episodes
+            // Групуємо з�� сезоном та озвучкою
             const bySeasonDub = {};
             anime.episodes.forEach(ep => {
                 const season = ep.season || '1';
-                const dub = ep.dub || 'UA';
+                const dub = ep.dub || 'Основна озвучка';
                 if (!bySeasonDub[season]) bySeasonDub[season] = {};
                 if (!bySeasonDub[season][dub]) bySeasonDub[season][dub] = [];
                 bySeasonDub[season][dub].push(ep);
             });
 
-            // Sort episodes
+            // Сортуємо серії
             Object.keys(bySeasonDub).forEach(season => {
                 Object.keys(bySeasonDub[season]).forEach(dub => {
                     bySeasonDub[season][dub].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
@@ -720,11 +718,10 @@
             const seasons = Object.keys(bySeasonDub).sort((a, b) => parseInt(a) - parseInt(b));
             const firstSeason = seasons[0] || '1';
             const dubs = Object.keys(bySeasonDub[firstSeason] || {}).sort();
-            const firstDub = dubs[0] || 'UA';
+            const firstDub = dubs[0] || 'Основна озвучка';
 
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
 
-            // Build UI with dropdowns for season and dub
             let episodesHtml = '';
             if (anime.episodes.length > 0) {
                 episodesHtml = `
@@ -737,7 +734,7 @@
                                 </select>
                             </div>
                             <div class="select-wrapper">
-                                <label>🎙 Озвучка</label>
+                                <label>🎙️ Озвучка</label>
                                 <select id="dubSelect" class="styled-select">
                                     ${dubs.map(d => `<option value="${d}" ${d === firstDub ? 'selected' : ''}>${d}</option>`).join('')}
                                 </select>
@@ -761,7 +758,7 @@
                         <div style="margin:0.5rem 0">
                             ${anime.genres.map(g => `<span class="tag">${g}</span>`).join('') || '<span class="tag">—</span>'}
                         </div>
-                        <p class="synopsis">${(anime.synopsis || 'Опис відсутній.').slice(0, 500)}</p>
+                        <p class="synopsis">${(anime.synopsis || 'Опис відсу��ній.').slice(0, 500)}</p>
                         <button class="btn-outline" id="toggleBookmarkBtn">
                             <i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}
                         </button>
@@ -772,7 +769,6 @@
                     ${episodesHtml}
                 </div>`;
 
-            // Render episodes for selected season and dub
             function renderEpisodes(season, dub) {
                 const container = document.getElementById('episodesContainer');
                 const eps = bySeasonDub[season]?.[dub] || [];
@@ -814,7 +810,7 @@
                         `<option value="${d}">${d}</option>`
                     ).join('');
                     
-                    renderEpisodes(selectedSeason, availableDubs[0] || 'UA');
+                    renderEpisodes(selectedSeason, availableDubs[0] || 'Основна озвучка');
                 });
 
                 dubSelect.addEventListener('change', function() {
