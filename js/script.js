@@ -103,7 +103,7 @@
         return new DOMParser().parseFromString(html, 'text/html');
     }
 
-    // Парсинг каталогу
+    // ================== КАТАЛОГ ==================
     function parseCards(doc) {
         const cards = doc.querySelectorAll('.poster');
         if (cards.length) {
@@ -176,7 +176,7 @@
         }
     }
 
-    // ================== ПЛЕЄРИ ==================
+    // ================== НОВИЙ УНІВЕРСАЛЬНИЙ ПАРСЕР ПЛЕЄРІВ ==================
     function extractPlayerIframes(doc) {
         const iframes = [];
         doc.querySelectorAll('iframe[src]').forEach(el => {
@@ -184,7 +184,7 @@
             if (!src) return;
             if (src.startsWith('//')) src = 'https:' + src;
             if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
-            iframes.push({ url: src, type: detectPlayerType(src) });
+            iframes.push({ url: src });
         });
         const scripts = doc.querySelectorAll('script:not([src])');
         scripts.forEach(s => {
@@ -193,71 +193,153 @@
             if (match) {
                 let url = match[1];
                 if (url.startsWith('//')) url = 'https:' + url;
-                iframes.push({ url, type: detectPlayerType(url) });
+                iframes.push({ url });
             }
         });
         console.log('[iframes] Знайдено:', iframes);
         return iframes;
     }
 
-    function detectPlayerType(url) {
-        if (/kodik\.(info|biz|cc|su)/i.test(url)) return 'kodik';
-        if (/alloha\.(tv|su|cc)/i.test(url)) return 'alloha';
-        return 'unknown';
-    }
+    /**
+     * Парсить HTML iframe плеєра та видобуває список епізодів.
+     * Працює з будь-якими плеєрами (Kodik, Alloha, custom), не потребує зовнішнього API.
+     */
+    async function parsePlayerEpisodes(iframeUrl) {
+        console.log('[Player] Парсинг iframe:', iframeUrl);
+        try {
+            const response = await fetch(getProxyUrl(iframeUrl));
+            const html = await response.text();
 
-    function extractKodikToken(html) {
-        const match = html.match(/token\s*[:=]\s*['"]([^'"]+)['"]/);
-        return match ? match[1] : null;
-    }
+            // 1) Спробуємо видобути playlist / episodes / translations з inline JS
+            const episodes = extractEpisodesFromHtml(html, iframeUrl);
+            if (episodes.length > 0) {
+                console.log('[Player] Знайдено епізодів через inline JS:', episodes.length);
+                return episodes;
+            }
 
-    async function fetchKodikEpisodes(iframeUrl) {
-        console.log('[Kodik] Отримання HTML плеєра...');
-        const response = await fetch(getProxyUrl(iframeUrl));
-        const html = await response.text();
-        const token = extractKodikToken(html);
-        console.log('[Kodik] Token:', token);
-        if (!token) return [];
+            // 2) Якщо не знайшли – шукаємо прямі посилання на m3u8/mp4
+            console.log('[Player] Playlist не знайдено, fallback на прямі m3u8/mp4');
+            const sources = extractSourcesFromText(html);
+            if (sources.length > 0) {
+                return sources.map((s, i) => ({
+                    title: s.label || `Потік ${i + 1}`,
+                    season: '1',
+                    episode: String(i + 1),
+                    file: s.file,
+                    dub: 'Невідома',
+                }));
+            }
 
-        const idMatch = iframeUrl.match(/\/(?:serial|seria)\/(\d+)/);
-        if (!idMatch) {
-            console.warn('[Kodik] Не знайдено ID серіалу');
+            console.warn('[Player] Нічого не знайдено в плеєрі');
+            return [];
+        } catch (e) {
+            console.error('[Player] Помилка парсингу:', e);
             return [];
         }
-        const serialId = idMatch[1];
-        console.log('[Kodik] Серіал ID:', serialId);
-        const apiUrl = `https://kodik.info/api/series/${serialId}?token=${token}`;
-        console.log('[Kodik] Запит API:', apiUrl);
-        const apiResp = await fetch(getProxyUrl(apiUrl));
-        console.log('[Kodik] Статус відповіді API:', apiResp.status);
-        if (!apiResp.ok) return [];
-        const data = await apiResp.json();
-        console.log('[Kodik] Отримано дані:', data);
-        return parseKodikApiResponse(data);
     }
 
-    function parseKodikApiResponse(data) {
+    function extractEpisodesFromHtml(html, iframeUrl) {
+        const scripts = html.match(/<script[^>]*>([\s\S]*?)<\/script>/gi) || [];
+        const allText = scripts.map(s => s.replace(/<[^>]+>/g, '')).join(';\n');
+        
         const episodes = [];
-        const seasons = data.results?.seasons || data.seasons || {};
-        for (const [season, dubs] of Object.entries(seasons)) {
-            for (const [dub, files] of Object.entries(dubs)) {
-                const episodesList = Array.isArray(files) ? files : Object.values(files);
-                episodesList.forEach(file => {
-                    episodes.push({
-                        title: `${dub} / Сезон ${season} / Серія ${file.episode || file.id}`,
-                        season: season,
-                        episode: String(file.episode || file.id),
-                        file: file.url || file.src || file.file,
-                        dub: dub,
-                    });
+
+        // Спільна функція для пошуку масивів/об'єктів у тексті
+        const findAssignments = (varNames) => {
+            const results = [];
+            for (const name of varNames) {
+                const re = new RegExp(`(?:var|let|const)?\\s*${name}\\s*=\\s*(\\[[\\s\\S]*?\\])\\s*;`, 'i');
+                const match = allText.match(re);
+                if (match) {
+                    try {
+                        const parsed = JSON.parse(match[1]
+                            .replace(/'/g, '"')               // одинарні лапки -> подвійні
+                            .replace(/(\w+):/g, '"$1":')      // ключі без лапок -> з лапками
+                        );
+                        if (Array.isArray(parsed)) results.push(...parsed);
+                    } catch (e) {
+                        // Якщо не вдалося розпарсити як масив, пробуємо витягти окремі об'єкти
+                        const objectMatches = match[1].match(/\{[^}]+\}/g);
+                        if (objectMatches) {
+                            objectMatches.forEach(objStr => {
+                                try {
+                                    const fixed = objStr
+                                        .replace(/'/g, '"')
+                                        .replace(/(\w+):/g, '"$1":');
+                                    results.push(JSON.parse(fixed));
+                                } catch {}
+                            });
+                        }
+                    }
+                }
+            }
+            return results;
+        };
+
+        // Шукаємо playlist, episodes, sources, translations
+        let items = findAssignments(['playlist', 'episodes', 'sources', 'data', 'playerData', 'pl']);
+        
+        // Також шукаємо translations окремо – це може бути об'єкт, де ключі – озвучки
+        let translations = {};
+        const transMatch = allText.match(/(?:var|let|const)?\s*translations\s*=\s*(\{[^;]+\})\s*;/i);
+        if (transMatch) {
+            try {
+                translations = JSON.parse(transMatch[1]
+                    .replace(/'/g, '"')
+                    .replace(/(\w+):/g, '"$1":')
+                );
+            } catch {}
+        }
+
+        // Нормалізуємо знайдені елементи
+        items.forEach(item => {
+            const ep = normalizeEpisode(item, translations, iframeUrl);
+            if (ep) episodes.push(ep);
+        });
+
+        // Якщо є translations, але playlist містить лише загальні дані, розмножуємо за озвучками
+        if (Object.keys(translations).length && episodes.length && episodes.every(e => !e.dub || e.dub === 'Невідома')) {
+            const baseEps = [...episodes];
+            episodes.length = 0;
+            for (const [dubId, dubData] of Object.entries(translations)) {
+                const dubName = dubData.title || dubData.name || dubId;
+                baseEps.forEach(ep => {
+                    episodes.push({ ...ep, dub: dubName });
                 });
             }
         }
-        console.log('[Kodik] Знайдено епізодів:', episodes.length);
+
         return episodes;
     }
 
-    // Fallback: пошук m3u8/mp4 у тексті
+    function normalizeEpisode(raw, translations, iframeUrl) {
+        if (!raw || typeof raw !== 'object') return null;
+
+        // Джерело відео
+        const file = raw.file || raw.src || raw.url || raw.hls || raw.video || '';
+        if (!file) return null;
+
+        const title = raw.title || raw.name || raw.episode_name || '';
+
+        const season = String(raw.season || raw.season_number || raw.s || '1');
+        const episode = String(raw.episode || raw.episode_number || raw.e || raw.id || '1');
+
+        // Озвучка: може бути в translation, translator, voice, dub, або ключ translations
+        let dub = raw.translation || raw.translator || raw.voice || raw.dub || raw.team || '';
+        if (!dub && raw.translation_id && translations[raw.translation_id]) {
+            dub = translations[raw.translation_id].title || translations[raw.translation_id].name || dub;
+        }
+        if (!dub) dub = 'Невідома';
+
+        return {
+            title: title || `${dub} / Сезон ${season} / Серія ${episode}`,
+            season,
+            episode,
+            file,
+            dub,
+        };
+    }
+
     function extractSourcesFromText(text) {
         const sources = [];
         const urlMatches = text.matchAll(/(https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*)/g);
@@ -271,6 +353,7 @@
         return sources;
     }
 
+    // ================== ЗАВАНТАЖЕННЯ ДЕТАЛЕЙ АНІМЕ ==================
     async function loadAnimeDetails(animeUrl) {
         console.log('[loadAnimeDetails]', animeUrl);
         const doc = await fetchUA(animeUrl);
@@ -304,40 +387,13 @@
         const iframes = extractPlayerIframes(doc);
         let allEpisodes = [];
 
-        // Спершу намагаємось отримати через Kodik API
+        // Парсимо кожен iframe новим універсальним парсером
         for (const iframe of iframes) {
-            if (iframe.type === 'kodik') {
-                try {
-                    const eps = await fetchKodikEpisodes(iframe.url);
-                    allEpisodes = allEpisodes.concat(eps);
-                } catch (e) {
-                    console.warn('[Kodik] Помилка:', e);
-                }
-            }
+            const eps = await parsePlayerEpisodes(iframe.url);
+            allEpisodes = allEpisodes.concat(eps);
         }
 
-        // Якщо Kodik нічого не дав, пробуємо fallback
-        if (allEpisodes.length === 0) {
-            console.log('[Fallback] Kodik не дав результатів, шукаємо m3u8 прямо');
-            for (const iframe of iframes) {
-                try {
-                    const playerHtml = await fetchUA(iframe.url);
-                    const text = playerHtml.body?.innerHTML || '';
-                    const sources = extractSourcesFromText(text);
-                    sources.forEach((s, i) => {
-                        allEpisodes.push({
-                            title: s.label || `Потік ${i+1}`,
-                            season: '1',
-                            episode: String(i+1),
-                            file: s.file,
-                            dub: 'Невідома',
-                        });
-                    });
-                } catch (e) {}
-            }
-        }
-
-        // Групуємо
+        // Групуємо за сезонами та озвучками
         const seasons = {};
         allEpisodes.forEach(ep => {
             const s = ep.season || '1';
@@ -362,7 +418,7 @@
         };
     }
 
-    // ================== ПЛЕЄР ==================
+    // ================== ВІДЕОПЛЕЄР ==================
     let hlsInstances = new Map();
 
     function destroyHlsForVideo(videoEl) {
@@ -586,7 +642,6 @@
                 const epText = document.getElementById('episodeSelect').selectedOptions[0]?.dataset.episode || '';
                 const season = document.getElementById('seasonSelect').value;
                 const dub = document.getElementById('dubSelect').value;
-                const title = `${anime.title} С${season} / ${dub} / Еп.${epText}`;
                 if (file) loadVideo(file, detailVideoEl);
                 else showToast('❌ Немає файлу');
             });
