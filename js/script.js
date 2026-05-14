@@ -231,83 +231,10 @@
         return null;
     }
 
-    function parsePlaylistItem(item, parentTitle = '', results = []) {
-        if (!item) return results;
-
-        // Папка = сезон
-        if (item.folder && Array.isArray(item.folder)) {
-            const seasonTitle = item.title || item.name || parentTitle;
-            const seasonNum = seasonTitle.match(/\d+/)?.[0] || '1';
-            
-            item.folder.forEach(ep => {
-                parseEpisodeItem(ep, seasonNum, results);
-            });
-            return results;
-        }
-
-        // Прямий файл
-        if (item.file) {
-            parseEpisodeItem(item, parentTitle, results);
-            return results;
-        }
-
-        // Вкладений плейліст
-        if (item.playlist && Array.isArray(item.playlist)) {
-            item.playlist.forEach(pl => {
-                parsePlaylistItem(pl, parentTitle, results);
-            });
-            return results;
-        }
-
-        return results;
-    }
-
-    function parseEpisodeItem(item, seasonNum = '1', results = []) {
-        if (!item) return results;
-
-        const episodeTitle = item.title || item.name || 'Епізод';
-        
-        // Якщо это масив - озвучки
-        if (Array.isArray(item.file)) {
-            const epNum = extractEpisodeNumber(episodeTitle);
-            
-            item.file.forEach((dubItem, dubIdx) => {
-                const dubTitle = dubItem.title || dubItem.name || `Озвучка ${dubIdx + 1}`;
-                const dubFile = dubItem.file || dubItem.url || dubItem;
-
-                if (typeof dubFile === 'string' && dubFile.match(/\.(m3u8|mp4|mkv|avi|webm)/)) {
-                    results.push({
-                        title: episodeTitle,
-                        season: seasonNum,
-                        episode: epNum,
-                        dub: dubTitle,
-                        file: dubFile,
-                        poster: item.poster || dubItem.poster || '',
-                        subtitle: item.subtitle || dubItem.subtitle || '',
-                        quality: extractQuality(dubTitle + ' ' + dubFile)
-                    });
-                }
-            });
-            return results;
-        }
-
-        // Один файл
-        if (typeof item.file === 'string' && item.file.match(/\.(m3u8|mp4|mkv|avi|webm)/)) {
-            const epNum = extractEpisodeNumber(episodeTitle);
-            results.push({
-                title: episodeTitle,
-                season: seasonNum,
-                episode: epNum,
-                dub: 'Основна озвучка',
-                file: item.file,
-                poster: item.poster || '',
-                subtitle: item.subtitle || '',
-                quality: extractQuality(episodeTitle + ' ' + item.file)
-            });
-            return results;
-        }
-
-        return results;
+    // Допоміжні функції для нового парсера
+    function extractSeasonNumber(title) {
+        const match = title.match(/сезон\s*(\d+)|season\s*(\d+)/i);
+        return match ? (match[1] || match[2]) : '1';
     }
 
     function extractEpisodeNumber(str) {
@@ -320,6 +247,106 @@
         return qMatch ? qMatch[1] + 'p' : '';
     }
 
+    function parseEpisodeItem(ep, seasonNum = '1', results = []) {
+        if (!ep) return results;
+
+        const episodeTitle = ep.title || ep.name || 'Епізод';
+        const epNum = extractEpisodeNumber(episodeTitle);
+
+        // Якщо file – масив (різні озвучки)
+        if (Array.isArray(ep.file)) {
+            ep.file.forEach((dubItem, idx) => {
+                const dubTitle = dubItem.title || dubItem.name || `Озвучка ${idx + 1}`;
+                const dubFile = dubItem.file || dubItem.url || dubItem;
+                if (typeof dubFile === 'string' && /\.(m3u8|mp4|mkv|avi|webm)/i.test(dubFile)) {
+                    results.push({
+                        title: episodeTitle,
+                        season: seasonNum,
+                        episode: epNum,
+                        dub: dubTitle,
+                        file: dubFile,
+                        poster: ep.poster || dubItem.poster || '',
+                        subtitle: ep.subtitle || dubItem.subtitle || '',
+                        id: ep.id || '',
+                        quality: extractQuality(dubTitle + ' ' + dubFile)
+                    });
+                }
+            });
+            return results;
+        }
+
+        // Один файл
+        if (typeof ep.file === 'string' && /\.(m3u8|mp4|mkv|avi|webm)/i.test(ep.file)) {
+            results.push({
+                title: episodeTitle,
+                season: seasonNum,
+                episode: epNum,
+                dub: 'Основна озвучка',
+                file: ep.file,
+                poster: ep.poster || '',
+                subtitle: ep.subtitle || '',
+                id: ep.id || '',
+                quality: extractQuality(episodeTitle + ' ' + ep.file)
+            });
+        }
+
+        return results;
+    }
+
+    function parsePlaylistItem(item, parentTitle = '', results = []) {
+        if (!item) return results;
+
+        // Якщо є масив folder – це або сезони, або безпосередньо серії
+        if (item.folder && Array.isArray(item.folder)) {
+            // Перевіряємо перший елемент: якщо він теж має folder → це сезон
+            const firstChild = item.folder[0];
+            if (firstChild && firstChild.folder) {
+                // Це список сезонів (Season)
+                item.folder.forEach(season => {
+                    const seasonTitle = season.title || season.name || parentTitle;
+                    const seasonNum = extractSeasonNumber(seasonTitle);
+                    // Обробляємо серії всередині сезону
+                    if (season.folder && Array.isArray(season.folder)) {
+                        season.folder.forEach(ep => {
+                            parseEpisodeItem(ep, seasonNum, results);
+                        });
+                    }
+                });
+            } else {
+                // Звичайний плоский список серій (без підрівня сезонів)
+                const seasonNum = extractSeasonNumber(item.title || parentTitle);
+                item.folder.forEach(ep => {
+                    parseEpisodeItem(ep, seasonNum, results);
+                });
+            }
+            return results;
+        }
+
+        // Якщо це вкладений плейлист (playlist)
+        if (item.playlist && Array.isArray(item.playlist)) {
+            item.playlist.forEach(pl => parsePlaylistItem(pl, parentTitle, results));
+            return results;
+        }
+
+        // Якщо це безпосередньо епізод (є file)
+        if (item.file) {
+            parseEpisodeItem(item, parentTitle, results);
+        }
+
+        return results;
+    }
+
+    // Витягування прямого посилання для moonanime.art
+    function extractFileFromMoonAnime(html) {
+        const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+        let match;
+        while ((match = scriptRegex.exec(html)) !== null) {
+            const fileMatch = match[1].match(/(?:file|src)\s*:\s*["']([^"']+\.m3u8)["']/);
+            if (fileMatch) return fileMatch[1];
+        }
+        return null;
+    }
+
     function extractSourcesFromText(text) {
         console.log('=== EXTRACTING SOURCES ===');
         const sources = [];
@@ -328,7 +355,6 @@
         const playerConfig = extractPlayerJSConfig(text);
         if (playerConfig) {
             console.log('PLAYERJS CONFIG:', playerConfig);
-
             if (playerConfig.file) {
                 if (Array.isArray(playerConfig.file)) {
                     playerConfig.file.forEach((item, idx) => {
@@ -342,6 +368,7 @@
                         dub: 'Основна озвучка',
                         file: playerConfig.file,
                         poster: '',
+                        id: '',
                         quality: extractQuality(playerConfig.file)
                     });
                 }
@@ -398,6 +425,7 @@
                     dub: 'Основна озвучка',
                     file: url,
                     poster: '',
+                    id: '',
                     quality: extractQuality(url)
                 });
             }
@@ -520,31 +548,51 @@
                     text = nestedDoc.body?.innerHTML || '';
                 }
 
-                let allSources = extractSourcesFromText(text);
-
-                if (!allSources.length && nestedDoc) {
-                    const scripts = safeQueryAll('script:not([src])', nestedDoc);
-                    for (const s of scripts) {
-                        const scriptSources = extractSourcesFromText(s.textContent);
-                        if (scriptSources.length) {
-                            allSources.push(...scriptSources);
-                        }
+                // Перевірка moonanime.art
+                const isMoon = text.includes('moonanime.art') || (nestedDoc?.location?.href?.includes('moonanime.art'));
+                if (isMoon) {
+                    const moonFile = extractFileFromMoonAnime(text);
+                    if (moonFile) {
+                        episodes = [{
+                            title: 'Серія 1',
+                            season: '1',
+                            episode: '1',
+                            dub: 'Основна озвучка',
+                            file: moonFile,
+                            poster: '',
+                            id: '',
+                            quality: extractQuality(moonFile)
+                        }];
                     }
                 }
 
-                if (!allSources.length) {
-                    const scripts = safeQueryAll('script:not([src])', playerDoc);
-                    for (const s of scripts) {
-                        const scriptSources = extractSourcesFromText(s.textContent);
-                        if (scriptSources.length) {
-                            allSources.push(...scriptSources);
+                // Якщо moon не знайдено, використовуємо загальний парсинг
+                if (episodes.length === 0) {
+                    let allSources = extractSourcesFromText(text);
+
+                    if (!allSources.length && nestedDoc) {
+                        const scripts = safeQueryAll('script:not([src])', nestedDoc);
+                        for (const s of scripts) {
+                            const scriptSources = extractSourcesFromText(s.textContent);
+                            if (scriptSources.length) {
+                                allSources.push(...scriptSources);
+                            }
                         }
                     }
+
+                    if (!allSources.length) {
+                        const scripts = safeQueryAll('script:not([src])', playerDoc);
+                        for (const s of scripts) {
+                            const scriptSources = extractSourcesFromText(s.textContent);
+                            if (scriptSources.length) {
+                                allSources.push(...scriptSources);
+                            }
+                        }
+                    }
+
+                    console.log('FINAL EPISODES:', allSources);
+                    episodes = allSources;
                 }
-
-                console.log('FINAL EPISODES:', allSources);
-                episodes = allSources;
-
             } catch (e) {
                 console.error('Episode parsing error:', e);
             }
@@ -698,7 +746,7 @@
             Storage.addHistory(anime);
             DOM.modalTitle.textContent = anime.title;
 
-            // Групуємо з�� сезоном та озвучкою
+            // Групуємо за сезоном та озвучкою
             const bySeasonDub = {};
             anime.episodes.forEach(ep => {
                 const season = ep.season || '1';
@@ -758,7 +806,7 @@
                         <div style="margin:0.5rem 0">
                             ${anime.genres.map(g => `<span class="tag">${g}</span>`).join('') || '<span class="tag">—</span>'}
                         </div>
-                        <p class="synopsis">${(anime.synopsis || 'Опис відсу��ній.').slice(0, 500)}</p>
+                        <p class="synopsis">${(anime.synopsis || 'Опис відсутній.').slice(0, 500)}</p>
                         <button class="btn-outline" id="toggleBookmarkBtn">
                             <i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}
                         </button>
