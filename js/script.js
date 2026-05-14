@@ -183,13 +183,15 @@
         }
     }
 
-    // ========== Парсер джерел ==========
+    // ================== 🔥 НОВИЙ УНІВЕРСАЛЬНИЙ ПАРСЕР ДЖЕРЕЛ ==================
     function extractSourcesFromText(text) {
         const sources = [];
-        const jsonMatch = text.match(/['"]file['"]\s*:\s*(\[[\s\S]{0,20000}?\])/);
-        if (jsonMatch) {
+
+        // 1. JSON-масив з ключем file (найпоширеніший формат Kodik/Alloha)
+        const jsonMatches = text.matchAll(/['"]file['"]\s*:\s*(\[[\s\S]{0,20000}?\])/g);
+        for (const match of jsonMatches) {
             try {
-                const arr = JSON.parse(jsonMatch[1]);
+                const arr = JSON.parse(match[1]);
                 const walk = (items, dub = '') => {
                     items.forEach(item => {
                         if (item.folder) {
@@ -204,27 +206,61 @@
                     });
                 };
                 walk(arr);
-            } catch (e) { console.warn('JSON parse failed', e); }
+            } catch (e) { /* ігноруємо биті JSON */ }
         }
-        const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*/g)];
-        urlMatches.forEach(m => {
+
+        // 2. Прямі URL m3u8/mp4 у всьому тексті
+        const urlMatches = text.matchAll(/(https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*)/g);
+        for (const m of urlMatches) {
             const url = m[0];
-            if (!sources.some(s => s.file === url)) sources.push({ label: 'Потік', file: url });
-        });
-        const singleMatches = text.match(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/g);
-        if (singleMatches) {
-            singleMatches.forEach(s => {
-                const innerMatch = s.match(/['"]([^'"]+\.m3u8[^'"]*)['"]/);
-                if (innerMatch && !sources.some(x => x.file === innerMatch[1])) {
-                    sources.push({ label: 'Озвучка', file: innerMatch[1] });
-                }
-            });
+            if (!sources.some(s => s.file === url)) {
+                sources.push({ label: 'Прямий потік', file: url });
+            }
         }
+
+        // 3. Одиночні ключі file (без масиву)
+        const singleFileMatches = text.matchAll(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/g);
+        for (const m of singleFileMatches) {
+            const url = m[1];
+            if (!sources.some(s => s.file === url)) {
+                sources.push({ label: 'Озвучка', file: url });
+            }
+        }
+
+        // 4. Ключі source / playlist (деякі плеєри)
+        for (const key of ['source', 'playlist', 'src']) {
+            const re = new RegExp(`['"]${key}['"]\\s*:\\s*['"]([^'"]+\\.m3u8[^'"]*)['"]`, 'g');
+            const matches = text.matchAll(re);
+            for (const m of matches) {
+                const url = m[1];
+                if (!sources.some(s => s.file === url)) {
+                    sources.push({ label: key, file: url });
+                }
+            }
+        }
+
+        // 5. Якщо нічого не знайдено, спробуємо витягти все, що схоже на URL потоку
+        if (sources.length === 0) {
+            const anyStream = text.matchAll(/(https?:\/\/[^"'\s]+\.(m3u8|mp4|ts)[^"'\s]*)/g);
+            for (const m of anyStream) {
+                const url = m[0];
+                if (!sources.some(s => s.file === url)) {
+                    sources.push({ label: 'Потік', file: url });
+                }
+            }
+        }
+
         return sources;
     }
 
+    // ================== ЗБІР УСІХ IFRAME ЗІ СТОРІНКИ ==================
     function extractPlayerIframeUrls(doc) {
-        const selectors = ['.video-responsive iframe', '.player-responsive iframe', '#player iframe', 'iframe[src]'];
+        const selectors = [
+            '.video-responsive iframe',
+            '.player-responsive iframe',
+            '#player iframe',
+            'iframe[src]'
+        ];
         const urls = [];
         for (const sel of selectors) {
             safeQueryAll(sel, doc).forEach(el => {
@@ -235,13 +271,27 @@
                 urls.push(src);
             });
         }
+        // Шукаємо в скриптах
         const scripts = safeQueryAll('script:not([src])', doc);
         for (const s of scripts) {
-            const match = s.textContent.match(/(?:playerUrl|iframeUrl)\s*=\s*['"]([^'"]+)['"]/);
+            const text = s.textContent;
+            // playerUrl, iframeUrl
+            const match = text.match(/(?:playerUrl|iframeUrl|src)\s*[:=]\s*['"]([^'"]+)['"]/g);
             if (match) {
-                let url = match[1];
-                if (url.startsWith('//')) url = 'https:' + url;
-                urls.push(url);
+                match.forEach(m => {
+                    const url = m.replace(/.*['"]([^'"]+)['"].*/, '$1');
+                    if (url.startsWith('//')) urls.push('https:' + url);
+                    else if (url.startsWith('http')) urls.push(url);
+                });
+            }
+            // Kodik/Alloha прямі посилання
+            const kodikMatch = text.match(/(?:https?:)?\/\/(?:kodik|alloha|tortuga)[^"'\s]+/g);
+            if (kodikMatch) {
+                kodikMatch.forEach(u => {
+                    let url = u;
+                    if (!url.startsWith('http')) url = 'https:' + url;
+                    urls.push(url);
+                });
             }
         }
         return [...new Set(urls)];
@@ -282,7 +332,7 @@
                 allSources.push(...sources);
             } catch (e) {}
         }
-        // fallback на вкладений iframe
+        // Якщо нічого немає, пробуємо вкладені iframe
         if (allSources.length === 0 && playerUrls.length > 0) {
             try {
                 const firstHtml = await fetchUA(playerUrls[0]);
@@ -293,8 +343,7 @@
                     if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
                     const nestedHtml = await fetchUA(nestedUrl);
                     const nestedText = nestedHtml.body?.innerHTML || '';
-                    const nestedSources = extractSourcesFromText(nestedText);
-                    allSources.push(...nestedSources);
+                    allSources.push(...extractSourcesFromText(nestedText));
                 }
             } catch (e) {}
         }
@@ -315,7 +364,7 @@
             };
         }).filter(ep => ep.file);
 
-        // Збираємо структуру для селекторів
+        // Групування для селекторів
         const seasons = {};
         episodes.forEach(ep => {
             const s = ep.season || '1';
@@ -340,8 +389,8 @@
         };
     }
 
-    // ========== Плеєр ==========
-    let hlsInstances = new Map(); // зберігаємо для різних відеоелементів
+    // ================== ПЛЕЄР ==================
+    let hlsInstances = new Map();
 
     function destroyHlsForVideo(videoEl) {
         if (hlsInstances.has(videoEl)) {
@@ -381,7 +430,7 @@
         }
     }
 
-    // ========== UI ==========
+    // ================== UI ==================
     let currentTab = 'main', currentPage = 1, totalPages = 1, currentList = [], currentSearchQuery = '', currentGenreSlug = null;
 
     function renderCards(list) {
@@ -458,8 +507,8 @@
         if (currentTab === 'bookmarks') loadContent(); else renderCards(currentList);
     }
 
-    // ========== Оновлене модальне вікно ==========
-    let currentDetailAnime = null; // зберігаємо дані для селекторів
+    // ================== МОДАЛЬНЕ ВІКНО ==================
+    let currentDetailAnime = null;
     let detailVideoEl = null;
 
     function closeDetailModal() {
@@ -559,10 +608,8 @@
                 else showToast('❌ Немає файлу');
             });
 
-            // Кнопка закладок
             document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
                 toggleBookmark(anime);
-                // Оновлюємо стан кнопки
                 const isNowBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
                 const btn = document.getElementById('toggleBookmarkBtn');
                 if (btn) btn.innerHTML = `<i class="fas fa-star"></i> ${isNowBookmarked ? 'В обраному' : 'Додати в обране'}`;
@@ -584,18 +631,6 @@
         document.body.style.overflow = '';
     });
 
-    // Модальне вікно плеєра (старе) можна залишити, якщо потрібно
-    function openPlayerModal(title, file) {
-        DOM.playerModalTitle.textContent = title;
-        DOM.playerModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        loadVideo(file, DOM.mainVideoPlayer);
-    }
-
-    // Ініціалізація подій для старого плеєра (якщо використовується)
-    window.playEpisode = openPlayerModal; // для сумісності
-
-    // Профіль
     function openProfileModal() {
         const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
         document.getElementById('statBookmarks').textContent = bookmarks.length;
