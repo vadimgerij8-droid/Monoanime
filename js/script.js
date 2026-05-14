@@ -50,8 +50,30 @@
         closePlayerBtn: document.getElementById('closePlayerBtn'),
         profileModal: document.getElementById('profileModal'),
         closeProfileBtn: document.getElementById('closeProfileBtn'),
-        profileBody: document.getElementById('profileBody')
+        profileBody: document.getElementById('profileBody'),
+        voiceSelector: document.getElementById('voiceSelector'),
+        playerLoading: document.getElementById('playerLoading')
     };
+
+    let hls = null;
+
+    // Кастомний завантажувач для HLS.js, що пропускає всі запити через проксі
+    class ProxyLoader {
+        constructor(config) {
+            this.config = config;
+        }
+        load(context, config, callbacks) {
+            let url = context.url;
+            if (url && !url.startsWith(PROXY_URL) && !url.startsWith('blob:')) {
+                context.url = getProxyUrl(url);
+            }
+            // Використовуємо стандартний fetch‑завантажувач
+            const defaultLoader = new Hls.DefaultConfig.loader(config);
+            defaultLoader.load(context, config, callbacks);
+        }
+        destroy() {}
+        abort() {}
+    }
 
     function showToast(msg) {
         DOM.toast.textContent = msg;
@@ -253,79 +275,141 @@
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
         const initialPlayerUrl = await extractPlayerIframeUrl(doc);
-        const playerIframeUrl = initialPlayerUrl ? await resolvePlayerIframe(initialPlayerUrl) : null;
+        const playerPageUrl = initialPlayerUrl ? await resolvePlayerIframe(initialPlayerUrl) : null;
+
         return {
             mal_id: animeUrl.hashCode(), title,
             images: { jpg: { large_image_url: poster, image_url: poster } },
-            genres, year, synopsis, score: null, playerIframeUrl, url: animeUrl, from: 'animeua'
+            genres, year, synopsis, score: null,
+            playerPageUrl,   // фінальна сторінка плеєра
+            url: animeUrl, from: 'animeua'
         };
     }
 
-    function getPlayerContainer() {
-        let container = document.getElementById('playerIframeContainer');
-        if (!container) {
-            const videoEl = document.getElementById('mainVideoPlayer');
-            if (videoEl) {
-                container = document.createElement('div');
-                container.id = 'playerIframeContainer';
-                container.style.position = 'relative';
-                container.style.width = '100%';
-                container.style.paddingBottom = '56.25%';
-                container.style.background = '#000';
-                videoEl.parentNode.replaceChild(container, videoEl);
-            } else {
-                const modalContent = DOM.playerModal.querySelector('.modal-content') || DOM.playerModal;
-                container = document.createElement('div');
-                container.id = 'playerIframeContainer';
-                container.style.position = 'relative';
-                container.style.width = '100%';
-                container.style.paddingBottom = '56.25%';
-                container.style.background = '#000';
-                modalContent.appendChild(container);
-            }
+    // Пошук усіх .m3u8‑посилань на сторінці плеєра
+    async function extractVoices(playerPageUrl) {
+        try {
+            const doc = await fetchUA(playerPageUrl);
+            const html = doc.documentElement.outerHTML;
+            const m3u8Matches = html.match(/https?:\/\/[^"'\s]+\.m3u8[^"'\s]*/gi) || [];
+            const uniqueUrls = [...new Set(m3u8Matches)].filter(u => u.includes('.m3u8'));
+            // Можна спробувати витягти назви (з data‑атрибутів або тексту поруч), але спрощено:
+            return uniqueUrls.map((url, i) => ({
+                label: `Озвучка ${i+1}`,
+                url: url
+            }));
+        } catch (e) {
+            console.error('extractVoices error', e);
+            return [];
         }
-        return container;
     }
 
-    function playEpisode(title, iframeUrl) {
-        if (!iframeUrl) {
-            showToast('❌ Немає URL плеєра');
+    function destroyHls() {
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+        const video = document.getElementById('mainVideoPlayer');
+        if (video) {
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+        }
+    }
+
+    function initPlayerWithVoice(voiceUrl) {
+        const video = document.getElementById('mainVideoPlayer');
+        destroyHls();
+
+        if (!voiceUrl) {
+            showToast('❌ Немає потоку');
             return;
         }
+
+        if (Hls.isSupported()) {
+            hls = new Hls({
+                loader: ProxyLoader   // всі запити через проксі
+            });
+            hls.loadSource(voiceUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play().catch(() => {});
+            });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    showToast('❌ Помилка відтворення');
+                    destroyHls();
+                }
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = voiceUrl;
+            video.play().catch(() => {});
+        } else {
+            showToast('❌ HLS не підтримується');
+        }
+    }
+
+    function buildVoiceSelector(voices, currentIndex, onSelect) {
+        DOM.voiceSelector.innerHTML = '';
+        DOM.voiceSelector.style.display = voices.length > 1 ? 'flex' : 'none';
+        voices.forEach((voice, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'voice-btn' + (idx === currentIndex ? ' active' : '');
+            btn.textContent = voice.label;
+            btn.addEventListener('click', () => {
+                // Оновити активний стан
+                DOM.voiceSelector.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                onSelect(idx);
+            });
+            DOM.voiceSelector.appendChild(btn);
+        });
+    }
+
+    async function playHlsEpisode(title, playerPageUrl) {
         DOM.playerModalTitle.textContent = title;
         DOM.playerModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        DOM.voiceSelector.style.display = 'none';
+        DOM.playerLoading.style.display = 'block';
+        const video = document.getElementById('mainVideoPlayer');
+        video.style.display = 'none';
 
-        const container = getPlayerContainer();
-        container.innerHTML = '<div class="loader" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;"><i class="fas fa-spinner fa-pulse"></i> Завантаження плеєра...</div>';
+        try {
+            const voices = await extractVoices(playerPageUrl);
+            if (!voices.length) {
+                showToast('❌ Не знайдено m3u8 потоків');
+                DOM.playerLoading.style.display = 'none';
+                video.style.display = 'block';
+                return;
+            }
 
-        const iframe = document.createElement('iframe');
-        iframe.src = iframeUrl;
-        iframe.frameBorder = '0';
-        iframe.allowFullscreen = true;
-        iframe.allow = 'autoplay; fullscreen';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.onload = () => {
-            const spinner = container.querySelector('.loader');
-            if (spinner) spinner.style.display = 'none';
-        };
-        iframe.onerror = () => {
-            showToast('❌ Помилка завантаження плеєра');
-            container.innerHTML = '<div class="loader" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"><i class="fas fa-exclamation-circle"></i> Помилка завантаження</div>';
-        };
-        container.appendChild(iframe);
+            let currentIdx = 0;
+            const playVoice = (idx) => {
+                currentIdx = idx;
+                initPlayerWithVoice(voices[idx].url);
+            };
+
+            buildVoiceSelector(voices, currentIdx, playVoice);
+            playVoice(0);
+            DOM.playerLoading.style.display = 'none';
+            video.style.display = 'block';
+        } catch (err) {
+            DOM.playerLoading.style.display = 'none';
+            video.style.display = 'block';
+            showToast('❌ Помилка отримання озвучок');
+        }
     }
 
     function closePlayerModal() {
         DOM.playerModal.style.display = 'none';
         document.body.style.overflow = '';
-        const container = document.getElementById('playerIframeContainer');
-        if (container) container.innerHTML = '';
+        destroyHls();
+        DOM.voiceSelector.innerHTML = '';
+        DOM.voiceSelector.style.display = 'none';
+        DOM.playerLoading.style.display = 'none';
+        const video = document.getElementById('mainVideoPlayer');
+        if (video) video.style.display = 'block';
     }
 
     let currentTab = 'main', currentPage = 1, totalPages = 1, currentList = [], currentSearchQuery = '', currentGenreSlug = null;
@@ -422,13 +506,13 @@
                         <div style="margin:0.5rem 0">${anime.genres.map(g => `<span class="tag">${g}</span>`).join('') || '<span class="tag">—</span>'}</div>
                         <p class="synopsis">${(anime.synopsis || 'Опис відсутній.').slice(0, 500)}</p>
                         <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
-                        ${anime.playerIframeUrl ? `<button class="btn-outline" id="watchBtn"><i class="fas fa-play"></i> Дивитися онлайн</button>` : '<p style="color:#ff6b6b;">⚠️ Плеєр не знайдено</p>'}
+                        ${anime.playerPageUrl ? `<button class="btn-outline" id="watchBtn"><i class="fas fa-play"></i> Дивитися онлайн</button>` : '<p style="color:#ff6b6b;">⚠️ Плеєр не знайдено</p>'}
                     </div>
                 </div>`;
             document.getElementById('toggleBookmarkBtn')?.addEventListener('click', () => { toggleBookmark(anime); openDetailModal(url); });
             const watchBtn = document.getElementById('watchBtn');
             if (watchBtn) {
-                watchBtn.addEventListener('click', () => playEpisode(anime.title, anime.playerIframeUrl));
+                watchBtn.addEventListener('click', () => playHlsEpisode(anime.title, anime.playerPageUrl));
             }
         } catch (err) {
             DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`;
