@@ -57,8 +57,8 @@
 
     let hls = null;
 
-    // --- ВИПРАВЛЕНИЙ ProxyLoader ---
-    const DefaultLoader = Hls.DefaultConfig.loader;          // зберегли оригінал
+    // === ВИПРАВЛЕНИЙ ProxyLoader (більше немає рекурсії) ===
+    const DefaultLoader = Hls.DefaultConfig.loader;
     class ProxyLoader extends DefaultLoader {
         constructor(config) {
             super(config);
@@ -68,10 +68,9 @@
             if (url && !url.startsWith(PROXY_URL) && !url.startsWith('blob:')) {
                 context.url = getProxyUrl(url);
             }
-            super.load(context, config, callbacks);           // викликаємо батьківський метод
+            super.load(context, config, callbacks);
         }
     }
-    // --------------------------------
 
     function showToast(msg) {
         DOM.toast.textContent = msg;
@@ -284,20 +283,137 @@
         };
     }
 
-    async function extractVoices(playerPageUrl) {
-        try {
-            const doc = await fetchUA(playerPageUrl);
-            const html = doc.documentElement.outerHTML;
-            const m3u8Matches = html.match(/https?:\/\/[^"'\s]+\.m3u8[^"'\s]*/gi) || [];
-            const uniqueUrls = [...new Set(m3u8Matches)].filter(u => u.includes('.m3u8'));
-            return uniqueUrls.map((url, i) => ({
-                label: `Озвучка ${i+1}`,
-                url: url
-            }));
-        } catch (e) {
-            console.error('extractVoices error', e);
-            return [];
+    // ========== НОВИЙ УНІВЕРСАЛЬНИЙ ПАРСЕР СТОРІНКИ ПЛЕЄРА ==========
+    async function parsePlayerPage(playerPageUrl) {
+        const doc = await fetchUA(playerPageUrl);
+        const html = doc.documentElement.outerHTML;
+
+        // 1) Шукаємо прямі m3u8-посилання (якщо JS не знайшли)
+        const m3u8Matches = html.match(/https?:\/\/[^"'\s]+\.m3u8[^"'\s]*/gi) || [];
+        const directVoices = [...new Set(m3u8Matches)].map((url, i) => ({
+            label: `Озвучка ${i+1}`,
+            url
+        }));
+
+        // 2) Витягуємо JS-скрипти та шукаємо дані про серії/озвучки
+        const scripts = safeQueryAll('script:not([src])', doc).map(s => s.textContent).join('\n');
+
+        let episodes = [];
+        let voices = [];
+        let seasons = [];
+        let selectedEpisode = null;
+        let selectedSeason = null;
+
+        // --- Пошук episodes ---
+        // Поширені формати: episodes = [...]; player.episodes = [...]; window.episodes = [...];
+        const epPatterns = [
+            /(?:var|let|const)?\s*episodes\s*=\s*(\[[^\]]*?\]);/s,
+            /"episodes"\s*:\s*(\[[^\]]*?\])/s,
+            /player\.episodes\s*=\s*(\[[^\]]*?\]);/s,
+            /window\.episodes\s*=\s*(\[[^\]]*?\]);/s
+        ];
+        for (const pat of epPatterns) {
+            const match = scripts.match(pat);
+            if (match) {
+                try {
+                    const arr = JSON.parse(match[1]);
+                    episodes = arr.map(ep => ({
+                        label: ep.title || ep.name || `Серія ${ep.id}`,
+                        value: ep.url || ep.link || ep.href || ''
+                    })).filter(ep => ep.value);
+                    if (episodes.length) break;
+                } catch (e) {}
+            }
         }
+
+        // Якщо не знайшли масив, шукаємо select
+        if (!episodes.length) {
+            const epSelect = safeQuery('select.episodes, select[name="episode"], select.series', doc);
+            if (epSelect) {
+                const options = safeQueryAll('option', epSelect);
+                episodes = options.map(opt => ({
+                    label: opt.textContent.trim(),
+                    value: opt.value || opt.getAttribute('data-url')
+                })).filter(ep => ep.value);
+                const selOpt = epSelect.querySelector('option[selected]') || options[0];
+                if (selOpt) selectedEpisode = selOpt.value || selOpt.getAttribute('data-url');
+            }
+        }
+
+        // Якщо й досі немає – шукаємо посилання з класами
+        if (!episodes.length) {
+            const epLinks = safeQueryAll('a.episode, a[href*="episode"], .episode-list a', doc);
+            episodes = epLinks.map(a => ({
+                label: a.textContent.trim(),
+                value: a.href || a.getAttribute('data-url')
+            })).filter(ep => ep.value);
+        }
+
+        // --- Пошук voices ---
+        const voicePatterns = [
+            /(?:var|let|const)?\s*voices\s*=\s*(\[[^\]]*?\]);/s,
+            /"voices"\s*:\s*(\[[^\]]*?\])/s,
+            /player\.voices\s*=\s*(\[[^\]]*?\]);/s,
+        ];
+        for (const pat of voicePatterns) {
+            const match = scripts.match(pat);
+            if (match) {
+                try {
+                    const arr = JSON.parse(match[1]);
+                    voices = arr.map(v => ({
+                        label: v.name || v.title || `Озвучка ${v.id}`,
+                        url: v.url || v.file || v.m3u8 || ''
+                    })).filter(v => v.url);
+                    if (voices.length) break;
+                } catch (e) {}
+            }
+        }
+
+        // Якщо знайшли тільки прямі m3u8, використовуємо їх
+        if (!voices.length && directVoices.length) {
+            voices = directVoices;
+        }
+
+        // --- Пошук seasons ---
+        const seasonPatterns = [
+            /(?:var|let|const)?\s*seasons\s*=\s*(\[[^\]]*?\]);/s,
+            /"seasons"\s*:\s*(\[[^\]]*?\])/s,
+        ];
+        for (const pat of seasonPatterns) {
+            const match = scripts.match(pat);
+            if (match) {
+                try {
+                    const arr = JSON.parse(match[1]);
+                    seasons = arr.map(s => ({
+                        label: s.name || s.title || `Сезон ${s.id}`,
+                        value: s.url || s.link || ''
+                    })).filter(s => s.value);
+                    if (seasons.length) break;
+                } catch (e) {}
+            }
+        }
+
+        // Якщо є select сезонів
+        if (!seasons.length) {
+            const seasonSelect = safeQuery('select.seasons, select[name="season"]', doc);
+            if (seasonSelect) {
+                const options = safeQueryAll('option', seasonSelect);
+                seasons = options.map(opt => ({
+                    label: opt.textContent.trim(),
+                    value: opt.value || opt.getAttribute('data-url')
+                })).filter(s => s.value);
+                const selOpt = seasonSelect.querySelector('option[selected]') || options[0];
+                if (selOpt) selectedSeason = selOpt.value || selOpt.getAttribute('data-url');
+            }
+        }
+
+        return {
+            voices,
+            episodes,
+            selectedEpisode: selectedEpisode || (episodes[0]?.value || null),
+            seasons,
+            selectedSeason: selectedSeason || (seasons[0]?.value || null)
+        };
     }
 
     function destroyHls() {
@@ -316,21 +432,13 @@
     function initPlayerWithVoice(voiceUrl) {
         const video = document.getElementById('mainVideoPlayer');
         destroyHls();
-
-        if (!voiceUrl) {
-            showToast('❌ Немає потоку');
-            return;
-        }
+        if (!voiceUrl) { showToast('❌ Немає потоку'); return; }
 
         if (Hls.isSupported()) {
-            hls = new Hls({
-                loader: ProxyLoader
-            });
+            hls = new Hls({ loader: ProxyLoader });
             hls.loadSource(voiceUrl);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play().catch(() => {});
-            });
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
             hls.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
                     showToast('❌ Помилка відтворення');
@@ -345,8 +453,9 @@
         }
     }
 
+    // Будує кнопки вибору озвучки
     function buildVoiceSelector(voices, currentIndex, onSelect) {
-        if (!DOM.voiceSelector) return;           // безпечна перевірка
+        if (!DOM.voiceSelector) return;
         DOM.voiceSelector.innerHTML = '';
         DOM.voiceSelector.style.display = voices.length > 1 ? 'flex' : 'none';
         voices.forEach((voice, idx) => {
@@ -366,36 +475,112 @@
         DOM.playerModalTitle.textContent = title;
         DOM.playerModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        destroyHls();
 
-        // безпечне приховування/показ, якщо елементів немає
-        if (DOM.voiceSelector) DOM.voiceSelector.style.display = 'none';
-        if (DOM.playerLoading) DOM.playerLoading.style.display = 'block';
+        // Створюємо селектори серій/сезонів, якщо ще немає в DOM
+        if (!document.getElementById('episodeSelector')) {
+            const container = document.createElement('div');
+            container.className = 'player-selectors';
+            container.innerHTML = `
+                <select id="seasonSelector" class="player-select"></select>
+                <select id="episodeSelector" class="player-select"></select>
+            `;
+            // Вставляємо перед voiceSelector
+            DOM.voiceSelector.parentNode.insertBefore(container, DOM.voiceSelector);
+        }
+        const seasonSelect = document.getElementById('seasonSelector');
+        const episodeSelect = document.getElementById('episodeSelector');
+        const voiceContainer = DOM.voiceSelector;
+        const loadingIndicator = DOM.playerLoading;
         const video = document.getElementById('mainVideoPlayer');
+
+        seasonSelect.style.display = 'none';
+        episodeSelect.style.display = 'none';
+        voiceContainer.style.display = 'none';
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
         video.style.display = 'none';
 
         try {
-            const voices = await extractVoices(playerPageUrl);
-            if (!voices.length) {
-                showToast('❌ Не знайдено m3u8 потоків');
-                if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
-                video.style.display = 'block';
-                return;
+            const playerData = await parsePlayerPage(playerPageUrl);
+
+            // Заповнюємо сезони
+            if (playerData.seasons.length > 1) {
+                seasonSelect.innerHTML = playerData.seasons.map(s =>
+                    `<option value="${s.value}" ${s.value === playerData.selectedSeason ? 'selected' : ''}>${s.label}</option>`
+                ).join('');
+                seasonSelect.style.display = 'inline-block';
             }
 
-            let currentIdx = 0;
-            const playVoice = (idx) => {
-                currentIdx = idx;
-                initPlayerWithVoice(voices[idx].url);
-            };
+            // Заповнюємо серії
+            if (playerData.episodes.length > 1) {
+                episodeSelect.innerHTML = playerData.episodes.map(ep =>
+                    `<option value="${ep.value}" ${ep.value === playerData.selectedEpisode ? 'selected' : ''}>${ep.label}</option>`
+                ).join('');
+                episodeSelect.style.display = 'inline-block';
+            }
 
-            buildVoiceSelector(voices, currentIdx, playVoice);
-            playVoice(0);
-            if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
-            video.style.display = 'block';
+            // Озвучки
+            let currentVoiceIndex = 0;
+            const playVoice = (idx) => {
+                currentVoiceIndex = idx;
+                if (playerData.voices[idx]) {
+                    initPlayerWithVoice(playerData.voices[idx].url);
+                }
+            };
+            if (playerData.voices.length) {
+                buildVoiceSelector(playerData.voices, currentVoiceIndex, playVoice);
+                voiceContainer.style.display = playerData.voices.length > 1 ? 'flex' : 'none';
+            }
+
+            // Функція перезавантаження плеєра при зміні серії/сезону
+            async function reloadPlayer() {
+                const epValue = episodeSelect.value;
+                const seasonValue = seasonSelect.value;
+
+                let newUrl = null;
+                // Якщо value є абсолютним URL – беремо його
+                if (epValue && (epValue.startsWith('http://') || epValue.startsWith('https://'))) {
+                    newUrl = epValue;
+                } else if (seasonValue && (seasonValue.startsWith('http://') || seasonValue.startsWith('https://'))) {
+                    newUrl = seasonValue;
+                }
+
+                // Якщо не URL, спробуємо сформувати з параметрів
+                if (!newUrl) {
+                    const url = new URL(playerPageUrl);
+                    if (epValue) url.searchParams.set('episode', epValue);
+                    if (seasonValue) url.searchParams.set('season', seasonValue);
+                    newUrl = url.href;
+                }
+
+                if (newUrl && newUrl !== playerPageUrl) {
+                    // Викликаємо playHlsEpisode для нової сторінки
+                    return playHlsEpisode(title, newUrl);
+                } else {
+                    // Якщо URL не змінився, просто оновлюємо список озвучок (можливо, змінились)
+                    const newData = await parsePlayerPage(playerPageUrl);
+                    if (newData.voices.length) {
+                        buildVoiceSelector(newData.voices, 0, playVoice);
+                        playVoice(0);
+                    }
+                }
+            }
+
+            episodeSelect.addEventListener('change', reloadPlayer);
+            seasonSelect.addEventListener('change', reloadPlayer);
+
+            // Запускаємо першу озвучку, якщо є
+            if (playerData.voices.length) {
+                playVoice(0);
+            } else {
+                showToast('❌ Немає доступних озвучок');
+            }
         } catch (err) {
-            if (DOM.playerLoading) DOM.playerLoading.style.display = 'none';
+            showToast('❌ Помилка отримання даних плеєра');
+            console.error(err);
+        } finally {
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
             video.style.display = 'block';
-            showToast('❌ Помилка отримання озвучок');
         }
     }
 
@@ -403,6 +588,13 @@
         DOM.playerModal.style.display = 'none';
         document.body.style.overflow = '';
         destroyHls();
+
+        // Очищаємо селектори
+        const seasonSel = document.getElementById('seasonSelector');
+        const episodeSel = document.getElementById('episodeSelector');
+        if (seasonSel) { seasonSel.innerHTML = ''; seasonSel.style.display = 'none'; }
+        if (episodeSel) { episodeSel.innerHTML = ''; episodeSel.style.display = 'none'; }
+
         if (DOM.voiceSelector) {
             DOM.voiceSelector.innerHTML = '';
             DOM.voiceSelector.style.display = 'none';
@@ -412,6 +604,7 @@
         if (video) video.style.display = 'block';
     }
 
+    // ====== решта коду без змін (каталог, закладки, тощо) ======
     let currentTab = 'main', currentPage = 1, totalPages = 1, currentList = [], currentSearchQuery = '', currentGenreSlug = null;
 
     function renderCards(list) {
@@ -520,7 +713,6 @@
     }
 
     function closeModal() { DOM.modal.style.display = 'none'; document.body.style.overflow = ''; }
-
     function closeProfileModal() { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; }
 
     function openProfileModal() {
