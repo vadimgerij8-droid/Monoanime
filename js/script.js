@@ -186,7 +186,7 @@
     }
 
     // ========== Парсер джерел ==========
-    function extractSourcesFromText(text) {
+    function extractSourcesFromText(text, providerName = '') {
         const sources = [];
         const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|'[\s\S]+?'|"[\s\S]+?")/i) || 
                           text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
@@ -207,14 +207,15 @@
                         } else if (item.file) {
                             sources.push({
                                 label: (dub ? dub + ' / ' : '') + (item.title || 'Озвучка'),
-                                file: item.file
+                                file: item.file,
+                                provider: providerName
                             });
                         }
                     });
                 };
                 
                 if (Array.isArray(arr)) walk(arr);
-                else if (arr.file) sources.push({ label: arr.title || 'Озвучка', file: arr.file });
+                else if (arr.file) sources.push({ label: arr.title || 'Озвучка', file: arr.file, provider: providerName });
             } catch (e) { console.warn('Помилка парсингу JSON озвучок'); }
         }
 
@@ -222,7 +223,7 @@
             const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.m3u8[^\s'"<>]*/g)];
             urlMatches.forEach(m => {
                 if (!sources.some(s => s.file === m[0])) {
-                    sources.push({ label: 'Потік', file: m[0] });
+                    sources.push({ label: 'Потік', file: m[0], provider: providerName });
                 }
             });
         }
@@ -292,13 +293,25 @@
 
         const playerUrls = extractPlayerIframeUrls(doc);
         const allSources = [];
+        const seenFiles = new Set();
         
         for (const playerUrl of playerUrls) {
             try {
+                let provider = 'Джерело';
+                if (playerUrl.includes('ashdi')) provider = 'Ashdi';
+                else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
+                else if (playerUrl.includes('player')) provider = 'Player';
+
                 const playerHtml = await fetchUA(playerUrl);
                 const text = playerHtml.body?.innerHTML || '';
-                const sources = extractSourcesFromText(text);
-                allSources.push(...sources);
+                const sources = extractSourcesFromText(text, provider);
+                
+                sources.forEach(s => {
+                    if (!seenFiles.has(s.file)) {
+                        seenFiles.add(s.file);
+                        allSources.push(s);
+                    }
+                });
                 
                 const nestedIframes = safeQueryAll('iframe', playerHtml);
                 for (const nested of nestedIframes) {
@@ -307,8 +320,13 @@
                         if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
                         if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
                         const nestedHtml = await fetchUA(nestedUrl);
-                        const nestedSources = extractSourcesFromText(nestedHtml.body?.innerHTML || '');
-                        allSources.push(...nestedSources);
+                        const nestedSources = extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider);
+                        nestedSources.forEach(s => {
+                            if (!seenFiles.has(s.file)) {
+                                seenFiles.add(s.file);
+                                allSources.push(s);
+                            }
+                        });
                     }
                 }
             } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
@@ -338,12 +356,8 @@
                     .replace(/\//g, ' ')
                     .replace(/\s+/g, ' ')
                     .trim();
-                dub = cleanedLabel || 'UA';
+                dub = cleanedLabel || s.provider || 'UA';
             }
-            
-            // Створюємо ключ сезону, який включає назву озвучки, якщо користувач хоче бачити озвучки як основні категорії
-            // Але зазвичай краще групувати: Сезон -> Озвучка -> Серія.
-            // Проте користувач просив, щоб в секції "Озвучка" були оригінальні назви.
             
             return {
                 title: label || `Серія ${idx+1}`,
@@ -495,7 +509,6 @@
             const seasons = Object.keys(anime.seasons).sort((a,b) => a - b);
             const firstSeason = seasons[0] || '1';
             
-            // Отримуємо список озвучок для обраного сезону
             const dubs = anime.seasons[firstSeason] ? Object.keys(anime.seasons[firstSeason]) : [];
             const firstDub = dubs[0] || '';
             const episodesForFirst = firstDub ? anime.seasons[firstSeason][firstDub] : [];
