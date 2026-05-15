@@ -277,7 +277,6 @@
             } catch (e) {}
         }
 
-        // ----- ПРАВИЛЬНЕ ГРУПУВАННЯ -----
         const seasons = {};
         allSources.forEach((s, idx) => {
             const label = s.label || '';
@@ -357,13 +356,25 @@
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
             
             const seasonKeys = Object.keys(anime.seasons).sort((a,b) => a - b);
-            const firstSeason = seasonKeys[0] || '1';
-            const dubKeys = Object.keys(anime.seasons[firstSeason] || {}).sort();
-            const firstDub = dubKeys[0] || '';
-            const episodes = firstDub ? anime.seasons[firstSeason][firstDub] : [];
-
+            
             DOM.modalBody.innerHTML = `
                 <div class="anime-detail-content">
+                    <style>
+                        .selection-group { margin-top: 1rem; }
+                        .selection-label { font-weight: 600; margin-bottom: 0.5rem; display: block; color: var(--text-color); }
+                        .selection-list { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+                        .select-pill { 
+                            padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd; 
+                            background: #f8f9fa; cursor: pointer; font-size: 0.9rem; transition: 0.2s;
+                            color: #333;
+                        }
+                        .select-pill:hover { background: #e9ecef; border-color: #ccc; }
+                        .select-pill.active { background: #007bff; color: #fff; border-color: #007bff; }
+                        .dark-mode .select-pill { background: #333; color: #eee; border-color: #444; }
+                        .dark-mode .select-pill:hover { background: #444; }
+                        .dark-mode .select-pill.active { background: #007bff; color: #fff; border-color: #007bff; }
+                        .episode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 0.5rem; }
+                    </style>
                     <div class="anime-detail-grid">
                         <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}"></div>
                         <div class="detail-info">
@@ -374,51 +385,85 @@
                             <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
                         </div>
                     </div>
-                    <div class="player-controls" style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="font-weight:600;"> Сезон</label>
-                            <select id="seasonSelect" class="btn-outline">${seasonKeys.map(s => `<option value="${s}">Сезон ${s}</option>`).join('')}</select>
+
+                    <div class="player-controls">
+                        <div class="selection-group" id="seasonGroup" style="${seasonKeys.length <= 1 ? 'display:none' : ''}">
+                            <span class="selection-label">Сезон</span>
+                            <div class="selection-list" id="seasonList"></div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="font-weight:600;"> Озвучка</label>
-                            <select id="dubSelect" class="btn-outline" style="max-width:250px;">${dubKeys.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+                        
+                        <div class="selection-group">
+                            <span class="selection-label">Озвучка</span>
+                            <div class="selection-list" id="dubList"></div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="font-weight:600;"> Серія</label>
-                            <select id="episodeSelect" class="btn-outline">${episodes.map(e => `<option value="${e.file}">Еп. ${e.episode}</option>`).join('')}</select>
+
+                        <div class="selection-group">
+                            <span class="selection-label">Серія</span>
+                            <div class="selection-list episode-grid" id="episodeList"></div>
                         </div>
-                        <button id="playBtn" class="btn-outline"><i class="fas fa-play"></i> Дивитися</button>
                     </div>
+
                     <video id="detailVideoPlayer" controls style="width:100%; margin-top:1rem; border-radius:8px; background:#000;"></video>
                 </div>
             `;
 
-            const seasonSelect = document.getElementById('seasonSelect');
-            const dubSelect = document.getElementById('dubSelect');
-            const epSelect = document.getElementById('episodeSelect');
+            const seasonList = document.getElementById('seasonList');
+            const dubList = document.getElementById('dubList');
+            const episodeList = document.getElementById('episodeList');
             const videoEl = document.getElementById('detailVideoPlayer');
 
-            function updateDubs() {
-                const s = seasonSelect.value;
-                const dubs = Object.keys(anime.seasons[s] || {}).sort();
-                dubSelect.innerHTML = dubs.map(d => `<option value="${d}">${d}</option>`).join('');
-                updateEps();
+            let currentSeason = seasonKeys[0] || '1';
+            let currentDub = '';
+
+            function renderSeasons() {
+                seasonList.innerHTML = seasonKeys.map(s => `
+                    <div class="select-pill ${s === currentSeason ? 'active' : ''}" data-val="${s}">Сезон ${s}</div>
+                `).join('');
+                
+                seasonList.querySelectorAll('.select-pill').forEach(p => {
+                    p.onclick = () => {
+                        currentSeason = p.dataset.val;
+                        renderSeasons();
+                        renderDubs();
+                    };
+                });
             }
 
-            function updateEps() {
-                const s = seasonSelect.value;
-                const d = dubSelect.value;
-                const eps = anime.seasons[s]?.[d] || [];
-                epSelect.innerHTML = eps.map(e => `<option value="${e.file}">Еп. ${e.episode}</option>`).join('');
+            function renderDubs() {
+                const dubs = Object.keys(anime.seasons[currentSeason] || {}).sort();
+                if (!dubs.includes(currentDub)) currentDub = dubs[0] || '';
+                
+                dubList.innerHTML = dubs.map(d => `
+                    <div class="select-pill ${d === currentDub ? 'active' : ''}" data-val="${d}">${d}</div>
+                `).join('');
+
+                dubList.querySelectorAll('.select-pill').forEach(p => {
+                    p.onclick = () => {
+                        currentDub = p.dataset.val;
+                        renderDubs();
+                        renderEpisodes();
+                    };
+                });
+                renderEpisodes();
             }
 
-            seasonSelect.addEventListener('change', updateDubs);
-            dubSelect.addEventListener('change', updateEps);
-            document.getElementById('playBtn').addEventListener('click', () => {
-                const file = epSelect.value;
-                if (file) loadVideo(file, videoEl);
-                else showToast('❌ Немає файлу');
-            });
+            function renderEpisodes() {
+                const eps = anime.seasons[currentSeason]?.[currentDub] || [];
+                episodeList.innerHTML = eps.map(e => `
+                    <div class="select-pill" data-file="${e.file}">${e.episode}</div>
+                `).join('');
+
+                episodeList.querySelectorAll('.select-pill').forEach(p => {
+                    p.onclick = () => {
+                        episodeList.querySelectorAll('.select-pill').forEach(el => el.classList.remove('active'));
+                        p.classList.add('active');
+                        loadVideo(p.dataset.file, videoEl);
+                    };
+                });
+            }
+
+            renderSeasons();
+            renderDubs();
             
             document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
                 let b = Storage.getBookmarks();
@@ -430,7 +475,10 @@
                 document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${Storage.getBookmarks().some(x => x.mal_id === anime.mal_id) ? 'В обраному' : 'Додати'}`;
             });
 
-        } catch (e) { DOM.modalBody.innerHTML = 'Помилка завантаження'; }
+        } catch (e) { 
+            console.error(e);
+            DOM.modalBody.innerHTML = 'Помилка завантаження'; 
+        }
     }
 
     function renderCards(list) {
