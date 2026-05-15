@@ -183,7 +183,7 @@
         }
     }
 
-    // ==================== PLAYERJS PARSER ====================
+    // ==================== PLAYERJS PARSER (ВИПРАВЛЕНИЙ) ====================
 
     function fixJsonLikeString(str) {
         let fixed = str
@@ -231,7 +231,6 @@
         return null;
     }
 
-    // Допоміжні функції для нового парсера
     function extractSeasonNumber(title) {
         const match = title.match(/сезон\s*(\d+)|season\s*(\d+)/i);
         return match ? (match[1] || match[2]) : '1';
@@ -247,32 +246,76 @@
         return qMatch ? qMatch[1] + 'p' : '';
     }
 
-    /** @param {string} currentDub - назва озвучки, що передається з батьківського рівня */
+    /**
+     * Визначає тип структури папки:
+     * - 'dubs'    — кожен child має title (назва озвучки) та folder з серіями
+     * - 'seasons' — кожен child має title (назва сезону) та folder, де folder[0] ТАКОЖ має folder
+     * - 'episodes'— просто список серій
+     */
+    function detectFolderType(children) {
+        if (!children || !children.length) return 'unknown';
+        
+        const sample = children.slice(0, Math.min(children.length, 3));
+        
+        // Перевірка на озвучки: child має folder, і його children мають file (серії)
+        const allHaveFolderWithEpisodes = sample.every(c => 
+            c.folder && Array.isArray(c.folder) && c.folder.length > 0
+        );
+        
+        if (!allHaveFolderWithEpisodes) return 'episodes';
+        
+        // Перевіряємо перший child з folder
+        const firstWithFolder = sample.find(c => c.folder && c.folder[0]);
+        if (!firstWithFolder) return 'episodes';
+        
+        const firstChild = firstWithFolder.folder[0];
+        
+        // Якщо перший елемент всередині ТАКОЖ має folder — це сезони
+        if (firstChild.folder && Array.isArray(firstChild.folder)) {
+            return 'seasons';
+        }
+        
+        // Якщо перший елемент має file — це озвучки (серії всередині озвучки)
+        if (firstChild.file !== undefined) {
+            return 'dubs';
+        }
+        
+        return 'episodes';
+    }
+
+    /**
+     * parseEpisodeItem — обробляє окрему серію
+     * @param {Object} ep — об'єкт епізоду
+     * @param {string} seasonNum — номер сезону
+     * @param {string} currentDub — назва озвучки
+     * @param {Array} results — масив результатів
+     */
     function parseEpisodeItem(ep, seasonNum = '1', currentDub = '', results = []) {
         if (!ep) return results;
 
         const episodeTitle = ep.title || ep.name || 'Епізод';
         const epNum = extractEpisodeNumber(episodeTitle);
 
-        // Якщо file – масив (різні озвучки)
+        // Якщо file — масив (різні якості/джерела однієї серії)
         if (Array.isArray(ep.file)) {
-            ep.file.forEach((dubItem, idx) => {
-                const dubTitle = dubItem.title || dubItem.name || `Озвучка ${idx + 1}`;
-                const dubFile = dubItem.file || dubItem.url || dubItem;
-                if (typeof dubFile === 'string' && (
-                    dubFile.startsWith('http') || 
-                    /\.(m3u8|mp4|mkv|avi|webm|txt|php)/i.test(dubFile)
+            ep.file.forEach((qualityItem, idx) => {
+                const qualityTitle = qualityItem.title || qualityItem.name || `Якість ${idx + 1}`;
+                const qualityFile = qualityItem.file || qualityItem.url || qualityItem;
+                
+                if (typeof qualityFile === 'string' && (
+                    qualityFile.startsWith('http') || 
+                    /\.(m3u8|mp4|mkv|avi|webm|txt|php)/i.test(qualityFile)
                 )) {
                     results.push({
                         title: episodeTitle,
                         season: seasonNum,
                         episode: epNum,
-                        dub: currentDub || dubTitle || 'Основна озвучка',
-                        file: dubFile,
-                        poster: ep.poster || dubItem.poster || '',
-                        subtitle: ep.subtitle || dubItem.subtitle || '',
+                        dub: currentDub || 'Основна озвучка',
+                        file: qualityFile,
+                        poster: ep.poster || qualityItem.poster || '',
+                        subtitle: ep.subtitle || qualityItem.subtitle || '',
                         id: ep.id || '',
-                        quality: extractQuality(dubTitle + ' ' + dubFile)
+                        quality: extractQuality(qualityTitle + ' ' + qualityFile)
                     });
                 }
             });
@@ -300,70 +343,80 @@
         return results;
     }
 
-    // ==================== ГОЛОВНА ЗМІНА: ПЕРЕПИСАНА parsePlaylistItem ====================
+    /**
+     * parsePlaylistItem — головна функція рекурсивного парсингу (ПОВНІСТЮ ПЕРЕРОБЛЕНА)
+     * Правильно обробляє:
+     * 1. Озвучки → Сезони → Серії
+     * 2. Озвучки → Серії (без сезонів)
+     * 3. Сезони → Серії
+     * 4. Просто список серій
+     */
     function parsePlaylistItem(item, parentTitle = '', currentDub = '', results = []) {
         if (!item) return results;
-
-        // Якщо є масив folder – це або сезони, або дубляжі, або серії
-        if (item.folder && Array.isArray(item.folder)) {
-            item.folder.forEach(child => {
-                const childTitle = (child.title || child.name || '').toLowerCase();
-
-                // 🟢 Нова структурна перевірка: чи є цей рівень озвучкою
-                // Озвучка – це коли всі дочірні елементи або мають file, або самі є папками з folder
-                const looksLikeDub =
-                    child.folder &&
-                    child.folder.every(f =>
-                        f.file ||
-                        (f.folder && Array.isArray(f.folder))
-                    );
-
-                // Якщо це окремий рівень озвучки
-                if (looksLikeDub && child.folder) {
-                    // Рекурсивно обробляємо вміст, передаючи назву дубляжу
-                    if (Array.isArray(child.folder)) {
-                        child.folder.forEach(grandchild => {
-                            parsePlaylistItem(grandchild, parentTitle, child.title, results);
-                        });
-                    }
-                } else if (child.folder && Array.isArray(child.folder)) {
-                    // Звичайна структура: сезони або серії
-                    // 🟢 Виправлена перевірка на сезони (безпечний доступ)
-                    const firstGrand = child.folder?.[0];
-                    const isSeasonStructure =
-                        firstGrand &&
-                        firstGrand.folder &&
-                        Array.isArray(firstGrand.folder);
-
-                    if (isSeasonStructure) {
-                        // Це рівень сезонів
-                        child.folder.forEach(season => {
-                            const seasonTitle = season.title || season.name || parentTitle;
-                            const seasonNum = extractSeasonNumber(seasonTitle);
-                            if (season.folder && Array.isArray(season.folder)) {
-                                season.folder.forEach(ep => {
-                                    parseEpisodeItem(ep, seasonNum, currentDub, results);
-                                });
-                            }
-                        });
-                    } else {
-                        // Плоский список серій (без сезонів)
-                        const seasonNum = extractSeasonNumber(child.title || parentTitle);
-                        child.folder.forEach(ep => {
-                            parseEpisodeItem(ep, seasonNum, currentDub, results);
-                        });
-                    }
-                } else if (child.file) {
-                    // Безпосередній епізод
-                    parseEpisodeItem(child, extractSeasonNumber(parentTitle), currentDub, results);
-                }
-            });
-            return results;
-        }
 
         // Якщо це вкладений плейлист (playlist)
         if (item.playlist && Array.isArray(item.playlist)) {
             item.playlist.forEach(pl => parsePlaylistItem(pl, parentTitle, currentDub, results));
+            return results;
+        }
+
+        // Якщо це папка (folder)
+        if (item.folder && Array.isArray(item.folder)) {
+            const children = item.folder;
+            const folderType = detectFolderType(children);
+
+            switch (folderType) {
+                case 'dubs': {
+                    // Це рівень озвучок
+                    children.forEach(dub => {
+                        const dubName = dub.title || dub.name || currentDub || 'Основна озвучка';
+                        const seasonNum = extractSeasonNumber(dub.title || parentTitle);
+                        
+                        if (dub.folder && Array.isArray(dub.folder)) {
+                            dub.folder.forEach(ep => {
+                                // Перевіряємо, чи всередині озвучки є ще сезони
+                                if (ep.folder && Array.isArray(ep.folder)) {
+                                    // Озвучка → Сезони → Серії
+                                    const innerSeasonNum = extractSeasonNumber(ep.title || dub.title);
+                                    ep.folder.forEach(innerEp => {
+                                        parseEpisodeItem(innerEp, innerSeasonNum, dubName, results);
+                                    });
+                                } else {
+                                    // Озвучка → Серії (без сезонів)
+                                    parseEpisodeItem(ep, seasonNum, dubName, results);
+                                }
+                            });
+                        }
+                    });
+                    break;
+                }
+
+                case 'seasons': {
+                    // Це рівень сезонів
+                    children.forEach(season => {
+                        const seasonTitle = season.title || season.name || parentTitle;
+                        const seasonNum = extractSeasonNumber(seasonTitle);
+                        
+                        if (season.folder && Array.isArray(season.folder)) {
+                            season.folder.forEach(ep => {
+                                parseEpisodeItem(ep, seasonNum, currentDub, results);
+                            });
+                        }
+                    });
+                    break;
+                }
+
+                case 'episodes':
+                default: {
+                    // Просто список серій
+                    const seasonNum = extractSeasonNumber(item.title || parentTitle);
+                    children.forEach(ep => {
+                        parseEpisodeItem(ep, seasonNum, currentDub, results);
+                    });
+                    break;
+                }
+            }
+
             return results;
         }
 
@@ -444,7 +497,7 @@
                 const files = JSON.parse(fixed);
                 if (Array.isArray(files)) {
                     files.forEach(item => {
-                        parseEpisodeItem(item, '1', '', sources);
+                        parsePlaylistItem(item, '1', '', sources);
                     });
                 }
             } catch (e) {
