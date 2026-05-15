@@ -247,7 +247,8 @@
         return qMatch ? qMatch[1] + 'p' : '';
     }
 
-    function parseEpisodeItem(ep, seasonNum = '1', results = []) {
+    /** @param {string} currentDub - назва озвучки, що передається з батьківського рівня */
+    function parseEpisodeItem(ep, seasonNum = '1', currentDub = '', results = []) {
         if (!ep) return results;
 
         const episodeTitle = ep.title || ep.name || 'Епізод';
@@ -258,12 +259,15 @@
             ep.file.forEach((dubItem, idx) => {
                 const dubTitle = dubItem.title || dubItem.name || `Озвучка ${idx + 1}`;
                 const dubFile = dubItem.file || dubItem.url || dubItem;
-                if (typeof dubFile === 'string' && /\.(m3u8|mp4|mkv|avi|webm)/i.test(dubFile)) {
+                if (typeof dubFile === 'string' && (
+                    dubFile.startsWith('http') || 
+                    /\.(m3u8|mp4|mkv|avi|webm|txt|php)/i.test(dubFile)
+                )) {
                     results.push({
                         title: episodeTitle,
                         season: seasonNum,
                         episode: epNum,
-                        dub: dubTitle,
+                        dub: currentDub || dubTitle || 'Основна озвучка',
                         file: dubFile,
                         poster: ep.poster || dubItem.poster || '',
                         subtitle: ep.subtitle || dubItem.subtitle || '',
@@ -276,12 +280,15 @@
         }
 
         // Один файл
-        if (typeof ep.file === 'string' && /\.(m3u8|mp4|mkv|avi|webm)/i.test(ep.file)) {
+        if (typeof ep.file === 'string' && (
+            ep.file.startsWith('http') || 
+            /\.(m3u8|mp4|mkv|avi|webm|txt|php)/i.test(ep.file)
+        )) {
             results.push({
                 title: episodeTitle,
                 season: seasonNum,
                 episode: epNum,
-                dub: 'Основна озвучка',
+                dub: currentDub || 'Основна озвучка',
                 file: ep.file,
                 poster: ep.poster || '',
                 subtitle: ep.subtitle || '',
@@ -293,44 +300,65 @@
         return results;
     }
 
-    function parsePlaylistItem(item, parentTitle = '', results = []) {
+    function parsePlaylistItem(item, parentTitle = '', currentDub = '', results = []) {
         if (!item) return results;
 
-        // Якщо є масив folder – це або сезони, або безпосередньо серії
+        // Якщо є масив folder – це або сезони, або дубляжі, або серії
         if (item.folder && Array.isArray(item.folder)) {
-            // Перевіряємо перший елемент: якщо він теж має folder → це сезон
-            const firstChild = item.folder[0];
-            if (firstChild && firstChild.folder) {
-                // Це список сезонів (Season)
-                item.folder.forEach(season => {
-                    const seasonTitle = season.title || season.name || parentTitle;
-                    const seasonNum = extractSeasonNumber(seasonTitle);
-                    // Обробляємо серії всередині сезону
-                    if (season.folder && Array.isArray(season.folder)) {
-                        season.folder.forEach(ep => {
-                            parseEpisodeItem(ep, seasonNum, results);
+            item.folder.forEach(child => {
+                const childTitle = (child.title || child.name || '').toLowerCase();
+                const looksLikeDub = childTitle.includes('anilibria') ||
+                                     childTitle.includes('amant') ||
+                                     childTitle.includes('dub') ||
+                                     childTitle.includes('озвуч') ||
+                                     childTitle.includes('voice');
+
+                // Якщо це окремий рівень озвучки
+                if (looksLikeDub && child.folder) {
+                    // Рекурсивно обробляємо вміст, передаючи назву дубляжу
+                    if (Array.isArray(child.folder)) {
+                        child.folder.forEach(grandchild => {
+                            parsePlaylistItem(grandchild, parentTitle, child.title, results);
                         });
                     }
-                });
-            } else {
-                // Звичайний плоский список серій (без підрівня сезонів)
-                const seasonNum = extractSeasonNumber(item.title || parentTitle);
-                item.folder.forEach(ep => {
-                    parseEpisodeItem(ep, seasonNum, results);
-                });
-            }
+                } else if (child.folder && Array.isArray(child.folder)) {
+                    // Звичайна структура: сезони або серії
+                    const firstGrand = child.folder[0];
+                    if (firstGrand && firstGrand.folder) {
+                        // Сезони
+                        child.folder.forEach(season => {
+                            const seasonTitle = season.title || season.name || parentTitle;
+                            const seasonNum = extractSeasonNumber(seasonTitle);
+                            if (season.folder && Array.isArray(season.folder)) {
+                                season.folder.forEach(ep => {
+                                    parseEpisodeItem(ep, seasonNum, currentDub, results);
+                                });
+                            }
+                        });
+                    } else {
+                        // Плоский список серій (без сезонів)
+                        const seasonNum = extractSeasonNumber(child.title || parentTitle);
+                        child.folder.forEach(ep => {
+                            parseEpisodeItem(ep, seasonNum, currentDub, results);
+                        });
+                    }
+                } else if (child.file) {
+                    // Безпосередній епізод
+                    parseEpisodeItem(child, extractSeasonNumber(parentTitle), currentDub, results);
+                }
+            });
             return results;
         }
 
         // Якщо це вкладений плейлист (playlist)
         if (item.playlist && Array.isArray(item.playlist)) {
-            item.playlist.forEach(pl => parsePlaylistItem(pl, parentTitle, results));
+            item.playlist.forEach(pl => parsePlaylistItem(pl, parentTitle, currentDub, results));
             return results;
         }
 
         // Якщо це безпосередньо епізод (є file)
         if (item.file) {
-            parseEpisodeItem(item, parentTitle, results);
+            parseEpisodeItem(item, parentTitle, currentDub, results);
         }
 
         return results;
@@ -358,7 +386,7 @@
             if (playerConfig.file) {
                 if (Array.isArray(playerConfig.file)) {
                     playerConfig.file.forEach((item, idx) => {
-                        parsePlaylistItem(item, '', sources);
+                        parsePlaylistItem(item, '', '', sources);
                     });
                 } else if (typeof playerConfig.file === 'string') {
                     sources.push({
@@ -376,7 +404,7 @@
 
             if (playerConfig.playlist && Array.isArray(playerConfig.playlist)) {
                 playerConfig.playlist.forEach(item => {
-                    parsePlaylistItem(item, '', sources);
+                    parsePlaylistItem(item, '', '', sources);
                 });
             }
         }
@@ -389,7 +417,7 @@
                 const playlist = JSON.parse(fixed);
                 if (Array.isArray(playlist)) {
                     playlist.forEach(item => {
-                        parsePlaylistItem(item, '', sources);
+                        parsePlaylistItem(item, '', '', sources);
                     });
                 }
             } catch (e) {
@@ -405,7 +433,7 @@
                 const files = JSON.parse(fixed);
                 if (Array.isArray(files)) {
                     files.forEach(item => {
-                        parseEpisodeItem(item, '1', sources);
+                        parseEpisodeItem(item, '1', '', sources);
                     });
                 }
             } catch (e) {
@@ -413,8 +441,8 @@
             }
         }
 
-        // 4. Пряме посилання на відео
-        const directUrls = text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4|mkv|avi|webm)[^\s'"<>]*/g);
+        // 4. Пряме посилання на відео (розширений regex)
+        const directUrls = text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4|mkv|avi|webm|txt|php)/g);
         for (const match of directUrls) {
             const url = match[0];
             if (!sources.some(s => s.file === url)) {
