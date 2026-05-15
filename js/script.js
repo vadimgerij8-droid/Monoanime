@@ -507,17 +507,17 @@
                 <div style="margin-top:1.5rem;">
                     <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem;">
                         <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="font-weight:600;">📺 Сезон</label>
+                            <label style="font-weight:600;"> Сезон</label>
                             <select id="seasonSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">
                                 ${seasons.map(s => `<option value="${s}" ${s === firstSeason ? 'selected' : ''}>Сезон ${s}</option>`).join('')}
                             </select>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="font-weight:600;">🎙 Озвучка</label>
+                            <label style="font-weight:600;"> Озвучка</label>
                             <select id="dubSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">${dubOptions}</select>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="font-weight:600;">🎬 Серія</label>
+                            <label style="font-weight:600;"> Серія</label>
                             <select id="episodeSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">${episodeOptions}</select>
                         </div>
                         <button id="playSelectedBtn" class="btn-outline"><i class="fas fa-play"></i> Дивитися</button>
