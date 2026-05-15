@@ -185,22 +185,18 @@
         }
     }
 
-    // ========== Парсер джерел (ОНОВЛЕНО) ==========
+    // ========== Парсер джерел ==========
     function extractSourcesFromText(text) {
         const sources = [];
-        
-        // 1. Гнучкий пошук JSON (підтримує різні типи лапок та форматів плеєрів)
         const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|'[\s\S]+?'|"[\s\S]+?")/i) || 
                           text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
         
         if (jsonMatch) {
             try {
                 let rawData = jsonMatch[1].trim();
-                // Очищення від лапок, якщо JSON загорнутий у них як рядок
                 if ((rawData.startsWith("'") && rawData.endsWith("'")) || (rawData.startsWith('"') && rawData.endsWith('"'))) {
                     rawData = rawData.slice(1, -1);
                 }
-                // Виправлення поширених помилок у JSON (зайві коми тощо)
                 const cleanJson = rawData.replace(/,\s*\]/g, ']').replace(/,\s*\}/g, '}');
                 const arr = JSON.parse(cleanJson);
                 
@@ -222,7 +218,6 @@
             } catch (e) { console.warn('Помилка парсингу JSON озвучок'); }
         }
 
-        // 2. Якщо через JSON нічого не знайшли, шукаємо прямі посилання на m3u8
         if (sources.length === 0) {
             const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.m3u8[^\s'"<>]*/g)];
             urlMatches.forEach(m => {
@@ -255,7 +250,6 @@
             });
         }
         
-        // Пошук у скриптах
         const scripts = safeQueryAll('script:not([src])', doc);
         for (const s of scripts) {
             const matches = s.textContent.matchAll(/(?:playerUrl|iframeUrl|src)\s*[:=]\s*['"]([^'"]+)['"]/g);
@@ -299,7 +293,6 @@
         const playerUrls = extractPlayerIframeUrls(doc);
         const allSources = [];
         
-        // Спробуємо отримати дані з кожного знайденого плеєра
         for (const playerUrl of playerUrls) {
             try {
                 const playerHtml = await fetchUA(playerUrl);
@@ -307,7 +300,6 @@
                 const sources = extractSourcesFromText(text);
                 allSources.push(...sources);
                 
-                // Якщо в плеєрі є ще один iframe (наприклад, ashdi всередині іншого)
                 const nestedIframes = safeQueryAll('iframe', playerHtml);
                 for (const nested of nestedIframes) {
                     let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
@@ -325,26 +317,21 @@
         // ----- Оновлений блок парсингу серій -----
         const episodes = allSources.map((s, idx) => {
             const label = s.label || '';
-            // Витягуємо сезон
             const seasonMatch = label.match(/[Сс]езон\s*(\d+)/);
-            const season = seasonMatch ? seasonMatch[1] : '1';
+            const seasonNum = seasonMatch ? seasonMatch[1] : '1';
             
-            // Витягуємо номер серії (підтримка форматів: "Серія 5", "5 серія", "Еп. 5")
             const epMatch = label.match(/(\d+)\s*[Сс]ері[яіяа]|[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
             const episode = epMatch ? (epMatch[1] || epMatch[2] || epMatch[3]) : String(idx + 1);
             
-            // Визначаємо озвучку (dub)
             const parts = label.split('/').map(p => p.trim()).filter(Boolean);
-            // Відфільтровуємо частини, які є сезоном або номером серії
             const dubParts = parts.filter(part => {
-                if (/^[Сс]езон\s*\d+$/.test(part)) return false;               // "Сезон 1"
-                if (/^(?:[Ее]п\.?\s*\d+|[Сс]ері[яіяа]\s*\d+|\d+\s*[Сс]ері[яіяа])$/.test(part)) return false; // "Еп. 1", "Серія 1", "1 серія"
-                if (/^\d{1,4}$/.test(part)) return false;                     // просто число (ймовірно номер серії)
+                if (/^[Сс]езон\s*\d+$/.test(part)) return false;
+                if (/^(?:[Ее]п\.?\s*\d+|[Сс]ері[яіяа]\s*\d+|\d+\s*[Сс]ері[яіяа])$/.test(part)) return false;
+                if (/^\d{1,4}$/.test(part)) return false;
                 return true;
             });
             let dub = dubParts.join(' / ');
             if (!dub) {
-                // Якщо після очищення нічого не лишилось, пробуємо взяти залишок без сезону/серії
                 const cleanedLabel = label
                     .replace(/[Сс]езон\s*\d+/g, '')
                     .replace(/[Ее]п\.?\s*\d+|[Сс]ері[яіяа]\s*\d+|\d+\s*[Сс]ері[яіяа]/g, '')
@@ -354,9 +341,13 @@
                 dub = cleanedLabel || 'UA';
             }
             
+            // Створюємо ключ сезону, який включає назву озвучки, якщо користувач хоче бачити озвучки як основні категорії
+            // Але зазвичай краще групувати: Сезон -> Озвучка -> Серія.
+            // Проте користувач просив, щоб в секції "Озвучка" були оригінальні назви.
+            
             return {
                 title: label || `Серія ${idx+1}`,
-                season,
+                season: seasonNum,
                 episode,
                 poster: s.poster || poster,
                 file: s.file,
@@ -365,7 +356,6 @@
             };
         }).filter(ep => ep.file);
 
-        // Групуємо за сезонами та озвучками
         const seasons = {};
         episodes.forEach(ep => {
             const s = ep.season || '1';
@@ -390,7 +380,6 @@
         };
     }
 
-    // ========== Плеєр ==========
     let hlsInstances = new Map();
     function destroyHlsForVideo(videoEl) {
         if (hlsInstances.has(videoEl)) {
@@ -432,7 +421,6 @@
         }
     }
 
-    // ========== UI та Події ==========
     let currentTab = 'main', currentPage = 1, currentSearchQuery = '', currentGenreSlug = null, currentList = [], currentDetailAnime = null;
 
     function renderCards(list) {
@@ -503,11 +491,15 @@
             currentDetailAnime = anime;
             DOM.modalTitle.textContent = anime.title;
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
+            
             const seasons = Object.keys(anime.seasons).sort((a,b) => a - b);
             const firstSeason = seasons[0] || '1';
+            
+            // Отримуємо список озвучок для обраного сезону
             const dubs = anime.seasons[firstSeason] ? Object.keys(anime.seasons[firstSeason]) : [];
             const firstDub = dubs[0] || '';
             const episodesForFirst = firstDub ? anime.seasons[firstSeason][firstDub] : [];
+            
             let dubOptions = dubs.map(d => `<option value="${d}">${d}</option>`).join('');
             let episodeOptions = episodesForFirst.map(ep => `<option value="${ep.file}" data-episode="${ep.episode}">Еп. ${ep.episode}</option>`).join('');
             
@@ -531,7 +523,7 @@
                         </div>
                         <div style="display:flex; align-items:center; gap:0.5rem;">
                             <label style="font-weight:600;"> Озвучка</label>
-                            <select id="dubSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">${dubOptions}</select>
+                            <select id="dubSelect" class="btn-outline" style="padding:0.4rem 0.8rem; max-width: 250px;">${dubOptions}</select>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.5rem;">
                             <label style="font-weight:600;"> Серія</label>
@@ -608,7 +600,7 @@
         const bList = document.getElementById('bookmarkList');
         const hList = document.getElementById('historyList');
         if (bList) bList.innerHTML = bookmarks.length ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>';
-        if (hList) hList.innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('') : '<p>Немає історії</p>';
+        if (hList) hList.innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('') : '<p>Історія порожня</p>';
         
         document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => {
             item.addEventListener('click', () => { 
