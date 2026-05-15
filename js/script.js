@@ -1,12 +1,14 @@
 (function() {
-    const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
+    // ================== НАЛАШТУВАННЯ ==================
+    const PROXY_URL = 'https://monoanime.animegran8.workers.dev'; // ваш проксі
     const ANIMEUA_BASE = 'https://animeua.club';
 
     function getProxyUrl(url) {
-        if (!url) { console.warn('getProxyUrl empty'); return null; }
+        if (!url) return null;
         return PROXY_URL + '?url=' + encodeURIComponent(url);
     }
 
+    // ================== ДОПОМІЖНІ ФУНКЦІЇ ==================
     String.prototype.hashCode = function() {
         let hash = 0;
         for (let i = 0; i < this.length; i++) {
@@ -32,6 +34,7 @@
         };
     }
 
+    // ================== DOM-ЕЛЕМЕНТИ ==================
     const DOM = {
         animeContainer: document.getElementById('animeContainer'),
         searchInput: document.getElementById('searchInput'),
@@ -48,12 +51,14 @@
         playerModal: document.getElementById('playerModal'),
         playerModalTitle: document.getElementById('playerModalTitle'),
         closePlayerBtn: document.getElementById('closePlayerBtn'),
-        mainVideoPlayer: document.getElementById('mainVideoPlayer'),
+        // ЗАМІСТЬ <video> тепер використовуємо <iframe>
+        mainVideoFrame: document.getElementById('mainVideoFrame'),
         profileModal: document.getElementById('profileModal'),
         closeProfileBtn: document.getElementById('closeProfileBtn'),
         profileBody: document.getElementById('profileBody')
     };
 
+    // ================== ТОСТ ==================
     function showToast(msg) {
         DOM.toast.textContent = msg;
         DOM.toast.classList.add('show');
@@ -61,6 +66,7 @@
         DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 2200);
     }
 
+    // ================== STORAGE ==================
     const Storage = {
         getBookmarks() { try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; } },
         saveBookmarks(arr) { localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr)); },
@@ -102,6 +108,7 @@
         applyTheme(next);
     }
 
+    // ================== ФЕТЧ З ПРОКСІ ==================
     async function fetchUA(url) {
         if (!url) throw new Error('empty url');
         const proxyUrl = getProxyUrl(url);
@@ -111,6 +118,7 @@
         return new DOMParser().parseFromString(html, 'text/html');
     }
 
+    // ================== ПАРСИНГ КАРТОК ==================
     function parseCards(doc) {
         const cards = safeQueryAll('.poster', doc);
         if (cards.length) {
@@ -183,93 +191,32 @@
         }
     }
 
-    // ========== Оновлений парсер джерел ==========
-    function extractSourcesFromText(text) {
-        const sources = [];
-
-        // 1. JSON-масив (основна структура з озвучками)
-        const jsonMatch = text.match(/['"]file['"]\s*:\s*(\[[\s\S]{0,20000}?\])/);
-        if (jsonMatch) {
-            try {
-                const arr = JSON.parse(jsonMatch[1]);
-                const walk = (items, dub = '') => {
-                    items.forEach(item => {
-                        if (item.folder) {
-                            walk(item.folder, item.title || dub);
-                        } else if (item.file) {
-                            sources.push({
-                                label: (dub ? dub + ' / ' : '') + (item.title || 'Озвучка'),
-                                file: item.file,
-                                poster: item.poster || ''
-                            });
-                        }
-                    });
-                };
-                walk(arr);
-            } catch (e) {
-                console.warn('JSON parse failed', e);
-            }
+    // ================== ОТРИМАННЯ IFRAME ПЛЕЄРА ЗІ СТОРІНКИ ==================
+    function extractIframeSrc(doc) {
+        // шукаємо перший iframe на сторінці (плеєр)
+        const iframe = safeQuery('iframe[src]', doc);
+        if (iframe) {
+            let src = iframe.getAttribute('src');
+            if (src.startsWith('//')) src = 'https:' + src;
+            if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
+            return src;
         }
-
-        // 2. Всі прямі m3u8/mp4 посилання
-        const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*/g)];
-        urlMatches.forEach(m => {
-            const url = m[0];
-            if (!sources.some(s => s.file === url)) {
-                sources.push({ label: 'Потік', file: url });
-            }
-        });
-
-        // 3. Одиночні file (якщо не знайшли нічого вище) – витягаємо всі
-        const singleMatches = text.match(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/g);
-        if (singleMatches) {
-            singleMatches.forEach(s => {
-                const innerMatch = s.match(/['"]([^'"]+\.m3u8[^'"]*)['"]/);
-                if (innerMatch) {
-                    const url = innerMatch[1];
-                    if (!sources.some(x => x.file === url)) {
-                        sources.push({ label: 'Озвучка', file: url });
-                    }
-                }
-            });
-        }
-
-        return sources;
-    }
-
-    // ========== Оновлений збирач iframe ==========
-    function extractPlayerIframeUrls(doc) {
-        const selectors = [
-            '.video-responsive iframe',
-            '.player-responsive iframe',
-            '#player iframe',
-            'iframe[src]'
-        ];
-        const urls = [];
-        for (const sel of selectors) {
-            safeQueryAll(sel, doc).forEach(el => {
-                let src = el.getAttribute('src') || el.getAttribute('data-src');
-                if (!src) return;
-                if (src.startsWith('//')) src = 'https:' + src;
-                if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
-                urls.push(src);
-            });
-        }
-        // Додатково шукаємо в script
+        // іноді він ховається в script
         const scripts = safeQueryAll('script:not([src])', doc);
         for (const s of scripts) {
             const match = s.textContent.match(/(?:playerUrl|iframeUrl)\s*=\s*['"]([^'"]+)['"]/);
             if (match) {
                 let url = match[1];
                 if (url.startsWith('//')) url = 'https:' + url;
-                urls.push(url);
+                return url;
             }
         }
-        return [...new Set(urls)];
+        return null;
     }
 
-    async function loadAnimeDetails(animeUrl) {
-        const doc = await fetchUA(animeUrl);
+    // ================== ДЕТАЛІ АНІМЕ (отримуємо список епізодів + базову інфу) ==================
+    async function fetchAnimeDetail(url) {
+        const doc = await fetchUA(url);
         let title = '';
         for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
             const el = safeQuery(sel, doc);
@@ -293,113 +240,81 @@
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
 
-        // --- Оновлений збір джерел з усіх плеєрів ---
-        const playerUrls = extractPlayerIframeUrls(doc);
-        const allSources = [];
-        for (const playerUrl of playerUrls) {
-            try {
-                const playerHtml = await fetchUA(playerUrl);
-                const text = playerHtml.body?.innerHTML || '';
-                const sources = extractSourcesFromText(text);
-                allSources.push(...sources);
-            } catch (e) {
-                console.warn('Не вдалося обробити плеєр:', playerUrl, e);
-            }
-        }
-
-        // Якщо нічого не знайшли, пробуємо знайти вкладені iframe у першому плеєрі (запасний варіант)
-        let episodes = [];
-        if (allSources.length === 0 && playerUrls.length > 0) {
-            try {
-                const firstHtml = await fetchUA(playerUrls[0]);
-                const nestedIframe = safeQuery('iframe[src]', firstHtml);
-                if (nestedIframe) {
-                    let nestedUrl = nestedIframe.getAttribute('src');
-                    if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
-                    if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
-                    const nestedHtml = await fetchUA(nestedUrl);
-                    const nestedText = nestedHtml.body?.innerHTML || '';
-                    const nestedSources = extractSourcesFromText(nestedText);
-                    allSources.push(...nestedSources);
+        // шукаємо посилання на серії
+        const epLinks = [];
+        const linkSelectors = [
+            '.episodes-list a',
+            '.pmovie__episodes a',
+            '.episodes a',
+            'a[href*="/episode-"]',  // поширений формат
+            'a[href*="/series-"]',
+            'a[href*="/play-"]'
+        ];
+        const seenUrls = new Set();
+        for (const sel of linkSelectors) {
+            safeQueryAll(sel, doc).forEach(a => {
+                let href = a.getAttribute('href');
+                if (!href) return;
+                if (href.startsWith('/')) href = ANIMEUA_BASE + href;
+                if (!seenUrls.has(href) && href !== url) {
+                    seenUrls.add(href);
+                    // намагаємось визначити номер серії
+                    let epNum = (a.textContent.match(/(\d+)/) || [])[1] || '';
+                    if (!epNum) {
+                        const urlMatch = href.match(/[-\/](\d+)(?:\.html)?$/);
+                        if (urlMatch) epNum = urlMatch[1];
+                    }
+                    epLinks.push({
+                        url: href,
+                        episode: epNum || String(epLinks.length + 1),
+                        label: a.textContent.trim() || 'Серія ' + (epNum || epLinks.length + 1)
+                    });
                 }
-            } catch (e) {}
+            });
         }
-
-        // Форматуємо джерела у звичний вигляд (серія, сезон, озвучка)
-        episodes = allSources.map((s, idx) => {
-            const parts = (s.label || '').split('/').map(p => p.trim());
-            const season = (s.label || '').match(/[Сс]езон\s*(\d+)/)?.[1] || '1';
-            const epMatch = (s.label || '').match(/[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
-            const episode = epMatch ? (epMatch[1] || epMatch[2]) : String(idx + 1);
-            return {
-                title: s.label || `Серія ${idx+1}`,
-                season,
-                episode,
-                poster: s.poster || poster,
-                file: s.file,
-                dub: parts[0] || 'UA',
-                quality: s.label?.match(/\[(\d+p)\]/)?.[1] || ''
-            };
-        }).filter(ep => ep.file);
 
         return {
-            mal_id: animeUrl.hashCode(),
+            mal_id: url.hashCode(),
             title,
             images: { jpg: { large_image_url: poster, image_url: poster } },
             genres,
             year,
             synopsis,
             score: null,
-            episodes,
-            playerUrl: playerUrls[0] || null,
-            url: animeUrl,
+            episodes: epLinks,  // масив { url, episode, label }
+            url: url,
             from: 'animeua'
         };
     }
 
-    // ========== Плеєр ==========
-    let hlsInstance = null;
-    function destroyHls() { if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } }
-
-    function loadVideo(url) {
-        destroyHls();
-        DOM.mainVideoPlayer.pause();
-        DOM.mainVideoPlayer.removeAttribute('src');
-        DOM.mainVideoPlayer.load();
-        if (!url) { showToast('❌ Немає URL відео'); return; }
-        const finalUrl = getProxyUrl(url);
-        if (Hls.isSupported()) {
-            hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
-            hlsInstance.loadSource(finalUrl);
-            hlsInstance.attachMedia(DOM.mainVideoPlayer);
-            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => DOM.mainVideoPlayer.play().catch(() => {}));
-            hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR: hlsInstance.startLoad(); break;
-                        case Hls.ErrorTypes.MEDIA_ERROR: hlsInstance.recoverMediaError(); break;
-                        default: destroyHls();
-                    }
-                }
-            });
-        } else if (DOM.mainVideoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-            DOM.mainVideoPlayer.src = finalUrl;
-            DOM.mainVideoPlayer.addEventListener('loadedmetadata', () => DOM.mainVideoPlayer.play().catch(() => {}));
-        } else {
-            DOM.mainVideoPlayer.src = finalUrl;
-            DOM.mainVideoPlayer.play().catch(() => {});
-        }
+    // ================== ЗАВАНТАЖИТИ ПЛЕЄР ДЛЯ КОНКРЕТНОГО ЕПІЗОДУ ==================
+    async function getEpisodeIframeSrc(episodeUrl) {
+        const doc = await fetchUA(episodeUrl);
+        const iframeSrc = extractIframeSrc(doc);
+        if (!iframeSrc) throw new Error('Плеєр не знайдено на сторінці серії');
+        // повертаємо проксований URL для вбудовування
+        return getProxyUrl(iframeSrc);
     }
 
-    function playEpisode(title, file) {
-        if (!file) { showToast('❌ Немає файлу'); return; }
-        DOM.playerModalTitle.textContent = title;
+    // ================== ПОКАЗ ПЛЕЄРА В IFRAME ==================
+    function showPlayer(title, episodeLabel, episodeUrl) {
+        DOM.playerModalTitle.textContent = title + ' - ' + episodeLabel;
         DOM.playerModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        loadVideo(file);
+        // показуємо лоадер
+        DOM.mainVideoFrame.srcdoc = '<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#fff;font-family:sans-serif;">⏳ Завантаження плеєра...</body></html>';
+        DOM.mainVideoFrame.style.display = 'block';
+        // отримуємо проксований iframe плеєра і вставляємо
+        getEpisodeIframeSrc(episodeUrl)
+            .then(proxiedUrl => {
+                DOM.mainVideoFrame.src = proxiedUrl;
+            })
+            .catch(err => {
+                DOM.mainVideoFrame.srcdoc = `<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#f55;">❌ ${err.message}</body></html>`;
+            });
     }
 
-    // ========== UI ==========
+    // ================== UI ==================
     let currentTab = 'main', currentPage = 1, totalPages = 1, currentList = [], currentSearchQuery = '', currentGenreSlug = null;
 
     function renderCards(list) {
@@ -482,31 +397,17 @@
         DOM.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         try {
-            const anime = await loadAnimeDetails(url);
+            const anime = await fetchAnimeDetail(url);
             Storage.addHistory(anime);
             DOM.modalTitle.textContent = anime.title;
 
-            // Групуємо за сезоном та озвучкою
-            const bySeasonDub = {};
-            anime.episodes.forEach(ep => {
-                const season = ep.season || '1';
-                const dub = ep.dub || 'UA';
-                if (!bySeasonDub[season]) bySeasonDub[season] = {};
-                if (!bySeasonDub[season][dub]) bySeasonDub[season][dub] = [];
-                bySeasonDub[season][dub].push(ep);
-            });
-
-            let episodesHtml = '';
-            for (const [season, dubs] of Object.entries(bySeasonDub)) {
-                episodesHtml += `<h4 style="margin-top:1.2rem;">📺 Сезон ${season}</h4>`;
-                for (const [dub, eps] of Object.entries(dubs)) {
-                    episodesHtml += `<p style="margin:0.5rem 0 0.2rem; font-weight:600;">🎙 ${dub}</p><div style="display:flex;flex-wrap:wrap;gap:0.4rem;">`;
-                    eps.forEach(ep => episodesHtml += `<button class="btn-outline ep-btn" data-file="${ep.file}">Еп.${ep.episode}</button>`);
-                    episodesHtml += '</div>';
-                }
-            }
-
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
+            const episodesHtml = anime.episodes.length
+                ? `<div style="display:flex;flex-wrap:wrap;gap:0.4rem;">${anime.episodes.map(ep => 
+                    `<button class="btn-outline ep-btn" data-url="${ep.url}" data-label="${ep.label}">${ep.episode}</button>`
+                ).join('')}</div>`
+                : '<p>Серії не знайдено (можливо, плеєр на головній сторінці)</p>';
+
             DOM.modalBody.innerHTML = `
                 <div class="anime-detail-grid">
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
@@ -517,10 +418,12 @@
                         <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
                     </div>
                 </div>
-                <div style="margin-top:1.5rem;">${episodesHtml || '<p>Серії не знайдено</p>'}</div>`;
+                <div style="margin-top:1.5rem;">${episodesHtml}</div>`;
             document.getElementById('toggleBookmarkBtn').addEventListener('click', () => { toggleBookmark(anime); openDetailModal(url); });
             DOM.modalBody.querySelectorAll('.ep-btn').forEach(btn => {
-                btn.addEventListener('click', () => playEpisode(`${anime.title} - Еп.${btn.textContent.replace('Еп.', '')}`, btn.dataset.file));
+                btn.addEventListener('click', () => {
+                    showPlayer(anime.title, btn.dataset.label, btn.dataset.url);
+                });
             });
         } catch (err) {
             DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`;
@@ -528,7 +431,12 @@
     }
 
     function closeModal() { DOM.modal.style.display = 'none'; document.body.style.overflow = ''; }
-    function closePlayerModal() { DOM.playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHls(); }
+    function closePlayerModal() {
+        DOM.playerModal.style.display = 'none';
+        document.body.style.overflow = '';
+        DOM.mainVideoFrame.src = '';  // зупиняємо iframe
+        DOM.mainVideoFrame.srcdoc = '';
+    }
     function closeProfileModal() { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; }
 
     function openProfileModal() {
@@ -603,6 +511,7 @@
         });
     }
 
+    // ================== ОБРОБНИКИ ПОДІЙ ==================
     DOM.themeToggleBtn.addEventListener('click', toggleTheme);
     DOM.profileBtn.addEventListener('click', openProfileModal);
     DOM.closeModalBtn.addEventListener('click', closeModal);
@@ -633,6 +542,7 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePlayerModal(); closeProfileModal(); } });
     document.getElementById('clearHistoryBtn').addEventListener('click', () => { Storage.clearHistory(); openProfileModal(); if (currentTab === 'history') loadContent(); });
 
+    // ================== СТАРТ ==================
     applyTheme(Storage.getTheme());
     updateBadge();
     initGenres().then(() => loadContent());
