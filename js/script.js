@@ -457,11 +457,17 @@
             const firstDub = dubs[0] || '';
             const episodes = firstDub ? anime.seasons[firstSeason][firstDub] : [];
             
+            // Calculate total unique episodes across all dubs in the first season for display
+            const totalEpisodes = episodes.length;
+            
             const html = `
                 <div class="anime-detail-grid">
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
                     <div class="detail-info">
-                        <div><span class="tag"><i class="fas fa-calendar"></i> ${anime.year || '—'}</span></div>
+                        <div>
+                            <span class="tag"><i class="fas fa-calendar"></i> ${anime.year || '—'}</span>
+                            <span class="tag"><i class="fas fa-film"></i> ${totalEpisodes} еп.</span>
+                        </div>
                         <div style="margin:0.5rem 0">${anime.genres.map(g => `<span class="tag">${g}</span>`).join('')}</div>
                         <p class="synopsis">${(anime.synopsis || 'Опис відсутній.').slice(0, 500)}</p>
                         <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
