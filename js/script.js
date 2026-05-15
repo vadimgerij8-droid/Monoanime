@@ -185,17 +185,25 @@
         }
     }
 
-    // ========== Парсер джерел ==========
+    // ========== Парсер джерел (ОНОВЛЕНО) ==========
     function extractSourcesFromText(text) {
         const sources = [];
         
-        // Покращений пошук JSON (file або playlist)
-        const jsonMatch = text.match(/['"](?:file|playlist)['"]\s*:\s*(\[[\s\S]{0,30000}?\])/);
+        // 1. Гнучкий пошук JSON (підтримує різні типи лапок та форматів плеєрів)
+        const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|'[\s\S]+?'|"[\s\S]+?")/i) || 
+                          text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
+        
         if (jsonMatch) {
             try {
-                // Очищення JSON від можливих коментарів або зайвих ком
-                let jsonStr = jsonMatch[1].replace(/,\s*\]/g, ']').replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '');
-                const arr = JSON.parse(jsonStr);
+                let rawData = jsonMatch[1].trim();
+                // Очищення від лапок, якщо JSON загорнутий у них як рядок
+                if ((rawData.startsWith("'") && rawData.endsWith("'")) || (rawData.startsWith('"') && rawData.endsWith('"'))) {
+                    rawData = rawData.slice(1, -1);
+                }
+                // Виправлення поширених помилок у JSON (зайві коми тощо)
+                const cleanJson = rawData.replace(/,\s*\]/g, ']').replace(/,\s*\}/g, '}');
+                const arr = JSON.parse(cleanJson);
+                
                 const walk = (items, dub = '') => {
                     items.forEach(item => {
                         if (item.folder || item.playlist) {
@@ -203,36 +211,27 @@
                         } else if (item.file) {
                             sources.push({
                                 label: (dub ? dub + ' / ' : '') + (item.title || 'Озвучка'),
-                                file: item.file,
-                                poster: item.poster || ''
+                                file: item.file
                             });
                         }
                     });
                 };
-                walk(arr);
-            } catch (e) { console.warn('JSON parse failed', e); }
+                
+                if (Array.isArray(arr)) walk(arr);
+                else if (arr.file) sources.push({ label: arr.title || 'Озвучка', file: arr.file });
+            } catch (e) { console.warn('Помилка парсингу JSON озвучок'); }
         }
 
-        // Пошук прямих посилань m3u8/mp4
-        const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*/g)];
-        urlMatches.forEach(m => {
-            const url = m[0];
-            if (!sources.some(s => s.file === url)) {
-                sources.push({ label: 'Потік', file: url });
-            }
-        });
-
-        // Пошук одиночних файлів у форматі file: "url"
-        const singleMatches = text.match(/['"]file['"]\s*:\s*['"]([^'"]+\.(?:m3u8|mp4)[^'"]*)['"]/g);
-        if (singleMatches) {
-            singleMatches.forEach(s => {
-                const innerMatch = s.match(/['"]([^'"]+\.(?:m3u8|mp4)[^'"]*)['"]/);
-                if (innerMatch && !sources.some(x => x.file === innerMatch[1])) {
-                    sources.push({ label: 'Озвучка', file: innerMatch[1] });
+        // 2. Якщо через JSON нічого не знайшли, шукаємо прямі посилання на m3u8
+        if (sources.length === 0) {
+            const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.m3u8[^\s'"<>]*/g)];
+            urlMatches.forEach(m => {
+                if (!sources.some(s => s.file === m[0])) {
+                    sources.push({ label: 'Потік', file: m[0] });
                 }
             });
         }
-
+        
         return sources;
     }
 
