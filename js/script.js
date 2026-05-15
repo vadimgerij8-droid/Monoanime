@@ -300,6 +300,7 @@
         return results;
     }
 
+    // ==================== ГОЛОВНА ЗМІНА: ПЕРЕПИСАНА parsePlaylistItem ====================
     function parsePlaylistItem(item, parentTitle = '', currentDub = '', results = []) {
         if (!item) return results;
 
@@ -307,11 +308,15 @@
         if (item.folder && Array.isArray(item.folder)) {
             item.folder.forEach(child => {
                 const childTitle = (child.title || child.name || '').toLowerCase();
-                const looksLikeDub = childTitle.includes('anilibria') ||
-                                     childTitle.includes('amant') ||
-                                     childTitle.includes('dub') ||
-                                     childTitle.includes('озвуч') ||
-                                     childTitle.includes('voice');
+
+                // 🟢 Нова структурна перевірка: чи є цей рівень озвучкою
+                // Озвучка – це коли всі дочірні елементи або мають file, або самі є папками з folder
+                const looksLikeDub =
+                    child.folder &&
+                    child.folder.every(f =>
+                        f.file ||
+                        (f.folder && Array.isArray(f.folder))
+                    );
 
                 // Якщо це окремий рівень озвучки
                 if (looksLikeDub && child.folder) {
@@ -323,9 +328,15 @@
                     }
                 } else if (child.folder && Array.isArray(child.folder)) {
                     // Звичайна структура: сезони або серії
-                    const firstGrand = child.folder[0];
-                    if (firstGrand && firstGrand.folder) {
-                        // Сезони
+                    // 🟢 Виправлена перевірка на сезони (безпечний доступ)
+                    const firstGrand = child.folder?.[0];
+                    const isSeasonStructure =
+                        firstGrand &&
+                        firstGrand.folder &&
+                        Array.isArray(firstGrand.folder);
+
+                    if (isSeasonStructure) {
+                        // Це рівень сезонів
                         child.folder.forEach(season => {
                             const seasonTitle = season.title || season.name || parentTitle;
                             const seasonNum = extractSeasonNumber(seasonTitle);
