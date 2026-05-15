@@ -183,11 +183,9 @@
         }
     }
 
-    // ========== Оновлений парсер джерел ==========
+    // ========== Парсер джерел ==========
     function extractSourcesFromText(text) {
         const sources = [];
-
-        // 1. JSON-масив (основна структура з озвучками)
         const jsonMatch = text.match(/['"]file['"]\s*:\s*(\[[\s\S]{0,20000}?\])/);
         if (jsonMatch) {
             try {
@@ -206,45 +204,27 @@
                     });
                 };
                 walk(arr);
-            } catch (e) {
-                console.warn('JSON parse failed', e);
-            }
+            } catch (e) { console.warn('JSON parse failed', e); }
         }
-
-        // 2. Всі прямі m3u8/mp4 посилання
         const urlMatches = [...text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4)[^\s'"<>]*/g)];
         urlMatches.forEach(m => {
             const url = m[0];
-            if (!sources.some(s => s.file === url)) {
-                sources.push({ label: 'Потік', file: url });
-            }
+            if (!sources.some(s => s.file === url)) sources.push({ label: 'Потік', file: url });
         });
-
-        // 3. Одиночні file (якщо не знайшли нічого вище) – витягаємо всі
         const singleMatches = text.match(/['"]file['"]\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/g);
         if (singleMatches) {
             singleMatches.forEach(s => {
                 const innerMatch = s.match(/['"]([^'"]+\.m3u8[^'"]*)['"]/);
-                if (innerMatch) {
-                    const url = innerMatch[1];
-                    if (!sources.some(x => x.file === url)) {
-                        sources.push({ label: 'Озвучка', file: url });
-                    }
+                if (innerMatch && !sources.some(x => x.file === innerMatch[1])) {
+                    sources.push({ label: 'Озвучка', file: innerMatch[1] });
                 }
             });
         }
-
         return sources;
     }
 
-    // ========== Оновлений збирач iframe ==========
     function extractPlayerIframeUrls(doc) {
-        const selectors = [
-            '.video-responsive iframe',
-            '.player-responsive iframe',
-            '#player iframe',
-            'iframe[src]'
-        ];
+        const selectors = ['.video-responsive iframe', '.player-responsive iframe', '#player iframe', 'iframe[src]'];
         const urls = [];
         for (const sel of selectors) {
             safeQueryAll(sel, doc).forEach(el => {
@@ -255,7 +235,6 @@
                 urls.push(src);
             });
         }
-        // Додатково шукаємо в script
         const scripts = safeQueryAll('script:not([src])', doc);
         for (const s of scripts) {
             const match = s.textContent.match(/(?:playerUrl|iframeUrl)\s*=\s*['"]([^'"]+)['"]/);
@@ -293,7 +272,6 @@
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
 
-        // --- Оновлений збір джерел з усіх плеєрів ---
         const playerUrls = extractPlayerIframeUrls(doc);
         const allSources = [];
         for (const playerUrl of playerUrls) {
@@ -302,13 +280,9 @@
                 const text = playerHtml.body?.innerHTML || '';
                 const sources = extractSourcesFromText(text);
                 allSources.push(...sources);
-            } catch (e) {
-                console.warn('Не вдалося обробити плеєр:', playerUrl, e);
-            }
+            } catch (e) {}
         }
-
-        // Якщо нічого не знайшли, пробуємо знайти вкладені iframe у першому плеєрі (запасний варіант)
-        let episodes = [];
+        // fallback на вкладений iframe
         if (allSources.length === 0 && playerUrls.length > 0) {
             try {
                 const firstHtml = await fetchUA(playerUrls[0]);
@@ -325,8 +299,7 @@
             } catch (e) {}
         }
 
-        // Форматуємо джерела у звичний вигляд (серія, сезон, озвучка)
-        episodes = allSources.map((s, idx) => {
+        const episodes = allSources.map((s, idx) => {
             const parts = (s.label || '').split('/').map(p => p.trim());
             const season = (s.label || '').match(/[Сс]езон\s*(\d+)/)?.[1] || '1';
             const epMatch = (s.label || '').match(/[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
@@ -342,6 +315,16 @@
             };
         }).filter(ep => ep.file);
 
+        // Збираємо структуру для селекторів
+        const seasons = {};
+        episodes.forEach(ep => {
+            const s = ep.season || '1';
+            const d = ep.dub || 'UA';
+            if (!seasons[s]) seasons[s] = {};
+            if (!seasons[s][d]) seasons[s][d] = [];
+            seasons[s][d].push(ep);
+        });
+
         return {
             mal_id: animeUrl.hashCode(),
             title,
@@ -351,52 +334,51 @@
             synopsis,
             score: null,
             episodes,
-            playerUrl: playerUrls[0] || null,
+            seasons,
             url: animeUrl,
             from: 'animeua'
         };
     }
 
     // ========== Плеєр ==========
-    let hlsInstance = null;
-    function destroyHls() { if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } }
+    let hlsInstances = new Map(); // зберігаємо для різних відеоелементів
 
-    function loadVideo(url) {
-        destroyHls();
-        DOM.mainVideoPlayer.pause();
-        DOM.mainVideoPlayer.removeAttribute('src');
-        DOM.mainVideoPlayer.load();
-        if (!url) { showToast('❌ Немає URL відео'); return; }
-        const finalUrl = getProxyUrl(url);
-        if (Hls.isSupported()) {
-            hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
-            hlsInstance.loadSource(finalUrl);
-            hlsInstance.attachMedia(DOM.mainVideoPlayer);
-            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => DOM.mainVideoPlayer.play().catch(() => {}));
-            hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR: hlsInstance.startLoad(); break;
-                        case Hls.ErrorTypes.MEDIA_ERROR: hlsInstance.recoverMediaError(); break;
-                        default: destroyHls();
-                    }
-                }
-            });
-        } else if (DOM.mainVideoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-            DOM.mainVideoPlayer.src = finalUrl;
-            DOM.mainVideoPlayer.addEventListener('loadedmetadata', () => DOM.mainVideoPlayer.play().catch(() => {}));
-        } else {
-            DOM.mainVideoPlayer.src = finalUrl;
-            DOM.mainVideoPlayer.play().catch(() => {});
+    function destroyHlsForVideo(videoEl) {
+        if (hlsInstances.has(videoEl)) {
+            hlsInstances.get(videoEl).destroy();
+            hlsInstances.delete(videoEl);
         }
     }
 
-    function playEpisode(title, file) {
-        if (!file) { showToast('❌ Немає файлу'); return; }
-        DOM.playerModalTitle.textContent = title;
-        DOM.playerModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        loadVideo(file);
+    function loadVideo(url, videoElement = DOM.mainVideoPlayer) {
+        destroyHlsForVideo(videoElement);
+        videoElement.pause();
+        videoElement.removeAttribute('src');
+        videoElement.load();
+        if (!url) { showToast('❌ Немає URL відео'); return; }
+        const finalUrl = getProxyUrl(url);
+        if (Hls.isSupported()) {
+            const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
+            hlsInstances.set(videoElement, hls);
+            hls.loadSource(finalUrl);
+            hls.attachMedia(videoElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => videoElement.play().catch(() => {}));
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+                        case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+                        default: destroyHlsForVideo(videoElement);
+                    }
+                }
+            });
+        } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+            videoElement.src = finalUrl;
+            videoElement.addEventListener('loadedmetadata', () => videoElement.play().catch(() => {}));
+        } else {
+            videoElement.src = finalUrl;
+            videoElement.play().catch(() => {});
+        }
     }
 
     // ========== UI ==========
@@ -476,38 +458,43 @@
         if (currentTab === 'bookmarks') loadContent(); else renderCards(currentList);
     }
 
+    // ========== Оновлене модальне вікно ==========
+    let currentDetailAnime = null; // зберігаємо дані для селекторів
+    let detailVideoEl = null;
+
+    function closeDetailModal() {
+        DOM.modal.style.display = 'none';
+        document.body.style.overflow = '';
+        if (detailVideoEl) {
+            destroyHlsForVideo(detailVideoEl);
+            detailVideoEl = null;
+        }
+        currentDetailAnime = null;
+    }
+
     async function openDetailModal(url) {
         DOM.modalTitle.textContent = 'Завантаження...';
         DOM.modalBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
         DOM.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
         try {
             const anime = await loadAnimeDetails(url);
             Storage.addHistory(anime);
+            currentDetailAnime = anime;
             DOM.modalTitle.textContent = anime.title;
 
-            // Групуємо за сезоном та озвучкою
-            const bySeasonDub = {};
-            anime.episodes.forEach(ep => {
-                const season = ep.season || '1';
-                const dub = ep.dub || 'UA';
-                if (!bySeasonDub[season]) bySeasonDub[season] = {};
-                if (!bySeasonDub[season][dub]) bySeasonDub[season][dub] = [];
-                bySeasonDub[season][dub].push(ep);
-            });
-
-            let episodesHtml = '';
-            for (const [season, dubs] of Object.entries(bySeasonDub)) {
-                episodesHtml += `<h4 style="margin-top:1.2rem;">📺 Сезон ${season}</h4>`;
-                for (const [dub, eps] of Object.entries(dubs)) {
-                    episodesHtml += `<p style="margin:0.5rem 0 0.2rem; font-weight:600;">🎙 ${dub}</p><div style="display:flex;flex-wrap:wrap;gap:0.4rem;">`;
-                    eps.forEach(ep => episodesHtml += `<button class="btn-outline ep-btn" data-file="${ep.file}">Еп.${ep.episode}</button>`);
-                    episodesHtml += '</div>';
-                }
-            }
-
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
-            DOM.modalBody.innerHTML = `
+            const seasons = Object.keys(anime.seasons).sort((a,b) => a - b);
+            const firstSeason = seasons[0] || '1';
+            const dubs = anime.seasons[firstSeason] ? Object.keys(anime.seasons[firstSeason]) : [];
+            const firstDub = dubs[0] || '';
+            const episodesForFirst = firstDub ? anime.seasons[firstSeason][firstDub] : [];
+
+            let dubOptions = dubs.map(d => `<option value="${d}">${d}</option>`).join('');
+            let episodeOptions = episodesForFirst.map(ep => `<option value="${ep.file}" data-episode="${ep.episode}">Еп. ${ep.episode}</option>`).join('');
+
+            const html = `
                 <div class="anime-detail-grid">
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
                     <div class="detail-info">
@@ -517,20 +504,98 @@
                         <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
                     </div>
                 </div>
-                <div style="margin-top:1.5rem;">${episodesHtml || '<p>Серії не знайдено</p>'}</div>`;
-            document.getElementById('toggleBookmarkBtn').addEventListener('click', () => { toggleBookmark(anime); openDetailModal(url); });
-            DOM.modalBody.querySelectorAll('.ep-btn').forEach(btn => {
-                btn.addEventListener('click', () => playEpisode(`${anime.title} - Еп.${btn.textContent.replace('Еп.', '')}`, btn.dataset.file));
+                <div style="margin-top:1.5rem;">
+                    <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label style="font-weight:600;">📺 Сезон</label>
+                            <select id="seasonSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">
+                                ${seasons.map(s => `<option value="${s}" ${s === firstSeason ? 'selected' : ''}>Сезон ${s}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label style="font-weight:600;">🎙 Озвучка</label>
+                            <select id="dubSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">${dubOptions}</select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label style="font-weight:600;">🎬 Серія</label>
+                            <select id="episodeSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">${episodeOptions}</select>
+                        </div>
+                        <button id="playSelectedBtn" class="btn-outline"><i class="fas fa-play"></i> Дивитися</button>
+                    </div>
+                    <div class="player-container" style="margin-top:1rem;">
+                        <video id="detailVideoPlayer" controls crossorigin="anonymous"></video>
+                    </div>
+                </div>
+            `;
+
+            DOM.modalBody.innerHTML = html;
+            detailVideoEl = document.getElementById('detailVideoPlayer');
+
+            function updateEpisodes() {
+                const season = document.getElementById('seasonSelect').value;
+                const dub = document.getElementById('dubSelect').value;
+                const eps = anime.seasons[season]?.[dub] || [];
+                const epSelect = document.getElementById('episodeSelect');
+                epSelect.innerHTML = eps.map(ep => `<option value="${ep.file}" data-episode="${ep.episode}">Еп. ${ep.episode}</option>`).join('');
+            }
+
+            document.getElementById('seasonSelect').addEventListener('change', function() {
+                const season = this.value;
+                const dubs = anime.seasons[season] ? Object.keys(anime.seasons[season]) : [];
+                const dubSelect = document.getElementById('dubSelect');
+                dubSelect.innerHTML = dubs.map(d => `<option value="${d}">${d}</option>`).join('');
+                updateEpisodes();
             });
+
+            document.getElementById('dubSelect').addEventListener('change', updateEpisodes);
+
+            document.getElementById('playSelectedBtn').addEventListener('click', () => {
+                const file = document.getElementById('episodeSelect').value;
+                const epText = document.getElementById('episodeSelect').selectedOptions[0]?.dataset.episode || '';
+                const season = document.getElementById('seasonSelect').value;
+                const dub = document.getElementById('dubSelect').value;
+                const title = `${anime.title} С${season} / ${dub} / Еп.${epText}`;
+                if (file) loadVideo(file, detailVideoEl);
+                else showToast('❌ Немає файлу');
+            });
+
+            // Кнопка закладок
+            document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
+                toggleBookmark(anime);
+                // Оновлюємо стан кнопки
+                const isNowBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
+                const btn = document.getElementById('toggleBookmarkBtn');
+                if (btn) btn.innerHTML = `<i class="fas fa-star"></i> ${isNowBookmarked ? 'В обраному' : 'Додати в обране'}`;
+            });
+
         } catch (err) {
             DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`;
         }
     }
 
-    function closeModal() { DOM.modal.style.display = 'none'; document.body.style.overflow = ''; }
-    function closePlayerModal() { DOM.playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHls(); }
-    function closeProfileModal() { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; }
+    DOM.closeModalBtn.addEventListener('click', closeDetailModal);
+    DOM.closePlayerBtn.addEventListener('click', () => {
+        DOM.playerModal.style.display = 'none';
+        document.body.style.overflow = '';
+        destroyHlsForVideo(DOM.mainVideoPlayer);
+    });
+    DOM.closeProfileBtn.addEventListener('click', () => {
+        DOM.profileModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
 
+    // Модальне вікно плеєра (старе) можна залишити, якщо потрібно
+    function openPlayerModal(title, file) {
+        DOM.playerModalTitle.textContent = title;
+        DOM.playerModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        loadVideo(file, DOM.mainVideoPlayer);
+    }
+
+    // Ініціалізація подій для старого плеєра (якщо використовується)
+    window.playEpisode = openPlayerModal; // для сумісності
+
+    // Профіль
     function openProfileModal() {
         const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
         document.getElementById('statBookmarks').textContent = bookmarks.length;
@@ -605,9 +670,6 @@
 
     DOM.themeToggleBtn.addEventListener('click', toggleTheme);
     DOM.profileBtn.addEventListener('click', openProfileModal);
-    DOM.closeModalBtn.addEventListener('click', closeModal);
-    DOM.closePlayerBtn.addEventListener('click', closePlayerModal);
-    DOM.closeProfileBtn.addEventListener('click', closeProfileModal);
     document.getElementById('logoHome').addEventListener('click', resetToMain);
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -629,8 +691,24 @@
         if (allPill) allPill.classList.add('active-pill');
         loadContent();
     }, 500));
-    window.addEventListener('click', (e) => { if (e.target === DOM.modal) closeModal(); if (e.target === DOM.playerModal) closePlayerModal(); if (e.target === DOM.profileModal) closeProfileModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePlayerModal(); closeProfileModal(); } });
+    window.addEventListener('click', (e) => {
+        if (e.target === DOM.modal) closeDetailModal();
+        if (e.target === DOM.playerModal) {
+            DOM.playerModal.style.display = 'none';
+            document.body.style.overflow = '';
+            destroyHlsForVideo(DOM.mainVideoPlayer);
+        }
+        if (e.target === DOM.profileModal) closeProfileModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeDetailModal();
+            DOM.playerModal.style.display = 'none';
+            document.body.style.overflow = '';
+            destroyHlsForVideo(DOM.mainVideoPlayer);
+            closeProfileModal();
+        }
+    });
     document.getElementById('clearHistoryBtn').addEventListener('click', () => { Storage.clearHistory(); openProfileModal(); if (currentTab === 'history') loadContent(); });
 
     applyTheme(Storage.getTheme());
