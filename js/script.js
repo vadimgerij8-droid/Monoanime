@@ -345,15 +345,13 @@
             let dub = label
                 .replace(/[Сс]езон\s*\d+/g, '')
                 .replace(/[Ее]п\.?\s*\d+|[Сс]ері[яіяа]\s*\d+|\d+\s*[Сс]ері[яіяа]/g, '')
-                .replace(/\[\d+p\]/g, '') // видаляємо якість
+                .replace(/\[\d+p\]/g, '')
                 .replace(/\//g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
             
-            // Якщо після очищення назва порожня, використовуємо провайдера
             if (!dub || dub.length < 2) dub = s.provider || 'UA';
             
-            // Додаємо провайдера до назви озвучки, щоб вони були унікальними
             const uniqueDubKey = `${dub} (${s.provider})`;
 
             return {
@@ -366,13 +364,28 @@
             };
         }).filter(ep => ep.file);
 
+        // ----- ФІЛЬТРАЦІЯ ТА СОРТУВАННЯ -----
         const seasons = {};
+        const addedEpisodes = new Set();
         episodes.forEach(ep => {
             const s = ep.season || '1';
-            const d = ep.dub;
+            const d = ep.dub || 'UA';
+            const uniqueKey = `${s}_${d}_${ep.episode}`;
+            if (addedEpisodes.has(uniqueKey)) return;
+            addedEpisodes.add(uniqueKey);
             if (!seasons[s]) seasons[s] = {};
-            if (!seasons[s][d]) seasons[s][d] = [];
+            if (!seasons[s][d]) {
+                seasons[s][d] = [];
+            }
             seasons[s][d].push(ep);
+        });
+
+        Object.keys(seasons).forEach(season => {
+            Object.keys(seasons[season]).forEach(dub => {
+                seasons[season][dub].sort((a, b) => {
+                    return Number(a.episode) - Number(b.episode);
+                });
+            });
         });
 
         return {
