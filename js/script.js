@@ -322,24 +322,50 @@
             } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
         }
 
+        // ----- Оновлений блок парсингу серій -----
         const episodes = allSources.map((s, idx) => {
-            const parts = (s.label || '').split('/').map(p => p.trim());
-            const seasonMatch = (s.label || '').match(/[Сс]езон\s*(\d+)/);
+            const label = s.label || '';
+            // Витягуємо сезон
+            const seasonMatch = label.match(/[Сс]езон\s*(\d+)/);
             const season = seasonMatch ? seasonMatch[1] : '1';
-            const epMatch = (s.label || '').match(/[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
-            const episode = epMatch ? (epMatch[1] || epMatch[2]) : String(idx + 1);
+            
+            // Витягуємо номер серії (підтримка форматів: "Серія 5", "5 серія", "Еп. 5")
+            const epMatch = label.match(/(\d+)\s*[Сс]ері[яіяа]|[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
+            const episode = epMatch ? (epMatch[1] || epMatch[2] || epMatch[3]) : String(idx + 1);
+            
+            // Визначаємо озвучку (dub)
+            const parts = label.split('/').map(p => p.trim()).filter(Boolean);
+            // Відфільтровуємо частини, які є сезоном або номером серії
+            const dubParts = parts.filter(part => {
+                if (/^[Сс]езон\s*\d+$/.test(part)) return false;               // "Сезон 1"
+                if (/^(?:[Ее]п\.?\s*\d+|[Сс]ері[яіяа]\s*\d+|\d+\s*[Сс]ері[яіяа])$/.test(part)) return false; // "Еп. 1", "Серія 1", "1 серія"
+                if (/^\d{1,4}$/.test(part)) return false;                     // просто число (ймовірно номер серії)
+                return true;
+            });
+            let dub = dubParts.join(' / ');
+            if (!dub) {
+                // Якщо після очищення нічого не лишилось, пробуємо взяти залишок без сезону/серії
+                const cleanedLabel = label
+                    .replace(/[Сс]езон\s*\d+/g, '')
+                    .replace(/[Ее]п\.?\s*\d+|[Сс]ері[яіяа]\s*\d+|\d+\s*[Сс]ері[яіяа]/g, '')
+                    .replace(/\//g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                dub = cleanedLabel || 'UA';
+            }
+            
             return {
-                title: s.label || `Серія ${idx+1}`,
+                title: label || `Серія ${idx+1}`,
                 season,
                 episode,
                 poster: s.poster || poster,
                 file: s.file,
-                dub: parts[0] || 'UA',
-                quality: s.label?.match(/\[(\d+p)\]/)?.[1] || ''
+                dub: dub,
+                quality: label.match(/\[(\d+p)\]/)?.[1] || ''
             };
         }).filter(ep => ep.file);
 
-        // Збираємо структуру для селекторів
+        // Групуємо за сезонами та озвучками
         const seasons = {};
         episodes.forEach(ep => {
             const s = ep.season || '1';
