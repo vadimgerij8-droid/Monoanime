@@ -2,11 +2,21 @@
     const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
     const ANIMEUA_BASE = 'https://animeua.club';
 
+    // Допоміжна функція для проксі
     function getProxyUrl(url) {
-        if (!url) { console.warn('getProxyUrl empty'); return null; }
+        if (!url) return null;
         return PROXY_URL + '?url=' + encodeURIComponent(url);
     }
 
+    // Універсальний fetch із проксі (для API animeon.club теж використовуємо)
+    async function apiFetch(url) {
+        const proxyUrl = getProxyUrl(url);
+        const resp = await fetch(proxyUrl);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        return resp.json();
+    }
+
+    // Хеш для ID із рядка (як у старому коді)
     String.prototype.hashCode = function() {
         let hash = 0;
         for (let i = 0; i < this.length; i++) {
@@ -16,6 +26,7 @@
         return Math.abs(hash);
     };
 
+    // Безпечний querySelector
     function safeQuery(selector, parent = document) {
         try { return parent.querySelector(selector); } catch (e) { return null; }
     }
@@ -24,6 +35,7 @@
         try { return Array.from(parent.querySelectorAll(selector)); } catch (e) { return []; }
     }
 
+    // debounce для пошуку
     function debounce(fn, delay) {
         let timer;
         return function(...args) {
@@ -32,6 +44,7 @@
         };
     }
 
+    // Основні DOM-елементи
     const DOM = {
         animeContainer: document.getElementById('animeContainer'),
         searchInput: document.getElementById('searchInput'),
@@ -54,6 +67,7 @@
         profileBody: document.getElementById('profileBody')
     };
 
+    // Тост
     function showToast(msg) {
         DOM.toast.textContent = msg;
         DOM.toast.classList.add('show');
@@ -61,6 +75,7 @@
         DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 2200);
     }
 
+    // Робота з localStorage
     const Storage = {
         getBookmarks() { try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; } },
         saveBookmarks(arr) { localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr)); },
@@ -80,12 +95,14 @@
         setTheme(theme) { localStorage.setItem('mono_anime_theme', theme); }
     };
 
+    // Оновлення бейджа закладок
     function updateBadge() {
         const count = Storage.getBookmarks().length;
         DOM.bookmarkBadge.textContent = count;
         DOM.bookmarkBadge.style.display = count > 0 ? 'flex' : 'none';
     }
 
+    // Тема
     function applyTheme(theme) {
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
@@ -102,8 +119,8 @@
         applyTheme(next);
     }
 
+    // Завантаження HTML з animeua
     async function fetchUA(url) {
-        if (!url) throw new Error('empty url');
         const proxyUrl = getProxyUrl(url);
         const resp = await fetch(proxyUrl);
         if (!resp.ok) throw new Error(`status ${resp.status}`);
@@ -111,6 +128,7 @@
         return new DOMParser().parseFromString(html, 'text/html');
     }
 
+    // Парсинг карток аніме з animeua
     function parseCards(doc) {
         const cards = safeQueryAll('.poster', doc);
         if (cards.length) {
@@ -130,6 +148,7 @@
                 };
             });
         }
+        // fallback
         const links = safeQueryAll('a[href*="/anime/"]', doc);
         const unique = new Map();
         links.forEach(a => { if (!unique.has(a.href)) unique.set(a.href, a); });
@@ -147,21 +166,25 @@
         });
     }
 
+    // Отримання головної сторінки каталогу
     async function fetchMainPage(page = 1) {
         const doc = await fetchUA(`${ANIMEUA_BASE}/page/${page}/`);
         return parseCards(doc);
     }
 
+    // Пошук
     async function searchAnimeUA(query, page = 1) {
         const doc = await fetchUA(`${ANIMEUA_BASE}/index.php?do=search&subaction=search&story=${encodeURIComponent(query)}&page=${page}`);
         return parseCards(doc);
     }
 
+    // Жанри
     async function fetchByGenre(genreSlug, page = 1) {
         const doc = await fetchUA(`${ANIMEUA_BASE}/genre/${genreSlug}/page/${page}/`);
         return parseCards(doc);
     }
 
+    // Список жанрів (із головної сторінки)
     async function fetchGenres() {
         try {
             const doc = await fetchUA(ANIMEUA_BASE);
@@ -174,6 +197,7 @@
             }).filter(g => g.slug && g.name);
             return [...new Map(genres.map(g => [g.slug, g])).values()].slice(0, 25);
         } catch (e) {
+            // fallback
             return [
                 { slug: '1', name: 'Action' }, { slug: '2', name: 'Adventure' },
                 { slug: '3', name: 'Comedy' }, { slug: '4', name: 'Drama' },
@@ -183,530 +207,36 @@
         }
     }
 
-    // ==================== PLAYERJS PARSER (ВИПРАВЛЕНИЙ) ====================
+    // ========== НОВИЙ API ДЛЯ ОЗВУЧОК ТА СЕРІЙ ==========
 
-    function fixJsonLikeString(str) {
-        let fixed = str
-            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
-            .replace(/'/g, '"')
-            .replace(/,\s*([}\]])/g, '$1')
-            .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
-            .replace(/\\x([0-9A-Fa-f]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16)))
-            .replace(/\n/g, ' ')
-            .replace(/\r/g, ' ')
-            .replace(/\t/g, ' ');
-        return fixed;
+    // Пошук аніме на animeon.club за назвою, повертає ID
+    async function searchAnimeOnClub(title) {
+        // Тимчасовий ендпоінт – уточніть реальний URL пошуку!
+        const url = `https://animeon.club/api/animes?search=${encodeURIComponent(title)}`;
+        const data = await apiFetch(url);
+        if (!data || !data.length) throw new Error('Аніме не знайдено на animeon.club');
+        return data[0].id; // припускаємо, що повертається масив, перший елемент має id
     }
 
-    function extractPlayerJSConfig(text) {
-        const patterns = [
-            /new\s+Playerjs\s*\(\s*({[\s\S]*?})\s*\)/i,
-            /Playerjs\s*\(\s*({[\s\S]*?})\s*\)/i,
-            /player\s*=\s*new\s+Playerjs\s*\(\s*({[\s\S]*?})\s*\)/i,
-            /var\s+player\s*=\s*new\s+Playerjs\s*\(\s*({[\s\S]*?})\s*\)/i,
-            /playerjs\s*\(\s*({[\s\S]*?})\s*\)/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                try {
-                    const fixed = fixJsonLikeString(match[1]);
-                    return JSON.parse(fixed);
-                } catch (e) {
-                    console.warn('PlayerJS parse failed, trying alternative:', e.message);
-                    const fileMatch = match[1].match(/["']?file["']?\s*:\s*(\[[\s\S]*?\]|["'][^"']+["'])/);
-                    if (fileMatch) {
-                        try {
-                            const fixed = fixJsonLikeString(fileMatch[1]);
-                            return { file: JSON.parse(fixed) };
-                        } catch (e2) {
-                            const url = fileMatch[1].replace(/["']/g, '').trim();
-                            if (url) return { file: url };
-                        }
-                    }
-                }
-            }
-        }
-        return null;
+    // 1) Озвучки
+    async function getFundubs(animeId) {
+        const data = await apiFetch(`https://animeon.club/api/player/fundubs/${animeId}`);
+        return data.fundubs;
     }
 
-    function extractSeasonNumber(title) {
-        const match = title.match(/сезон\s*(\d+)|season\s*(\d+)/i);
-        return match ? (match[1] || match[2]) : '1';
+    // 2) Серії
+    async function getEpisodes(animeId, playerId, fundubId) {
+        const data = await apiFetch(`https://animeon.club/api/player/episodes/${animeId}?playerId=${playerId}&fundubId=${fundubId}`);
+        return data.episodes;
     }
 
-    function extractEpisodeNumber(str) {
-        const match = str.match(/[ЕеEp\.]*(?:пізод|pisode|p\.)?[\s-]*(\d+)|(\d+)[\s]*(?:серія|ep|series)?/i);
-        return match ? (match[1] || match[2]) : '1';
+    // 3) Відео URL
+    async function getVideoUrl(episodeId) {
+        const data = await apiFetch(`https://animeon.club/api/player/episode/${episodeId}`);
+        return data.videoUrl;
     }
 
-    function extractQuality(str) {
-        const qMatch = str.match(/(\d{3,4})p/);
-        return qMatch ? qMatch[1] + 'p' : '';
-    }
-
-    /**
-     * Визначає тип структури папки:
-     * - 'dubs'    — кожен child має title (назва озвучки) та folder з серіями
-     * - 'seasons' — кожен child має title (назва сезону) та folder, де folder[0] ТАКОЖ має folder
-     * - 'episodes'— просто список серій
-     */
-    function detectFolderType(children) {
-        if (!children || !children.length) return 'unknown';
-        
-        const sample = children.slice(0, Math.min(children.length, 3));
-        
-        // Перевірка на озвучки: child має folder, і його children мають file (серії)
-        const allHaveFolderWithEpisodes = sample.every(c => 
-            c.folder && Array.isArray(c.folder) && c.folder.length > 0
-        );
-        
-        if (!allHaveFolderWithEpisodes) return 'episodes';
-        
-        // Перевіряємо перший child з folder
-        const firstWithFolder = sample.find(c => c.folder && c.folder[0]);
-        if (!firstWithFolder) return 'episodes';
-        
-        const firstChild = firstWithFolder.folder[0];
-        
-        // Якщо перший елемент всередині ТАКОЖ має folder — це сезони
-        if (firstChild.folder && Array.isArray(firstChild.folder)) {
-            return 'seasons';
-        }
-        
-        // Якщо перший елемент має file — це озвучки (серії всередині озвучки)
-        if (firstChild.file !== undefined) {
-            return 'dubs';
-        }
-        
-        return 'episodes';
-    }
-
-    /**
-     * parseEpisodeItem — обробляє окрему серію
-     * @param {Object} ep — об'єкт епізоду
-     * @param {string} seasonNum — номер сезону
-     * @param {string} currentDub — назва озвучки
-     * @param {Array} results — масив результатів
-     */
-    function parseEpisodeItem(ep, seasonNum = '1', currentDub = '', results = []) {
-        if (!ep) return results;
-
-        const episodeTitle = ep.title || ep.name || 'Епізод';
-        const epNum = extractEpisodeNumber(episodeTitle);
-
-        // Якщо file — масив (різні якості/джерела однієї серії)
-        if (Array.isArray(ep.file)) {
-            ep.file.forEach((qualityItem, idx) => {
-                const qualityTitle = qualityItem.title || qualityItem.name || `Якість ${idx + 1}`;
-                const qualityFile = qualityItem.file || qualityItem.url || qualityItem;
-                
-                if (typeof qualityFile === 'string' && (
-                    qualityFile.startsWith('http') || 
-                    /\.(m3u8|mp4|mkv|avi|webm|txt|php)/i.test(qualityFile)
-                )) {
-                    results.push({
-                        title: episodeTitle,
-                        season: seasonNum,
-                        episode: epNum,
-                        dub: currentDub || 'Основна озвучка',
-                        file: qualityFile,
-                        poster: ep.poster || qualityItem.poster || '',
-                        subtitle: ep.subtitle || qualityItem.subtitle || '',
-                        id: ep.id || '',
-                        quality: extractQuality(qualityTitle + ' ' + qualityFile)
-                    });
-                }
-            });
-            return results;
-        }
-
-        // Один файл
-        if (typeof ep.file === 'string' && (
-            ep.file.startsWith('http') || 
-            /\.(m3u8|mp4|mkv|avi|webm|txt|php)/i.test(ep.file)
-        )) {
-            results.push({
-                title: episodeTitle,
-                season: seasonNum,
-                episode: epNum,
-                dub: currentDub || 'Основна озвучка',
-                file: ep.file,
-                poster: ep.poster || '',
-                subtitle: ep.subtitle || '',
-                id: ep.id || '',
-                quality: extractQuality(episodeTitle + ' ' + ep.file)
-            });
-        }
-
-        return results;
-    }
-
-    /**
-     * parsePlaylistItem — головна функція рекурсивного парсингу (ПОВНІСТЮ ПЕРЕРОБЛЕНА)
-     * Правильно обробляє:
-     * 1. Озвучки → Сезони → Серії
-     * 2. Озвучки → Серії (без сезонів)
-     * 3. Сезони → Серії
-     * 4. Просто список серій
-     */
-    function parsePlaylistItem(item, parentTitle = '', currentDub = '', results = []) {
-        if (!item) return results;
-
-        // Якщо це вкладений плейлист (playlist)
-        if (item.playlist && Array.isArray(item.playlist)) {
-            item.playlist.forEach(pl => parsePlaylistItem(pl, parentTitle, currentDub, results));
-            return results;
-        }
-
-        // Якщо це папка (folder)
-        if (item.folder && Array.isArray(item.folder)) {
-            const children = item.folder;
-            const folderType = detectFolderType(children);
-
-            switch (folderType) {
-                case 'dubs': {
-                    // Це рівень озвучок
-                    children.forEach(dub => {
-                        const dubName = dub.title || dub.name || currentDub || 'Основна озвучка';
-                        const seasonNum = extractSeasonNumber(dub.title || parentTitle);
-                        
-                        if (dub.folder && Array.isArray(dub.folder)) {
-                            dub.folder.forEach(ep => {
-                                // Перевіряємо, чи всередині озвучки є ще сезони
-                                if (ep.folder && Array.isArray(ep.folder)) {
-                                    // Озвучка → Сезони → Серії
-                                    const innerSeasonNum = extractSeasonNumber(ep.title || dub.title);
-                                    ep.folder.forEach(innerEp => {
-                                        parseEpisodeItem(innerEp, innerSeasonNum, dubName, results);
-                                    });
-                                } else {
-                                    // Озвучка → Серії (без сезонів)
-                                    parseEpisodeItem(ep, seasonNum, dubName, results);
-                                }
-                            });
-                        }
-                    });
-                    break;
-                }
-
-                case 'seasons': {
-                    // Це рівень сезонів
-                    children.forEach(season => {
-                        const seasonTitle = season.title || season.name || parentTitle;
-                        const seasonNum = extractSeasonNumber(seasonTitle);
-                        
-                        if (season.folder && Array.isArray(season.folder)) {
-                            season.folder.forEach(ep => {
-                                parseEpisodeItem(ep, seasonNum, currentDub, results);
-                            });
-                        }
-                    });
-                    break;
-                }
-
-                case 'episodes':
-                default: {
-                    // Просто список серій
-                    const seasonNum = extractSeasonNumber(item.title || parentTitle);
-                    children.forEach(ep => {
-                        parseEpisodeItem(ep, seasonNum, currentDub, results);
-                    });
-                    break;
-                }
-            }
-
-            return results;
-        }
-
-        // Якщо це безпосередньо епізод (є file)
-        if (item.file) {
-            parseEpisodeItem(item, parentTitle, currentDub, results);
-        }
-
-        return results;
-    }
-
-    // Витягування прямого посилання для moonanime.art
-    function extractFileFromMoonAnime(html) {
-        const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-        let match;
-        while ((match = scriptRegex.exec(html)) !== null) {
-            const fileMatch = match[1].match(/(?:file|src)\s*:\s*["']([^"']+\.m3u8)["']/);
-            if (fileMatch) return fileMatch[1];
-        }
-        return null;
-    }
-
-    function extractSourcesFromText(text) {
-        console.log('=== EXTRACTING SOURCES ===');
-        const sources = [];
-
-        // 1. PlayerJS конфіг
-        const playerConfig = extractPlayerJSConfig(text);
-        if (playerConfig) {
-            console.log('PLAYERJS CONFIG:', playerConfig);
-            if (playerConfig.file) {
-                if (Array.isArray(playerConfig.file)) {
-                    playerConfig.file.forEach((item, idx) => {
-                        parsePlaylistItem(item, '', '', sources);
-                    });
-                } else if (typeof playerConfig.file === 'string') {
-                    sources.push({
-                        title: 'Епізод 1',
-                        season: '1',
-                        episode: '1',
-                        dub: 'Основна озвучка',
-                        file: playerConfig.file,
-                        poster: '',
-                        id: '',
-                        quality: extractQuality(playerConfig.file)
-                    });
-                }
-            }
-
-            if (playerConfig.playlist && Array.isArray(playerConfig.playlist)) {
-                playerConfig.playlist.forEach(item => {
-                    parsePlaylistItem(item, '', '', sources);
-                });
-            }
-        }
-
-        // 2. Прямий плейліст
-        const playlistMatches = text.matchAll(/["']?playlist["']?\s*:\s*(\[[\s\S]{0,15000}?\])(?=\s*[,}])/g);
-        for (const match of playlistMatches) {
-            try {
-                const fixed = fixJsonLikeString(match[1]);
-                const playlist = JSON.parse(fixed);
-                if (Array.isArray(playlist)) {
-                    playlist.forEach(item => {
-                        parsePlaylistItem(item, '', '', sources);
-                    });
-                }
-            } catch (e) {
-                console.warn('Direct playlist parse failed:', e.message);
-            }
-        }
-
-        // 3. Файли масив
-        const fileMatches = text.matchAll(/["']?file["']?\s*:\s*(\[[\s\S]{0,15000}?\])(?=\s*[,}])/g);
-        for (const match of fileMatches) {
-            try {
-                const fixed = fixJsonLikeString(match[1]);
-                const files = JSON.parse(fixed);
-                if (Array.isArray(files)) {
-                    files.forEach(item => {
-                        parsePlaylistItem(item, '1', '', sources);
-                    });
-                }
-            } catch (e) {
-                console.warn('Direct file parse failed:', e.message);
-            }
-        }
-
-        // 4. Пряме посилання на відео (розширений regex)
-        const directUrls = text.matchAll(/https?:\/\/[^\s'"<>]+\.(m3u8|mp4|mkv|avi|webm|txt|php)/g);
-        for (const match of directUrls) {
-            const url = match[0];
-            if (!sources.some(s => s.file === url)) {
-                sources.push({
-                    title: 'Епізод',
-                    season: '1',
-                    episode: '1',
-                    dub: 'Основна озвучка',
-                    file: url,
-                    poster: '',
-                    id: '',
-                    quality: extractQuality(url)
-                });
-            }
-        }
-
-        console.log('TOTAL SOURCES:', sources);
-        return sources;
-    }
-
-    async function resolveNestedIframe(doc, depth = 0) {
-        if (depth > 3) {
-            console.warn('Max iframe depth reached');
-            return null;
-        }
-
-        const iframe = safeQuery('iframe[src], iframe[data-src]', doc);
-        if (!iframe) return null;
-
-        let src = iframe.getAttribute('src') || iframe.getAttribute('data-src');
-        if (!src) return null;
-
-        if (src.startsWith('//')) src = 'https:' + src;
-        if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
-
-        console.log(`Resolving iframe (depth ${depth}):`, src);
-
-        try {
-            const nestedDoc = await fetchUA(src);
-            const nestedIframe = safeQuery('iframe[src], iframe[data-src]', nestedDoc);
-            if (nestedIframe) {
-                return resolveNestedIframe(nestedDoc, depth + 1);
-            }
-            return nestedDoc;
-        } catch (e) {
-            console.error('Iframe error:', e);
-            return null;
-        }
-    }
-
-    async function extractPlayerIframeUrl(doc) {
-        const selectors = [
-            '.video-responsive iframe',
-            '.player-responsive iframe',
-            '#player iframe',
-            'iframe[src*="kodik"]',
-            'iframe[src*="alloha"]',
-            'iframe[src*="player"]',
-            'iframe[src*="video"]',
-            'iframe[src*="stream"]'
-        ];
-
-        for (const sel of selectors) {
-            const el = safeQuery(sel, doc);
-            if (el) {
-                let src = el.getAttribute('src') || el.getAttribute('data-src');
-                if (src) {
-                    if (src.startsWith('//')) src = 'https:' + src;
-                    if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
-                    return src;
-                }
-            }
-        }
-
-        const scripts = safeQueryAll('script:not([src])', doc);
-        for (const s of scripts) {
-            const patterns = [
-                /(?:playerUrl|iframeUrl|src)\s*=\s*['"]([^'"]+)['"]/,
-                /['"]file['"]\s*:\s*['"]([^'"]+)['"]/,
-                /url\s*:\s*['"]([^'"]+)['"]/
-            ];
-            for (const pattern of patterns) {
-                const match = s.textContent.match(pattern);
-                if (match) {
-                    let url = match[1];
-                    if (url.startsWith('//')) url = 'https:' + url;
-                    if (!url.startsWith('http')) url = ANIMEUA_BASE + url;
-                    return url;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    async function loadAnimeDetails(animeUrl) {
-        const doc = await fetchUA(animeUrl);
-        let title = '';
-        for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
-            const el = safeQuery(sel, doc);
-            if (el?.textContent.trim()) { title = el.textContent.trim(); break; }
-        }
-        let poster = '';
-        for (const sel of ['div.page__subcol-side .img-fit-cover img', '.pmovie__poster img', '.anime__poster img']) {
-            const el = safeQuery(sel, doc);
-            if (el) {
-                const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-                if (src) { poster = src.startsWith('http') ? src : ANIMEUA_BASE + src; break; }
-            }
-        }
-        const genres = safeQueryAll('.pmovie__genres a, .genres a', doc).map(a => a.textContent.trim()).filter(Boolean);
-        const yearEl = safeQuery('.pmovie__year, .release-year', doc);
-        const yearMatch = (yearEl?.textContent || '').match(/\d{4}/);
-        const year = yearMatch ? parseInt(yearMatch[0]) : null;
-        let synopsis = '';
-        for (const sel of ['.full-text', '.pmovie__description', '.anime__description']) {
-            const el = safeQuery(sel, doc);
-            if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
-        }
-
-        const playerUrl = await extractPlayerIframeUrl(doc);
-        let episodes = [];
-
-        if (playerUrl) {
-            try {
-                let playerDoc = await fetchUA(playerUrl);
-                let text = playerDoc.body?.innerHTML || '';
-
-                const nestedDoc = await resolveNestedIframe(playerDoc);
-                if (nestedDoc) {
-                    text = nestedDoc.body?.innerHTML || '';
-                }
-
-                // Перевірка moonanime.art
-                const isMoon = text.includes('moonanime.art') || (nestedDoc?.location?.href?.includes('moonanime.art'));
-                if (isMoon) {
-                    const moonFile = extractFileFromMoonAnime(text);
-                    if (moonFile) {
-                        episodes = [{
-                            title: 'Серія 1',
-                            season: '1',
-                            episode: '1',
-                            dub: 'Основна озвучка',
-                            file: moonFile,
-                            poster: '',
-                            id: '',
-                            quality: extractQuality(moonFile)
-                        }];
-                    }
-                }
-
-                // Якщо moon не знайдено, використовуємо загальний парсинг
-                if (episodes.length === 0) {
-                    let allSources = extractSourcesFromText(text);
-
-                    if (!allSources.length && nestedDoc) {
-                        const scripts = safeQueryAll('script:not([src])', nestedDoc);
-                        for (const s of scripts) {
-                            const scriptSources = extractSourcesFromText(s.textContent);
-                            if (scriptSources.length) {
-                                allSources.push(...scriptSources);
-                            }
-                        }
-                    }
-
-                    if (!allSources.length) {
-                        const scripts = safeQueryAll('script:not([src])', playerDoc);
-                        for (const s of scripts) {
-                            const scriptSources = extractSourcesFromText(s.textContent);
-                            if (scriptSources.length) {
-                                allSources.push(...scriptSources);
-                            }
-                        }
-                    }
-
-                    console.log('FINAL EPISODES:', allSources);
-                    episodes = allSources;
-                }
-            } catch (e) {
-                console.error('Episode parsing error:', e);
-            }
-        }
-
-        return {
-            mal_id: animeUrl.hashCode(),
-            title,
-            images: { jpg: { large_image_url: poster, image_url: poster } },
-            genres,
-            year,
-            synopsis,
-            score: null,
-            episodes,
-            playerUrl,
-            url: animeUrl,
-            from: 'animeua'
-        };
-    }
-
-    // ==================== VIDEO PLAYER ====================
-
+    // ========== ВІДЕОПЛЕЄР ==========
     let hlsInstance = null;
     function destroyHls() { if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } }
 
@@ -748,8 +278,7 @@
         loadVideo(file);
     }
 
-    // ==================== UI ====================
-
+    // ========== ІНТЕРФЕЙС ==========
     let currentTab = 'main', currentPage = 1, totalPages = 1, currentList = [], currentSearchQuery = '', currentGenreSlug = null;
 
     function renderCards(list) {
@@ -762,7 +291,7 @@
         DOM.animeContainer.innerHTML = list.map(anime => {
             const img = anime.images?.jpg?.large_image_url || 'https://via.placeholder.com/300x420?text=No+Image';
             const isBm = bookmarkedIds.has(anime.mal_id);
-            return `<div class="anime-card" data-id="${anime.mal_id}" data-url="${anime.url || ''}">
+            return `<div class="anime-card" data-id="${anime.mal_id}" data-url="${anime.url || ''}" data-title="${anime.title.replace(/"/g, '&quot;')}">
                 <div class="card-img"><img src="${img}" alt="${anime.title}" loading="lazy">
                     <div class="card-actions-overlay">
                         <button class="card-action-btn bookmark-btn ${isBm ? 'bookmarked' : ''}" data-id="${anime.mal_id}"><i class="fas fa-star"></i></button>
@@ -776,7 +305,9 @@
         DOM.animeContainer.querySelectorAll('.anime-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.card-action-btn')) return;
-                if (card.dataset.url) openDetailModal(card.dataset.url);
+                const url = card.dataset.url;
+                const title = card.dataset.title;
+                if (url) openDetailModal(url, title);
             });
         });
         DOM.animeContainer.querySelectorAll('.bookmark-btn').forEach(btn => {
@@ -790,7 +321,10 @@
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const anime = currentList.find(a => a.mal_id === parseInt(btn.dataset.id));
-                if (anime && anime.url) { Storage.addHistory(anime); openDetailModal(anime.url); }
+                if (anime && anime.url) {
+                    Storage.addHistory(anime);
+                    openDetailModal(anime.url, anime.title);
+                }
             });
         });
         renderPagination();
@@ -826,65 +360,60 @@
         if (currentTab === 'bookmarks') loadContent(); else renderCards(currentList);
     }
 
-    // ==================== MODAL WITH SEASON/DUB/EPISODE SELECTORS ====================
+    // ========== МОДАЛЬНЕ ВІКНО ДЕТАЛЕЙ (оновлене) ==========
+    async function openDetailModal(animeUrl, animeTitle) {
+        // Якщо назву не передано, намагаємось знайти в поточних даних
+        if (!animeTitle) {
+            const found = [...currentList, ...Storage.getBookmarks(), ...Storage.getHistory()]
+                .find(a => a.url === animeUrl);
+            animeTitle = found ? found.title : '';
+        }
 
-    async function openDetailModal(url) {
         DOM.modalTitle.textContent = 'Завантаження...';
         DOM.modalBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
         DOM.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
         try {
-            const anime = await loadAnimeDetails(url);
+            // 1. Завантажуємо метадані з animeua (постер, опис, жанри)
+            const info = await loadAnimeInfo(animeUrl);
+            const anime = {
+                ...info,
+                url: animeUrl,
+                mal_id: animeUrl.hashCode()
+            };
             Storage.addHistory(anime);
+
+            // 2. Отримуємо озвучки через API
+            let animeId;
+            try {
+                animeId = await searchAnimeOnClub(animeTitle || info.title);
+            } catch {
+                throw new Error('Не вдалося знайти аніме на animeon.club');
+            }
+            const fundubs = await getFundubs(animeId);
+
+            // 3. Будуємо інтерфейс
+            const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
             DOM.modalTitle.textContent = anime.title;
 
-            // Групуємо за сезоном та озвучкою
-            const bySeasonDub = {};
-            anime.episodes.forEach(ep => {
-                const season = ep.season || '1';
-                const dub = ep.dub || 'Основна озвучка';
-                if (!bySeasonDub[season]) bySeasonDub[season] = {};
-                if (!bySeasonDub[season][dub]) bySeasonDub[season][dub] = [];
-                bySeasonDub[season][dub].push(ep);
-            });
-
-            // Сортуємо серії
-            Object.keys(bySeasonDub).forEach(season => {
-                Object.keys(bySeasonDub[season]).forEach(dub => {
-                    bySeasonDub[season][dub].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
-                });
-            });
-
-            const seasons = Object.keys(bySeasonDub).sort((a, b) => parseInt(a) - parseInt(b));
-            const firstSeason = seasons[0] || '1';
-            const dubs = Object.keys(bySeasonDub[firstSeason] || {}).sort();
-            const firstDub = dubs[0] || 'Основна озвучка';
-
-            const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
-
             let episodesHtml = '';
-            if (anime.episodes.length > 0) {
+            if (fundubs && fundubs.length > 0) {
                 episodesHtml = `
                     <div class="player-controls">
                         <div class="control-group">
                             <div class="select-wrapper">
-                                <label>📺 Сезон</label>
-                                <select id="seasonSelect" class="styled-select">
-                                    ${seasons.map(s => `<option value="${s}" ${s === firstSeason ? 'selected' : ''}>Сезон ${s}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="select-wrapper">
                                 <label>🎙️ Озвучка</label>
                                 <select id="dubSelect" class="styled-select">
-                                    ${dubs.map(d => `<option value="${d}" ${d === firstDub ? 'selected' : ''}>${d}</option>`).join('')}
+                                    ${fundubs.map((f, idx) => `<option value="${idx}" ${idx === 0 ? 'selected' : ''}>${f.fundub.name}</option>`).join('')}
                                 </select>
                             </div>
                         </div>
-                        <div id="episodesContainer" class="episodes-grid"></div>
+                        <div id="episodesContainer" class="episodes-grid">Оберіть озвучку</div>
                     </div>
                 `;
             } else {
-                episodesHtml = '<p>Серії не знайдено</p>';
+                episodesHtml = '<p>Озвучки не знайдено</p>';
             }
 
             DOM.modalBody.innerHTML = `
@@ -893,7 +422,6 @@
                     <div class="detail-info">
                         <div>
                             <span class="tag"><i class="fas fa-calendar"></i> ${anime.year || '—'}</span>
-                            <span class="tag"><i class="fas fa-film"></i> ${anime.episodes.length} еп.</span>
                         </div>
                         <div style="margin:0.5rem 0">
                             ${anime.genres.map(g => `<span class="tag">${g}</span>`).join('') || '<span class="tag">—</span>'}
@@ -909,85 +437,125 @@
                     ${episodesHtml}
                 </div>`;
 
-            function renderEpisodes(season, dub) {
-                const container = document.getElementById('episodesContainer');
-                const eps = bySeasonDub[season]?.[dub] || [];
-                
-                if (eps.length === 0) {
-                    container.innerHTML = '<p style="opacity: 0.6;">Серії не знайдено для цього вибору</p>';
-                    return;
-                }
-
-                container.innerHTML = eps.map((ep, idx) => `
-                    <button class="btn-outline ep-btn ${idx === 0 ? 'active-episode' : ''}" 
-                            data-file="${ep.file}" 
-                            data-episode="${ep.episode}"
-                            title="${ep.title || `Серія ${ep.episode}`}">
-                        <span class="ep-number">${ep.episode}</span>
-                        ${ep.quality ? `<span class="ep-quality">${ep.quality}</span>` : ''}
-                    </button>
-                `).join('');
-
-                container.querySelectorAll('.ep-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        container.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active-episode'));
-                        this.classList.add('active-episode');
-                        const episodeNum = this.dataset.episode;
-                        playEpisode(`${anime.title} - Сезон ${season}, Серія ${episodeNum} [${dub}]`, this.dataset.file);
-                    });
-                });
-            }
-
-            const seasonSelect = document.getElementById('seasonSelect');
-            const dubSelect = document.getElementById('dubSelect');
-
-            if (seasonSelect && dubSelect) {
-                seasonSelect.addEventListener('change', function() {
-                    const selectedSeason = this.value;
-                    const availableDubs = Object.keys(bySeasonDub[selectedSeason] || {}).sort();
-                    
-                    dubSelect.innerHTML = availableDubs.map(d => 
-                        `<option value="${d}">${d}</option>`
-                    ).join('');
-                    
-                    renderEpisodes(selectedSeason, availableDubs[0] || 'Основна озвучка');
-                });
-
-                dubSelect.addEventListener('change', function() {
-                    renderEpisodes(seasonSelect.value, this.value);
-                });
-
-                renderEpisodes(firstSeason, firstDub);
-            }
-
-            document.getElementById('toggleBookmarkBtn').addEventListener('click', () => { 
-                toggleBookmark(anime); 
-                openDetailModal(url); 
+            // Кнопка закладки
+            document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
+                toggleBookmark(anime);
+                openDetailModal(animeUrl, animeTitle); // оновити вікно
             });
+
+            // Логіка вибору озвучки та завантаження серій
+            const dubSelect = document.getElementById('dubSelect');
+            const episodesContainer = document.getElementById('episodesContainer');
+
+            async function loadEpisodesForDub(fundubIndex) {
+                const fundub = fundubs[fundubIndex];
+                const playerId = fundub.player[0].id; // беремо першого плеєра
+                const fundubId = fundub.fundub.id;
+                episodesContainer.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження серій...</div>';
+                try {
+                    const episodes = await getEpisodes(animeId, playerId, fundubId);
+                    if (!episodes || episodes.length === 0) {
+                        episodesContainer.innerHTML = '<p>Серій не знайдено</p>';
+                        return;
+                    }
+                    episodesContainer.innerHTML = episodes.map(ep => `
+                        <button class="btn-outline ep-btn" data-id="${ep.id}" title="Серія ${ep.episode || ''}">
+                            ${ep.episode || '?'}
+                        </button>
+                    `).join('');
+                    episodesContainer.querySelectorAll('.ep-btn').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const epId = this.dataset.id;
+                            this.disabled = true;
+                            this.textContent = '...';
+                            try {
+                                const videoUrl = await getVideoUrl(epId);
+                                if (videoUrl) {
+                                    playEpisode(`${anime.title} – Серія ${ep.episode || ''} [${fundub.fundub.name}]`, videoUrl);
+                                } else {
+                                    showToast('❌ Відео не знайдено');
+                                }
+                            } catch (e) {
+                                showToast('Помилка отримання відео');
+                            }
+                            this.disabled = false;
+                            this.textContent = ep.episode || '?';
+                        });
+                    });
+                } catch (e) {
+                    episodesContainer.innerHTML = `<p>Помилка завантаження серій: ${e.message}</p>`;
+                }
+            }
+
+            if (dubSelect) {
+                dubSelect.addEventListener('change', () => loadEpisodesForDub(parseInt(dubSelect.value)));
+                // Завантажити серії для першої озвучки автоматично
+                loadEpisodesForDub(0);
+            }
 
         } catch (err) {
             DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`;
         }
     }
 
+    // Спрощена функція для метаданих (без пошуку плеєра)
+    async function loadAnimeInfo(url) {
+        const doc = await fetchUA(url);
+        let title = '';
+        for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
+            const el = safeQuery(sel, doc);
+            if (el?.textContent.trim()) { title = el.textContent.trim(); break; }
+        }
+        let poster = '';
+        for (const sel of ['div.page__subcol-side .img-fit-cover img', '.pmovie__poster img', '.anime__poster img']) {
+            const el = safeQuery(sel, doc);
+            if (el) {
+                const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+                if (src) { poster = src.startsWith('http') ? src : ANIMEUA_BASE + src; break; }
+            }
+        }
+        const genres = safeQueryAll('.pmovie__genres a, .genres a', doc).map(a => a.textContent.trim()).filter(Boolean);
+        const yearEl = safeQuery('.pmovie__year, .release-year', doc);
+        const yearMatch = (yearEl?.textContent || '').match(/\d{4}/);
+        const year = yearMatch ? parseInt(yearMatch[0]) : null;
+        let synopsis = '';
+        for (const sel of ['.full-text', '.pmovie__description', '.anime__description']) {
+            const el = safeQuery(sel, doc);
+            if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
+        }
+        return {
+            title: title || 'Без назви',
+            images: { jpg: { large_image_url: poster } },
+            genres,
+            year,
+            synopsis
+        };
+    }
+
+    // Закриття модалок
     function closeModal() { DOM.modal.style.display = 'none'; document.body.style.overflow = ''; }
     function closePlayerModal() { DOM.playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHls(); }
     function closeProfileModal() { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; }
 
+    // Профіль
     function openProfileModal() {
         const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
         document.getElementById('statBookmarks').textContent = bookmarks.length;
         document.getElementById('statHistory').textContent = history.length;
         document.getElementById('statWatched').textContent = history.length;
-        document.getElementById('bookmarkList').innerHTML = bookmarks.length ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}" onerror="this.src='data:image/svg+xml,...'"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>';
-        document.getElementById('historyList').innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}" onerror="..."><span>${h.title}</span></div>`).join('') : '<p>Немає історії</p>';
+        document.getElementById('bookmarkList').innerHTML = bookmarks.length ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}" data-title="${b.title.replace(/"/g, '&quot;')}"><img src="${b.image_url}" onerror="this.src='data:image/svg+xml,...'"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>';
+        document.getElementById('historyList').innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}" data-title="${h.title.replace(/"/g, '&quot;')}"><img src="${h.image_url}" onerror="..."><span>${h.title}</span></div>`).join('') : '<p>Немає історії</p>';
         document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => {
-            item.addEventListener('click', () => { closeProfileModal(); openDetailModal(item.dataset.url); });
+            item.addEventListener('click', () => {
+                closeProfileModal();
+                openDetailModal(item.dataset.url, item.dataset.title);
+            });
         });
         DOM.profileModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
+    // Завантаження контенту (каталог, пошук, закладки)
     async function loadContent() {
         DOM.animeContainer.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
         DOM.paginationRow.innerHTML = '';
@@ -1046,7 +614,7 @@
         });
     }
 
-    // Event listeners
+    // Слухачі подій
     DOM.themeToggleBtn.addEventListener('click', toggleTheme);
     DOM.profileBtn.addEventListener('click', openProfileModal);
     DOM.closeModalBtn.addEventListener('click', closeModal);
@@ -1077,6 +645,7 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePlayerModal(); closeProfileModal(); } });
     document.getElementById('clearHistoryBtn').addEventListener('click', () => { Storage.clearHistory(); openProfileModal(); if (currentTab === 'history') loadContent(); });
 
+    // Старт
     applyTheme(Storage.getTheme());
     updateBadge();
     initGenres().then(() => loadContent());
