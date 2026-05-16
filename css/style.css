@@ -288,7 +288,6 @@ body {
     margin-top: 0.5rem;
 }
 
-/* ===== Оновлені картки ===== */
 .anime-card {
     background: var(--surface);
     border-radius: var(--radius);
@@ -497,13 +496,37 @@ body {
     min-width: 250px;
 }
 
+/* === Оновлений блок опису === */
 .synopsis {
-    margin: 0.8rem 0;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    transition: color var(--transition);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Показувати лише 4 рядки */
+    -webkit-box-orient: vertical;
+    transition: all 0.3s ease;
 }
+
+.synopsis.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+}
+
+.more-btn {
+    background: none;
+    border: none;
+    color: #ff4757;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+    margin-top: 5px;
+    display: none; /* Схована за замовчуванням */
+}
+
+.tag.rating-tag {
+    background: #ff4757;
+    color: white;
+    font-weight: bold;
+}
+/* ============================= */
 
 .tag {
     background: var(--tag-bg);
@@ -556,7 +579,6 @@ body {
     background: #000;
 }
 
-/* Селектор озвучок */
 .voice-selector {
     display: flex;
     justify-content: center;
