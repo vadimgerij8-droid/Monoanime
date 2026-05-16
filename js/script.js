@@ -2,6 +2,28 @@
     const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
     const ANIMEUA_BASE = 'https://animeua.club';
 
+    // Статична мапа жанрів: назва -> slug
+    const GENRE_MAP = {
+        "Бойові мистецтва": "boivie",
+        "Бойовики": "boyovik",
+        "Воєнні": "voenne",
+        "Гарем": "garems",
+        "Драми": "drama",
+        "Детектив": "detektiv",
+        "Демони": "demons",
+        "Комедії": "komik",
+        "Роботи": "meha",
+        "Повсякденність": "posyardnevnist",
+        "Пригоди": "adventures",
+        "Психологічні": "psih",
+        "Романтика": "romantik",
+        "Надприродні": "weird",
+        "Фантастика": "fantastika",
+        "Фентезі": "fentezi",
+        "Школа": "classes",
+        "Еччі": "echhi"
+    };
+
     function getProxyUrl(url) {
         if (!url) { console.warn('getProxyUrl empty'); return null; }
         return PROXY_URL + '?url=' + encodeURIComponent(url);
@@ -164,25 +186,11 @@
         return parseCards(doc);
     }
 
-    async function fetchGenres() {
-        try {
-            const doc = await fetchUA(ANIMEUA_BASE);
-            const genreLinks = safeQueryAll('.genre-nav a, .genres-list a, a[href*="/genre/"]', doc);
-            const genres = genreLinks.map(a => {
-                const href = a.getAttribute('href');
-                const slug = href.match(/\/genre\/([^/]+)/)?.[1] || '';
-                const name = a.textContent.trim();
-                return { slug, name };
-            }).filter(g => g.slug && g.name);
-            return [...new Map(genres.map(g => [g.slug, g])).values()].slice(0, 25);
-        } catch (e) {
-            return [
-                { slug: '1', name: 'Action' }, { slug: '2', name: 'Adventure' },
-                { slug: '3', name: 'Comedy' }, { slug: '4', name: 'Drama' },
-                { slug: '5', name: 'Fantasy' }, { slug: '6', name: 'Horror' },
-                { slug: '7', name: 'Romance' }, { slug: '8', name: 'Sci-Fi' }
-            ];
-        }
+    // Оновлена функція: повертає жанри зі статичної мапи
+    function fetchGenres() {
+        return Object.entries(GENRE_MAP)
+            .map(([name, slug]) => ({ slug, name }))
+            .sort((a, b) => a.name.localeCompare(b.name, 'uk'));
     }
 
     // ========== Оновлений Парсер джерел з групуванням ==========
@@ -568,7 +576,7 @@
 
     async function initGenres() {
         if (!DOM.categoryScroll) return;
-        const genres = await fetchGenres();
+        const genres = fetchGenres(); // тепер це синхронний виклик
         DOM.categoryScroll.querySelectorAll('.category-pill').forEach(p => p.remove());
         const allBtn = document.createElement('button');
         allBtn.className = 'category-pill active-pill';
