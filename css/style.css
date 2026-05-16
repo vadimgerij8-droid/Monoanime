@@ -1,4 +1,4 @@
-:root {
+Ось :root {
     --bg: #fafafa;
     --surface: #ffffff;
     --text: #111111;
@@ -7,8 +7,8 @@
     --border: #e0e0e0;
     --border-light: #ececec;
     --hover: #f5f5f5;
-    --active: #FF4B63; /* Полуничний колір */
-    --active-text: #ffffff; /* Білий текст для світлої теми */
+    --active: #111111;
+    --active-text: #ffffff;
     --tag-bg: #f0f0f0;
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
     --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.12);
@@ -18,7 +18,6 @@
     --radius-lg: 36px;
     --radius-xl: 48px;
     --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --primary: #FF4B63;
 }
 
 .dark-mode {
@@ -30,8 +29,8 @@
     --border: #333333;
     --border-light: #2a2a2a;
     --hover: #222222;
-    --active: #FF4B63; /* Полуничний колір залишається */
-    --active-text: #0d0d0d; /* Темний текст для темної теми, як ви просили */
+    --active: #f0f0f0;
+    --active-text: #0d0d0d;
     --tag-bg: #252525;
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.5);
@@ -124,7 +123,7 @@ body {
 
 .search-wrapper:focus-within {
     border-color: var(--active);
-    box-shadow: 0 0 0 3px rgba(255, 75, 99, 0.15);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
 }
 
 .search-wrapper i {
@@ -175,7 +174,7 @@ body {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: var(--primary);
+    background: #e74c3c;
     color: #fff;
     border-radius: 50%;
     width: 18px;
@@ -305,7 +304,7 @@ body {
 .anime-card:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow-md);
-    border-color: var(--active);
+    border-color: #c0c0c0;
 }
 
 .anime-poster {
@@ -499,11 +498,11 @@ body {
 
 /* === Оновлений блок опису === */
 .synopsis {
+    overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 4; /* Показувати лише 4 рядки */
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
-    color: var(--text);
 }
 
 .synopsis.expanded {
@@ -514,7 +513,7 @@ body {
 .more-btn {
     background: none;
     border: none;
-    color: var(--primary);
+    color: #ff4757;
     cursor: pointer;
     font-weight: bold;
     padding: 0;
@@ -523,8 +522,8 @@ body {
 }
 
 .tag.rating-tag {
-    background: var(--primary);
-    color: var(--active-text);
+    background: #ff4757;
+    color: white;
     font-weight: bold;
 }
 /* ============================= */
