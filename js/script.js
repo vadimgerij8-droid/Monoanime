@@ -345,6 +345,13 @@
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
 
+        // ========== НОВЕ: Парсинг вікового рейтингу ==========
+        let rating = '';
+        const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
+        if (ratingEl) {
+            rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
+        }
+
         const playerUrls = extractPlayerIframeUrls(doc);
         const allRawSources = [];
         for (const playerUrl of playerUrls) {
@@ -390,7 +397,18 @@
             }
         }
 
-        return { mal_id: animeUrl.hashCode(), title, images: { jpg: { large_image_url: poster, image_url: poster } }, genres, year, synopsis, seasons, url: animeUrl, from: 'animeua' };
+        return { 
+            mal_id: animeUrl.hashCode(), 
+            title, 
+            images: { jpg: { large_image_url: poster, image_url: poster } }, 
+            genres, 
+            year, 
+            synopsis, 
+            seasons, 
+            url: animeUrl, 
+            from: 'animeua',
+            rating // <-- Додано
+        };
     }
 
     let hlsInstances = new Map();
@@ -494,9 +512,11 @@
             const firstDub = dubs[0] || '';
             const episodes = firstDub ? anime.seasons[firstSeason][firstDub] : [];
             
-            // Calculate total unique episodes across all dubs in the first season for display
             const totalEpisodes = episodes.length;
             
+            // Рейтинг (якщо є)
+            const ratingTag = anime.rating ? `<span class="tag rating-tag"><i class="fas fa-user-shield"></i> ${anime.rating}</span>` : '';
+
             const html = `
                 <div class="anime-detail-grid">
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
@@ -505,8 +525,11 @@
                             <span class="tag"><i class="fas fa-calendar"></i> ${anime.year || '—'}</span>
                             <span class="tag"><i class="fas fa-film"></i> ${totalEpisodes} еп.</span>
                         </div>
-                        <div style="margin:0.5rem 0">${anime.genres.map(g => `<span class="tag">${g}</span>`).join('')}</div>
-                        <p class="synopsis">${(anime.synopsis || 'Опис відсутній.').slice(0, 500)}</p>
+                        <div style="margin:0.5rem 0">${anime.genres.map(g => `<span class="tag">${g}</span>`).join('')} ${ratingTag}</div>
+                        <div class="synopsis-container">
+                            <div class="synopsis" id="synopsisText">${anime.synopsis || 'Опис відсутній.'}</div>
+                            <button class="more-btn" id="moreBtn" style="display: none;">більше</button>
+                        </div>
                         <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
                     </div>
                 </div>
@@ -572,6 +595,20 @@
                 document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${isNow ? 'В обраному' : 'Додати в обране'}`;
             });
 
+            // ========== Логіка для кнопки «більше» ==========
+            const synopsisText = document.getElementById('synopsisText');
+            const moreBtn = document.getElementById('moreBtn');
+            if (synopsisText && moreBtn) {
+                // Перевіряємо, чи текст обрізаний (не вліз у 4 рядки)
+                if (synopsisText.scrollHeight > synopsisText.clientHeight) {
+                    moreBtn.style.display = 'block';
+                }
+                moreBtn.addEventListener('click', () => {
+                    const isExpanded = synopsisText.classList.toggle('expanded');
+                    moreBtn.textContent = isExpanded ? 'менше' : 'більше';
+                });
+            }
+
         } catch (err) { DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`; }
     }
 
@@ -594,7 +631,6 @@
         if (!DOM.animeContainer) return;
         DOM.animeContainer.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
         try {
-            // Вкладки: ТОП 100 має пріоритет
             if (currentTab === 'top100') {
                 currentList = await fetchTop100();
             } else if (currentSearchQuery) {
@@ -602,7 +638,6 @@
             } else if (currentGenreSlug) {
                 currentList = await fetchByGenre(currentGenreSlug, currentPage);
             } else {
-                // Головна сторінка
                 currentList = await fetchMainPage(currentPage);
             }
             renderCards(currentList);
@@ -634,7 +669,7 @@
             btn.addEventListener('click', () => {
                 currentGenreSlug = genre.slug;
                 currentPage = 1;
-                currentTab = 'main'; // скидаємо на основний режим
+                currentTab = 'main';
                 document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
                 btn.classList.add('active-pill');
                 loadContent();
@@ -656,7 +691,6 @@
         loadContent();
     }, 500));
 
-    // Підключення нових кнопок (переконайтеся, що в HTML є такі елементи)
     const topBtn = document.getElementById('top100Btn');
     const randBtn = document.getElementById('randomBtn');
     if (topBtn) topBtn.addEventListener('click', showTop100);
