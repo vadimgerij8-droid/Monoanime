@@ -1,24 +1,8 @@
 (function() {
-    // ================= КОНФІГУРАЦІЯ FIREBASE =================
-    const firebaseConfig = {
-        apiKey: "AIzaSyCGFJnzds6BzKr1hxX8NV0gpfXiaxCEn6M",
-        authDomain: "monoanime8.firebaseapp.com",
-        projectId: "monoanime8",
-        storageBucket: "monoanime8.firebasestorage.app",
-        messagingSenderId: "277731716769",
-        appId: "1:277731716769:web:cef62b34753bb70a1fcae0",
-        measurementId: "G-32V4LC8F6V"
-    };
-
-    // Ініціалізація
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // ================= ПОЧАТОК ВАШОГО КОДУ =================
     const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
     const ANIMEUA_BASE = 'https://animeua.club';
 
+    // Статична мапа жанрів: назва -> slug
     const GENRE_MAP = {
         "Бойові мистецтва": "boivie",
         "Бойовики": "boyovik",
@@ -89,17 +73,7 @@
         mainVideoPlayer: document.getElementById('mainVideoPlayer'),
         profileModal: document.getElementById('profileModal'),
         closeProfileBtn: document.getElementById('closeProfileBtn'),
-        profileBody: document.getElementById('profileBody'),
-        // Нові елементи для авторизації
-        signInGoogleBtn: document.getElementById('signInGoogleBtn'),
-        signInEmailBtn: document.getElementById('signInEmailBtn'),
-        signUpEmailBtn: document.getElementById('signUpEmailBtn'),
-        signOutBtn: document.getElementById('signOutBtn'),
-        emailAuthModal: document.getElementById('emailAuthModal'),
-        emailAuthTitle: document.getElementById('emailAuthTitle'),
-        authEmail: document.getElementById('authEmail'),
-        authPassword: document.getElementById('authPassword'),
-        confirmEmailAuthBtn: document.getElementById('confirmEmailAuthBtn')
+        profileBody: document.getElementById('profileBody')
     };
 
     function showToast(msg) {
@@ -110,149 +84,31 @@
         DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 2200);
     }
 
-    // ================= ДОПОМІЖНІ ФУНКЦІЇ FIRESTORE =================
-    async function createUserProfile(user) {
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
-        if (!doc.exists) {
-            await userRef.set({
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || 'Анонімний користувач',
-                photoURL: user.photoURL || null,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } else {
-            await userRef.update({
-                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-    }
-
-    async function addBookmarkToFirestore(userId, anime) {
-        const bookmarkRef = db.collection('users').doc(userId).collection('bookmarks').doc(String(anime.mal_id));
-        await bookmarkRef.set({
-            mal_id: anime.mal_id,
-            title: anime.title,
-            image_url: anime.images?.jpg?.large_image_url || '',
-            url: anime.url || '',
-            score: anime.score || null,
-            year: anime.year || null,
-            addedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    }
-
-    async function removeBookmarkFromFirestore(userId, animeId) {
-        const bookmarkRef = db.collection('users').doc(userId).collection('bookmarks').doc(String(animeId));
-        await bookmarkRef.delete();
-    }
-
-    async function getBookmarksFromFirestore(userId) {
-        const snapshot = await db.collection('users').doc(userId)
-            .collection('bookmarks')
-            .orderBy('addedAt', 'desc')
-            .get();
-        const bookmarks = [];
-        snapshot.forEach(doc => bookmarks.push(doc.data()));
-        return bookmarks;
-    }
-
-    async function addHistoryToFirestore(userId, anime) {
-        const historyRef = db.collection('users').doc(userId).collection('history').doc(String(anime.mal_id));
-        await historyRef.set({
-            mal_id: anime.mal_id,
-            title: anime.title,
-            image_url: anime.images?.jpg?.large_image_url || '',
-            url: anime.url || '',
-            score: anime.score || null,
-            year: anime.year || null,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    }
-
-    async function getHistoryFromFirestore(userId) {
-        const snapshot = await db.collection('users').doc(userId)
-            .collection('history')
-            .orderBy('timestamp', 'desc')
-            .limit(50)
-            .get();
-        const history = [];
-        snapshot.forEach(doc => history.push(doc.data()));
-        return history;
-    }
-
-    async function clearHistoryInFirestore(userId) {
-        const batch = db.batch();
-        const snapshot = await db.collection('users').doc(userId).collection('history').get();
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-    }
-
-    // ================= СТАН КОРИСТУВАЧА =================
-    let currentUser = null;
-
-    auth.onAuthStateChanged(async (user) => {
-        currentUser = user;
-        if (user) {
-            await createUserProfile(user);
-            // Оновлюємо UI
-            if (DOM.signInGoogleBtn) DOM.signInGoogleBtn.style.display = 'none';
-            if (DOM.signInEmailBtn) DOM.signInEmailBtn.style.display = 'none';
-            if (DOM.signUpEmailBtn) DOM.signUpEmailBtn.style.display = 'none';
-            if (DOM.signOutBtn) DOM.signOutBtn.style.display = 'inline-block';
-            if (DOM.profileBtn) DOM.profileBtn.style.display = 'inline-block';
-        } else {
-            if (DOM.signInGoogleBtn) DOM.signInGoogleBtn.style.display = 'inline-block';
-            if (DOM.signInEmailBtn) DOM.signInEmailBtn.style.display = 'inline-block';
-            if (DOM.signUpEmailBtn) DOM.signUpEmailBtn.style.display = 'inline-block';
-            if (DOM.signOutBtn) DOM.signOutBtn.style.display = 'none';
-            if (DOM.profileBtn) DOM.profileBtn.style.display = 'none';
-        }
-        // Оновити бейдж після зміни стану
-        await updateBadgeFromFirestore();
-    });
-
-    async function updateBadgeFromFirestore() {
-        if (!DOM.bookmarkBadge) return;
-        if (!currentUser) {
-            DOM.bookmarkBadge.style.display = 'none';
-            return;
-        }
-        const bookmarks = await getBookmarksFromFirestore(currentUser.uid);
-        DOM.bookmarkBadge.textContent = bookmarks.length;
-        DOM.bookmarkBadge.style.display = bookmarks.length > 0 ? 'flex' : 'none';
-    }
-
-    // ================= НОВИЙ STORAGE З FIRESTORE =================
     const Storage = {
-        async getBookmarks() {
-            if (!currentUser) return [];
-            return await getBookmarksFromFirestore(currentUser.uid);
+        getBookmarks() { try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; } },
+        saveBookmarks(arr) { localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr)); },
+        getHistory() { try { return JSON.parse(localStorage.getItem('mono_anime_history') || '[]'); } catch { return []; } },
+        addHistory(anime) {
+            if (!anime || !anime.mal_id) return;
+            const hist = this.getHistory().filter(h => h.mal_id !== anime.mal_id);
+            hist.unshift({
+                mal_id: anime.mal_id, title: anime.title,
+                image_url: anime.images?.jpg?.large_image_url || '',
+                url: anime.url || '', score: anime.score, year: anime.year, timestamp: Date.now()
+            });
+            localStorage.setItem('mono_anime_history', JSON.stringify(hist.slice(0, 50)));
         },
-        async addBookmark(anime) {
-            if (!currentUser) throw new Error('Користувач не авторизований');
-            await addBookmarkToFirestore(currentUser.uid, anime);
-        },
-        async removeBookmark(animeId) {
-            if (!currentUser) throw new Error('Користувач не авторизований');
-            await removeBookmarkFromFirestore(currentUser.uid, animeId);
-        },
-        // saveBookmarks більше не потрібний, операції одразу пишуть у Firestore
-        async getHistory() {
-            if (!currentUser) return [];
-            return await getHistoryFromFirestore(currentUser.uid);
-        },
-        async addHistory(anime) {
-            if (!currentUser || !anime || !anime.mal_id) return;
-            await addHistoryToFirestore(currentUser.uid, anime);
-        },
-        async clearHistory() {
-            if (!currentUser) return;
-            await clearHistoryInFirestore(currentUser.uid);
-        },
+        clearHistory() { localStorage.setItem('mono_anime_history', '[]'); },
         getTheme() { return localStorage.getItem('mono_anime_theme') || 'light'; },
         setTheme(theme) { localStorage.setItem('mono_anime_theme', theme); }
     };
+
+    function updateBadge() {
+        if (!DOM.bookmarkBadge) return;
+        const count = Storage.getBookmarks().length;
+        DOM.bookmarkBadge.textContent = count;
+        DOM.bookmarkBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
 
     function applyTheme(theme) {
         if (theme === 'dark') {
@@ -269,80 +125,6 @@
         Storage.setTheme(next);
         applyTheme(next);
     }
-
-    // ================= АВТЕНТИФІКАЦІЯ =================
-    async function signInWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        try {
-            const result = await auth.signInWithPopup(provider);
-            showToast('Успішний вхід через Google');
-        } catch (error) {
-            showToast(`Помилка: ${error.message}`);
-        }
-    }
-
-    async function signInWithEmail(email, password) {
-        await auth.signInWithEmailAndPassword(email, password);
-    }
-
-    async function signUpWithEmail(email, password) {
-        await auth.createUserWithEmailAndPassword(email, password);
-    }
-
-    async function signOutUser() {
-        await auth.signOut();
-        showToast('Ви вийшли');
-    }
-
-    // Обробники UI для авторизації
-    if (DOM.signInGoogleBtn) DOM.signInGoogleBtn.addEventListener('click', signInWithGoogle);
-    if (DOM.signOutBtn) DOM.signOutBtn.addEventListener('click', signOutUser);
-
-    if (DOM.signInEmailBtn) DOM.signInEmailBtn.addEventListener('click', () => {
-        if (DOM.emailAuthModal) {
-            DOM.emailAuthTitle.textContent = 'Вхід через Email';
-            DOM.confirmEmailAuthBtn.textContent = 'Увійти';
-            DOM.confirmEmailAuthBtn.onclick = async () => {
-                try {
-                    await signInWithEmail(DOM.authEmail.value, DOM.authPassword.value);
-                    DOM.emailAuthModal.style.display = 'none';
-                    showToast('Успішний вхід!');
-                } catch (e) {
-                    showToast(`Помилка: ${e.message}`);
-                }
-            };
-            DOM.emailAuthModal.style.display = 'flex';
-        }
-    });
-
-    if (DOM.signUpEmailBtn) DOM.signUpEmailBtn.addEventListener('click', () => {
-        if (DOM.emailAuthModal) {
-            DOM.emailAuthTitle.textContent = 'Реєстрація через Email';
-            DOM.confirmEmailAuthBtn.textContent = 'Зареєструватися';
-            DOM.confirmEmailAuthBtn.onclick = async () => {
-                try {
-                    await signUpWithEmail(DOM.authEmail.value, DOM.authPassword.value);
-                    DOM.emailAuthModal.style.display = 'none';
-                    showToast('Успішна реєстрація!');
-                } catch (e) {
-                    showToast(`Помилка: ${e.message}`);
-                }
-            };
-            DOM.emailAuthModal.style.display = 'flex';
-        }
-    });
-
-    // Закриття модального вікна Email
-    if (DOM.emailAuthModal) {
-        DOM.emailAuthModal.querySelector('.close-button')?.addEventListener('click', () => {
-            DOM.emailAuthModal.style.display = 'none';
-        });
-        window.addEventListener('click', (e) => {
-            if (e.target === DOM.emailAuthModal) DOM.emailAuthModal.style.display = 'none';
-        });
-    }
-
-    // ================= РЕШТА ФУНКЦІЙ (без змін, крім toggleBookmark та openProfileModal) =================
 
     async function fetchUA(url) {
         if (!url) throw new Error('empty url');
@@ -404,11 +186,13 @@
         return parseCards(doc);
     }
 
+    // ========== НОВА: ТОП 100 ==========
     async function fetchTop100() {
         const doc = await fetchUA(`${ANIMEUA_BASE}/top.html`);
         return parseCards(doc);
     }
 
+    // Нова функція-обробник для кнопки ТОП 100
     async function showTop100() {
         currentTab = 'top100';
         currentPage = 1;
@@ -425,17 +209,20 @@
         }
     }
 
+    // ========== НОВА: Випадкове аніме ==========
     function openRandomAnime() {
         const randomUrl = `${ANIMEUA_BASE}/index.php?do=rand`;
         openDetailModal(randomUrl);
     }
 
+    // Оновлена функція: повертає жанри зі статичної мапи
     function fetchGenres() {
         return Object.entries(GENRE_MAP)
             .map(([name, slug]) => ({ slug, name }))
             .sort((a, b) => a.name.localeCompare(b.name, 'uk'));
     }
 
+    // ========== Оновлений Парсер джерел з групуванням ==========
     function extractSourcesFromText(text, providerName = '') {
         const sources = [];
         const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) || 
@@ -558,6 +345,7 @@
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
 
+        // ========== НОВЕ: Парсинг вікового рейтингу ==========
         let rating = '';
         const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
         if (ratingEl) {
@@ -619,7 +407,7 @@
             seasons, 
             url: animeUrl, 
             from: 'animeua',
-            rating
+            rating // <-- Додано
         };
     }
 
@@ -696,21 +484,13 @@
         if (video) { video.pause(); destroyHlsForVideo(video); }
     }
 
-    async function toggleBookmark(anime) {
-        if (!currentUser) {
-            showToast('Будь ласка, увійдіть, щоб керувати обраним.');
-            return;
-        }
-        const bookmarks = await Storage.getBookmarks();
-        const idx = bookmarks.findIndex(x => x.mal_id === anime.mal_id);
-        if (idx > -1) {
-            await Storage.removeBookmark(anime.mal_id);
-            showToast('Видалено з обраного');
-        } else {
-            await Storage.addBookmark(anime);
-            showToast('Додано в обране');
-        }
-        await updateBadgeFromFirestore();
+    function toggleBookmark(anime) {
+        let b = Storage.getBookmarks();
+        const idx = b.findIndex(x => x.mal_id === anime.mal_id);
+        if (idx > -1) { b.splice(idx, 1); showToast('Видалено з обраного'); }
+        else { b.push(anime); showToast('Додано в обране'); }
+        Storage.saveBookmarks(b);
+        updateBadge();
     }
 
     async function openDetailModal(url) {
@@ -721,11 +501,10 @@
         document.body.style.overflow = 'hidden';
         try {
             const anime = await loadAnimeDetails(url);
-            await Storage.addHistory(anime); // додаємо в історію (асинхронно)
+            Storage.addHistory(anime);
             currentDetailAnime = anime;
             DOM.modalTitle.textContent = anime.title;
-            const bookmarks = await Storage.getBookmarks();
-            const isBookmarked = bookmarks.some(b => b.mal_id === anime.mal_id);
+            const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
             
             const seasons = Object.keys(anime.seasons).sort((a,b) => parseInt(a) - parseInt(b));
             const firstSeason = seasons[0] || '1';
@@ -735,6 +514,7 @@
             
             const totalEpisodes = episodes.length;
             
+            // Рейтинг (якщо є)
             const ratingTag = anime.rating ? `<span class="tag rating-tag"><i class="fas fa-user-shield"></i> ${anime.rating}</span>` : '';
 
             const html = `
@@ -809,16 +589,17 @@
                 if (file) loadVideo(file, detailVideoEl);
                 else showToast('❌ Немає файлу');
             });
-            document.getElementById('toggleBookmarkBtn').addEventListener('click', async () => {
-                await toggleBookmark(anime);
-                const updatedBookmarks = await Storage.getBookmarks();
-                const isNow = updatedBookmarks.some(b => b.mal_id === anime.mal_id);
+            document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
+                toggleBookmark(anime);
+                const isNow = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
                 document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${isNow ? 'В обраному' : 'Додати в обране'}`;
             });
 
+            // ========== Логіка для кнопки «більше» ==========
             const synopsisText = document.getElementById('synopsisText');
             const moreBtn = document.getElementById('moreBtn');
             if (synopsisText && moreBtn) {
+                // Перевіряємо, чи текст обрізаний (не вліз у 4 рядки)
                 if (synopsisText.scrollHeight > synopsisText.clientHeight) {
                     moreBtn.style.display = 'block';
                 }
@@ -835,29 +616,13 @@
     if (DOM.closePlayerBtn) DOM.closePlayerBtn.addEventListener('click', () => { DOM.playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHlsForVideo(DOM.mainVideoPlayer); });
     if (DOM.closeProfileBtn) DOM.closeProfileBtn.addEventListener('click', () => { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; });
 
-    async function openProfileModal() {
+    function openProfileModal() {
         if (!DOM.profileModal) return;
-        if (!currentUser) {
-            DOM.profileBody.innerHTML = '<p>Будь ласка, увійдіть, щоб переглянути свій профіль.</p>';
-            DOM.profileModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            return;
-        }
-
-        const bookmarks = await Storage.getBookmarks();
-        const history = await Storage.getHistory();
-
-        const bList = document.getElementById('bookmarkList');
-        const hList = document.getElementById('historyList');
+        const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
+        const bList = document.getElementById('bookmarkList'), hList = document.getElementById('historyList');
         if (bList) bList.innerHTML = bookmarks.length ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>';
         if (hList) hList.innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('') : '<p>Історія порожня</p>';
-
-        document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => item.addEventListener('click', () => { 
-            DOM.profileModal.style.display = 'none'; 
-            document.body.style.overflow = ''; 
-            openDetailModal(item.dataset.url); 
-        }));
-
+        document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => item.addEventListener('click', () => { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; openDetailModal(item.dataset.url); }));
         DOM.profileModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
@@ -913,9 +678,9 @@
         });
     }
 
-    // ================= ІНІЦІАЛІЗАЦІЯ =================
+    // ========== Ініціалізація ==========
     applyTheme(Storage.getTheme());
-    updateBadgeFromFirestore();
+    updateBadge();
 
     if (DOM.themeToggleBtn) DOM.themeToggleBtn.addEventListener('click', toggleTheme);
     if (DOM.profileBtn) DOM.profileBtn.addEventListener('click', openProfileModal);
