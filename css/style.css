@@ -147,13 +147,12 @@ body {
     color: #9a9a9a;
 }
 
-/* ========== ВСІ КНОПКИ – НОВИЙ ЖОВТИЙ СТИЛЬ ========== */
+/* ========== ВСІ КНОПКИ – ЖОВТИЙ ФОН, БІЛИЙ ТЕКСТ ========== */
 
-/* Іконкові кнопки (пошук, профіль тощо) */
 .btn-icon {
-    background: #FFD700;               /* Змінено */
+    background: #FFD700;
     border: 1.5px solid #FFD700;
-    color: #ffffff;                   /* Завжди білий текст */
+    color: #ffffff;
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -168,17 +167,16 @@ body {
 }
 
 .btn-icon:hover {
-    background: #e6b800;              /* Трохи темніший жовтий */
+    background: #e6b800;
     border-color: #e6b800;
     color: #ffffff;
 }
 
-/* Бейдж на іконкових кнопках (кількість сповіщень) */
 .btn-icon .badge {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     color: #fff;
     border-radius: 50%;
     width: 18px;
@@ -191,9 +189,8 @@ body {
     display: none;
 }
 
-/* Контурні кнопки (наприклад, "Увійти") */
 .btn-outline {
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     border: 1.5px solid #FFD700;
     color: #ffffff;
     border-radius: var(--radius-xl);
@@ -212,9 +209,8 @@ body {
     color: #ffffff;
 }
 
-/* Пігулки категорій */
 .category-pill {
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     border: 1.5px solid #FFD700;
     color: #ffffff;
     border-radius: var(--radius-xl);
@@ -233,14 +229,13 @@ body {
 }
 
 .category-pill.active-pill {
-    background: #e6b800;              /* Активна пігулка трохи темніша */
+    background: #e6b800;
     border-color: #e6b800;
     color: #ffffff;
 }
 
-/* Вкладки (таби) */
 .tab-btn {
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     border: none;
     color: #ffffff;
     padding: 0.5rem 1.2rem;
@@ -257,13 +252,12 @@ body {
 }
 
 .tab-btn.active-tab {
-    background: #e6b800;              /* Активна вкладка */
+    background: #e6b800;
     color: #ffffff;
 }
 
-/* Кнопки пагінації */
 .page-btn {
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     border: 1.5px solid #FFD700;
     color: #ffffff;
     border-radius: 50%;
@@ -294,17 +288,14 @@ body {
     opacity: 0.35;
     cursor: not-allowed;
     pointer-events: none;
-    background: #FFD700;              /* Залишаємо жовтий, але тьмяний */
-    border-color: #FFD700;
-    color: #ffffff;
+    /* Фон і межа залишаються успадкованими, opacity робить їх тьмянішими */
 }
 
-/* Кнопка "Дивитися" */
 .btn-watch {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     color: #ffffff;
     border: none;
     border-radius: var(--radius-xl);
@@ -319,13 +310,12 @@ body {
 
 .btn-watch:hover {
     background: #e6b800;
-    opacity: 1;                       /* Прибираємо стару прозорість */
+    opacity: 1;
     transform: translateY(-1px);
 }
 
-/* Кнопки вибору озвучення */
 .voice-btn {
-    background: #FFD700;              /* Змінено */
+    background: #FFD700;
     border: 1.5px solid #FFD700;
     color: #ffffff;
     border-radius: var(--radius-xl);
@@ -349,17 +339,16 @@ body {
     color: #ffffff;
 }
 
-/* Кнопка "більше" в описі */
 .more-btn {
-    background: #FFD700;              /* Додаємо жовтий фон */
+    background: #FFD700;
     border: none;
-    color: #ffffff;                   /* Білий текст */
+    color: #ffffff;
     cursor: pointer;
     font-weight: bold;
-    padding: 0.3rem 0.8rem;           /* Трохи відступів */
+    padding: 0.3rem 0.8rem;
     margin-top: 5px;
-    border-radius: 20px;              /* Округлення */
-    display: none;                    /* Схована за замовчуванням */
+    border-radius: 20px;
+    display: none; /* Схована за замовчуванням */
     transition: background var(--transition);
 }
 
@@ -367,7 +356,7 @@ body {
     background: #e6b800;
 }
 
-/* Тег рейтингу (вже був жовтий, залишаємо) */
+/* Тег рейтингу */
 .tag.rating-tag {
     background: #FFD700;
     color: white;
@@ -376,7 +365,7 @@ body {
 
 /* ========== КІНЕЦЬ ЗМІН КНОПОК ========== */
 
-/* Решта тегів (не рейтинг) залишаються звичайними */
+/* Решта тегів (не рейтинг) */
 .tag {
     background: var(--tag-bg);
     display: inline-block;
@@ -487,7 +476,7 @@ body {
     min-width: 250px;
 }
 
-/* Блок опису */
+/* === Оновлений блок опису === */
 .synopsis {
     overflow: hidden;
     display: -webkit-box;
@@ -515,6 +504,14 @@ body {
     display: block;
     max-height: 60vh;
     background: #000;
+}
+
+.voice-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
 }
 
 /* ПРОФІЛЬ */
