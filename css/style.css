@@ -147,10 +147,13 @@ body {
     color: #9a9a9a;
 }
 
+/* ========== ВСІ КНОПКИ – НОВИЙ ЖОВТИЙ СТИЛЬ ========== */
+
+/* Іконкові кнопки (пошук, профіль тощо) */
 .btn-icon {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
+    background: #FFD700;               /* Змінено */
+    border: 1.5px solid #FFD700;
+    color: #ffffff;                   /* Завжди білий текст */
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -165,16 +168,17 @@ body {
 }
 
 .btn-icon:hover {
-    background: var(--active);
-    color: var(--active-text);
-    border-color: var(--active);
+    background: #e6b800;              /* Трохи темніший жовтий */
+    border-color: #e6b800;
+    color: #ffffff;
 }
 
+/* Бейдж на іконкових кнопках (кількість сповіщень) */
 .btn-icon .badge {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: #FFD700;      /* Замінено на насичений жовтий */
+    background: #FFD700;              /* Змінено */
     color: #fff;
     border-radius: 50%;
     width: 18px;
@@ -187,10 +191,11 @@ body {
     display: none;
 }
 
+/* Контурні кнопки (наприклад, "Увійти") */
 .btn-outline {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--text);
+    background: #FFD700;              /* Змінено */
+    border: 1.5px solid #FFD700;
+    color: #ffffff;
     border-radius: var(--radius-xl);
     padding: 0.5rem 1.3rem;
     font-weight: 600;
@@ -202,36 +207,16 @@ body {
 }
 
 .btn-outline:hover {
-    background: var(--active);
-    color: var(--active-text);
-    border-color: var(--active);
+    background: #e6b800;
+    border-color: #e6b800;
+    color: #ffffff;
 }
 
-.category-section {
-    margin-bottom: 1.8rem;
-}
-
-.category-scroll {
-    display: flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.category-label {
-    font-weight: 700;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-secondary);
-    margin-right: 0.4rem;
-    transition: color var(--transition);
-}
-
+/* Пігулки категорій */
 .category-pill {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
+    background: #FFD700;              /* Змінено */
+    border: 1.5px solid #FFD700;
+    color: #ffffff;
     border-radius: var(--radius-xl);
     padding: 0.45rem 1.1rem;
     font-weight: 600;
@@ -243,26 +228,21 @@ body {
 }
 
 .category-pill:hover {
-    background: var(--hover);
+    background: #e6b800;
+    border-color: #e6b800;
 }
 
 .category-pill.active-pill {
-    background: var(--active);
-    color: var(--active-text);
-    border-color: var(--active);
+    background: #e6b800;              /* Активна пігулка трохи темніша */
+    border-color: #e6b800;
+    color: #ffffff;
 }
 
-.tabs-row {
-    display: flex;
-    gap: 0.3rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
+/* Вкладки (таби) */
 .tab-btn {
-    background: transparent;
+    background: #FFD700;              /* Змінено */
     border: none;
-    color: var(--text-secondary);
+    color: #ffffff;
     padding: 0.5rem 1.2rem;
     font-weight: 600;
     font-size: 0.9rem;
@@ -272,104 +252,20 @@ body {
 }
 
 .tab-btn:hover {
-    color: var(--text);
-    background: var(--hover);
+    background: #e6b800;
+    color: #ffffff;
 }
 
 .tab-btn.active-tab {
-    background: var(--active);
-    color: var(--active-text);
+    background: #e6b800;              /* Активна вкладка */
+    color: #ffffff;
 }
 
-.anime-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
-    gap: 1.6rem;
-    margin-top: 0.5rem;
-}
-
-.anime-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--transition), box-shadow var(--transition);
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.anime-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-md);
-    border-color: #c0c0c0;
-}
-
-.anime-poster {
-    position: relative;
-    padding-top: 140%;
-    background: #ebebeb;
-    overflow: hidden;
-}
-
-.anime-poster img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.anime-card:hover .anime-poster img {
-    transform: scale(1.04);
-}
-
-.anime-info {
-    padding: 0.9rem 1rem 1rem;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-
-.anime-title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-    color: var(--text);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    transition: color var(--transition);
-}
-
-.anime-meta {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    flex-wrap: wrap;
-    transition: color var(--transition);
-}
-
-.pagination-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 2.5rem;
-    flex-wrap: wrap;
-}
-
+/* Кнопки пагінації */
 .page-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
+    background: #FFD700;              /* Змінено */
+    border: 1.5px solid #FFD700;
+    color: #ffffff;
     border-radius: 50%;
     width: 38px;
     height: 38px;
@@ -384,19 +280,114 @@ body {
 }
 
 .page-btn:hover {
-    background: var(--hover);
+    background: #e6b800;
+    border-color: #e6b800;
 }
 
 .page-btn.active-page {
-    background: var(--active);
-    color: var(--active-text);
-    border-color: var(--active);
+    background: #e6b800;
+    border-color: #e6b800;
+    color: #ffffff;
 }
 
 .page-btn:disabled {
     opacity: 0.35;
     cursor: not-allowed;
     pointer-events: none;
+    background: #FFD700;              /* Залишаємо жовтий, але тьмяний */
+    border-color: #FFD700;
+    color: #ffffff;
+}
+
+/* Кнопка "Дивитися" */
+.btn-watch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #FFD700;              /* Змінено */
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-xl);
+    padding: 0.7rem 1.6rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    margin-top: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-watch:hover {
+    background: #e6b800;
+    opacity: 1;                       /* Прибираємо стару прозорість */
+    transform: translateY(-1px);
+}
+
+/* Кнопки вибору озвучення */
+.voice-btn {
+    background: #FFD700;              /* Змінено */
+    border: 1.5px solid #FFD700;
+    color: #ffffff;
+    border-radius: var(--radius-xl);
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.voice-btn:hover {
+    background: #e6b800;
+    border-color: #e6b800;
+}
+
+.voice-btn.active {
+    background: #e6b800;
+    border-color: #e6b800;
+    color: #ffffff;
+}
+
+/* Кнопка "більше" в описі */
+.more-btn {
+    background: #FFD700;              /* Додаємо жовтий фон */
+    border: none;
+    color: #ffffff;                   /* Білий текст */
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.3rem 0.8rem;           /* Трохи відступів */
+    margin-top: 5px;
+    border-radius: 20px;              /* Округлення */
+    display: none;                    /* Схована за замовчуванням */
+    transition: background var(--transition);
+}
+
+.more-btn:hover {
+    background: #e6b800;
+}
+
+/* Тег рейтингу (вже був жовтий, залишаємо) */
+.tag.rating-tag {
+    background: #FFD700;
+    color: white;
+    font-weight: bold;
+}
+
+/* ========== КІНЕЦЬ ЗМІН КНОПОК ========== */
+
+/* Решта тегів (не рейтинг) залишаються звичайними */
+.tag {
+    background: var(--tag-bg);
+    display: inline-block;
+    padding: 0.25rem 0.8rem;
+    border-radius: 40px;
+    font-size: 0.73rem;
+    font-weight: 500;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+    transition: all var(--transition);
 }
 
 /* МОДАЛЬНІ ВІКНА */
@@ -496,11 +487,11 @@ body {
     min-width: 250px;
 }
 
-/* === Оновлений блок опису === */
+/* Блок опису */
 .synopsis {
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 4; /* Показувати лише 4 рядки */
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     transition: all 0.3s ease;
 }
@@ -508,59 +499,6 @@ body {
 .synopsis.expanded {
     display: block;
     -webkit-line-clamp: unset;
-}
-
-.more-btn {
-    background: none;
-    border: none;
-    color: #FFD700; /* Змінено на насичений жовтий */
-    cursor: pointer;
-    font-weight: bold;
-    padding: 0;
-    margin-top: 5px;
-    display: none; /* Схована за замовчуванням */
-}
-
-.tag.rating-tag {
-    background: #FFD700; /* Змінено на насичений жовтий */
-    color: white;
-    font-weight: bold;
-}
-/* ============================= */
-
-.tag {
-    background: var(--tag-bg);
-    display: inline-block;
-    padding: 0.25rem 0.8rem;
-    border-radius: 40px;
-    font-size: 0.73rem;
-    font-weight: 500;
-    margin-right: 0.4rem;
-    margin-bottom: 0.4rem;
-    color: var(--text);
-    transition: all var(--transition);
-}
-
-.btn-watch {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--active);
-    color: var(--active-text);
-    border: none;
-    border-radius: var(--radius-xl);
-    padding: 0.7rem 1.6rem;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all var(--transition);
-    margin-top: 0.5rem;
-    text-decoration: none;
-}
-
-.btn-watch:hover {
-    opacity: 0.85;
-    transform: translateY(-1px);
 }
 
 .player-container {
@@ -577,38 +515,6 @@ body {
     display: block;
     max-height: 60vh;
     background: #000;
-}
-
-.voice-selector {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.8rem;
-}
-
-.voice-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    border-radius: var(--radius-xl);
-    padding: 0.4rem 1rem;
-    font-weight: 600;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: all var(--transition);
-    white-space: nowrap;
-    box-shadow: var(--shadow-sm);
-}
-
-.voice-btn:hover {
-    background: var(--hover);
-}
-
-.voice-btn.active {
-    background: var(--active);
-    color: var(--active-text);
-    border-color: var(--active);
 }
 
 /* ПРОФІЛЬ */
