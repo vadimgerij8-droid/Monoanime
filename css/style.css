@@ -1,4 +1,4 @@
- :root {
+:root {
     --bg: #fafafa;
     --surface: #ffffff;
     --text: #111111;
@@ -513,7 +513,7 @@ body {
 .more-btn {
     background: none;
     border: none;
-    color: #ff4757;
+    color: #FFD700; /* Змінено на насичений жовтий */
     cursor: pointer;
     font-weight: bold;
     padding: 0;
@@ -522,7 +522,7 @@ body {
 }
 
 .tag.rating-tag {
-    background: #ff4757;
+    background: #FFD700; /* Змінено на насичений жовтий */
     color: white;
     font-weight: bold;
 }
