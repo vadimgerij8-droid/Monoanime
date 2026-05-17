@@ -530,7 +530,10 @@
                             <div class="synopsis" id="synopsisText">${anime.synopsis || 'Опис відсутній.'}</div>
                             <button class="more-btn" id="moreBtn" style="display: none;">більше</button>
                         </div>
-                        <button class="btn-outline" id="toggleBookmarkBtn"><i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}</button>
+                        <!-- Кнопка "Додати в обране" зі збільшеним верхнім відступом -->
+                        <button class="btn-outline" id="toggleBookmarkBtn" style="margin-top: 1.5rem;">
+                            <i class="fas fa-star"></i> ${isBookmarked ? 'В обраному' : 'Додати в обране'}
+                        </button>
                     </div>
                 </div>
                 <div style="margin-top:1.5rem;">
@@ -553,7 +556,10 @@
                                 ${episodes.map(ep => `<option value="${ep.file}">Еп. ${ep.episode}</option>`).join('')}
                             </select>
                         </div>
-                        <button id="playSelectedBtn" class="btn-outline" style="align-self: flex-end; padding: 0.6rem 1.2rem; background: #ff4757; color: white; border: none;"><i class="fas fa-play"></i> ДИВИТИСЯ</button>
+                        <!-- Кнопка "ДИВИТИСЯ": менший розмір, жовтий колір, зміщена вниз -->
+                        <button id="playSelectedBtn" class="btn-outline" style="align-self: flex-end; padding: 0.4rem 0.8rem; background: #ffcc00; color: #333; border: none; font-size: 0.85rem; margin-top: 8px;">
+                            <i class="fas fa-play"></i> ДИВИТИСЯ
+                        </button>
                     </div>
                     <div class="player-container" style="margin-top:1rem; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9;">
                         <video id="detailVideoPlayer" controls crossorigin="anonymous" style="width:100%; height: 100%;"></video>
