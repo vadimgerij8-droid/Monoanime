@@ -174,7 +174,7 @@ body {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: #e74c3c;
+    background: #FFD700;      /* Замінено на насичений жовтий */
     color: #fff;
     border-radius: 50%;
     width: 18px;
