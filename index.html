@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title></title></title>
+    <title>MONOANIME</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
-    <!-- Нові посилання на іконки та маніфест -->
+    <!-- Firebase SDKs (compat для зручності) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="android-chrome-192x192.png" sizes="192x192">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -30,6 +34,13 @@
                 <input type="text" id="searchInput" placeholder="Пошук аніме..." autocomplete="off">
             </div>
             <button id="themeToggleBtn" class="btn-icon" title="Змінити тему"><i class="fas fa-moon"></i></button>
+            
+            <!-- Нові кнопки авторизації -->
+            <button id="signInGoogleBtn" class="btn-icon" title="Увійти через Google"><i class="fab fa-google"></i></button>
+            <button id="signInEmailBtn" class="btn-icon" title="Увійти через Email"><i class="fas fa-envelope"></i></button>
+            <button id="signUpEmailBtn" class="btn-icon" title="Зареєструватися"><i class="fas fa-user-plus"></i></button>
+            <button id="signOutBtn" class="btn-icon" title="Вийти" style="display:none;"><i class="fas fa-sign-out-alt"></i></button>
+            
             <button id="profileBtn" class="btn-icon" title="Профіль"><i class="fas fa-user"></i><span class="badge" id="bookmarkBadge">0</span></button>
         </div>
     </div>
@@ -40,7 +51,6 @@
         </div>
     </div>
 
-    <!-- Замінено старі вкладки на нові кнопки -->
     <div class="tabs-row">
         <button class="tab-btn active-tab" id="top100Btn">ТОП 100</button>
         <button class="tab-btn" id="randomBtn">🎲Випадкове аніме</button>
@@ -94,6 +104,23 @@
             <h4>🕒 Історія переглядів</h4>
             <div class="bookmark-list" id="historyList"><p>Немає історії</p></div>
             <button class="btn-outline" id="clearHistoryBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Очистити історію</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальне вікно для Email/Password авторизації -->
+<div id="emailAuthModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h2 id="emailAuthTitle">Вхід</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                <input type="email" id="authEmail" placeholder="Email" style="padding:0.5rem;">
+                <input type="password" id="authPassword" placeholder="Пароль" style="padding:0.5rem;">
+                <button id="confirmEmailAuthBtn" class="btn-outline">Увійти</button>
+            </div>
         </div>
     </div>
 </div>
