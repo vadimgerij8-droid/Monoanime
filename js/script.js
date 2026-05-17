@@ -186,11 +186,13 @@
         return parseCards(doc);
     }
 
+    // ========== НОВА: ТОП 100 ==========
     async function fetchTop100() {
         const doc = await fetchUA(`${ANIMEUA_BASE}/top.html`);
         return parseCards(doc);
     }
 
+    // Нова функція-обробник для кнопки ТОП 100
     async function showTop100() {
         currentTab = 'top100';
         currentPage = 1;
@@ -207,44 +209,38 @@
         }
     }
 
+    // ========== НОВА: Випадкове аніме ==========
     function openRandomAnime() {
         const randomUrl = `${ANIMEUA_BASE}/index.php?do=rand`;
         openDetailModal(randomUrl);
     }
 
+    // Оновлена функція: повертає жанри зі статичної мапи
     function fetchGenres() {
         return Object.entries(GENRE_MAP)
             .map(([name, slug]) => ({ slug, name }))
             .sort((a, b) => a.name.localeCompare(b.name, 'uk'));
     }
 
-    // Допоміжна функція для очищення JS-об'єктів у валідний JSON
-    function cleanJsToJson(rawData) {
-        try {
-            return rawData
-                .replace(/'/g, '"') // Заміна одинарних лапок на подвійні
-                .replace(/(\s*?{\s*?|\s*?,\s*?)(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '$1"$3":') // Лапки для ключів
-                .replace(/,\s*([\]}])/g, '$1'); // Видалення зайвих ком
-        } catch (e) {
-            return rawData;
-        }
-    }
-
+    // ========== Оновлений Парсер джерел з групуванням ==========
     function extractSourcesFromText(text, providerName = '') {
         const sources = [];
-        // Шукаємо JSON або масив у тексті
-        const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\{[\s\S]+?\})/i) || 
+        const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) || 
                           text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
         
         if (jsonMatch) {
             try {
                 let rawData = jsonMatch[1].trim();
-                // Спроба перетворити JS-літерал у JSON
-                const cleanJson = cleanJsToJson(rawData);
+                if ((rawData.startsWith("'") && rawData.endsWith("'")) || (rawData.startsWith('"') && rawData.endsWith('"'))) {
+                    rawData = rawData.slice(1, -1);
+                }
+                if (rawData.startsWith('{') && rawData.endsWith('}')) {
+                    rawData = `[${rawData}]`;
+                }
+                const cleanJson = rawData.replace(/,\s*\]/g, ']').replace(/,\s*\}/g, '}');
                 const arr = JSON.parse(cleanJson);
                 
                 const walk = (items, currentDub = '', currentSeason = '1') => {
-                    if (!Array.isArray(items)) return;
                     items.forEach(item => {
                         if (item.folder || item.playlist) {
                             let nextDub = currentDub;
@@ -286,7 +282,6 @@
             } catch (e) { console.warn('Помилка парсингу JSON озвучок', e); }
         }
 
-        // Фолбек: пошук прямих посилань .m3u8
         if (sources.length === 0) {
             const urlMatches = [...text.matchAll(/https?:\/\/[^\s\'"<>]+\.m3u8[^\s\'"<>]*/g)];
             urlMatches.forEach((m, idx) => {
@@ -350,6 +345,7 @@
             if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
         }
 
+        // ========== НОВЕ: Парсинг вікового рейтингу ==========
         let rating = '';
         const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
         if (ratingEl) {
@@ -365,7 +361,7 @@
                 else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
                 else if (playerUrl.includes('player')) provider = 'Player';
                 const playerHtml = await fetchUA(playerUrl);
-                const text = playerHtml.documentElement?.innerHTML || '';
+                const text = playerHtml.body?.innerHTML || '';
                 allRawSources.push(...extractSourcesFromText(text, provider));
                 const nestedIframes = safeQueryAll('iframe', playerHtml);
                 for (const nested of nestedIframes) {
@@ -374,7 +370,7 @@
                         if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
                         if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
                         const nestedHtml = await fetchUA(nestedUrl);
-                        allRawSources.push(...extractSourcesFromText(nestedHtml.documentElement?.innerHTML || '', provider));
+                        allRawSources.push(...extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider));
                     }
                 }
             } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
@@ -411,7 +407,7 @@
             seasons, 
             url: animeUrl, 
             from: 'animeua',
-            rating
+            rating // <-- Додано
         };
     }
 
@@ -500,10 +496,9 @@
     async function openDetailModal(url) {
         if (!DOM.modal) return;
         DOM.modalTitle.textContent = 'Завантаження...';
-        DOM.modalBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження даних...</div>';
+        DOM.modalBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
         DOM.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-
         try {
             const anime = await loadAnimeDetails(url);
             Storage.addHistory(anime);
@@ -511,39 +506,18 @@
             DOM.modalTitle.textContent = anime.title;
             const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
             
-            const seasonsKeys = Object.keys(anime.seasons || {}).sort((a,b) => parseInt(a) - parseInt(b));
-            
-            if (seasonsKeys.length === 0) {
-                DOM.modalBody.innerHTML = '<div class="loader">На жаль, не вдалося знайти джерела для цього аніме.</div>';
-                return;
-            }
-
-            const firstSeason = seasonsKeys[0];
-            const dubsKeys = Object.keys(anime.seasons[firstSeason] || {}).sort();
-            const firstDub = dubsKeys[0] || '';
+            const seasons = Object.keys(anime.seasons).sort((a,b) => parseInt(a) - parseInt(b));
+            const firstSeason = seasons[0] || '1';
+            const dubs = Object.keys(anime.seasons[firstSeason] || {}).sort();
+            const firstDub = dubs[0] || '';
             const episodes = firstDub ? anime.seasons[firstSeason][firstDub] : [];
             
             const totalEpisodes = episodes.length;
+            
+            // Рейтинг (якщо є)
             const ratingTag = anime.rating ? `<span class="tag rating-tag"><i class="fas fa-user-shield"></i> ${anime.rating}</span>` : '';
 
             const html = `
-                <style>
-                    .player-controls-row select {
-                        appearance: auto !important;
-                        -webkit-appearance: menulist !important;
-                        background: white;
-                        color: black;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        padding: 8px;
-                        font-size: 14px;
-                    }
-                    .dark-mode .player-controls-row select {
-                        background: #333;
-                        color: white;
-                        border-color: #555;
-                    }
-                </style>
                 <div class="anime-detail-grid">
                     <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
                     <div class="detail-info">
@@ -560,26 +534,26 @@
                     </div>
                 </div>
                 <div style="margin-top:1.5rem;">
-                    <div class="player-controls-row" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem; background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 8px;">
-                        <div style="display:flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 120px;">
-                            <label style="font-size: 0.8rem; font-weight: 600; color: #888;">СЕЗОН</label>
-                            <select id="seasonSelect">
-                                ${seasonsKeys.map(s => `<option value="${s}" ${s === firstSeason ? 'selected' : ''}>Сезон ${s}</option>`).join('')}
+                    <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem; background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 8px;">
+                        <div style="display:flex; flex-direction: column; gap: 0.3rem;">
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #666;">СЕЗОН</label>
+                            <select id="seasonSelect" class="btn-outline" style="padding:0.5rem; min-width: 120px;">
+                                ${seasons.map(s => `<option value="${s}" ${s === firstSeason ? 'selected' : ''}>Сезон ${s}</option>`).join('')}
                             </select>
                         </div>
-                        <div style="display:flex; flex-direction: column; gap: 0.3rem; flex: 2; min-width: 150px;">
-                            <label style="font-size: 0.8rem; font-weight: 600; color: #888;">ОЗВУЧКА</label>
-                            <select id="dubSelect">
-                                ${dubsKeys.map(d => `<option value="${d}" ${d === firstDub ? 'selected' : ''}>${d}</option>`).join('')}
+                        <div style="display:flex; flex-direction: column; gap: 0.3rem;">
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #666;">ОЗВУЧКА</label>
+                            <select id="dubSelect" class="btn-outline" style="padding:0.5rem; min-width: 200px;">
+                                ${dubs.map(d => `<option value="${d}" ${d === firstDub ? 'selected' : ''}>${d}</option>`).join('')}
                             </select>
                         </div>
-                        <div style="display:flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 100px;">
-                            <label style="font-size: 0.8rem; font-weight: 600; color: #888;">СЕРІЯ</label>
-                            <select id="episodeSelect">
+                        <div style="display:flex; flex-direction: column; gap: 0.3rem;">
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #666;">СЕРІЯ</label>
+                            <select id="episodeSelect" class="btn-outline" style="padding:0.5rem; min-width: 100px;">
                                 ${episodes.map(ep => `<option value="${ep.file}">Еп. ${ep.episode}</option>`).join('')}
                             </select>
                         </div>
-                        <button id="playSelectedBtn" class="btn-outline" style="align-self: flex-end; padding: 0.6rem 1.2rem; background: #ff4757; color: white; border: none; height: 40px;"><i class="fas fa-play"></i> ДИВИТИСЯ</button>
+                        <button id="playSelectedBtn" class="btn-outline" style="align-self: flex-end; padding: 0.6rem 1.2rem; background: #ff4757; color: white; border: none;"><i class="fas fa-play"></i> ДИВИТИСЯ</button>
                     </div>
                     <div class="player-container" style="margin-top:1rem; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9;">
                         <video id="detailVideoPlayer" controls crossorigin="anonymous" style="width:100%; height: 100%;"></video>
@@ -589,6 +563,7 @@
 
             DOM.modalBody.innerHTML = html;
             const detailVideoEl = document.getElementById('detailVideoPlayer');
+
             const seasonSelect = document.getElementById('seasonSelect');
             const dubSelect = document.getElementById('dubSelect');
             const episodeSelect = document.getElementById('episodeSelect');
@@ -607,24 +582,24 @@
                 episodeSelect.innerHTML = availableEps.map(ep => `<option value="${ep.file}">Еп. ${ep.episode}</option>`).join('');
             }
 
-            if (seasonSelect) seasonSelect.addEventListener('change', updateDubs);
-            if (dubSelect) dubSelect.addEventListener('change', updateEpisodes);
-            
+            seasonSelect.addEventListener('change', updateDubs);
+            dubSelect.addEventListener('change', updateEpisodes);
             document.getElementById('playSelectedBtn').addEventListener('click', () => {
                 const file = episodeSelect.value;
                 if (file) loadVideo(file, detailVideoEl);
                 else showToast('❌ Немає файлу');
             });
-
             document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
                 toggleBookmark(anime);
                 const isNow = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
                 document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${isNow ? 'В обраному' : 'Додати в обране'}`;
             });
 
+            // ========== Логіка для кнопки «більше» ==========
             const synopsisText = document.getElementById('synopsisText');
             const moreBtn = document.getElementById('moreBtn');
             if (synopsisText && moreBtn) {
+                // Перевіряємо, чи текст обрізаний (не вліз у 4 рядки)
                 if (synopsisText.scrollHeight > synopsisText.clientHeight) {
                     moreBtn.style.display = 'block';
                 }
@@ -634,10 +609,7 @@
                 });
             }
 
-        } catch (err) { 
-            console.error(err);
-            DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`; 
-        }
+        } catch (err) { DOM.modalBody.innerHTML = `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`; }
     }
 
     if (DOM.closeModalBtn) DOM.closeModalBtn.addEventListener('click', closeDetailModal);
@@ -706,6 +678,7 @@
         });
     }
 
+    // ========== Ініціалізація ==========
     applyTheme(Storage.getTheme());
     updateBadge();
 
