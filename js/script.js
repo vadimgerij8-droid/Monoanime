@@ -1,32 +1,3 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from "firebase/auth";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCGFJnzds6BzKr1hxX8NV0gpfXiaxCEn6M",
-  authDomain: "monoanime8.firebaseapp.com",
-  projectId: "monoanime8",
-  storageBucket: "monoanime8.firebasestorage.app",
-  messagingSenderId: "277731716769",
-  appId: "1:277731716769:web:cef62b34753bb70a1fcae0",
-  measurementId: "G-32V4LC8F6V"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-
 (function() {
     const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
     const ANIMEUA_BASE = 'https://animeua.club';
@@ -436,7 +407,7 @@ const auth = getAuth(app);
             seasons, 
             url: animeUrl, 
             from: 'animeua',
-            rating
+            rating // <-- Додано
         };
     }
 
@@ -624,10 +595,11 @@ const auth = getAuth(app);
                 document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${isNow ? 'В обраному' : 'Додати в обране'}`;
             });
 
-            // Логіка для кнопки «більше»
+            // ========== Логіка для кнопки «більше» ==========
             const synopsisText = document.getElementById('synopsisText');
             const moreBtn = document.getElementById('moreBtn');
             if (synopsisText && moreBtn) {
+                // Перевіряємо, чи текст обрізаний (не вліз у 4 рядки)
                 if (synopsisText.scrollHeight > synopsisText.clientHeight) {
                     moreBtn.style.display = 'block';
                 }
@@ -644,132 +616,13 @@ const auth = getAuth(app);
     if (DOM.closePlayerBtn) DOM.closePlayerBtn.addEventListener('click', () => { DOM.playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHlsForVideo(DOM.mainVideoPlayer); });
     if (DOM.closeProfileBtn) DOM.closeProfileBtn.addEventListener('click', () => { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; });
 
-    // ========== Firebase Auth ==========
-    let currentUser = null;
-
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        const profileContent = document.getElementById('authContainer');
-        if (profileContent && DOM.profileModal.style.display === 'flex') {
-            renderAuthSection(profileContent);
-        }
-    });
-
-    async function signInWithGoogle() {
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-            showToast('Успішний вхід через Google');
-        } catch (error) {
-            showToast('Помилка входу: ' + error.message);
-        }
-    }
-
-    async function signUpWithEmail(email, password) {
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            showToast('Реєстрація успішна!');
-        } catch (error) {
-            showToast('Помилка реєстрації: ' + error.message);
-        }
-    }
-
-    async function signInWithEmail(email, password) {
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            showToast('Вхід виконано');
-        } catch (error) {
-            showToast('Помилка входу: ' + error.message);
-        }
-    }
-
-    async function logout() {
-        await signOut(auth);
-        showToast('Ви вийшли з акаунту');
-    }
-
-    function renderAuthSection(container) {
-        if (currentUser) {
-            container.innerHTML = `
-                <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <img src="${currentUser.photoURL || ''}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;" />
-                    <h3 style="margin: 0.5rem 0;">${currentUser.displayName || currentUser.email}</h3>
-                    <p style="color: #888; font-size: 0.9rem;">${currentUser.email}</p>
-                    <button id="logoutBtn" class="btn-outline" style="margin-top: 0.5rem;"><i class="fas fa-sign-out-alt"></i> Вийти</button>
-                </div>
-            `;
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-        } else {
-            container.innerHTML = `
-                <div style="margin-bottom: 1.5rem;">
-                    <button id="googleSignInBtn" class="btn-outline" style="width:100%; margin-bottom: 1rem; background: #4285f4; color: white; border: none;">
-                        <i class="fab fa-google"></i> Увійти через Google
-                    </button>
-                    <div style="border-top: 1px solid #ddd; margin: 1rem 0;"></div>
-                    <form id="loginForm" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                        <input type="email" id="emailInput" placeholder="Email" required style="padding:0.5rem; border-radius:4px; border:1px solid #ccc;" />
-                        <input type="password" id="passwordInput" placeholder="Пароль" required style="padding:0.5rem; border-radius:4px; border:1px solid #ccc;" />
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button type="submit" id="loginBtn" class="btn-outline" style="flex:1;">Увійти</button>
-                            <button type="button" id="registerBtn" class="btn-outline" style="flex:1;">Реєстрація</button>
-                        </div>
-                    </form>
-                </div>
-            `;
-            document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
-            document.getElementById('loginForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = document.getElementById('emailInput').value.trim();
-                const password = document.getElementById('passwordInput').value;
-                signInWithEmail(email, password);
-            });
-            document.getElementById('registerBtn').addEventListener('click', () => {
-                const email = document.getElementById('emailInput').value.trim();
-                const password = document.getElementById('passwordInput').value;
-                if (email && password) {
-                    signUpWithEmail(email, password);
-                } else {
-                    showToast('Заповніть email і пароль');
-                }
-            });
-        }
-    }
-
-    // Модифікована функція відкриття профілю
     function openProfileModal() {
         if (!DOM.profileModal) return;
         const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
-
-        DOM.profileBody.innerHTML = `
-            <div id="authContainer"></div>
-            <hr style="margin: 1rem 0;" />
-            <h3><i class="fas fa-star"></i> Обране</h3>
-            <div id="bookmarkList" class="bookmark-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;"></div>
-            <h3><i class="fas fa-history"></i> Історія переглядів</h3>
-            <div id="historyList" class="bookmark-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
-        `;
-
-        const bList = document.getElementById('bookmarkList');
-        bList.innerHTML = bookmarks.length 
-            ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('') 
-            : '<p>Немає обраних</p>';
-
-        const hList = document.getElementById('historyList');
-        hList.innerHTML = history.length 
-            ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('') 
-            : '<p>Історія порожня</p>';
-
-        document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => {
-            item.addEventListener('click', () => {
-                DOM.profileModal.style.display = 'none';
-                document.body.style.overflow = '';
-                openDetailModal(item.dataset.url);
-            });
-        });
-
-        const authContainer = document.getElementById('authContainer');
-        renderAuthSection(authContainer);
-
+        const bList = document.getElementById('bookmarkList'), hList = document.getElementById('historyList');
+        if (bList) bList.innerHTML = bookmarks.length ? bookmarks.slice(0,12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>';
+        if (hList) hList.innerHTML = history.length ? history.slice(0,12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('') : '<p>Історія порожня</p>';
+        document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => item.addEventListener('click', () => { DOM.profileModal.style.display = 'none'; document.body.style.overflow = ''; openDetailModal(item.dataset.url); }));
         DOM.profileModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
