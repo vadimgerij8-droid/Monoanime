@@ -1,17 +1,7 @@
-const BOOKMARKS_KEY = 'mono_anime_bookmarks';
-const HISTORY_KEY = 'mono_anime_history';
-const THEME_KEY = 'mono_anime_theme';
-
-export const Storage = {
-    getBookmarks() {
-        try { return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]'); } catch { return []; }
-    },
-    saveBookmarks(arr) {
-        localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(arr));
-    },
-    getHistory() {
-        try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
-    },
+const Storage = {
+    getBookmarks() { try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; } },
+    saveBookmarks(arr) { localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr)); },
+    getHistory() { try { return JSON.parse(localStorage.getItem('mono_anime_history') || '[]'); } catch { return []; } },
     addHistory(anime) {
         if (!anime || !anime.mal_id) return;
         const hist = this.getHistory().filter(h => h.mal_id !== anime.mal_id);
@@ -20,15 +10,34 @@ export const Storage = {
             image_url: anime.images?.jpg?.large_image_url || '',
             url: anime.url || '', score: anime.score, year: anime.year, timestamp: Date.now()
         });
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, 50)));
+        localStorage.setItem('mono_anime_history', JSON.stringify(hist.slice(0, 50)));
     },
-    clearHistory() {
-        localStorage.setItem(HISTORY_KEY, '[]');
-    },
-    getTheme() {
-        return localStorage.getItem(THEME_KEY) || 'light';
-    },
-    setTheme(theme) {
-        localStorage.setItem(THEME_KEY, theme);
-    }
+    clearHistory() { localStorage.setItem('mono_anime_history', '[]'); },
+    getTheme() { return localStorage.getItem('mono_anime_theme') || 'light'; },
+    setTheme(theme) { localStorage.setItem('mono_anime_theme', theme); }
 };
+
+function updateBadge() {
+    const badge = document.getElementById('bookmarkBadge');
+    if (!badge) return;
+    const count = Storage.getBookmarks().length;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function applyTheme(theme) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+}
+
+function toggleTheme() {
+    const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
+    Storage.setTheme(next);
+    applyTheme(next);
+}
