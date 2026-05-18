@@ -1,6 +1,3 @@
-import { PROXY_URL, ANIMEUA_BASE, GENRE_MAP } from './config.js';
-import { getProxyUrl, safeQuery, safeQueryAll } from './utils.js';
-
 async function fetchUA(url) {
     if (!url) throw new Error('empty url');
     const proxyUrl = getProxyUrl(url);
@@ -46,54 +43,53 @@ function parseCards(doc) {
     });
 }
 
-export async function fetchMainPage(page = 1) {
+async function fetchMainPage(page = 1) {
     const doc = await fetchUA(`${ANIMEUA_BASE}/page/${page}/`);
     return parseCards(doc);
 }
 
-export async function searchAnimeUA(query, page = 1) {
+async function searchAnimeUA(query, page = 1) {
     const doc = await fetchUA(`${ANIMEUA_BASE}/index.php?do=search&subaction=search&story=${encodeURIComponent(query)}&page=${page}`);
     return parseCards(doc);
 }
 
-export async function fetchByGenre(genreSlug, page = 1) {
+async function fetchByGenre(genreSlug, page = 1) {
     const doc = await fetchUA(`${ANIMEUA_BASE}/genre/${genreSlug}/page/${page}/`);
     return parseCards(doc);
 }
 
-export async function fetchTop100() {
+async function fetchTop100() {
     const doc = await fetchUA(`${ANIMEUA_BASE}/top.html`);
     return parseCards(doc);
 }
 
-export function fetchGenres() {
+function fetchGenres() {
     return Object.entries(GENRE_MAP)
         .map(([name, slug]) => ({ slug, name }))
         .sort((a, b) => a.name.localeCompare(b.name, 'uk'));
 }
 
+// ---------- Парсинг джерел ----------
+
 function extractSourcesFromText(text, providerName = '') {
     const sources = [];
-    const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) || 
-                      text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
-    
+    const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) ||
+        text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
+
     if (jsonMatch) {
         try {
             let rawData = jsonMatch[1].trim();
             if ((rawData.startsWith("'") && rawData.endsWith("'")) || (rawData.startsWith('"') && rawData.endsWith('"'))) {
                 rawData = rawData.slice(1, -1);
             }
-            if (rawData.startsWith('{') && rawData.endsWith('}')) {
-                rawData = `[${rawData}]`;
-            }
+            if (rawData.startsWith('{') && rawData.endsWith('}')) rawData = `[${rawData}]`;
             const cleanJson = rawData.replace(/,\s*\]/g, ']').replace(/,\s*\}/g, '}');
             const arr = JSON.parse(cleanJson);
-            
+
             const walk = (items, currentDub = '', currentSeason = '1') => {
                 items.forEach(item => {
                     if (item.folder || item.playlist) {
-                        let nextDub = currentDub;
-                        let nextSeason = currentSeason;
+                        let nextDub = currentDub, nextSeason = currentSeason;
                         const folderTitle = item.title || '';
                         const seasonMatch = folderTitle.match(/[Сс]езон\s*(\d+)/);
                         if (seasonMatch) {
@@ -113,19 +109,11 @@ function extractSourcesFromText(text, providerName = '') {
                         if (epSeasonMatch) finalSeason = epSeasonMatch[1];
                         const epNumMatch = episodeTitle.match(/(\d+)\s*[Сс]ері[яіяа]|[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
                         const episodeNumber = epNumMatch ? (epNumMatch[1] || epNumMatch[2] || epNumMatch[3]) : '1';
-
-                        sources.push({
-                            label: episodeTitle,
-                            file: item.file,
-                            provider: providerName,
-                            dub: finalDub.trim(),
-                            season: finalSeason,
-                            episode: episodeNumber
-                        });
+                        sources.push({ label: episodeTitle, file: item.file, provider: providerName, dub: finalDub.trim(), season: finalSeason, episode: episodeNumber });
                     }
                 });
             };
-            
+
             if (Array.isArray(arr)) walk(arr);
             else if (arr.file) sources.push({ label: arr.title || 'Озвучка', file: arr.file, provider: providerName, dub: providerName || 'UA', season: '1', episode: '1' });
         } catch (e) { console.warn('Помилка парсингу JSON озвучок', e); }
@@ -169,7 +157,7 @@ function extractPlayerIframeUrls(doc) {
     return [...new Set(urls)];
 }
 
-export async function loadAnimeDetails(animeUrl) {
+async function loadAnimeDetails(animeUrl) {
     const doc = await fetchUA(animeUrl);
     let title = '';
     for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
@@ -195,9 +183,7 @@ export async function loadAnimeDetails(animeUrl) {
     }
     let rating = '';
     const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
-    if (ratingEl) {
-        rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
-    }
+    if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
 
     const playerUrls = extractPlayerIframeUrls(doc);
     const allRawSources = [];
@@ -234,13 +220,9 @@ export async function loadAnimeDetails(animeUrl) {
             seenKeys.add(uniqueKey);
             if (!seasons[seasonNum]) seasons[seasonNum] = {};
             if (!seasons[seasonNum][dubName]) seasons[seasonNum][dubName] = [];
-            seasons[seasonNum][dubName].push({
-                title: s.label, season: seasonNum, episode: episodeNum,
-                file: s.file, dub: dubName, provider: s.provider
-            });
+            seasons[seasonNum][dubName].push({ title: s.label, season: seasonNum, episode: episodeNum, file: s.file, dub: dubName, provider: s.provider });
         }
     });
-
     for (const s in seasons) {
         for (const d in seasons[s]) {
             seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
@@ -251,6 +233,7 @@ export async function loadAnimeDetails(animeUrl) {
         mal_id: animeUrl.hashCode(),
         title,
         images: { jpg: { large_image_url: poster, image_url: poster } },
-        genres, year, synopsis, seasons, url: animeUrl, from: 'animeua', rating
+        genres, year, synopsis, seasons,
+        url: animeUrl, from: 'animeua', rating
     };
 }
