@@ -1,7 +1,7 @@
-export const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
-export const ANIMEUA_BASE = 'https://animeua.club';
+const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
+const ANIMEUA_BASE = 'https://animeua.club';
 
-export const GENRE_MAP = {
+const GENRE_MAP = {
     "Бойові мистецтва": "boivie",
     "Бойовики": "boyovik",
     "Воєнні": "voenne",
@@ -21,3 +21,8 @@ export const GENRE_MAP = {
     "Школа": "classes",
     "Еччі": "echhi"
 };
+
+function getProxyUrl(url) {
+    if (!url) { console.warn('getProxyUrl empty'); return null; }
+    return PROXY_URL + '?url=' + encodeURIComponent(url);
+}
