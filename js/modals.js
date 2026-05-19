@@ -1,60 +1,39 @@
 import { showToast } from './ui.js';
 import { Storage, updateBadge } from './storage.js';
-import { loadAnimeDetails, loadVideo } from './player.js'; // потрібно переконатись, що player.js експортує ці функції
+import { loadAnimeDetails } from './api.js';
+import { loadVideo, destroyHlsForVideo } from './player.js';
 
-// --- Auth Modal ---
-export function openAuthModal() {
-  let modal = document.getElementById('authModal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'authModal';
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-      <div class="modal-box" style="max-width:420px; padding:2rem; position:relative;">
-        <button onclick="closeAuthModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:inherit;">✕</button>
-        
-        <div id="authTabBar" style="display:flex;gap:0;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);">
-          <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">Увійти</button>
-          <button id="tabRegisterBtn" onclick="switchAuthTab('register')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">Реєстрація</button>
-        </div>
+// ==================== Auth Tab inside Profile Modal ====================
+function renderAuthForm() {
+  return `
+    <div id="authTabBar" style="display:flex;gap:0;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">Увійти</button>
+      <button id="tabRegisterBtn" onclick="switchAuthTab('register')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">Реєстрація</button>
+    </div>
 
-        <button onclick="authGoogleSignIn()" style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid #ddd;background:#fff;color:#333;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.7rem;margin-bottom:1rem;">
-          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Продовжити з Google
-        </button>
+    <button onclick="authGoogleSignIn()" style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid #ddd;background:#fff;color:#333;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.7rem;margin-bottom:1rem;">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Продовжити з Google
+    </button>
 
-        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;color:#999;">
-          <div style="flex:1;height:1px;background:#ddd;"></div>або<div style="flex:1;height:1px;background:#ddd;"></div>
-        </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;color:#999;">
+      <div style="flex:1;height:1px;background:#ddd;"></div>або<div style="flex:1;height:1px;background:#ddd;"></div>
+    </div>
 
-        <div id="authNameWrap" style="display:none;margin-bottom:0.75rem;">
-          <input id="authName" type="text" placeholder="Ім'я" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
-        </div>
-        <div style="margin-bottom:0.75rem;">
-          <input id="authEmail" type="email" placeholder="Email" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
-        </div>
-        <div style="margin-bottom:1.25rem;">
-          <input id="authPassword" type="password" placeholder="Пароль" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
-        </div>
+    <div id="authNameWrap" style="display:none;margin-bottom:0.75rem;">
+      <input id="authName" type="text" placeholder="Ім'я" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <input id="authEmail" type="email" placeholder="Email" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <input id="authPassword" type="password" placeholder="Пароль" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
+    </div>
 
-        <button id="authSubmitBtn" onclick="authEmailLogin()" style="width:100%;padding:0.75rem;border-radius:8px;border:none;background:#ffcc00;color:#333;font-size:1rem;font-weight:700;cursor:pointer;">
-          Увійти
-        </button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeAuthModal(); });
-  }
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-
-export function closeAuthModal() {
-  const modal = document.getElementById('authModal');
-  if (modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
-  }
+    <button id="authSubmitBtn" onclick="authEmailLogin()" style="width:100%;padding:0.75rem;border-radius:8px;border:none;background:#ffcc00;color:#333;font-size:1rem;font-weight:700;cursor:pointer;">
+      Увійти
+    </button>
+  `;
 }
 
 window.switchAuthTab = function (tab) {
@@ -77,96 +56,101 @@ window.switchAuthTab = function (tab) {
   }
 };
 
-// --- Profile Modal ---
+// ==================== Profile Modal ====================
 export async function openProfileModal() {
-  if (!window.currentUser) {
-    openAuthModal();
-    return;
-  }
-
   const profileModal = document.getElementById('profileModal');
-  if (!profileModal) return;
+  const profileBody = document.getElementById('profileBody');
+  if (!profileModal || !profileBody) return;
+
   profileModal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  const profileBody = document.getElementById('profileBody');
-  if (!profileBody) return;
+  if (!window.currentUser) {
+    // Показати форму авторизації
+    profileBody.innerHTML = renderAuthForm();
+    return;
+  }
+
+  // Завантаження даних профілю
   profileBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
 
   const { cloudGetBookmarks, cloudGetHistory } = await import('./auth.js');
   const [bookmarks, history] = await Promise.all([cloudGetBookmarks(), cloudGetHistory()]);
   const user = window.currentUser;
 
+  const bookmarksHtml = bookmarks.length
+    ? bookmarks.map(b => `
+        <div class="bookmark-item" data-url="${b.url}" style="cursor:pointer; display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0; border-bottom:1px solid var(--border);">
+          <img src="${b.images?.jpg?.large_image_url || ''}" alt="" style="width:40px; height:56px; object-fit:cover; border-radius:4px;">
+          <span>${b.title}</span>
+        </div>`).join('')
+    : '<p>Немає обраних</p>';
+
+  const historyHtml = history.length
+    ? history.map(h => `
+        <div class="bookmark-item" data-url="${h.url}" style="cursor:pointer; display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0; border-bottom:1px solid var(--border);">
+          <img src="${h.image_url}" alt="" style="width:40px; height:56px; object-fit:cover; border-radius:4px;">
+          <span>${h.title}</span>
+        </div>`).join('')
+    : '<p>Немає історії</p>';
+
   profileBody.innerHTML = `
-    <div style="display:flex;align-items:center;gap:1rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border,#eee);margin-bottom:1.5rem;">
-      ${user.photoURL
-        ? `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`
-        : `<div style="width:60px;height:60px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:1.8rem;"><i class="fas fa-user"></i></div>`
-      }
-      <div style="flex:1;">
-        <div style="font-size:1.1rem;font-weight:700;">${user.displayName || 'Без імені'}</div>
-        <div style="font-size:0.85rem;color:#888;">${user.email || ''}</div>
+    <div class="profile-section">
+      <div class="profile-avatar">
+        ${user.photoURL
+          ? `<img src="${user.photoURL}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`
+          : `<i class="fas fa-user-circle" style="font-size:80px;"></i>`
+        }
       </div>
-      <button onclick="authSignOut()" style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid #ddd;background:none;cursor:pointer;font-size:0.85rem;color:inherit;">
+      <h3 style="color:var(--text);">${user.displayName || 'Аніме-фанат'}</h3>
+      <p style="color:var(--text-secondary);">${user.email || ''}</p>
+      <button onclick="authSignOut()" style="margin-top:0.5rem; padding:0.4rem 1rem; border-radius:8px; border:1px solid #ddd; background:none; cursor:pointer; color:inherit;">
         <i class="fas fa-sign-out-alt"></i> Вийти
       </button>
     </div>
-
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
-      <div style="background:rgba(255,204,0,0.15);border-radius:10px;padding:0.9rem;text-align:center;">
-        <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
-        <div style="font-size:0.75rem;color:#888;">Обране</div>
-      </div>
-      <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
-        <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
-        <div style="font-size:0.75rem;color:#888;">Переглянуто</div>
-      </div>
-      <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
-        <div style="font-size:1.6rem;font-weight:700;">★</div>
-        <div style="font-size:0.75rem;color:#888;">Рейтинг</div>
-      </div>
+    <div class="profile-stats">
+      <div class="profile-stat"><div class="stat-num" id="statBookmarks">${bookmarks.length}</div><div class="stat-label">Обрано</div></div>
+      <div class="profile-stat"><div class="stat-num" id="statHistory">${history.length}</div><div class="stat-label">Переглянуто</div></div>
+      <div class="profile-stat"><div class="stat-num" id="statWatched">—</div><div class="stat-label">Епізодів</div></div>
     </div>
-
-    <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);margin-bottom:1rem;">
-      <button class="profile-tab" data-tab="bookmarks" onclick="switchProfileTab(this,'bookmarks')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">⭐ Обране</button>
-      <button class="profile-tab" data-tab="history" onclick="switchProfileTab(this,'history')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">🕓 Історія</button>
-    </div>
-
-    <div id="profileTabBookmarks">${renderProfileGrid(bookmarks, 'Немає обраних аніме')}</div>
-    <div id="profileTabHistory" style="display:none;">${renderProfileGrid(history, 'Історія порожня')}</div>
+    <h4>⭐ Обрані аніме</h4>
+    <div class="bookmark-list" id="bookmarkList">${bookmarksHtml}</div>
+    <h4>🕓 Історія переглядів</h4>
+    <div class="bookmark-list" id="historyList">${historyHtml}</div>
+    <button class="btn-outline" id="clearHistoryBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Очистити історію</button>
   `;
 
-  profileBody.querySelectorAll('.profile-card').forEach(card => {
-    card.addEventListener('click', () => {
+  // Кліки по обраному/історії
+  document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(el => {
+    el.addEventListener('click', () => {
       profileModal.style.display = 'none';
       document.body.style.overflow = '';
-      openDetailModal(card.dataset.url);
+      openDetailModal(el.dataset.url);
     });
   });
+
+  // Очищення історії
+  const clearBtn = document.getElementById('clearHistoryBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', async () => {
+      if (window.currentUser) {
+        const { cloudGetHistory, cloudAddHistory } = await import('./auth.js');
+        // Для очищення просто перезаписуємо порожнім масивом
+        const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+        const db = getFirestore();
+        const ref = doc(db, 'users', window.currentUser.uid);
+        await setDoc(ref, { history: [] }, { merge: true });
+        localStorage.setItem('mono_anime_history', '[]');
+      } else {
+        Storage.clearHistory();
+      }
+      openProfileModal(); // оновити
+      showToast('Історію очищено');
+    });
+  }
 }
 
-function renderProfileGrid(list, emptyMsg) {
-  if (!list.length) return `<p style="text-align:center;color:#888;padding:2rem;">${emptyMsg}</p>`;
-  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.75rem;">
-    ${list.slice(0, 24).map(item => `
-      <div class="profile-card" data-url="${item.url}" style="cursor:pointer;border-radius:10px;overflow:hidden;background:var(--card-bg,#f5f5f5);">
-        <img src="${item.image_url}" alt="${item.title}" style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;">
-        <div style="padding:0.4rem 0.3rem;font-size:0.72rem;font-weight:600;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="${item.title}">${item.title}</div>
-      </div>
-    `).join('')}
-  </div>`;
-}
-
-window.switchProfileTab = function (btn, tab) {
-  document.querySelectorAll('.profile-tab').forEach(b => {
-    b.style.background = 'transparent'; b.style.color = 'inherit';
-  });
-  btn.style.background = '#ffcc00'; btn.style.color = '#333';
-  document.getElementById('profileTabBookmarks').style.display = tab === 'bookmarks' ? '' : 'none';
-  document.getElementById('profileTabHistory').style.display = tab === 'history' ? '' : 'none';
-};
-
-// --- Detail Modal ---
+// ==================== Detail Modal ====================
 let currentDetailAnime = null;
 
 export function closeDetailModal() {
@@ -177,10 +161,7 @@ export function closeDetailModal() {
   const video = document.getElementById('detailVideoPlayer');
   if (video) {
     video.pause();
-    // destroyHlsForVideo повинна бути глобальною або імпортованою
-    if (typeof window.destroyHlsForVideo === 'function') {
-      window.destroyHlsForVideo(video);
-    }
+    destroyHlsForVideo(video);
   }
 }
 
@@ -385,9 +366,7 @@ export async function openDetailModal(url) {
   }
 }
 
-// Глобальні посилання для сумісності
-window.closeAuthModal = closeAuthModal;
+// Для доступу з HTML
 window.openProfileModal = openProfileModal;
 window.closeDetailModal = closeDetailModal;
 window.openDetailModal = openDetailModal;
-window.openAuthModal = openAuthModal;
