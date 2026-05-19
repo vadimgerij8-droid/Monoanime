@@ -19,6 +19,14 @@ const db = getFirestore(app);
 window.firebaseAuth = auth;
 window.firebaseDb = db;
 
+window.firebaseFns = {
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    increment
+};
+
 window.signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -55,8 +63,8 @@ window.signOutUser = async () => {
 
 async function loadCloudData() {
     if (!window.currentFirebaseUser) return;
-    const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-    const snap = await getDoc(ref);
+    const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+    const snap = await window.firebaseFns.getDoc(ref);
     if (snap.exists()) {
         const data = snap.data();
         if (data.bookmarks) {
