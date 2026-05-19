@@ -53,7 +53,7 @@ export async function authGoogleSignIn() {
   const provider = new GoogleAuthProvider();
   try {
     await signInWithPopup(auth, provider);
-    closeAuthModal();
+    // Після входу профіль оновиться через onAuthStateChanged
   } catch (error) {
     console.error('Google sign-in error:', error);
     window.showToast?.('Помилка входу через Google');
@@ -65,7 +65,6 @@ export async function authEmailLogin() {
   const password = document.getElementById('authPassword')?.value;
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    closeAuthModal();
   } catch (error) {
     console.error('Email login error:', error);
     window.showToast?.('Помилка входу: ' + error.message);
@@ -79,7 +78,6 @@ export async function authEmailRegister() {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
-    closeAuthModal();
   } catch (error) {
     console.error('Register error:', error);
     window.showToast?.('Помилка реєстрації: ' + error.message);
@@ -91,14 +89,6 @@ export async function authSignOut() {
     await signOut(auth);
   } catch (error) {
     console.error('Sign out error:', error);
-  }
-}
-
-function closeAuthModal() {
-  const modal = document.getElementById('authModal');
-  if (modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
   }
 }
 
@@ -205,7 +195,7 @@ export async function cloudSaveProgress(mal_id, season, dub, episode) {
   localStorage.setItem('mono_anime_progress', JSON.stringify(progress));
 }
 
-// Глобальні функції для виклику з HTML (onclick)
+// Глобальні функції для виклику з onclick у HTML
 window.authGoogleSignIn = authGoogleSignIn;
 window.authEmailLogin = authEmailLogin;
 window.authEmailRegister = authEmailRegister;
