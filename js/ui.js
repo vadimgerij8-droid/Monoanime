@@ -32,7 +32,6 @@ function renderPagination() {
     const row = document.getElementById('paginationRow');
     if (!row) return;
     let html = '';
-    // Використовуємо window.currentPage замість локальної змінної
     if (window.currentPage > 1) html += `<button class="btn-outline" onclick="changePage(${window.currentPage - 1})">Назад</button>`;
     html += `<span style="margin:0 1rem; font-weight:bold;">Сторінка ${window.currentPage}</span>`;
     html += `<button class="btn-outline" onclick="changePage(${window.currentPage + 1})">Вперед</button>`;
