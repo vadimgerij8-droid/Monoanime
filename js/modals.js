@@ -9,12 +9,22 @@ function closeDetailModal() {
     if (video) { video.pause(); destroyHlsForVideo(video); }
 }
 
-function toggleBookmark(anime) {
-    let b = Storage.getBookmarks();
+async function toggleBookmark(anime) {
+    let b = await Storage.getBookmarks();
     const idx = b.findIndex(x => x.mal_id === anime.mal_id);
-    if (idx > -1) { b.splice(idx, 1); showToast('Видалено з обраного'); }
-    else { b.push(anime); showToast('Додано в обране'); }
-    Storage.saveBookmarks(b);
+    if (idx > -1) {
+        b.splice(idx, 1);
+        showToast('Видалено з обраного');
+    } else {
+        b.push({
+            mal_id: anime.mal_id,
+            title: anime.title,
+            image_url: anime.images?.jpg?.large_image_url || '',
+            url: anime.url
+        });
+        showToast('Додано в обране');
+    }
+    await Storage.saveBookmarks(b);
     updateBadge();
 }
 
@@ -35,7 +45,7 @@ async function openDetailModal(url) {
         currentDetailAnime = anime;
         modalTitle.textContent = anime.title;
 
-        const isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
+        const isBookmarked = (await Storage.getBookmarks()).some(b => b.mal_id === anime.mal_id);
         const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
         const firstSeason = seasons[0] || '1';
         const dubs = Object.keys(anime.seasons[firstSeason] || {}).sort();
@@ -89,6 +99,10 @@ async function openDetailModal(url) {
                 <div class="player-container" style="margin-top:1rem; background:#000; border-radius:8px; overflow:hidden; aspect-ratio:16/9;">
                     <video id="detailVideoPlayer" controls crossorigin="anonymous" style="width:100%; height:100%;"></video>
                 </div>
+                <div style="margin-top:1rem; display:flex; justify-content:flex-end; align-items:center;">
+                    <button id="markWatchedBtn" class="btn-outline"><i class="fas fa-check"></i> Переглянуто</button>
+                    <span id="watchedCount" style="margin-left:1rem; font-size:0.9rem;"></span>
+                </div>
             </div>
         `;
 
@@ -116,14 +130,30 @@ async function openDetailModal(url) {
 
         document.getElementById('playSelectedBtn').addEventListener('click', () => {
             const file = episodeSelect.value;
-            if (file) loadVideo(file, detailVideoEl);
+            const epOption = episodeSelect.options[episodeSelect.selectedIndex];
+            const episodeNumber = epOption ? epOption.text.replace('Еп. ', '') : '1';
+            if (file) loadVideo(file, detailVideoEl, anime.mal_id, episodeNumber);
             else showToast('❌ Немає файлу');
         });
 
-        document.getElementById('toggleBookmarkBtn').addEventListener('click', () => {
-            toggleBookmark(anime);
-            const isNow = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
+        document.getElementById('toggleBookmarkBtn').addEventListener('click', async () => {
+            await toggleBookmark(anime);
+            const isNow = (await Storage.getBookmarks()).some(b => b.mal_id === anime.mal_id);
             document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${isNow ? 'В обраному' : 'Додати в обране'}`;
+        });
+
+        const markBtn = document.getElementById('markWatchedBtn');
+        const watchedSpan = document.getElementById('watchedCount');
+        const updateWatchedDisplay = async () => {
+            const count = await Storage.getWatchedEpisodes(anime.mal_id);
+            watchedSpan.textContent = `Переглянуто серій: ${count}`;
+        };
+        updateWatchedDisplay();
+
+        markBtn.addEventListener('click', async () => {
+            await Storage.incrementWatched(anime.mal_id);
+            updateWatchedDisplay();
+            showToast('Серію зараховано!');
         });
 
         const synopsisText = document.getElementById('synopsisText');
@@ -144,22 +174,68 @@ async function openDetailModal(url) {
 function openProfileModal() {
     const profileModal = document.getElementById('profileModal');
     if (!profileModal) return;
-    const bookmarks = Storage.getBookmarks(), history = Storage.getHistory();
-    const bList = document.getElementById('bookmarkList');
-    const hList = document.getElementById('historyList');
-    if (bList) bList.innerHTML = bookmarks.length
-        ? bookmarks.slice(0, 12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('')
-        : '<p>Немає обраних</p>';
-    if (hList) hList.innerHTML = history.length
-        ? history.slice(0, 12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('')
-        : '<p>Історія порожня</p>';
-    document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item =>
-        item.addEventListener('click', () => {
-            profileModal.style.display = 'none';
-            document.body.style.overflow = '';
-            openDetailModal(item.dataset.url);
-        })
-    );
+    loadProfileUI();
     profileModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
+
+window.loadProfileUI = async function() {
+    const profileBody = document.getElementById('profileBody');
+    if (!profileBody) return;
+
+    const user = window.currentFirebaseUser;
+    if (!user) {
+        profileBody.innerHTML = `
+            <div style="text-align:center;">
+                <button id="googleLoginBtn" class="btn-outline" style="margin-bottom:1rem;">
+                    <i class="fab fa-google"></i> Увійти через Google
+                </button>
+                <hr>
+                <input type="email" id="profileEmail" placeholder="Email" class="input-field" style="margin:0.5rem 0; width:100%;">
+                <input type="password" id="profilePassword" placeholder="Пароль" class="input-field" style="margin:0.5rem 0; width:100%;">
+                <div style="display:flex; gap:0.5rem;">
+                    <button id="signInBtn" class="btn-outline" style="flex:1;">Увійти</button>
+                    <button id="signUpBtn" class="btn-outline" style="flex:1;">Реєстрація</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('googleLoginBtn').addEventListener('click', window.signInWithGoogle);
+        document.getElementById('signInBtn').addEventListener('click', () => {
+            const email = document.getElementById('profileEmail').value.trim();
+            const pass = document.getElementById('profilePassword').value;
+            if (!email || !pass) return showToast('Заповніть поля');
+            window.signInWithEmail(email, pass);
+        });
+        document.getElementById('signUpBtn').addEventListener('click', () => {
+            const email = document.getElementById('profileEmail').value.trim();
+            const pass = document.getElementById('profilePassword').value;
+            if (!email || !pass) return showToast('Заповніть поля');
+            window.signUpWithEmail(email, pass);
+        });
+    } else {
+        const bookmarks = await Storage.getBookmarks();
+        const history = await Storage.getHistory();
+        profileBody.innerHTML = `
+            <div style="text-align:center; margin-bottom:1rem;">
+                <p>Ви увійшли як <strong>${user.email || user.displayName || 'Користувач'}</strong></p>
+                <button id="logoutBtn" class="btn-outline"><i class="fas fa-sign-out-alt"></i> Вийти</button>
+            </div>
+            <h3>Обране</h3>
+            <div id="bookmarkList" class="profile-list">
+                ${bookmarks.length ? bookmarks.slice(0, 12).map(b => `<div class="bookmark-item" data-url="${b.url}"><img src="${b.image_url}"><span>${b.title}</span></div>`).join('') : '<p>Немає обраних</p>'}
+            </div>
+            <h3>Історія</h3>
+            <div id="historyList" class="profile-list">
+                ${history.length ? history.slice(0, 12).map(h => `<div class="bookmark-item" data-url="${h.url}"><img src="${h.image_url}"><span>${h.title}</span></div>`).join('') : '<p>Історія порожня</p>'}
+            </div>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', window.signOutUser);
+        document.querySelectorAll('#bookmarkList .bookmark-item, #historyList .bookmark-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.getElementById('profileModal').style.display = 'none';
+                document.body.style.overflow = '';
+                openDetailModal(item.dataset.url);
+            });
+        });
+    }
+};
