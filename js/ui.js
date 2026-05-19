@@ -1,3 +1,5 @@
+// js/ui.js — UI helpers (без змін, сумісний з новою auth-логікою)
+
 function showToast(msg) {
     const toast = document.getElementById('toast');
     if (!toast) return;
