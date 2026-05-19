@@ -6,7 +6,7 @@ import {
   doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove
 } from './firebase.js';
 
-// ---------- Cloud helpers ----------
+// ---------- Helpers ----------
 async function getUserDocRef(uid) {
   return doc(db, 'users', uid);
 }
@@ -25,7 +25,29 @@ async function ensureUserDocExists(user) {
   return ref;
 }
 
-// ---------- Cloud CRUD (exported for storage.js / modals.js) ----------
+// Робить безпечний об'єкт аніме для Firestore (без undefined)
+function cleanAnimeObject(anime) {
+  return {
+    mal_id: anime.mal_id,
+    title: anime.title || '',
+    url: anime.url || '',
+    images: {
+      jpg: {
+        large_image_url: anime.images?.jpg?.large_image_url || '',
+        image_url: anime.images?.jpg?.image_url || ''
+      }
+    },
+    score: anime.score ?? null,
+    year: anime.year ?? null,
+    from: anime.from || 'animeua',
+    genres: anime.genres || [],
+    synopsis: anime.synopsis || '',
+    rating: anime.rating || '',
+    seasons: anime.seasons || {}
+  };
+}
+
+// ---------- Cloud CRUD ----------
 export async function cloudGetBookmarks() {
   if (!window.currentUser) return [];
   const ref = await getUserDocRef(window.currentUser.uid);
@@ -36,13 +58,15 @@ export async function cloudGetBookmarks() {
 export async function cloudSaveBookmarks(arr) {
   if (!window.currentUser) return;
   const ref = await getUserDocRef(window.currentUser.uid);
-  await updateDoc(ref, { bookmarks: arr });
+  const cleanedArr = arr.map(cleanAnimeObject);
+  await updateDoc(ref, { bookmarks: cleanedArr });
 }
 
 export async function cloudAddBookmark(anime) {
   if (!window.currentUser) return;
   const ref = await getUserDocRef(window.currentUser.uid);
-  await updateDoc(ref, { bookmarks: arrayUnion(anime) });
+  const safeAnime = cleanAnimeObject(anime);
+  await updateDoc(ref, { bookmarks: arrayUnion(safeAnime) });
 }
 
 export async function cloudRemoveBookmark(malId) {
@@ -67,13 +91,15 @@ export async function cloudAddHistory(anime) {
   const ref = await getUserDocRef(window.currentUser.uid);
   const entry = {
     mal_id: anime.mal_id,
-    title: anime.title,
+    title: anime.title || '',
     image_url: anime.images?.jpg?.large_image_url || '',
     url: anime.url || '',
-    score: anime.score,
-    year: anime.year,
+    score: anime.score ?? null,
+    year: anime.year ?? null,
     timestamp: Date.now()
   };
+  // Видаляємо undefined (хоча тут їх немає, але про всяк випадок)
+  Object.keys(entry).forEach(key => entry[key] === undefined && delete entry[key]);
   await updateDoc(ref, { history: arrayUnion(entry) });
   // trim to 50
   const snap = await getDoc(ref);
@@ -133,19 +159,30 @@ async function syncLocalToCloud(uid) {
   }
 
   // bookmarks dedup
-  const mergedBm = [...cloudBm];
+  const mergedBm = [...cloudBm.map(cleanAnimeObject)];
   for (const b of lb) {
-    if (!mergedBm.some(c => c.mal_id === b.mal_id)) mergedBm.push(b);
+    if (!mergedBm.some(c => c.mal_id === b.mal_id)) {
+      mergedBm.push(cleanAnimeObject(b));
+    }
   }
 
   // history dedup by mal_id, keep highest timestamp
   const mergedHist = [...cloudHist];
   for (const h of lh) {
     const idx = mergedHist.findIndex(c => c.mal_id === h.mal_id);
+    const newEntry = {
+      mal_id: h.mal_id,
+      title: h.title || '',
+      image_url: h.image_url || '',
+      url: h.url || '',
+      score: h.score ?? null,
+      year: h.year ?? null,
+      timestamp: h.timestamp || Date.now()
+    };
     if (idx > -1) {
-      if ((h.timestamp || 0) > (mergedHist[idx].timestamp || 0)) mergedHist[idx] = h;
+      if ((newEntry.timestamp || 0) > (mergedHist[idx].timestamp || 0)) mergedHist[idx] = newEntry;
     } else {
-      mergedHist.push(h);
+      mergedHist.push(newEntry);
     }
   }
   mergedHist.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -161,7 +198,7 @@ async function syncLocalToCloud(uid) {
   localStorage.removeItem('mono_anime_history');
 }
 
-// ---------- Auth UI (globals) ----------
+// ---------- Auth UI ----------
 window.authGoogleSignIn = async () => {
   const provider = new GoogleAuthProvider();
   try {
