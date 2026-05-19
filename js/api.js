@@ -234,7 +234,8 @@ async function loadAnimeDetails(animeUrl) {
         title,
         images: { jpg: { large_image_url: poster, image_url: poster } },
         genres, year, synopsis, seasons,
-        url: animeUrl, from: 'animeua', rating
+        url: animeUrl, from: 'animeua', rating,
+        score: null
     };
 }
 
