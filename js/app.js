@@ -71,8 +71,7 @@ function openRandomAnime() {
 async function initGenres() {
     const categoryScroll = document.getElementById('categoryScroll');
     if (!categoryScroll) return;
-    // fetchGenres – синхронна функція, повертає масив
-    const genres = fetchGenres();
+    const genres = fetchGenres();  // синхронна
     categoryScroll.querySelectorAll('.category-pill').forEach(p => p.remove());
 
     const allBtn = document.createElement('button');
