@@ -1,11 +1,3 @@
-import { initAuth } from './auth.js';
-import { Storage, updateBadge, applyTheme, toggleTheme } from './storage.js';
-import { showToast, renderCards, renderPagination } from './ui.js';
-import { openDetailModal, closeDetailModal, openProfileModal } from './modals.js';
-import { fetchMainPage, searchAnimeUA, fetchByGenre, fetchTop100, fetchGenres } from './api.js';
-import { loadVideo, destroyHlsForVideo } from './player.js';
-import { debounce } from './utils.js';
-
 let currentTab = 'main';
 let currentPage = 1;
 let currentSearchQuery = '';
@@ -13,92 +5,105 @@ let currentGenreSlug = null;
 let currentList = [];
 
 window.changePage = (p) => {
-  currentPage = p;
-  window.scrollTo(0, 0);
-  loadContent();
+    currentPage = p;
+    window.scrollTo(0, 0);
+    loadContent();
 };
 
 async function loadContent() {
-  const container = document.getElementById('animeContainer');
-  if (!container) return;
-  container.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
-  try {
-    if (currentTab === 'top100') {
-      currentList = await fetchTop100();
-    } else if (currentSearchQuery) {
-      currentList = await searchAnimeUA(currentSearchQuery, currentPage);
-    } else if (currentGenreSlug) {
-      currentList = await fetchByGenre(currentGenreSlug, currentPage);
-    } else {
-      currentList = await fetchMainPage(currentPage);
+    const container = document.getElementById('animeContainer');
+    if (!container) return;
+    container.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+    try {
+        if (currentTab === 'top100') {
+            currentList = await fetchTop100();
+        } else if (currentSearchQuery) {
+            currentList = await searchAnimeUA(currentSearchQuery, currentPage);
+        } else if (currentGenreSlug) {
+            currentList = await fetchByGenre(currentGenreSlug, currentPage);
+        } else {
+            currentList = await fetchMainPage(currentPage);
+        }
+        renderCards(currentList);
+    } catch (err) {
+        container.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}</div>`;
     }
-    renderCards(currentList);
-  } catch (err) {
-    container.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}</div>`;
-  }
 }
 
 async function showTop100() {
-  currentTab = 'top100';
-  currentPage = 1;
-  currentSearchQuery = '';
-  currentGenreSlug = null;
-  const container = document.getElementById('animeContainer');
-  if (container) container.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження ТОП 100...</div>';
-  try {
-    currentList = await fetchTop100();
-    renderCards(currentList);
-  } catch (err) {
-    if (container) container.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}</div>`;
-  }
+    currentTab = 'top100';
+    currentPage = 1;
+    currentSearchQuery = '';
+    currentGenreSlug = null;
+    const container = document.getElementById('animeContainer');
+    if (container) container.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження ТОП 100...</div>';
+    try {
+        currentList = await fetchTop100();
+        renderCards(currentList);
+    } catch (err) {
+        if (container) container.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}</div>`;
+    }
 }
 
 function openRandomAnime() {
-  openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`);
+    openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`);
 }
 
 async function initGenres() {
-  const categoryScroll = document.getElementById('categoryScroll');
-  if (!categoryScroll) return;
-  const genres = fetchGenres();
-  categoryScroll.querySelectorAll('.category-pill').forEach(p => p.remove());
+    const categoryScroll = document.getElementById('categoryScroll');
+    if (!categoryScroll) return;
+    const genres = fetchGenres();
+    categoryScroll.querySelectorAll('.category-pill').forEach(p => p.remove());
 
-  const allBtn = document.createElement('button');
-  allBtn.className = 'category-pill active-pill';
-  allBtn.textContent = 'Усі';
-  allBtn.addEventListener('click', () => {
-    currentGenreSlug = null;
-    currentPage = 1;
-    currentTab = 'main';
-    document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
-    allBtn.classList.add('active-pill');
-    loadContent();
-  });
-  categoryScroll.appendChild(allBtn);
-
-  genres.forEach(genre => {
-    const btn = document.createElement('button');
-    btn.className = 'category-pill';
-    btn.textContent = genre.name;
-    btn.addEventListener('click', () => {
-      currentGenreSlug = genre.slug;
-      currentPage = 1;
-      currentTab = 'main';
-      document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
-      btn.classList.add('active-pill');
-      loadContent();
+    const allBtn = document.createElement('button');
+    allBtn.className = 'category-pill active-pill';
+    allBtn.textContent = 'Усі';
+    allBtn.addEventListener('click', () => {
+        currentGenreSlug = null;
+        currentPage = 1;
+        currentTab = 'main';
+        document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
+        allBtn.classList.add('active-pill');
+        loadContent();
     });
-    categoryScroll.appendChild(btn);
-  });
+    categoryScroll.appendChild(allBtn);
+
+    genres.forEach(genre => {
+        const btn = document.createElement('button');
+        btn.className = 'category-pill';
+        btn.textContent = genre.name;
+        btn.addEventListener('click', () => {
+            currentGenreSlug = genre.slug;
+            currentPage = 1;
+            currentTab = 'main';
+            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
+            btn.classList.add('active-pill');
+            loadContent();
+        });
+        categoryScroll.appendChild(btn);
+    });
 }
 
+// ─── updateBadge (з підтримкою хмари) ────────────────────────────────────────
+async function updateBadge() {
+    const badge = document.getElementById('bookmarkBadge');
+    if (!badge) return;
+    let count = 0;
+    if (window.currentUser) {
+        try {
+            const { cloudGetBookmarks } = await import('./auth.js');
+            count = (await cloudGetBookmarks()).length;
+        } catch { count = 0; }
+    } else {
+        count = Storage.getBookmarks().length;
+    }
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+// ─── Ініціалізація ────────────────────────────────────────────────────────────
 applyTheme(Storage.getTheme());
 updateBadge();
-
-// Ініціалізація аутентифікації
-initAuth((user) => {
-  updateBadge();
-});
 
 const themeBtn = document.getElementById('themeToggleBtn');
 const profileBtn = document.getElementById('profileBtn');
@@ -115,48 +120,42 @@ const mainVideoPlayer = document.getElementById('mainVideoPlayer');
 if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
 if (profileBtn) profileBtn.addEventListener('click', openProfileModal);
 if (searchInput) searchInput.addEventListener('input', debounce(() => {
-  currentSearchQuery = searchInput.value.trim();
-  currentPage = 1;
-  currentTab = 'main';
-  loadContent();
+    currentSearchQuery = searchInput.value.trim();
+    currentPage = 1;
+    currentTab = 'main';
+    loadContent();
 }, 500));
 if (topBtn) topBtn.addEventListener('click', showTop100);
 if (randBtn) randBtn.addEventListener('click', openRandomAnime);
 if (closeModalBtn) closeModalBtn.addEventListener('click', closeDetailModal);
 if (closePlayerBtn) closePlayerBtn.addEventListener('click', () => {
-  playerModal.style.display = 'none';
-  document.body.style.overflow = '';
-  destroyHlsForVideo(mainVideoPlayer);
-});
-if (closeProfileBtn) closeProfileBtn.addEventListener('click', () => {
-  profileModal.style.display = 'none';
-  document.body.style.overflow = '';
-});
-
-window.addEventListener('click', (e) => {
-  const animeModal = document.getElementById('animeModal');
-  if (e.target === animeModal) closeDetailModal();
-  if (e.target === playerModal) {
     playerModal.style.display = 'none';
     document.body.style.overflow = '';
     destroyHlsForVideo(mainVideoPlayer);
-  }
-  if (e.target === profileModal) {
+});
+if (closeProfileBtn) closeProfileBtn.addEventListener('click', () => {
     profileModal.style.display = 'none';
     document.body.style.overflow = '';
-  }
+});
+
+window.addEventListener('click', (e) => {
+    const animeModal = document.getElementById('animeModal');
+    if (e.target === animeModal) closeDetailModal();
+    if (e.target === playerModal) { playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHlsForVideo(mainVideoPlayer); }
+    if (e.target === profileModal) { profileModal.style.display = 'none'; document.body.style.overflow = ''; }
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeDetailModal();
-    if (playerModal) {
-      playerModal.style.display = 'none';
-      destroyHlsForVideo(mainVideoPlayer);
+    if (e.key === 'Escape') {
+        closeDetailModal();
+        if (playerModal) { playerModal.style.display = 'none'; destroyHlsForVideo(mainVideoPlayer); }
+        document.body.style.overflow = '';
+        if (profileModal) profileModal.style.display = 'none';
+        window.closeAuthModal?.();
     }
-    document.body.style.overflow = '';
-    if (profileModal) profileModal.style.display = 'none';
-  }
 });
+
+// auth.js підключається як модуль — завантажуємо його окремо
+import('./auth.js').catch(console.error);
 
 initGenres().then(() => loadContent());
