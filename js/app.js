@@ -84,8 +84,6 @@ async function initGenres() {
     });
 }
 
-// ---------- Ініціалізація ----------
-
 applyTheme(Storage.getTheme());
 updateBadge();
 
