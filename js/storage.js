@@ -1,68 +1,43 @@
-import { getCurrentUser, cloudAddHistory } from './auth.js';
-
-export const Storage = {
-  getBookmarks() {
-    try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; }
-  },
-  saveBookmarks(arr) {
-    localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr));
-  },
-  getHistory() {
-    try { return JSON.parse(localStorage.getItem('mono_anime_history') || '[]'); } catch { return []; }
-  },
-  async addHistory(anime) {
-    if (!anime || !anime.mal_id) return;
-    const user = getCurrentUser();
-    if (user) {
-      await cloudAddHistory(anime);
-    } else {
-      const hist = this.getHistory().filter(h => h.mal_id !== anime.mal_id);
-      hist.unshift({
-        mal_id: anime.mal_id,
-        title: anime.title,
-        image_url: anime.images?.jpg?.large_image_url || '',
-        url: anime.url || '',
-        score: anime.score,
-        year: anime.year,
-        timestamp: Date.now()
-      });
-      localStorage.setItem('mono_anime_history', JSON.stringify(hist.slice(0, 50)));
-    }
-  },
-  clearHistory() {
-    localStorage.setItem('mono_anime_history', '[]');
-  },
-  getTheme() { return localStorage.getItem('mono_anime_theme') || 'light'; },
-  setTheme(theme) { localStorage.setItem('mono_anime_theme', theme); },
-  getProgress(mal_id) {
-    try {
-      const progress = JSON.parse(localStorage.getItem('mono_anime_progress') || '{}');
-      return progress[mal_id] || null;
-    } catch { return null; }
-  }
+const Storage = {
+    getBookmarks() { try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; } },
+    saveBookmarks(arr) { localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr)); },
+    getHistory() { try { return JSON.parse(localStorage.getItem('mono_anime_history') || '[]'); } catch { return []; } },
+    addHistory(anime) {
+        if (!anime || !anime.mal_id) return;
+        const hist = this.getHistory().filter(h => h.mal_id !== anime.mal_id);
+        hist.unshift({
+            mal_id: anime.mal_id, title: anime.title,
+            image_url: anime.images?.jpg?.large_image_url || '',
+            url: anime.url || '', score: anime.score, year: anime.year, timestamp: Date.now()
+        });
+        localStorage.setItem('mono_anime_history', JSON.stringify(hist.slice(0, 50)));
+    },
+    clearHistory() { localStorage.setItem('mono_anime_history', '[]'); },
+    getTheme() { return localStorage.getItem('mono_anime_theme') || 'light'; },
+    setTheme(theme) { localStorage.setItem('mono_anime_theme', theme); }
 };
 
-export function updateBadge() {
-  const badge = document.getElementById('bookmarkBadge');
-  if (!badge) return;
-  const count = Storage.getBookmarks().length;
-  badge.textContent = count;
-  badge.style.display = count > 0 ? 'flex' : 'none';
+function updateBadge() {
+    const badge = document.getElementById('bookmarkBadge');
+    if (!badge) return;
+    const count = Storage.getBookmarks().length;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-export function applyTheme(theme) {
-  const btn = document.getElementById('themeToggleBtn');
-  if (theme === 'dark') {
-    document.body.classList.add('dark-mode');
-    if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
-  } else {
-    document.body.classList.remove('dark-mode');
-    if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
-  }
+function applyTheme(theme) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
 }
 
-export function toggleTheme() {
-  const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
-  Storage.setTheme(next);
-  applyTheme(next);
+function toggleTheme() {
+    const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
+    Storage.setTheme(next);
+    applyTheme(next);
 }
