@@ -237,3 +237,15 @@ async function loadAnimeDetails(animeUrl) {
         url: animeUrl, from: 'animeua', rating
     };
 }
+
+// Глобальні посилання
+window.fetchUA = fetchUA;
+window.parseCards = parseCards;
+window.fetchMainPage = fetchMainPage;
+window.searchAnimeUA = searchAnimeUA;
+window.fetchByGenre = fetchByGenre;
+window.fetchTop100 = fetchTop100;
+window.fetchGenres = fetchGenres;
+window.extractSourcesFromText = extractSourcesFromText;
+window.extractPlayerIframeUrls = extractPlayerIframeUrls;
+window.loadAnimeDetails = loadAnimeDetails;
