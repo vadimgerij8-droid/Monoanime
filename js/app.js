@@ -1,9 +1,10 @@
 import { initAuth } from './auth.js';
 import { Storage, updateBadge, applyTheme, toggleTheme } from './storage.js';
 import { showToast, renderCards, renderPagination } from './ui.js';
-import { openDetailModal, closeDetailModal } from './modals.js';
+import { openDetailModal, closeDetailModal, openProfileModal } from './modals.js';
 import { fetchMainPage, searchAnimeUA, fetchByGenre, fetchTop100, fetchGenres } from './api.js';
 import { loadVideo, destroyHlsForVideo } from './player.js';
+import { debounce } from './utils.js';
 
 let currentTab = 'main';
 let currentPage = 1;
@@ -159,6 +160,3 @@ document.addEventListener('keydown', (e) => {
 });
 
 initGenres().then(() => loadContent());
-
-// Дебаунс та інші допоміжні функції імпортуються з utils.js, який має бути доступний глобально
-// Якщо utils.js не модуль – можна залишити як є, але краще зробити його модулем.
