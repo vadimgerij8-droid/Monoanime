@@ -1,6 +1,5 @@
 import Storage from './storage.js';
 
-// Глобалізація функцій, які були у звичайних скриптах
 const {
     fetchTop100,
     searchAnimeUA,
@@ -20,7 +19,6 @@ let currentSearchQuery = '';
 let currentGenreSlug = null;
 let currentList = [];
 
-// Робимо currentPage глобально доступною для ui.js
 window.currentPage = 1;
 
 window.changePage = (p) => {
@@ -71,7 +69,7 @@ function openRandomAnime() {
 async function initGenres() {
     const categoryScroll = document.getElementById('categoryScroll');
     if (!categoryScroll) return;
-    const genres = fetchGenres();  // синхронна
+    const genres = fetchGenres();
     categoryScroll.querySelectorAll('.category-pill').forEach(p => p.remove());
 
     const allBtn = document.createElement('button');
@@ -118,26 +116,26 @@ const playerModal = document.getElementById('playerModal');
 const profileModal = document.getElementById('profileModal');
 const mainVideoPlayer = document.getElementById('mainVideoPlayer');
 
-if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
-if (profileBtn) profileBtn.addEventListener('click', window.openProfileModal);
+if (themeBtn) themeBtn.addEventListener('click', toggleTheme, { passive: true });
+if (profileBtn) profileBtn.addEventListener('click', window.openProfileModal, { passive: true });
 if (searchInput) searchInput.addEventListener('input', debounce(() => {
     currentSearchQuery = searchInput.value.trim();
     window.currentPage = 1;
     currentTab = 'main';
     loadContent();
 }, 500));
-if (topBtn) topBtn.addEventListener('click', showTop100);
-if (randBtn) randBtn.addEventListener('click', openRandomAnime);
-if (closeModalBtn) closeModalBtn.addEventListener('click', window.closeDetailModal);
+if (topBtn) topBtn.addEventListener('click', showTop100, { passive: true });
+if (randBtn) randBtn.addEventListener('click', openRandomAnime, { passive: true });
+if (closeModalBtn) closeModalBtn.addEventListener('click', window.closeDetailModal, { passive: true });
 if (closePlayerBtn) closePlayerBtn.addEventListener('click', () => {
     playerModal.style.display = 'none';
     document.body.style.overflow = '';
     destroyHlsForVideo(mainVideoPlayer);
-});
+}, { passive: true });
 if (closeProfileBtn) closeProfileBtn.addEventListener('click', () => {
     profileModal.style.display = 'none';
     document.body.style.overflow = '';
-});
+}, { passive: true });
 
 window.addEventListener('click', (e) => {
     const animeModal = document.getElementById('animeModal');
