@@ -21,8 +21,8 @@ function loadVideo(url, videoElement) {
             enableWorker: true,
             lowLatencyMode: false,
             backBufferLength: 90,
-            startLevel: -1,  // авто вибір якості
-            manifestLoadPolicy: { default: { maxTimeToFirstByteMs: 8000, maxLoadTimeMs: 16000 } } // швидший старт
+            startLevel: -1,
+            manifestLoadPolicy: { default: { maxTimeToFirstByteMs: 8000, maxLoadTimeMs: 16000 } }
         });
         hlsInstances.set(videoElement, hls);
         hls.loadSource(finalUrl);
@@ -33,14 +33,9 @@ function loadVideo(url, videoElement) {
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
                 switch (data.type) {
-                    case Hls.ErrorTypes.NETWORK_ERROR:
-                        hls.startLoad();
-                        break;
-                    case Hls.ErrorTypes.MEDIA_ERROR:
-                        hls.recoverMediaError();
-                        break;
-                    default:
-                        destroyHlsForVideo(videoElement);
+                    case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+                    case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+                    default: destroyHlsForVideo(videoElement);
                 }
             }
         });
