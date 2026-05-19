@@ -1,3 +1,8 @@
+// js/app.js — Головний модуль додатку
+
+// Імпорт Firebase auth (ініціалізує onAuthStateChanged, глобальні функції)
+import './auth.js';
+
 let currentTab = 'main';
 let currentPage = 1;
 let currentSearchQuery = '';
@@ -84,22 +89,23 @@ async function initGenres() {
     });
 }
 
+// ─── Init ─────────────────────────────────────────────────────────────────────
 applyTheme(Storage.getTheme());
 updateBadge();
 
-const themeBtn = document.getElementById('themeToggleBtn');
-const profileBtn = document.getElementById('profileBtn');
-const searchInput = document.getElementById('searchInput');
-const topBtn = document.getElementById('top100Btn');
-const randBtn = document.getElementById('randomBtn');
-const closeModalBtn = document.getElementById('closeModalBtn');
+const themeBtn       = document.getElementById('themeToggleBtn');
+const profileBtn     = document.getElementById('profileBtn');
+const searchInput    = document.getElementById('searchInput');
+const topBtn         = document.getElementById('top100Btn');
+const randBtn        = document.getElementById('randomBtn');
+const closeModalBtn  = document.getElementById('closeModalBtn');
 const closePlayerBtn = document.getElementById('closePlayerBtn');
-const closeProfileBtn = document.getElementById('closeProfileBtn');
-const playerModal = document.getElementById('playerModal');
-const profileModal = document.getElementById('profileModal');
-const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+const closeProfileBtn= document.getElementById('closeProfileBtn');
+const playerModal    = document.getElementById('playerModal');
+const profileModal   = document.getElementById('profileModal');
+const mainVideoPlayer= document.getElementById('mainVideoPlayer');
 
-if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+if (themeBtn)   themeBtn.addEventListener('click', toggleTheme);
 if (profileBtn) profileBtn.addEventListener('click', openProfileModal);
 if (searchInput) searchInput.addEventListener('input', debounce(() => {
     currentSearchQuery = searchInput.value.trim();
@@ -107,10 +113,10 @@ if (searchInput) searchInput.addEventListener('input', debounce(() => {
     currentTab = 'main';
     loadContent();
 }, 500));
-if (topBtn) topBtn.addEventListener('click', showTop100);
+if (topBtn)  topBtn.addEventListener('click', showTop100);
 if (randBtn) randBtn.addEventListener('click', openRandomAnime);
-if (closeModalBtn) closeModalBtn.addEventListener('click', closeDetailModal);
-if (closePlayerBtn) closePlayerBtn.addEventListener('click', () => {
+if (closeModalBtn)   closeModalBtn.addEventListener('click', closeDetailModal);
+if (closePlayerBtn)  closePlayerBtn.addEventListener('click', () => {
     playerModal.style.display = 'none';
     document.body.style.overflow = '';
     destroyHlsForVideo(mainVideoPlayer);
@@ -123,14 +129,14 @@ if (closeProfileBtn) closeProfileBtn.addEventListener('click', () => {
 window.addEventListener('click', (e) => {
     const animeModal = document.getElementById('animeModal');
     if (e.target === animeModal) closeDetailModal();
-    if (e.target === playerModal) { playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHlsForVideo(mainVideoPlayer); }
+    if (e.target === playerModal)  { playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHlsForVideo(mainVideoPlayer); }
     if (e.target === profileModal) { profileModal.style.display = 'none'; document.body.style.overflow = ''; }
 });
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeDetailModal();
-        if (playerModal) { playerModal.style.display = 'none'; destroyHlsForVideo(mainVideoPlayer); }
+        if (playerModal)  { playerModal.style.display = 'none'; destroyHlsForVideo(mainVideoPlayer); }
         document.body.style.overflow = '';
         if (profileModal) profileModal.style.display = 'none';
     }
