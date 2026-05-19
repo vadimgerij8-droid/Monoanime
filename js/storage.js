@@ -8,8 +8,8 @@ const Storage = {
 
     async getBookmarks() {
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            const snap = await getDoc(ref);
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            const snap = await window.firebaseFns.getDoc(ref);
             if (snap.exists() && snap.data().bookmarks) {
                 return snap.data().bookmarks;
             }
@@ -22,8 +22,8 @@ const Storage = {
         this.saveBookmarksLocal(arr);
         updateBadge();
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            await setDoc(ref, { bookmarks: arr }, { merge: true });
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            await window.firebaseFns.setDoc(ref, { bookmarks: arr }, { merge: true });
         }
     },
 
@@ -36,8 +36,8 @@ const Storage = {
 
     async getHistory() {
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            const snap = await getDoc(ref);
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            const snap = await window.firebaseFns.getDoc(ref);
             if (snap.exists() && snap.data().history) {
                 return snap.data().history;
             }
@@ -62,22 +62,22 @@ const Storage = {
         this.saveHistoryLocal(local.slice(0, 50));
 
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            const snap = await getDoc(ref);
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            const snap = await window.firebaseFns.getDoc(ref);
             let historyArr = [];
             if (snap.exists() && snap.data().history) {
                 historyArr = snap.data().history.filter(h => h.mal_id !== anime.mal_id);
             }
             historyArr.unshift(historyItem);
-            await setDoc(ref, { history: historyArr.slice(0, 50) }, { merge: true });
+            await window.firebaseFns.setDoc(ref, { history: historyArr.slice(0, 50) }, { merge: true });
         }
     },
 
     async clearHistory() {
         localStorage.setItem('mono_anime_history', '[]');
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            await setDoc(ref, { history: [] }, { merge: true });
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            await window.firebaseFns.setDoc(ref, { history: [] }, { merge: true });
         }
     },
 
@@ -90,8 +90,8 @@ const Storage = {
 
     async getWatchedEpisodes(animeMalId) {
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            const snap = await getDoc(ref);
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            const snap = await window.firebaseFns.getDoc(ref);
             const data = snap.data()?.watchedEpisodes || {};
             return data[animeMalId] || 0;
         }
@@ -105,9 +105,9 @@ const Storage = {
         this.saveWatchedEpisodesLocal(local);
 
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            await updateDoc(ref, {
-                [`watchedEpisodes.${animeMalId}`]: increment(1)
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            await window.firebaseFns.updateDoc(ref, {
+                [`watchedEpisodes.${animeMalId}`]: window.firebaseFns.increment(1)
             });
         }
     },
@@ -122,8 +122,8 @@ const Storage = {
     async getVideoProgress(animeMalId, episode) {
         const key = `${animeMalId}_${episode}`;
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            const snap = await getDoc(ref);
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            const snap = await window.firebaseFns.getDoc(ref);
             const data = snap.data()?.videoProgress || {};
             return data[key] || 0;
         }
@@ -138,8 +138,8 @@ const Storage = {
         this.saveVideoProgressLocal(local);
 
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            await setDoc(ref, { videoProgress: { [key]: currentTime } }, { merge: true });
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            await window.firebaseFns.setDoc(ref, { videoProgress: { [key]: currentTime } }, { merge: true });
         }
     },
 
@@ -150,8 +150,8 @@ const Storage = {
         localStorage.setItem('mono_anime_theme', theme);
         applyTheme(theme);
         if (window.currentFirebaseUser) {
-            const ref = doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
-            setDoc(ref, { theme }, { merge: true });
+            const ref = window.firebaseFns.doc(window.firebaseDb, 'users', window.currentFirebaseUser.uid);
+            window.firebaseFns.setDoc(ref, { theme }, { merge: true });
         }
     }
 };
