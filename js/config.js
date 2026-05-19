@@ -26,3 +26,6 @@ function getProxyUrl(url) {
     if (!url) { console.warn('getProxyUrl empty'); return null; }
     return PROXY_URL + '?url=' + encodeURIComponent(url);
 }
+
+// Глобальні змінні для використання іншими скриптами
+window.ANIMEUA_BASE = ANIMEUA_BASE;
