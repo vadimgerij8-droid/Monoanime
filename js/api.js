@@ -1,4 +1,3 @@
-// === Кеш деталей аніме (записується одразу після парсингу) ===
 const detailsCache = new Map();
 
 async function fetchUA(url) {
@@ -81,7 +80,6 @@ function fetchGenres() {
         .sort((a, b) => a.name.localeCompare(b.name, 'uk'));
 }
 
-// ---------- Парсинг джерел (легкий, без змін у логіці) ----------
 function extractSourcesFromText(text, providerName = '') {
     const sources = [];
     const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) ||
@@ -141,7 +139,6 @@ function extractSourcesFromText(text, providerName = '') {
     return sources;
 }
 
-// === Швидке витягування iframe URL (без змін, але швидко) ===
 function extractPlayerIframeUrls(doc) {
     const selectors = ['.video-responsive iframe', '.player-responsive iframe', '#player iframe', '.pmovie__player iframe', 'iframe[src]', 'iframe[data-src]'];
     const urls = [];
@@ -169,17 +166,12 @@ function extractPlayerIframeUrls(doc) {
     return [...new Set(urls)];
 }
 
-// === ОСНОВНА ФУНКЦІЯ: завантаження деталей аніме з кешуванням та лінивим довантаженням джерел ===
 async function loadAnimeDetails(animeUrl) {
-    // Якщо вже кешовано – повертаємо миттєво
     if (detailsCache.has(animeUrl)) {
         return detailsCache.get(animeUrl);
     }
 
-    // Завантажуємо головну сторінку
     const doc = await fetchUA(animeUrl);
-    
-    // 1. Швидкий парсинг базової інфи (без очікування джерел)
     let title = '';
     for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
         const el = safeQuery(sel, doc);
@@ -206,35 +198,30 @@ async function loadAnimeDetails(animeUrl) {
     const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
     if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
 
-    // Створюємо об'єкт з порожніми seasons – UI показуємо одразу, а джерела дозавантажимо асинхронно
     const baseAnime = {
         mal_id: animeUrl.hashCode(),
         title,
         images: { jpg: { large_image_url: poster, image_url: poster } },
         genres, year, synopsis,
-        seasons: {},  // заповнимо пізніше
-        url: animeUrl,
-        from: 'animeua', rating,
+        seasons: {},
+        url: animeUrl, from: 'animeua', rating,
         score: null,
         _sourcesLoaded: false
     };
 
-    // Записуємо в кеш одразу (з порожніми сезонами) – це дозволить UI з'явитися миттєво
     detailsCache.set(animeUrl, baseAnime);
 
-    // Запускаємо фонове завантаження джерел (не блокуємо)
+    // Фонове завантаження джерел
     loadSourcesInBackground(animeUrl, doc, baseAnime);
 
     return baseAnime;
 }
 
-// === Фонове завантаження джерел та оновлення об'єкта в кеші ===
 async function loadSourcesInBackground(animeUrl, doc, baseAnime) {
     try {
         const playerUrls = extractPlayerIframeUrls(doc);
         const allRawSources = [];
 
-        // Паралельно обробляємо всі плеєри (з Promise.all)
         const playerPromises = playerUrls.map(async (playerUrl) => {
             try {
                 let provider = 'Джерело';
@@ -244,10 +231,8 @@ async function loadSourcesInBackground(animeUrl, doc, baseAnime) {
 
                 const playerHtml = await fetchUA(playerUrl);
                 const text = playerHtml.body?.innerHTML || '';
-                const sources = extractSourcesFromText(text, provider);
-                allRawSources.push(...sources);
+                allRawSources.push(...extractSourcesFromText(text, provider));
 
-                // Nested iframes (теж паралельно)
                 const nestedIframes = safeQueryAll('iframe', playerHtml);
                 const nestedPromises = nestedIframes.map(async (nested) => {
                     let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
@@ -265,7 +250,6 @@ async function loadSourcesInBackground(animeUrl, doc, baseAnime) {
 
         await Promise.all(playerPromises);
 
-        // Формуємо seasons
         const seasons = {};
         const seenKeys = new Set();
         allRawSources.forEach(s => {
@@ -286,12 +270,10 @@ async function loadSourcesInBackground(animeUrl, doc, baseAnime) {
             }
         }
 
-        // Оновлюємо об'єкт у кеші
         baseAnime.seasons = seasons;
         baseAnime._sourcesLoaded = true;
         detailsCache.set(animeUrl, baseAnime);
 
-        // Якщо детальна модалка відкрита для цього аніме – динамічно оновити UI
         if (window._currentDetailUrl === animeUrl) {
             window._updateDetailSourcesUI(baseAnime);
         }
@@ -300,29 +282,7 @@ async function loadSourcesInBackground(animeUrl, doc, baseAnime) {
     }
 }
 
-// === Функція для "швидкого" random (просто підставляємо redirect URL) ===
-async function fetchRandomAnimeUrl() {
-    const proxyUrl = getProxyUrl(`${ANIMEUA_BASE}/index.php?do=rand`);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    try {
-        const resp = await fetch(proxyUrl, { signal: controller.signal, redirect: 'follow' });
-        // Після редиректу resp.url містить кінцеву адресу
-        return resp.url; // але це буде проксована URL, треба витягнути реальну
-        // Альтернатива: отримати HTML і знайти канонічний лінк, але це довше. Краще використати швидкий редирект.
-        // На жаль, через проксі resp.url = proxyUrl?url=... тому цей метод не дасть чистої URL.
-        // Залишимо старий підхід, але з кешуванням redirect'ів окремо.
-    } catch { /* fallback */ }
-    // fallback: завантажуємо мінімальний HTML
-    const doc = await fetchUA(`${ANIMEUA_BASE}/index.php?do=rand`);
-    const link = safeQuery('link[rel="canonical"]', doc);
-    if (link) return link.href;
-    const og = safeQuery('meta[property="og:url"]', doc);
-    if (og) return og.getAttribute('content');
-    return ANIMEUA_BASE + '/'; // fallback
-}
-
-// Глобально
+// Глобальні посилання
 window.fetchUA = fetchUA;
 window.parseCards = parseCards;
 window.fetchMainPage = fetchMainPage;
@@ -333,4 +293,3 @@ window.fetchGenres = fetchGenres;
 window.extractSourcesFromText = extractSourcesFromText;
 window.extractPlayerIframeUrls = extractPlayerIframeUrls;
 window.loadAnimeDetails = loadAnimeDetails;
-window.fetchRandomAnimeUrl = fetchRandomAnimeUrl;
