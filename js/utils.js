@@ -22,3 +22,27 @@ function debounce(fn, delay) {
         timer = setTimeout(() => fn.apply(this, args), delay);
     };
 }
+
+function applyTheme(theme) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+}
+
+function toggleTheme() {
+    const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
+    Storage.setTheme(next);
+    applyTheme(next);
+}
+
+// Глобальні посилання
+window.debounce = debounce;
+window.applyTheme = applyTheme;
+window.toggleTheme = toggleTheme;
+window.safeQuery = safeQuery;
+window.safeQueryAll = safeQueryAll;
