@@ -1,227 +1,212 @@
-// js/auth.js — Firebase Auth + Firestore integration
-
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeApp } from 'firebase/app';
 import {
-    getAuth,
-    onAuthStateChanged,
-    signInWithPopup,
-    GoogleAuthProvider,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    updateProfile
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth';
 import {
-    getFirestore,
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc,
-    arrayUnion,
-    arrayRemove,
-    collection,
-    getDocs
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp
+} from 'firebase/firestore';
 
-// ─── Firebase Init ────────────────────────────────────────────────────────────
 const firebaseConfig = {
-    apiKey: "AIzaSyDxEGgR8KuZh9IEeAEv5yXa2lAzdLGP5jI",
-    authDomain: "monoanime-46d6f.firebaseapp.com",
-    projectId: "monoanime-46d6f",
-    storageBucket: "monoanime-46d6f.firebasestorage.app",
-    messagingSenderId: "645025854458",
-    appId: "1:645025854458:web:f41af5e48b79517522aa43",
-    measurementId: "G-ZJB9D0CJQL"
+  apiKey: "AIzaSyDxEGgR8KuZh9IEeAEv5yXa2lAzdLGP5jI",
+  authDomain: "monoanime-46d6f.firebaseapp.com",
+  projectId: "monoanime-46d6f",
+  storageBucket: "monoanime-46d6f.firebasestorage.app",
+  messagingSenderId: "645025854458",
+  appId: "1:645025854458:web:f41af5e48b79517522aa43",
+  measurementId: "G-ZJB9D0CJQL"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ─── Auth State ───────────────────────────────────────────────────────────────
-onAuthStateChanged(auth, (user) => {
-    window.currentUser = user || null;
-    updateAuthUI(user);
-    updateBadge();
-});
+let currentUser = null;
 
-function updateAuthUI(user) {
-    const profileBtn = document.getElementById('profileBtn');
-    if (!profileBtn) return;
+export function initAuth(callback) {
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    window.currentUser = user;
+
     if (user) {
-        profileBtn.innerHTML = user.photoURL
-            ? `<img src="${user.photoURL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;">`
-            : `<i class="fas fa-user-check"></i>`;
-        profileBtn.title = user.displayName || user.email || 'Профіль';
-    } else {
-        profileBtn.innerHTML = `<i class="fas fa-user"></i>`;
-        profileBtn.title = 'Профіль';
+      await syncCloudToLocal();
     }
+    if (callback) callback(user);
+  });
 }
 
-// ─── Google Sign-In ───────────────────────────────────────────────────────────
-window.authGoogleSignIn = async function () {
-    try {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-        closeAuthModal();
-        showToast('✅ Увійшли через Google!');
-    } catch (e) {
-        showToast('❌ ' + (e.message || 'Помилка входу через Google'));
-    }
-};
+export function getCurrentUser() {
+  return currentUser;
+}
 
-// ─── Email Register ───────────────────────────────────────────────────────────
-window.authEmailRegister = async function () {
-    const email = document.getElementById('authEmail')?.value?.trim();
-    const password = document.getElementById('authPassword')?.value;
-    const name = document.getElementById('authName')?.value?.trim();
-    if (!email || !password) { showToast('❌ Введіть email та пароль'); return; }
-    try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        if (name) await updateProfile(cred.user, { displayName: name });
-        closeAuthModal();
-        showToast('✅ Реєстрація успішна!');
-    } catch (e) {
-        const msg = {
-            'auth/email-already-in-use': 'Email вже використовується',
-            'auth/weak-password': 'Пароль занадто слабкий (мін. 6 символів)',
-            'auth/invalid-email': 'Невірний формат email'
-        }[e.code] || e.message;
-        showToast('❌ ' + msg);
-    }
-};
+export async function authGoogleSignIn() {
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+    closeAuthModal();
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    window.showToast?.('Помилка входу через Google');
+  }
+}
 
-// ─── Email Login ──────────────────────────────────────────────────────────────
-window.authEmailLogin = async function () {
-    const email = document.getElementById('authEmail')?.value?.trim();
-    const password = document.getElementById('authPassword')?.value;
-    if (!email || !password) { showToast('❌ Введіть email та пароль'); return; }
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        closeAuthModal();
-        showToast('✅ Успішний вхід!');
-    } catch (e) {
-        const msg = {
-            'auth/user-not-found': 'Користувача не знайдено',
-            'auth/wrong-password': 'Невірний пароль',
-            'auth/invalid-credential': 'Невірні дані для входу',
-            'auth/invalid-email': 'Невірний формат email'
-        }[e.code] || e.message;
-        showToast('❌ ' + msg);
-    }
-};
+export async function authEmailLogin() {
+  const email = document.getElementById('authEmail')?.value;
+  const password = document.getElementById('authPassword')?.value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    closeAuthModal();
+  } catch (error) {
+    console.error('Email login error:', error);
+    window.showToast?.('Помилка входу: ' + error.message);
+  }
+}
 
-// ─── Sign Out ─────────────────────────────────────────────────────────────────
-window.authSignOut = async function () {
+export async function authEmailRegister() {
+  const email = document.getElementById('authEmail')?.value;
+  const password = document.getElementById('authPassword')?.value;
+  const name = document.getElementById('authName')?.value;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
+    closeAuthModal();
+  } catch (error) {
+    console.error('Register error:', error);
+    window.showToast?.('Помилка реєстрації: ' + error.message);
+  }
+}
+
+export async function authSignOut() {
+  try {
     await signOut(auth);
-    const profileModal = document.getElementById('profileModal');
-    if (profileModal) profileModal.style.display = 'none';
+  } catch (error) {
+    console.error('Sign out error:', error);
+  }
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('authModal');
+  if (modal) {
+    modal.style.display = 'none';
     document.body.style.overflow = '';
-    showToast('👋 Вийшли з акаунту');
-};
-
-// ─── Close Auth Modal ─────────────────────────────────────────────────────────
-window.closeAuthModal = function () {
-    const modal = document.getElementById('authModal');
-    if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
-};
-
-// ─── Firestore helpers ────────────────────────────────────────────────────────
-function userDoc() {
-    if (!window.currentUser) return null;
-    return doc(db, 'users', window.currentUser.uid);
+  }
 }
 
-async function ensureUserDoc() {
-    const ref = userDoc();
-    if (!ref) return;
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-        await setDoc(ref, { bookmarks: [], history: [], progress: {} });
-    }
+// --- Firestore helpers ---
+
+function getUserDocRef(uid) {
+  return doc(db, 'users', uid);
 }
 
-// ─── Bookmarks ────────────────────────────────────────────────────────────────
+async function getUserData() {
+  if (!currentUser) return null;
+  const ref = getUserDocRef(currentUser.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    return snap.data();
+  } else {
+    const initial = { bookmarks: [], history: [], progress: {} };
+    await setDoc(ref, initial);
+    return initial;
+  }
+}
+
+async function syncCloudToLocal() {
+  const data = await getUserData();
+  if (!data) return;
+  localStorage.setItem('mono_anime_bookmarks', JSON.stringify(data.bookmarks || []));
+  localStorage.setItem('mono_anime_history', JSON.stringify(data.history || []));
+  localStorage.setItem('mono_anime_progress', JSON.stringify(data.progress || {}));
+}
+
+// --- Bookmarks ---
+
 export async function cloudGetBookmarks() {
-    const ref = userDoc();
-    if (!ref) return [];
-    const snap = await getDoc(ref);
-    return snap.exists() ? (snap.data().bookmarks || []) : [];
+  const data = await getUserData();
+  return data?.bookmarks || [];
 }
 
 export async function cloudAddBookmark(anime) {
-    await ensureUserDoc();
-    const ref = userDoc();
-    if (!ref) return;
-    const entry = {
-        mal_id: anime.mal_id,
-        title: anime.title,
-        image_url: anime.images?.jpg?.large_image_url || '',
-        url: anime.url || '',
-        score: anime.score || null,
-        year: anime.year || null,
-        timestamp: Date.now()
-    };
-    const snap = await getDoc(ref);
-    const bm = snap.data().bookmarks || [];
-    const exists = bm.some(b => b.mal_id === anime.mal_id);
-    if (!exists) {
-        await updateDoc(ref, { bookmarks: arrayUnion(entry) });
-    }
+  if (!currentUser) return;
+  const ref = getUserDocRef(currentUser.uid);
+  const data = await getUserData();
+  const bookmarks = data?.bookmarks || [];
+  if (!bookmarks.some(b => b.mal_id === anime.mal_id)) {
+    bookmarks.push(anime);
+    await setDoc(ref, { bookmarks }, { merge: true });
+    localStorage.setItem('mono_anime_bookmarks', JSON.stringify(bookmarks));
+  }
 }
 
 export async function cloudRemoveBookmark(mal_id) {
-    const ref = userDoc();
-    if (!ref) return;
-    const snap = await getDoc(ref);
-    const bm = (snap.data().bookmarks || []).filter(b => b.mal_id !== mal_id);
-    await updateDoc(ref, { bookmarks: bm });
+  if (!currentUser) return;
+  const ref = getUserDocRef(currentUser.uid);
+  const data = await getUserData();
+  if (!data) return;
+  const newBookmarks = data.bookmarks.filter(b => b.mal_id !== mal_id);
+  await setDoc(ref, { bookmarks: newBookmarks }, { merge: true });
+  localStorage.setItem('mono_anime_bookmarks', JSON.stringify(newBookmarks));
 }
 
-// ─── History ──────────────────────────────────────────────────────────────────
+// --- History ---
+
 export async function cloudGetHistory() {
-    const ref = userDoc();
-    if (!ref) return [];
-    const snap = await getDoc(ref);
-    return snap.exists() ? (snap.data().history || []) : [];
+  const data = await getUserData();
+  return data?.history || [];
 }
 
 export async function cloudAddHistory(anime) {
-    await ensureUserDoc();
-    const ref = userDoc();
-    if (!ref) return;
-    const snap = await getDoc(ref);
-    let hist = (snap.data().history || []).filter(h => h.mal_id !== anime.mal_id);
-    const entry = {
-        mal_id: anime.mal_id,
-        title: anime.title,
-        image_url: anime.images?.jpg?.large_image_url || '',
-        url: anime.url || '',
-        score: anime.score || null,
-        year: anime.year || null,
-        timestamp: Date.now()
-    };
-    hist.unshift(entry);
-    hist = hist.slice(0, 50);
-    await updateDoc(ref, { history: hist });
+  if (!currentUser) return;
+  const ref = getUserDocRef(currentUser.uid);
+  const data = await getUserData();
+  if (!data) return;
+  const history = data.history || [];
+  const filtered = history.filter(h => h.mal_id !== anime.mal_id);
+  const entry = {
+    mal_id: anime.mal_id,
+    title: anime.title,
+    image_url: anime.images?.jpg?.large_image_url || '',
+    url: anime.url || '',
+    score: anime.score,
+    year: anime.year,
+    timestamp: Date.now()
+  };
+  filtered.unshift(entry);
+  const newHistory = filtered.slice(0, 50);
+  await setDoc(ref, { history: newHistory }, { merge: true });
+  localStorage.setItem('mono_anime_history', JSON.stringify(newHistory));
 }
 
-// ─── Progress ─────────────────────────────────────────────────────────────────
+// --- Progress ---
+
 export async function cloudGetProgress(mal_id) {
-    const ref = userDoc();
-    if (!ref) return null;
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return null;
-    const progress = snap.data().progress || {};
-    return progress[String(mal_id)] || null;
+  const data = await getUserData();
+  return data?.progress?.[mal_id] || null;
 }
 
 export async function cloudSaveProgress(mal_id, season, dub, episode) {
-    await ensureUserDoc();
-    const ref = userDoc();
-    if (!ref) return;
-    await updateDoc(ref, {
-        [`progress.${mal_id}`]: { season, dub, episode, updatedAt: Date.now() }
-    });
+  if (!currentUser) return;
+  const ref = getUserDocRef(currentUser.uid);
+  const data = await getUserData();
+  if (!data) return;
+  const progress = data.progress || {};
+  progress[mal_id] = { season, dub, episode, timestamp: Date.now() };
+  await setDoc(ref, { progress }, { merge: true });
+  localStorage.setItem('mono_anime_progress', JSON.stringify(progress));
 }
+
+// Глобальні функції для виклику з HTML (onclick)
+window.authGoogleSignIn = authGoogleSignIn;
+window.authEmailLogin = authEmailLogin;
+window.authEmailRegister = authEmailRegister;
+window.authSignOut = authSignOut;
