@@ -35,8 +35,9 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-    const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
-    Storage.setTheme(next);
+    const current = localStorage.getItem('mono_anime_theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('mono_anime_theme', next);
     applyTheme(next);
 }
 
