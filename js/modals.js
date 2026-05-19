@@ -141,7 +141,7 @@ function renderProfileGrid(list, emptyMsg) {
   return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.75rem;">
     ${list.slice(0, 24).map(item => `
       <div class="profile-card" data-url="${item.url}" style="cursor:pointer;border-radius:10px;overflow:hidden;background:var(--card-bg,#f5f5f5);">
-        <img src="${item.image_url}" alt="${item.title}" style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;">
+        <img src="${item.image_url || item.images?.jpg?.large_image_url}" alt="${item.title}" style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;">
         <div style="padding:0.4rem 0.3rem;font-size:0.72rem;font-weight:600;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="${item.title}">${item.title}</div>
       </div>
     `).join('')}
