@@ -1,10 +1,19 @@
 async function fetchUA(url) {
     if (!url) throw new Error('empty url');
     const proxyUrl = getProxyUrl(url);
-    const resp = await fetch(proxyUrl);
-    if (!resp.ok) throw new Error(`status ${resp.status}`);
-    const html = await resp.text();
-    return new DOMParser().parseFromString(html, 'text/html');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15с таймаут
+    try {
+        const resp = await fetch(proxyUrl, { signal: controller.signal });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const html = await resp.text();
+        return new DOMParser().parseFromString(html, 'text/html');
+    } catch (err) {
+        if (err.name === 'AbortError') throw new Error('Сервер не відповів (таймаут)');
+        throw err;
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 function parseCards(doc) {
