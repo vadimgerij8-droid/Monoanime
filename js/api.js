@@ -3,7 +3,6 @@ const fetchCache = new Map();
 
 async function fetchUA(url) {
     if (!url) throw new Error('empty url');
-    // Перевіряємо кеш (кешуємо HTML-рядок, щоб не тримати DOM)
     if (fetchCache.has(url)) {
         const html = fetchCache.get(url);
         return new DOMParser().parseFromString(html, 'text/html');
@@ -11,12 +10,11 @@ async function fetchUA(url) {
 
     const proxyUrl = getProxyUrl(url);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15с таймаут
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
         const resp = await fetch(proxyUrl, { signal: controller.signal });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const html = await resp.text();
-        // Зберігаємо в кеш
         fetchCache.set(url, html);
         return new DOMParser().parseFromString(html, 'text/html');
     } catch (err) {
@@ -207,7 +205,6 @@ async function loadAnimeDetails(animeUrl) {
 
     const playerUrls = extractPlayerIframeUrls(doc);
 
-    // Паралельне завантаження всіх плеєрів
     const playerPromises = playerUrls.map(async (playerUrl) => {
         try {
             let provider = 'Джерело';
@@ -219,7 +216,6 @@ async function loadAnimeDetails(animeUrl) {
             const text = playerHtml.body?.innerHTML || '';
             let sources = extractSourcesFromText(text, provider);
 
-            // Паралельне завантаження вкладених iframe всередині цього плеєра
             const nestedIframes = safeQueryAll('iframe', playerHtml);
             const nestedPromises = nestedIframes.map(async (nested) => {
                 let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
