@@ -330,7 +330,7 @@ window.openDetailModal = async function (url) {
   }
 };
 
-// Глобальні експорти
+// Робимо функції глобальними
 window.openAuthModal = openAuthModal;
 window.openProfileModal = openProfileModal;
 window.toggleBookmark = toggleBookmark;
