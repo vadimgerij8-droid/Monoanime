@@ -165,8 +165,13 @@ window.closeDetailModal = () => {
 async function toggleBookmark(anime) {
   const bm = await Storage.getBookmarks();
   const exists = bm.some(b => b.mal_id === anime.mal_id);
-  if (exists) { await cloudRemoveBookmark(anime.mal_id); window.showToast('Видалено з обраного'); }
-  else { await cloudAddBookmark(anime); window.showToast('Додано в обране'); }
+  if (exists) {
+    await Storage.removeBookmark(anime.mal_id);
+    window.showToast('Видалено з обраного');
+  } else {
+    await Storage.addBookmark(anime);
+    window.showToast('Додано в обране ⭐');
+  }
   window.updateBadge();
 }
 
@@ -261,7 +266,6 @@ function renderDetailSourcesUI(anime, savedProgress) {
   const sourcesArea = document.getElementById('sourcesArea');
   if (!sourcesArea) return;
 
-  // Переконаємося, що savedProgress не є Promise і має очікувану структуру
   const progress = (savedProgress && typeof savedProgress === 'object') ? savedProgress : null;
 
   const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
