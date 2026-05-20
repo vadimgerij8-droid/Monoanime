@@ -11,12 +11,8 @@ function renderCards(list) {
     const container = document.getElementById('animeContainer');
     if (!container) return;
     if (!list.length) { container.innerHTML = '<div class="loader">Нічого не знайдено</div>'; return; }
-    const fragment = document.createDocumentFragment();
-    list.forEach(a => {
-        const card = document.createElement('div');
-        card.className = 'anime-card';
-        card.dataset.url = a.url;
-        card.innerHTML = `
+    container.innerHTML = list.map(a => `
+        <div class="anime-card" data-url="${a.url}">
             <div class="anime-poster">
                 <img src="${a.images.jpg.large_image_url}" alt="${a.title}" loading="lazy">
             </div>
@@ -24,12 +20,9 @@ function renderCards(list) {
                 <div class="anime-title">${a.title}</div>
                 <div class="anime-meta">${a.year || ''} • UA</div>
             </div>
-        `;
-        card.addEventListener('click', () => window.openDetailModal(card.dataset.url));
-        fragment.appendChild(card);
-    });
-    container.innerHTML = '';
-    container.appendChild(fragment);
+        </div>
+    `).join('');
+    // Обробники кліків тепер додаються через делегування в app.js
     renderPagination();
 }
 
@@ -43,6 +36,7 @@ function renderPagination() {
     row.innerHTML = html;
 }
 
+// Глобальні посилання
 window.showToast = showToast;
 window.renderCards = renderCards;
 window.renderPagination = renderPagination;
