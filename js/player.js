@@ -2,8 +2,7 @@ const hlsInstances = new Map();
 
 function destroyHlsForVideo(videoEl) {
     if (hlsInstances.has(videoEl)) {
-        const hls = hlsInstances.get(videoEl);
-        hls.destroy();
+        hlsInstances.get(videoEl).destroy();
         hlsInstances.delete(videoEl);
     }
 }
@@ -17,19 +16,11 @@ function loadVideo(url, videoElement) {
     if (!url) { showToast('❌ Немає URL відео'); return; }
     const finalUrl = getProxyUrl(url);
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-        const hls = new Hls({
-            enableWorker: true,
-            lowLatencyMode: false,
-            backBufferLength: 90,
-            startLevel: -1,
-            manifestLoadPolicy: { default: { maxTimeToFirstByteMs: 8000, maxLoadTimeMs: 16000 } }
-        });
+        const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
         hlsInstances.set(videoElement, hls);
         hls.loadSource(finalUrl);
         hls.attachMedia(videoElement);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            videoElement.play().catch(() => {});
-        });
+        hls.on(Hls.Events.MANIFEST_PARSED, () => videoElement.play().catch(() => {}));
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
                 switch (data.type) {
@@ -45,5 +36,6 @@ function loadVideo(url, videoElement) {
     }
 }
 
+// Глобальні посилання
 window.loadVideo = loadVideo;
 window.destroyHlsForVideo = destroyHlsForVideo;
