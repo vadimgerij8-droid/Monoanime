@@ -26,5 +26,3 @@ function getProxyUrl(url) {
     if (!url) { console.warn('getProxyUrl empty'); return null; }
     return PROXY_URL + '?url=' + encodeURIComponent(url);
 }
-
-window.ANIMEUA_BASE = ANIMEUA_BASE;
