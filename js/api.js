@@ -1,5 +1,7 @@
 // Кеш для fetchUA (ключ – оригінальний URL)
 const fetchCache = new Map();
+// Кеш для деталей аніме
+const detailsCache = new Map();
 
 async function fetchUA(url) {
     if (!url) throw new Error('empty url');
@@ -176,6 +178,10 @@ function extractPlayerIframeUrls(doc) {
 }
 
 async function loadAnimeDetails(animeUrl) {
+    if (detailsCache.has(animeUrl)) {
+        return detailsCache.get(animeUrl);
+    }
+
     const doc = await fetchUA(animeUrl);
     let title = '';
     for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
@@ -222,8 +228,13 @@ async function loadAnimeDetails(animeUrl) {
                 if (nestedUrl && nestedUrl !== 'about:blank') {
                     if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
                     if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
-                    const nestedHtml = await fetchUA(nestedUrl);
-                    return extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider);
+                    try {
+                        const nestedHtml = await fetchUA(nestedUrl);
+                        return extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider);
+                    } catch (e) {
+                        console.warn('Nested iframe fetch failed', nestedUrl, e);
+                        return [];
+                    }
                 }
                 return [];
             });
@@ -258,7 +269,7 @@ async function loadAnimeDetails(animeUrl) {
         }
     }
 
-    return {
+    const result = {
         mal_id: animeUrl.hashCode(),
         title,
         images: { jpg: { large_image_url: poster, image_url: poster } },
@@ -266,6 +277,9 @@ async function loadAnimeDetails(animeUrl) {
         url: animeUrl, from: 'animeua', rating,
         score: null
     };
+
+    detailsCache.set(animeUrl, result);
+    return result;
 }
 
 // Глобальні посилання
