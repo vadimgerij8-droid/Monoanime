@@ -27,4 +27,5 @@ function getProxyUrl(url) {
     return PROXY_URL + '?url=' + encodeURIComponent(url);
 }
 
+// Глобальні змінні для використання іншими скриптами
 window.ANIMEUA_BASE = ANIMEUA_BASE;
