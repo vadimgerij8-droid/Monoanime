@@ -176,9 +176,20 @@ window.openDetailModal = async function (url) {
 
   try {
     const anime = await window.loadAnimeDetails(url);
-    await Storage.addHistory(anime);
-    const isBookmarked = (await Storage.getBookmarks()).some(b => b.mal_id === anime.mal_id);
-    const savedProgress = window.currentUser ? await cloudGetProgress(anime.mal_id) : null;
+
+    // Не блокуємо UI — запускаємо фоново
+    Storage.addHistory(anime).catch(console.warn);
+
+    // Завантажуємо паралельно з таймаутом 3с
+    const [isBookmarked, savedProgress] = await Promise.all([
+      Storage.getBookmarks().then(bm => bm.some(b => b.mal_id === anime.mal_id)).catch(() => false),
+      window.currentUser
+        ? Promise.race([
+            cloudGetProgress(anime.mal_id).catch(() => null),
+            new Promise(r => setTimeout(() => r(null), 3000))
+          ])
+        : Promise.resolve(null)
+    ]);
 
     modalTitle.textContent = anime.title;
     renderDetailBaseUI(anime, isBookmarked, savedProgress);
@@ -329,7 +340,15 @@ function renderDetailSourcesUI(anime, savedProgress) {
 // Викликається з api.js коли джерела довантажено
 window._updateDetailSourcesUI = async function (anime) {
   if (anime._sourcesLoaded) {
-    const savedProgress = window.currentUser ? await cloudGetProgress(anime.mal_id) : null;
+    let savedProgress = null;
+    if (window.currentUser) {
+      try {
+        savedProgress = await Promise.race([
+          cloudGetProgress(anime.mal_id),
+          new Promise(r => setTimeout(() => r(null), 3000))
+        ]);
+      } catch(e) { console.warn(e); }
+    }
     renderDetailSourcesUI(anime, savedProgress);
   }
 };
