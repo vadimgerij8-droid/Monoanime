@@ -41,6 +41,7 @@ function toggleTheme() {
     applyTheme(next);
 }
 
+// Глобальні посилання
 window.debounce = debounce;
 window.applyTheme = applyTheme;
 window.toggleTheme = toggleTheme;
