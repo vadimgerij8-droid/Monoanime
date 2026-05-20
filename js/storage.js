@@ -5,14 +5,28 @@ import {
 } from './auth.js';
 
 const Storage = {
+  _bookmarksCache: { data: null, timestamp: 0, ttl: 60000 },
+  _historyCache: { data: null, timestamp: 0, ttl: 60000 },
+  _progressCache: new Map(),
+
   async getBookmarks() {
-    if (window.currentUser) {
-      return await cloudGetBookmarks();
+    const now = Date.now();
+    if (this._bookmarksCache.data && (now - this._bookmarksCache.timestamp) < this._bookmarksCache.ttl) {
+      return this._bookmarksCache.data;
     }
-    return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]');
+    let data;
+    if (window.currentUser) {
+      data = await cloudGetBookmarks();
+    } else {
+      data = JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]');
+    }
+    this._bookmarksCache.data = data;
+    this._bookmarksCache.timestamp = now;
+    return data;
   },
 
   async saveBookmarks(arr) {
+    this._bookmarksCache.data = null;
     if (window.currentUser) {
       await cloudSaveBookmarks(arr);
     } else {
@@ -20,15 +34,48 @@ const Storage = {
     }
   },
 
-  async getHistory() {
+  async addBookmark(anime) {
+    this._bookmarksCache.data = null;
     if (window.currentUser) {
-      return await cloudGetHistory();
+      await cloudAddBookmark(anime);
+    } else {
+      const bookmarks = await this.getBookmarks();
+      if (!bookmarks.some(b => b.mal_id === anime.mal_id)) {
+        bookmarks.push(anime);
+        localStorage.setItem('mono_anime_bookmarks', JSON.stringify(bookmarks));
+      }
     }
-    return JSON.parse(localStorage.getItem('mono_anime_history') || '[]');
+  },
+
+  async removeBookmark(mal_id) {
+    this._bookmarksCache.data = null;
+    if (window.currentUser) {
+      await cloudRemoveBookmark(mal_id);
+    } else {
+      let bookmarks = await this.getBookmarks();
+      bookmarks = bookmarks.filter(b => b.mal_id !== mal_id);
+      localStorage.setItem('mono_anime_bookmarks', JSON.stringify(bookmarks));
+    }
+  },
+
+  async getHistory() {
+    const now = Date.now();
+    if (this._historyCache.data && (now - this._historyCache.timestamp) < this._historyCache.ttl) {
+      return this._historyCache.data;
+    }
+    let data;
+    if (window.currentUser) {
+      data = await cloudGetHistory();
+    } else {
+      data = JSON.parse(localStorage.getItem('mono_anime_history') || '[]');
+    }
+    this._historyCache.data = data;
+    this._historyCache.timestamp = now;
+    return data;
   },
 
   async addHistory(anime) {
-    if (!anime || !anime.mal_id) return;
+    this._historyCache.data = null;
     if (window.currentUser) {
       await cloudAddHistory(anime);
       return;
@@ -48,6 +95,7 @@ const Storage = {
   },
 
   async clearHistory() {
+    this._historyCache.data = null;
     if (window.currentUser) {
       await cloudClearHistory();
     } else {
@@ -61,6 +109,26 @@ const Storage = {
 
   setTheme(theme) {
     localStorage.setItem('mono_anime_theme', theme);
+  },
+
+  async getProgressCached(mal_id) {
+    const now = Date.now();
+    const cached = this._progressCache.get(mal_id);
+    if (cached && (now - cached.timestamp) < 30000) {
+      return cached.data;
+    }
+    const data = await cloudGetProgress(mal_id);
+    this._progressCache.set(mal_id, { data, timestamp: now });
+    return data;
+  },
+
+  async saveProgress(mal_id, season, dub, episode) {
+    this._progressCache.delete(mal_id);
+    await cloudSaveProgress(mal_id, season, dub, episode);
+  },
+
+  clearProgressCache(mal_id) {
+    this._progressCache.delete(mal_id);
   }
 };
 
