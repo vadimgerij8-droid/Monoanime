@@ -1,28 +1,11 @@
-import Storage from './storage.js';
-
-const {
-    fetchTop100,
-    searchAnimeUA,
-    fetchByGenre,
-    fetchMainPage,
-    fetchGenres,
-    applyTheme,
-    toggleTheme,
-    debounce,
-    renderCards,
-    destroyHlsForVideo
-} = window;
-
 let currentTab = 'main';
 let currentPage = 1;
 let currentSearchQuery = '';
 let currentGenreSlug = null;
 let currentList = [];
 
-window.currentPage = 1;
-
 window.changePage = (p) => {
-    window.currentPage = p;
+    currentPage = p;
     window.scrollTo(0, 0);
     loadContent();
 };
@@ -35,11 +18,11 @@ async function loadContent() {
         if (currentTab === 'top100') {
             currentList = await fetchTop100();
         } else if (currentSearchQuery) {
-            currentList = await searchAnimeUA(currentSearchQuery, window.currentPage);
+            currentList = await searchAnimeUA(currentSearchQuery, currentPage);
         } else if (currentGenreSlug) {
-            currentList = await fetchByGenre(currentGenreSlug, window.currentPage);
+            currentList = await fetchByGenre(currentGenreSlug, currentPage);
         } else {
-            currentList = await fetchMainPage(window.currentPage);
+            currentList = await fetchMainPage(currentPage);
         }
         renderCards(currentList);
     } catch (err) {
@@ -49,7 +32,7 @@ async function loadContent() {
 
 async function showTop100() {
     currentTab = 'top100';
-    window.currentPage = 1;
+    currentPage = 1;
     currentSearchQuery = '';
     currentGenreSlug = null;
     const container = document.getElementById('animeContainer');
@@ -63,7 +46,7 @@ async function showTop100() {
 }
 
 function openRandomAnime() {
-    window.openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`);
+    openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`);
 }
 
 async function initGenres() {
@@ -77,7 +60,7 @@ async function initGenres() {
     allBtn.textContent = 'Усі';
     allBtn.addEventListener('click', () => {
         currentGenreSlug = null;
-        window.currentPage = 1;
+        currentPage = 1;
         currentTab = 'main';
         document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
         allBtn.classList.add('active-pill');
@@ -91,7 +74,7 @@ async function initGenres() {
         btn.textContent = genre.name;
         btn.addEventListener('click', () => {
             currentGenreSlug = genre.slug;
-            window.currentPage = 1;
+            currentPage = 1;
             currentTab = 'main';
             document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active-pill'));
             btn.classList.add('active-pill');
@@ -101,8 +84,26 @@ async function initGenres() {
     });
 }
 
+// ─── updateBadge (з підтримкою хмари) ────────────────────────────────────────
+async function updateBadge() {
+    const badge = document.getElementById('bookmarkBadge');
+    if (!badge) return;
+    let count = 0;
+    if (window.currentUser) {
+        try {
+            const { cloudGetBookmarks } = await import('./auth.js');
+            count = (await cloudGetBookmarks()).length;
+        } catch { count = 0; }
+    } else {
+        count = Storage.getBookmarks().length;
+    }
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+// ─── Ініціалізація ────────────────────────────────────────────────────────────
 applyTheme(Storage.getTheme());
-window.updateBadge();
+updateBadge();
 
 const themeBtn = document.getElementById('themeToggleBtn');
 const profileBtn = document.getElementById('profileBtn');
@@ -116,41 +117,45 @@ const playerModal = document.getElementById('playerModal');
 const profileModal = document.getElementById('profileModal');
 const mainVideoPlayer = document.getElementById('mainVideoPlayer');
 
-if (themeBtn) themeBtn.addEventListener('click', toggleTheme, { passive: true });
-if (profileBtn) profileBtn.addEventListener('click', window.openProfileModal, { passive: true });
+if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+if (profileBtn) profileBtn.addEventListener('click', openProfileModal);
 if (searchInput) searchInput.addEventListener('input', debounce(() => {
     currentSearchQuery = searchInput.value.trim();
-    window.currentPage = 1;
+    currentPage = 1;
     currentTab = 'main';
     loadContent();
 }, 500));
-if (topBtn) topBtn.addEventListener('click', showTop100, { passive: true });
-if (randBtn) randBtn.addEventListener('click', openRandomAnime, { passive: true });
-if (closeModalBtn) closeModalBtn.addEventListener('click', window.closeDetailModal, { passive: true });
+if (topBtn) topBtn.addEventListener('click', showTop100);
+if (randBtn) randBtn.addEventListener('click', openRandomAnime);
+if (closeModalBtn) closeModalBtn.addEventListener('click', closeDetailModal);
 if (closePlayerBtn) closePlayerBtn.addEventListener('click', () => {
     playerModal.style.display = 'none';
     document.body.style.overflow = '';
     destroyHlsForVideo(mainVideoPlayer);
-}, { passive: true });
+});
 if (closeProfileBtn) closeProfileBtn.addEventListener('click', () => {
     profileModal.style.display = 'none';
     document.body.style.overflow = '';
-}, { passive: true });
+});
 
 window.addEventListener('click', (e) => {
     const animeModal = document.getElementById('animeModal');
-    if (e.target === animeModal) window.closeDetailModal();
+    if (e.target === animeModal) closeDetailModal();
     if (e.target === playerModal) { playerModal.style.display = 'none'; document.body.style.overflow = ''; destroyHlsForVideo(mainVideoPlayer); }
     if (e.target === profileModal) { profileModal.style.display = 'none'; document.body.style.overflow = ''; }
 });
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        window.closeDetailModal();
+        closeDetailModal();
         if (playerModal) { playerModal.style.display = 'none'; destroyHlsForVideo(mainVideoPlayer); }
         document.body.style.overflow = '';
         if (profileModal) profileModal.style.display = 'none';
+        window.closeAuthModal?.();
     }
 });
+
+// auth.js підключається як модуль — завантажуємо його окремо
+import('./auth.js').catch(console.error);
 
 initGenres().then(() => loadContent());
