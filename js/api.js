@@ -1,21 +1,10 @@
-const detailsCache = new Map();
-
 async function fetchUA(url) {
     if (!url) throw new Error('empty url');
     const proxyUrl = getProxyUrl(url);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    try {
-        const resp = await fetch(proxyUrl, { signal: controller.signal });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const html = await resp.text();
-        return new DOMParser().parseFromString(html, 'text/html');
-    } catch (err) {
-        if (err.name === 'AbortError') throw new Error('Сервер не відповів (таймаут)');
-        throw err;
-    } finally {
-        clearTimeout(timeout);
-    }
+    const resp = await fetch(proxyUrl);
+    if (!resp.ok) throw new Error(`status ${resp.status}`);
+    const html = await resp.text();
+    return new DOMParser().parseFromString(html, 'text/html');
 }
 
 function parseCards(doc) {
@@ -79,6 +68,8 @@ function fetchGenres() {
         .map(([name, slug]) => ({ slug, name }))
         .sort((a, b) => a.name.localeCompare(b.name, 'uk'));
 }
+
+// ---------- Парсинг джерел ----------
 
 function extractSourcesFromText(text, providerName = '') {
     const sources = [];
@@ -167,10 +158,6 @@ function extractPlayerIframeUrls(doc) {
 }
 
 async function loadAnimeDetails(animeUrl) {
-    if (detailsCache.has(animeUrl)) {
-        return detailsCache.get(animeUrl);
-    }
-
     const doc = await fetchUA(animeUrl);
     let title = '';
     for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
@@ -198,98 +185,55 @@ async function loadAnimeDetails(animeUrl) {
     const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
     if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
 
-    const baseAnime = {
+    const playerUrls = extractPlayerIframeUrls(doc);
+    const allRawSources = [];
+    for (const playerUrl of playerUrls) {
+        try {
+            let provider = 'Джерело';
+            if (playerUrl.includes('ashdi')) provider = 'Ashdi';
+            else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
+            else if (playerUrl.includes('player')) provider = 'Player';
+            const playerHtml = await fetchUA(playerUrl);
+            const text = playerHtml.body?.innerHTML || '';
+            allRawSources.push(...extractSourcesFromText(text, provider));
+            const nestedIframes = safeQueryAll('iframe', playerHtml);
+            for (const nested of nestedIframes) {
+                let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
+                if (nestedUrl && nestedUrl !== 'about:blank') {
+                    if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
+                    if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
+                    const nestedHtml = await fetchUA(nestedUrl);
+                    allRawSources.push(...extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider));
+                }
+            }
+        } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
+    }
+
+    const seasons = {};
+    const seenKeys = new Set();
+    allRawSources.forEach(s => {
+        const seasonNum = s.season || '1';
+        const dubName = s.dub || 'UA';
+        const episodeNum = s.episode || '1';
+        const uniqueKey = `${seasonNum}-${dubName}-${episodeNum}-${s.file}`;
+        if (!seenKeys.has(uniqueKey)) {
+            seenKeys.add(uniqueKey);
+            if (!seasons[seasonNum]) seasons[seasonNum] = {};
+            if (!seasons[seasonNum][dubName]) seasons[seasonNum][dubName] = [];
+            seasons[seasonNum][dubName].push({ title: s.label, season: seasonNum, episode: episodeNum, file: s.file, dub: dubName, provider: s.provider });
+        }
+    });
+    for (const s in seasons) {
+        for (const d in seasons[s]) {
+            seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
+        }
+    }
+
+    return {
         mal_id: animeUrl.hashCode(),
         title,
         images: { jpg: { large_image_url: poster, image_url: poster } },
-        genres, year, synopsis,
-        seasons: {},
-        url: animeUrl, from: 'animeua', rating,
-        score: null,
-        _sourcesLoaded: false
+        genres, year, synopsis, seasons,
+        url: animeUrl, from: 'animeua', rating
     };
-
-    detailsCache.set(animeUrl, baseAnime);
-
-    // Фонове завантаження джерел
-    loadSourcesInBackground(animeUrl, doc, baseAnime);
-
-    return baseAnime;
 }
-
-async function loadSourcesInBackground(animeUrl, doc, baseAnime) {
-    try {
-        const playerUrls = extractPlayerIframeUrls(doc);
-        const allRawSources = [];
-
-        const playerPromises = playerUrls.map(async (playerUrl) => {
-            try {
-                let provider = 'Джерело';
-                if (playerUrl.includes('ashdi')) provider = 'Ashdi';
-                else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
-                else if (playerUrl.includes('player')) provider = 'Player';
-
-                const playerHtml = await fetchUA(playerUrl);
-                const text = playerHtml.body?.innerHTML || '';
-                allRawSources.push(...extractSourcesFromText(text, provider));
-
-                const nestedIframes = safeQueryAll('iframe', playerHtml);
-                const nestedPromises = nestedIframes.map(async (nested) => {
-                    let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
-                    if (!nestedUrl || nestedUrl === 'about:blank') return;
-                    if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
-                    if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
-                    try {
-                        const nestedHtml = await fetchUA(nestedUrl);
-                        allRawSources.push(...extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider));
-                    } catch (e) { /* ignore */ }
-                });
-                await Promise.all(nestedPromises);
-            } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
-        });
-
-        await Promise.all(playerPromises);
-
-        const seasons = {};
-        const seenKeys = new Set();
-        allRawSources.forEach(s => {
-            const seasonNum = s.season || '1';
-            const dubName = s.dub || 'UA';
-            const episodeNum = s.episode || '1';
-            const uniqueKey = `${seasonNum}-${dubName}-${episodeNum}-${s.file}`;
-            if (!seenKeys.has(uniqueKey)) {
-                seenKeys.add(uniqueKey);
-                if (!seasons[seasonNum]) seasons[seasonNum] = {};
-                if (!seasons[seasonNum][dubName]) seasons[seasonNum][dubName] = [];
-                seasons[seasonNum][dubName].push({ title: s.label, season: seasonNum, episode: episodeNum, file: s.file, dub: dubName, provider: s.provider });
-            }
-        });
-        for (const s in seasons) {
-            for (const d in seasons[s]) {
-                seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
-            }
-        }
-
-        baseAnime.seasons = seasons;
-        baseAnime._sourcesLoaded = true;
-        detailsCache.set(animeUrl, baseAnime);
-
-        if (window._currentDetailUrl === animeUrl) {
-            window._updateDetailSourcesUI(baseAnime);
-        }
-    } catch (e) {
-        console.error('Background source loading failed', e);
-    }
-}
-
-// Глобальні посилання
-window.fetchUA = fetchUA;
-window.parseCards = parseCards;
-window.fetchMainPage = fetchMainPage;
-window.searchAnimeUA = searchAnimeUA;
-window.fetchByGenre = fetchByGenre;
-window.fetchTop100 = fetchTop100;
-window.fetchGenres = fetchGenres;
-window.extractSourcesFromText = extractSourcesFromText;
-window.extractPlayerIframeUrls = extractPlayerIframeUrls;
-window.loadAnimeDetails = loadAnimeDetails;
