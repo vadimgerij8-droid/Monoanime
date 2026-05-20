@@ -79,10 +79,18 @@ async function openProfileModal() {
   }
 }
 
+// Допоміжна функція для таймауту
+function withTimeout(promise, fallback = [], ms = 5000) {
+  return Promise.race([
+    promise.catch(() => fallback),
+    new Promise(r => setTimeout(() => r(fallback), ms))
+  ]);
+}
+
 async function refreshProfileData() {
   const [bookmarks, history] = await Promise.all([
-    Storage.getBookmarks(),
-    Storage.getHistory()
+    withTimeout(Storage.getBookmarks()),
+    withTimeout(Storage.getHistory())
   ]);
   profileCache = { bookmarks, history };
   renderProfileContent(bookmarks, history);
