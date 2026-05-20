@@ -1,4 +1,8 @@
 import Storage from './storage.js';
+import {
+  cloudGetBookmarks, cloudAddBookmark, cloudRemoveBookmark,
+  cloudGetProgress, cloudSaveProgress
+} from './auth.js';
 
 // ---------- Auth Modal ----------
 function openAuthModal() {
@@ -80,63 +84,56 @@ async function openProfileModal() {
   if (!profileBody) return;
   profileBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
 
-  try {
-    const [bookmarks, history] = await Promise.all([
-      Storage.getBookmarks(),
-      Storage.getHistory()
-    ]);
-    const user = window.currentUser;
+  const bookmarks = await Storage.getBookmarks();
+  const history = await Storage.getHistory();
+  const user = window.currentUser;
 
-    profileBody.innerHTML = `
-      <div style="display:flex;align-items:center;gap:1rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border,#eee);margin-bottom:1.5rem;">
-        ${user.photoURL
-          ? `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`
-          : `<div style="width:60px;height:60px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:1.8rem;"><i class="fas fa-user"></i></div>`
-        }
-        <div style="flex:1;">
-          <div style="font-size:1.1rem;font-weight:700;">${user.displayName || 'Без імені'}</div>
-          <div style="font-size:0.85rem;color:#888;">${user.email || ''}</div>
-        </div>
-        <button onclick="window.authSignOut()" style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid #ddd;background:none;cursor:pointer;font-size:0.85rem;color:inherit;">
-          <i class="fas fa-sign-out-alt"></i> Вийти
-        </button>
+  profileBody.innerHTML = `
+    <div style="display:flex;align-items:center;gap:1rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border,#eee);margin-bottom:1.5rem;">
+      ${user.photoURL
+        ? `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`
+        : `<div style="width:60px;height:60px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:1.8rem;"><i class="fas fa-user"></i></div>`
+      }
+      <div style="flex:1;">
+        <div style="font-size:1.1rem;font-weight:700;">${user.displayName || 'Без імені'}</div>
+        <div style="font-size:0.85rem;color:#888;">${user.email || ''}</div>
       </div>
+      <button onclick="window.authSignOut()" style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid #ddd;background:none;cursor:pointer;font-size:0.85rem;color:inherit;">
+        <i class="fas fa-sign-out-alt"></i> Вийти
+      </button>
+    </div>
 
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
-        <div style="background:rgba(255,204,0,0.15);border-radius:10px;padding:0.9rem;text-align:center;">
-          <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
-          <div style="font-size:0.75rem;color:#888;">Обране</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
-          <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
-          <div style="font-size:0.75rem;color:#888;">Переглянуто</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
-          <div style="font-size:1.6rem;font-weight:700;">★</div>
-          <div style="font-size:0.75rem;color:#888;">Рейтинг</div>
-        </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+      <div style="background:rgba(255,204,0,0.15);border-radius:10px;padding:0.9rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
+        <div style="font-size:0.75rem;color:#888;">Обране</div>
       </div>
-
-      <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);margin-bottom:1rem;">
-        <button class="profile-tab" data-tab="bookmarks" onclick="window.switchProfileTab(this,'bookmarks')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">⭐ Обране</button>
-        <button class="profile-tab" data-tab="history" onclick="window.switchProfileTab(this,'history')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">🕓 Історія</button>
+      <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
+        <div style="font-size:0.75rem;color:#888;">Переглянуто</div>
       </div>
+      <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;">★</div>
+        <div style="font-size:0.75rem;color:#888;">Рейтинг</div>
+      </div>
+    </div>
 
-      <div id="profileTabBookmarks">${renderProfileGrid(bookmarks, 'Немає обраних аніме')}</div>
-      <div id="profileTabHistory" style="display:none;">${renderProfileGrid(history, 'Історія порожня')}</div>
-    `;
+    <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);margin-bottom:1rem;">
+      <button class="profile-tab" data-tab="bookmarks" onclick="window.switchProfileTab(this,'bookmarks')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">⭐ Обране</button>
+      <button class="profile-tab" data-tab="history" onclick="window.switchProfileTab(this,'history')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">🕓 Історія</button>
+    </div>
 
-    profileBody.querySelectorAll('.profile-card').forEach(card => {
-      card.addEventListener('click', () => {
-        profileModal.style.display = 'none';
-        document.body.style.overflow = '';
-        window.openDetailModal(card.dataset.url);
-      });
+    <div id="profileTabBookmarks">${renderProfileGrid(bookmarks, 'Немає обраних аніме')}</div>
+    <div id="profileTabHistory" style="display:none;">${renderProfileGrid(history, 'Історія порожня')}</div>
+  `;
+
+  profileBody.querySelectorAll('.profile-card').forEach(card => {
+    card.addEventListener('click', () => {
+      profileModal.style.display = 'none';
+      document.body.style.overflow = '';
+      window.openDetailModal(card.dataset.url);
     });
-  } catch (err) {
-    console.error('Помилка завантаження профілю:', err);
-    profileBody.innerHTML = '<p style="text-align:center;color:#888;padding:2rem;">Не вдалося завантажити профіль. Спробуйте пізніше.</p>';
-  }
+  });
 }
 
 function renderProfileGrid(list, emptyMsg) {
@@ -176,10 +173,10 @@ async function toggleBookmark(anime) {
   const bm = await Storage.getBookmarks();
   const exists = bm.some(b => b.mal_id === anime.mal_id);
   if (exists) {
-    await Storage.removeBookmark(anime.mal_id);
+    await cloudRemoveBookmark(anime.mal_id);
     window.showToast('Видалено з обраного');
   } else {
-    await Storage.addBookmark(anime);
+    await cloudAddBookmark(anime);
     window.showToast('Додано в обране');
   }
   window.updateBadge();
@@ -203,7 +200,7 @@ window.openDetailModal = async function (url) {
     modalTitle.textContent = anime.title;
 
     const isBookmarked = (await Storage.getBookmarks()).some(b => b.mal_id === anime.mal_id);
-    const savedProgress = window.currentUser ? await Storage.getProgressCached(anime.mal_id) : null;
+    const savedProgress = window.currentUser ? await cloudGetProgress(anime.mal_id) : null;
 
     const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
     const firstSeason = (savedProgress?.season && anime.seasons[savedProgress.season]) ? savedProgress.season : (seasons[0] || '1');
@@ -258,10 +255,10 @@ window.openDetailModal = async function (url) {
           <div style="display:flex;flex-direction:column;gap:0.3rem;">
             <label style="font-size:0.8rem;font-weight:600;color:#666;">СЕРІЯ</label>
             <select id="episodeSelect" class="btn-outline" style="padding:0.5rem;min-width:100px;">
-              ${episodes.length ? episodes.map((ep, i) => `<option value="${ep.file}" ${i === savedEpIndex ? 'selected' : ''}>Еп. ${ep.episode}</option>`).join('') : '<option value="">Немає серій</option>'}
+              ${episodes.map((ep, i) => `<option value="${ep.file}" ${i === savedEpIndex ? 'selected' : ''}>Еп. ${ep.episode}</option>`).join('')}
             </select>
           </div>
-          <button id="playSelectedBtn" class="btn-outline" style="align-self:flex-end;padding:0.4rem 0.8rem;background:#ffcc00;color:#333;border:none;font-size:0.85rem;margin-top:8px;" ${episodes.length ? '' : 'disabled'}>
+          <button id="playSelectedBtn" class="btn-outline" style="align-self:flex-end;padding:0.4rem 0.8rem;background:#ffcc00;color:#333;border:none;font-size:0.85rem;margin-top:8px;">
             <i class="fas fa-play"></i> ДИВИТИСЯ
           </button>
         </div>
@@ -275,7 +272,6 @@ window.openDetailModal = async function (url) {
     const seasonSelect = document.getElementById('seasonSelect');
     const dubSelect = document.getElementById('dubSelect');
     const episodeSelect = document.getElementById('episodeSelect');
-    const playSelectedBtn = document.getElementById('playSelectedBtn');
 
     function updateDubs() {
       const s = seasonSelect.value;
@@ -287,33 +283,22 @@ window.openDetailModal = async function (url) {
     function updateEpisodes() {
       const s = seasonSelect.value, d = dubSelect.value;
       const eps = anime.seasons[s]?.[d] || [];
-      if (eps.length === 0) {
-        episodeSelect.innerHTML = '<option value="">Немає серій</option>';
-        playSelectedBtn.disabled = true;
-      } else {
-        episodeSelect.innerHTML = eps.map(ep => `<option value="${ep.file}">Еп. ${ep.episode}</option>`).join('');
-        playSelectedBtn.disabled = false;
-      }
+      episodeSelect.innerHTML = eps.map(ep => `<option value="${ep.file}">Еп. ${ep.episode}</option>`).join('');
     }
 
     async function playEpisode(file) {
-      if (!file || file === '') {
-        window.showToast('❌ Немає файлу - спробуйте вибрати іншу озвучку або сезон');
-        return;
-      }
+      if (!file) { window.showToast('❌ Немає файлу'); return; }
       window.loadVideo(file, detailVideoEl);
       if (window.currentUser) {
         const s = seasonSelect.value, d = dubSelect.value;
         const ep = (anime.seasons[s]?.[d] || []).find(e => e.file === file);
-        if (ep) {
-          await Storage.saveProgress(anime.mal_id, s, d, ep.episode);
-        }
+        if (ep) await cloudSaveProgress(anime.mal_id, s, d, ep.episode);
       }
     }
 
     seasonSelect.addEventListener('change', updateDubs);
     dubSelect.addEventListener('change', updateEpisodes);
-    playSelectedBtn.addEventListener('click', () => playEpisode(episodeSelect.value));
+    document.getElementById('playSelectedBtn').addEventListener('click', () => playEpisode(episodeSelect.value));
 
     const resumeBtn = document.getElementById('resumeBtn');
     if (resumeBtn && savedProgress) {
@@ -345,7 +330,7 @@ window.openDetailModal = async function (url) {
   }
 };
 
-// Глобальні експорти
+// Робимо функції глобальними
 window.openAuthModal = openAuthModal;
 window.openProfileModal = openProfileModal;
 window.toggleBookmark = toggleBookmark;
