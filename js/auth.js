@@ -25,7 +25,6 @@ async function ensureUserDocExists(user) {
   return ref;
 }
 
-// Робить безпечний об'єкт аніме для Firestore (без undefined)
 function cleanAnimeObject(anime) {
   return {
     mal_id: anime.mal_id,
@@ -100,7 +99,6 @@ export async function cloudAddHistory(anime) {
   };
   Object.keys(entry).forEach(key => entry[key] === undefined && delete entry[key]);
   await updateDoc(ref, { history: arrayUnion(entry) });
-  // trim to 50
   const snap = await getDoc(ref);
   if (snap.exists()) {
     const hist = snap.data().history || [];
@@ -143,9 +141,8 @@ export async function cloudSaveProgress(animeId, season, dub, episode) {
   });
 }
 
-// ---------- Sync local → cloud (неблокувальна) ----------
+// ---------- Sync local → cloud ----------
 function syncLocalToCloud(uid) {
-  // Виконуємо асинхронно, не чекаємо
   (async () => {
     const lb = JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]');
     const lh = JSON.parse(localStorage.getItem('mono_anime_history') || '[]');
