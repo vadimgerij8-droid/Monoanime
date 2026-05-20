@@ -146,6 +146,8 @@ footer {
     color: var(--text-muted);
     transition: all var(--transition);
 }
+
+/* ===== Модальне вікно ===== */
 .modal-overlay {
     position: fixed;
     inset: 0;
