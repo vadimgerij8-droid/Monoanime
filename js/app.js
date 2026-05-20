@@ -1,5 +1,6 @@
 import Storage from './storage.js';
 
+// Глобалізація функцій, які були у звичайних скриптах
 const {
     fetchTop100,
     searchAnimeUA,
@@ -19,6 +20,7 @@ let currentSearchQuery = '';
 let currentGenreSlug = null;
 let currentList = [];
 
+// Робимо currentPage глобально доступною для ui.js
 window.currentPage = 1;
 
 window.changePage = (p) => {
@@ -63,7 +65,7 @@ async function showTop100() {
 }
 
 function openRandomAnime() {
-    window.openDetailModal(`${window.ANIMEUA_BASE}/index.php?do=rand`);
+    window.openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`);
 }
 
 async function initGenres() {
@@ -116,6 +118,7 @@ const playerModal = document.getElementById('playerModal');
 const profileModal = document.getElementById('profileModal');
 const mainVideoPlayer = document.getElementById('mainVideoPlayer');
 
+// Делегування кліків на картках аніме
 const animeContainer = document.getElementById('animeContainer');
 if (animeContainer) {
     animeContainer.addEventListener('click', (e) => {
