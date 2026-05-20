@@ -22,7 +22,6 @@ function renderCards(list) {
             </div>
         </div>
     `).join('');
-    // Обробники кліків тепер додаються через делегування в app.js
     renderPagination();
 }
 
