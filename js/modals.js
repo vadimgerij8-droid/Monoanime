@@ -241,18 +241,22 @@ function renderDetailBaseUI(anime, isBookmarked, savedProgress) {
 function renderDetailSourcesUI(anime, savedProgress) {
   const sourcesArea = document.getElementById('sourcesArea');
   if (!sourcesArea) return;
+
+  // Переконаємося, що savedProgress не є Promise і має очікувану структуру
+  const progress = (savedProgress && typeof savedProgress === 'object') ? savedProgress : null;
+
   const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
-  const firstSeason = (savedProgress?.season && anime.seasons[savedProgress.season]) ? savedProgress.season : (seasons[0] || '1');
+  const firstSeason = (progress?.season && anime.seasons[progress.season]) ? progress.season : (seasons[0] || '1');
   const dubs = Object.keys(anime.seasons[firstSeason] || {}).sort();
-  const firstDub = (savedProgress?.dub && dubs.includes(savedProgress.dub)) ? savedProgress.dub : (dubs[0] || '');
+  const firstDub = (progress?.dub && dubs.includes(progress.dub)) ? progress.dub : (dubs[0] || '');
   const episodes = firstDub ? (anime.seasons[firstSeason][firstDub] || []) : [];
-  const savedEpIndex = savedProgress?.episode ? episodes.findIndex(ep => ep.episode === savedProgress.episode) : -1;
+  const savedEpIndex = progress?.episode ? episodes.findIndex(ep => ep.episode === progress.episode) : -1;
 
   sourcesArea.innerHTML = `
-    ${savedProgress ? `
+    ${progress ? `
     <div style="background:rgba(255,204,0,0.15);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.9rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
       <i class="fas fa-history" style="color:#e6b800;"></i>
-      Продовжити: <strong>Сезон ${savedProgress.season} · ${savedProgress.dub} · Еп. ${savedProgress.episode}</strong>
+      Продовжити: <strong>Сезон ${progress.season} · ${progress.dub} · Еп. ${progress.episode}</strong>
       <button id="resumeBtn" style="margin-left:auto;padding:0.3rem 0.7rem;border-radius:6px;border:none;background:#ffcc00;color:#333;font-weight:600;cursor:pointer;">▶ Продовжити</button>
     </div>` : ''}
     <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;background:rgba(0,0,0,0.05);padding:1rem;border-radius:8px;">
@@ -312,20 +316,20 @@ function renderDetailSourcesUI(anime, savedProgress) {
   dubSelect.addEventListener('change', updateEpisodes);
   document.getElementById('playSelectedBtn').addEventListener('click', () => playEpisode(episodeSelect.value));
   const resumeBtn = document.getElementById('resumeBtn');
-  if (resumeBtn && savedProgress) {
+  if (resumeBtn && progress) {
     resumeBtn.addEventListener('click', () => {
-      if (anime.seasons[savedProgress.season]) { seasonSelect.value = savedProgress.season; updateDubs(); }
-      if (dubSelect.querySelector(`option[value="${savedProgress.dub}"]`)) { dubSelect.value = savedProgress.dub; updateEpisodes(); }
-      const ep = (anime.seasons[savedProgress.season]?.[savedProgress.dub] || []).find(e => e.episode === savedProgress.episode);
+      if (anime.seasons[progress.season]) { seasonSelect.value = progress.season; updateDubs(); }
+      if (dubSelect.querySelector(`option[value="${progress.dub}"]`)) { dubSelect.value = progress.dub; updateEpisodes(); }
+      const ep = (anime.seasons[progress.season]?.[progress.dub] || []).find(e => e.episode === progress.episode);
       if (ep) { episodeSelect.value = ep.file; playEpisode(ep.file); }
     });
   }
 }
 
 // Викликається з api.js коли джерела довантажено
-window._updateDetailSourcesUI = function (anime) {
+window._updateDetailSourcesUI = async function (anime) {
   if (anime._sourcesLoaded) {
-    const savedProgress = window.currentUser ? cloudGetProgress(anime.mal_id) : null;
+    const savedProgress = window.currentUser ? await cloudGetProgress(anime.mal_id) : null;
     renderDetailSourcesUI(anime, savedProgress);
   }
 };
