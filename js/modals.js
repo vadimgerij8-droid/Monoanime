@@ -67,17 +67,51 @@ window.switchAuthTab = function (tab) {
 
 // ─── Profile Modal ────────────────────────────────────────────────────────────
 async function openProfileModal() {
-    if (!window.currentUser) {
-        return;
-    }
 
     const profileModal = document.getElementById('profileModal');
     if (!profileModal) return;
+
     profileModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
     const profileBody = document.getElementById('profileBody');
     if (!profileBody) return;
+
+    // Якщо нема акаунта
+    if (!window.currentUser) {
+        const bookmarks = Storage.getBookmarks();
+        const history = Storage.getHistory();
+
+        profileBody.innerHTML = `
+            <div style="text-align:center;padding:1rem 0 2rem;">
+                <div style="width:70px;height:70px;border-radius:50%;background:#ffcc00;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2rem;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div style="font-size:1.1rem;font-weight:700;">Гість</div>
+                <div style="color:#888;font-size:0.9rem;">Локальний профіль</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+                <div style="background:rgba(255,204,0,0.15);border-radius:10px;padding:0.9rem;text-align:center;">
+                    <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
+                    <div style="font-size:0.75rem;color:#888;">Обране</div>
+                </div>
+
+                <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
+                    <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
+                    <div style="font-size:0.75rem;color:#888;">Історія</div>
+                </div>
+            </div>
+
+            <div id="profileTabBookmarks">
+                ${renderProfileGrid(bookmarks, 'Немає обраних аніме')}
+            </div>
+        `;
+
+        return;
+    }
+
+    // Користувач авторизований — хмарний профіль
     profileBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
 
     const { cloudGetBookmarks, cloudGetHistory } = await import('./auth.js');
