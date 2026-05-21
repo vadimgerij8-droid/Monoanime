@@ -67,7 +67,9 @@ window.switchAuthTab = function (tab) {
 
 // ─── Profile Modal ────────────────────────────────────────────────────────────
 async function openProfileModal() {
-    if (!window.currentUser) { openAuthModal(); return; }
+    if (!window.currentUser) {
+        return;
+    }
 
     const profileModal = document.getElementById('profileModal');
     if (!profileModal) return;
