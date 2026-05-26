@@ -1,14 +1,14 @@
 :root {
     --bg: #fafafa;
     --surface: #ffffff;
-    --text: #111111;                  /* основний текст світлої теми */
+    --text: #111111;
     --text-secondary: #4a4a4a;
     --text-muted: #6f6f6f;
     --border: #e0e0e0;
     --border-light: #ececec;
     --hover: #f5f5f5;
-    --active: #FFD700;               /* жовтий фон активної кнопки */
-    --active-text: #000000;          /* чорний текст на активній кнопці */
+    --active: #FFD700;          /* жовтий фон для активної кнопки */
+    --active-text: #000000;     /* чорний текст на активній кнопці */
     --tag-bg: #f0f0f0;
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
     --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.12);
@@ -23,14 +23,14 @@
 .dark-mode {
     --bg: #0d0d0d;
     --surface: #1a1a1a;
-    --text: #f0f0f0;                 /* білий текст у темній темі (для кнопок також) */
+    --text: #f0f0f0;            /* білий текст у темній темі */
     --text-secondary: #bbbbbb;
     --text-muted: #888888;
     --border: #333333;
     --border-light: #2a2a2a;
     --hover: #222222;
-    --active: #FFD700;               /* жовтий фон при натисканні */
-    --active-text: #000000;          /* чорний текст на активній кнопці */
+    --active: #FFD700;          /* жовтий фон залишається */
+    --active-text: #000000;     /* чорний текст на активній кнопці */
     --tag-bg: #252525;
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.5);
@@ -56,4 +56,35 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: 1.5rem 1.5rem 1rem;
+}
+
+/* ========== КНОПКИ ========== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    color: var(--text);                 /* чорний у світлій темі, білий у темній */
+    border: 1px solid var(--border);
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    user-select: none;
+}
+
+.btn:hover {
+    background: var(--hover);
+}
+
+/* Активна / вибрана кнопка */
+.btn:active,
+.btn.active,
+.btn[aria-pressed="true"],
+.btn.selected {
+    background: var(--active);          /* жовтий фон */
+    color: var(--active-text);          /* чорний текст завжди */
+    border-color: var(--active);
 }
