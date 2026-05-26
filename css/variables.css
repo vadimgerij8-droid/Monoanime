@@ -1,14 +1,14 @@
 :root {
     --bg: #fafafa;
     --surface: #ffffff;
-    --text: #000000;
+    --text: #111111;                  /* основний текст світлої теми */
     --text-secondary: #4a4a4a;
     --text-muted: #6f6f6f;
     --border: #e0e0e0;
     --border-light: #ececec;
     --hover: #f5f5f5;
-    --active: #FFD700;
-    --active-text: #ffffff;
+    --active: #FFD700;               /* жовтий фон активної кнопки */
+    --active-text: #000000;          /* чорний текст на активній кнопці */
     --tag-bg: #f0f0f0;
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
     --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.12);
@@ -23,14 +23,14 @@
 .dark-mode {
     --bg: #0d0d0d;
     --surface: #1a1a1a;
-    --text: #000000;
+    --text: #f0f0f0;                 /* білий текст у темній темі (для кнопок також) */
     --text-secondary: #bbbbbb;
     --text-muted: #888888;
     --border: #333333;
     --border-light: #2a2a2a;
     --hover: #222222;
-    --active: #FFD700;
-    --active-text: #ffffff;
+    --active: #FFD700;               /* жовтий фон при натисканні */
+    --active-text: #000000;          /* чорний текст на активній кнопці */
     --tag-bg: #252525;
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.5);
