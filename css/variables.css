@@ -1,7 +1,7 @@
 :root {
     --bg: #fafafa;
     --surface: #ffffff;
-    --text: #111111;
+    --text: #000000;
     --text-secondary: #4a4a4a;
     --text-muted: #6f6f6f;
     --border: #e0e0e0;
@@ -23,7 +23,7 @@
 .dark-mode {
     --bg: #0d0d0d;
     --surface: #1a1a1a;
-    --text: #f0f0f0;
+    --text: #000000;
     --text-secondary: #bbbbbb;
     --text-muted: #888888;
     --border: #333333;
