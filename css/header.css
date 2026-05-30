@@ -1,128 +1,134 @@
 .header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1.2rem;
-    transition: border-color var(--transition);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.2rem;
+  transition: border-color var(--transition);
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    cursor: pointer;
-    user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
 }
 
 .logo-icon {
-    font-size: 4rem;
-    font-weight: 800;
-    color: var(--text);
-    transition: color var(--transition);
-    position: relative;
-    top: -8px;
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--text);
+  transition: color var(--transition), transform 0.2s ease;
+  position: relative;
+  top: -8px;
+}
+
+.logo:hover .logo-icon {
+  transform: rotate(-3deg) scale(1.05);
 }
 
 .logo-text h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    transition: color var(--transition);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  transition: color var(--transition);
 }
 
 .logo-text span {
-    font-weight: 400;
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    display: block;
-    transition: color var(--transition);
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: block;
 }
 
 .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
 }
 
 .search-wrapper {
-    display: flex;
-    align-items: center;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-xl);
-    padding: 0.5rem 1rem;
-    transition: all var(--transition);
-    box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 0.5rem 1rem;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .search-wrapper:focus-within {
-    border-color: var(--active);
-    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.15);
+  border-color: var(--active);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.dark-mode .search-wrapper:focus-within {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .search-wrapper i {
-    color: var(--text-secondary);
-    margin-right: 0.5rem;
-    transition: color var(--transition);
+  color: var(--text-secondary);
+  margin-right: 0.5rem;
 }
 
 #searchInput {
-    border: none;
-    outline: none;
-    font-size: 0.95rem;
-    background: transparent;
-    width: 200px;
-    font-weight: 500;
-    color: var(--text);
-    transition: color var(--transition);
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  background: transparent;
+  width: 200px;
+  font-weight: 500;
+  color: var(--text);
 }
 
 #searchInput::placeholder {
-    color: #9a9a9a;
+  color: #888888;
 }
 
 .btn-icon {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition);
-    font-size: 1rem;
-    position: relative;
-    box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 1rem;
+  position: relative;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-icon:hover {
-    background: var(--active);
-    color: #ffffff;
-    border-color: var(--active);
+  background: var(--active);
+  color: var(--active-text);
+  border-color: var(--active);
+  transform: scale(1.08);
 }
 
 .btn-icon .badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #FFD700;
-    color: #fff;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    display: none;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--active);
+  color: var(--active-text);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
 }
