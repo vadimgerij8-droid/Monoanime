@@ -1,24 +1,24 @@
 @media (max-width: 768px) {
-    .app-container {
-        padding: 1rem;
-    }
-    .anime-grid {
-        gap: 1rem;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-    .modal-body {
-        padding: 1rem;
-    }
-    .detail-poster {
-        flex-basis: 120px;
-    }
-    .header {
-        gap: 0.8rem;
-    }
-    #searchInput {
-        width: 140px;
-    }
-    .voice-selector {
-        justify-content: flex-start;
-    }
+  .app-container {
+    padding: 1rem;
+  }
+  .anime-grid {
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .modal-body {
+    padding: 1rem;
+  }
+  .detail-poster {
+    flex-basis: 120px;
+  }
+  .header {
+    gap: 0.8rem;
+  }
+  #searchInput {
+    width: 140px;
+  }
+  .voice-selector {
+    justify-content: flex-start;
+  }
 }
