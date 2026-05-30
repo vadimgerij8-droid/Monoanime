@@ -1,90 +1,75 @@
 :root {
-    --bg: #fafafa;
-    --surface: #ffffff;
-    --text: #111111;
-    --text-secondary: #4a4a4a;
-    --text-muted: #6f6f6f;
-    --border: #e0e0e0;
-    --border-light: #ececec;
-    --hover: #f5f5f5;
-    --active: #FFD700;          /* жовтий фон для активної кнопки */
-    --active-text: #000000;     /* чорний текст на активній кнопці */
-    --tag-bg: #f0f0f0;
-    --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
-    --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.12);
-    --shadow-lg: 0 30px 50px rgba(0, 0, 0, 0.2);
-    --radius-sm: 20px;
-    --radius: 24px;
-    --radius-lg: 36px;
-    --radius-xl: 48px;
-    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --text: #0a0a0a;
+  --text-secondary: #3a3a3a;
+  --text-muted: #6b6b6b;
+  --border: #0a0a0a;
+  --border-light: #d4d4d4;
+  --hover: #f4f4f4;
+  --active: #0a0a0a;
+  --active-text: #ffffff;
+  --tag-bg: #eaeaea;
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.2);
+  --radius-sm: 14px;
+  --radius: 18px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark-mode {
-    --bg: #0d0d0d;
-    --surface: #1a1a1a;
-    --text: #f0f0f0;            /* білий текст у темній темі */
-    --text-secondary: #bbbbbb;
-    --text-muted: #888888;
-    --border: #333333;
-    --border-light: #2a2a2a;
-    --hover: #222222;
-    --active: #FFD700;          /* жовтий фон залишається */
-    --active-text: #000000;     /* чорний текст на активній кнопці */
-    --tag-bg: #252525;
-    --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 18px 30px -12px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 30px 50px rgba(0, 0, 0, 0.6);
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --text: #f5f5f5;
+  --text-secondary: #c0c0c0;
+  --text-muted: #7a7a7a;
+  --border: #f5f5f5;
+  --border-light: #2c2c2c;
+  --hover: #222222;
+  --active: #f5f5f5;
+  --active-text: #0a0a0a;
+  --tag-bg: #262626;
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.7);
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-    transition: background var(--transition), color var(--transition);
-    min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
 }
 
 .app-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1.5rem 1.5rem 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 1rem;
 }
 
-/* ========== КНОПКИ ========== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface);
-    color: var(--text);                 /* чорний у світлій темі, білий у темній */
-    border: 1px solid var(--border);
-    padding: 10px 24px;
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition);
-    user-select: none;
+/* ---------- Анімації ---------- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.btn:hover {
-    background: var(--hover);
+@keyframes skeletonShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* Активна / вибрана кнопка */
-.btn:active,
-.btn.active,
-.btn[aria-pressed="true"],
-.btn.selected {
-    background: var(--active);          /* жовтий фон */
-    color: var(--active-text);          /* чорний текст завжди */
-    border-color: var(--active);
+@keyframes subtlePulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
 }
