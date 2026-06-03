@@ -1,4 +1,4 @@
-// ─── Auth Modal ───────────────────────────────────────────────────────────────
+// ─── Auth Modal ──────────────────────────────────────────────────────────────
 function openAuthModal() {
     let modal = document.getElementById('authModal');
     if (!modal) {
@@ -7,15 +7,15 @@ function openAuthModal() {
         modal.className = 'modal-overlay';
         modal.innerHTML = `
             <div class="modal-box" style="max-width:420px; padding:2rem; position:relative;">
-                <button onclick="closeAuthModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:inherit;">✕</button>
+                <button onclick="window.closeAuthModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:inherit;">✕</button>
                 
                 <div id="authTabBar" style="display:flex;gap:0;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);">
-                    <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">Увійти</button>
-                    <button id="tabRegisterBtn" onclick="switchAuthTab('register')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">Реєстрація</button>
+                    <button id="tabLoginBtn" onclick="window.switchAuthTab('login')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">Увійти</button>
+                    <button id="tabRegisterBtn" onclick="window.switchAuthTab('register')" style="flex:1;padding:0.6rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">Реєстрація</button>
                 </div>
 
-                <button onclick="authGoogleSignIn()" style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid #ddd;background:#fff;color:#333;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.7rem;margin-bottom:1rem;">
-                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                <button onclick="window.authGoogleSignIn()" style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid #ddd;background:#fff;color:#333;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:1rem;">
+                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.45 13.75 18.03 9.5 24 9.5z"/></svg>
                     Продовжити з Google
                 </button>
 
@@ -33,13 +33,13 @@ function openAuthModal() {
                     <input id="authPassword" type="password" placeholder="Пароль" style="width:100%;padding:0.7rem 1rem;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;background:var(--input-bg,#f5f5f5);color:inherit;">
                 </div>
 
-                <button id="authSubmitBtn" onclick="authEmailLogin()" style="width:100%;padding:0.75rem;border-radius:8px;border:none;background:#ffcc00;color:#333;font-size:1rem;font-weight:700;cursor:pointer;">
+                <button id="authSubmitBtn" onclick="window.authEmailLogin()" style="width:100%;padding:0.75rem;border-radius:8px;border:none;background:#ffcc00;color:#333;font-size:1rem;font-weight:700;cursor:pointer;">
                     Увійти
                 </button>
             </div>
         `;
         document.body.appendChild(modal);
-        modal.addEventListener('click', (e) => { if (e.target === modal) closeAuthModal(); });
+        modal.addEventListener('click', (e) => { if (e.target === modal) window.closeAuthModal?.(); });
     }
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -65,7 +65,7 @@ window.switchAuthTab = function (tab) {
     }
 };
 
-// ─── Profile Modal ────────────────────────────────────────────────────────────
+// ─── Profile Modal ──────────────────���──────────────────────────────────────────
 async function openProfileModal() {
 
     const profileModal = document.getElementById('profileModal');
@@ -114,56 +114,61 @@ async function openProfileModal() {
     // Користувач авторизований — хмарний профіль
     profileBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
 
-    const { cloudGetBookmarks, cloudGetHistory } = await import('./auth.js');
-    const [bookmarks, history] = await Promise.all([cloudGetBookmarks(), cloudGetHistory()]);
-    const user = window.currentUser;
+    try {
+        const { cloudGetBookmarks, cloudGetHistory } = await import('./auth.js');
+        const [bookmarks, history] = await Promise.all([cloudGetBookmarks(), cloudGetHistory()]);
+        const user = window.currentUser;
 
-    profileBody.innerHTML = `
-        <div style="display:flex;align-items:center;gap:1rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border,#eee);margin-bottom:1.5rem;">
-            ${user.photoURL
-                ? `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`
-                : `<div style="width:60px;height:60px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:1.8rem;"><i class="fas fa-user"></i></div>`
-            }
-            <div style="flex:1;">
-                <div style="font-size:1.1rem;font-weight:700;">${user.displayName || 'Без імені'}</div>
-                <div style="font-size:0.85rem;color:#888;">${user.email || ''}</div>
+        profileBody.innerHTML = `
+            <div style="display:flex;align-items:center;gap:1rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border,#eee);margin-bottom:1.5rem;">
+                ${user.photoURL
+                    ? `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`
+                    : `<div style="width:60px;height:60px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:1.8rem;"><i class="fas fa-user"></i></div>`
+                }
+                <div style="flex:1;">
+                    <div style="font-size:1.1rem;font-weight:700;">${user.displayName || 'Без імені'}</div>
+                    <div style="font-size:0.85rem;color:#888;">${user.email || ''}</div>
+                </div>
+                <button onclick="window.authSignOut()" style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid #ddd;background:none;cursor:pointer;font-size:0.85rem;color:inherit;">
+                    <i class="fas fa-sign-out-alt"></i> Вийти
+                </button>
             </div>
-            <button onclick="authSignOut()" style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid #ddd;background:none;cursor:pointer;font-size:0.85rem;color:inherit;">
-                <i class="fas fa-sign-out-alt"></i> Вийти
-            </button>
-        </div>
 
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
-            <div style="background:rgba(255,204,0,0.15);border-radius:10px;padding:0.9rem;text-align:center;">
-                <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
-                <div style="font-size:0.75rem;color:#888;">Обране</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+                <div style="background:rgba(255,204,0,0.15);border-radius:10px;padding:0.9rem;text-align:center;">
+                    <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
+                    <div style="font-size:0.75rem;color:#888;">Обране</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
+                    <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
+                    <div style="font-size:0.75rem;color:#888;">Переглянуто</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
+                    <div style="font-size:1.6rem;font-weight:700;">★</div>
+                    <div style="font-size:0.75rem;color:#888;">Рейтинг</div>
+                </div>
             </div>
-            <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
-                <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
-                <div style="font-size:0.75rem;color:#888;">Переглянуто</div>
+
+            <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);margin-bottom:1rem;">
+                <button class="profile-tab" data-tab="bookmarks" onclick="window.switchProfileTab(this,'bookmarks')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">Обране</button>
+                <button class="profile-tab" data-tab="history" onclick="window.switchProfileTab(this,'history')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">Історія</button>
             </div>
-            <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
-                <div style="font-size:1.6rem;font-weight:700;">★</div>
-                <div style="font-size:0.75rem;color:#888;">Рейтинг</div>
-            </div>
-        </div>
 
-        <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border,#ddd);margin-bottom:1rem;">
-            <button class="profile-tab" data-tab="bookmarks" onclick="switchProfileTab(this,'bookmarks')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:#ffcc00;color:#333;">⭐ Обране</button>
-            <button class="profile-tab" data-tab="history" onclick="switchProfileTab(this,'history')" style="flex:1;padding:0.55rem;border:none;cursor:pointer;font-weight:600;background:transparent;color:inherit;">🕓 Історія</button>
-        </div>
+            <div id="profileTabBookmarks">${renderProfileGrid(bookmarks, 'Немає обраних аніме')}</div>
+            <div id="profileTabHistory" style="display:none;">${renderProfileGrid(history, 'Історія порожня')}</div>
+        `;
 
-        <div id="profileTabBookmarks">${renderProfileGrid(bookmarks, 'Немає обраних аніме')}</div>
-        <div id="profileTabHistory" style="display:none;">${renderProfileGrid(history, 'Історія порожня')}</div>
-    `;
-
-    profileBody.querySelectorAll('.profile-card').forEach(card => {
-        card.addEventListener('click', () => {
-            profileModal.style.display = 'none';
-            document.body.style.overflow = '';
-            openDetailModal(card.dataset.url);
+        profileBody.querySelectorAll('.profile-card').forEach(card => {
+            card.addEventListener('click', () => {
+                profileModal.style.display = 'none';
+                document.body.style.overflow = '';
+                openDetailModal(card.dataset.url);
+            });
         });
-    });
+    } catch (err) {
+        console.error('Error loading cloud profile:', err);
+        profileBody.innerHTML = '<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка завантаження профілю</div>';
+    }
 }
 
 function renderProfileGrid(list, emptyMsg) {
@@ -187,7 +192,7 @@ window.switchProfileTab = function (btn, tab) {
     document.getElementById('profileTabHistory').style.display = tab === 'history' ? '' : 'none';
 };
 
-// ─── Detail Modal ─────────────────────────────────────────────────────────────
+// ─── Detail Modal ──────────────────────────────────────────────────────────────
 let currentDetailAnime = null;
 
 function closeDetailModal() {
@@ -201,11 +206,16 @@ function closeDetailModal() {
 
 async function toggleBookmark(anime) {
     if (window.currentUser) {
-        const { cloudGetBookmarks, cloudAddBookmark, cloudRemoveBookmark } = await import('./auth.js');
-        const bm = await cloudGetBookmarks();
-        const exists = bm.some(b => b.mal_id === anime.mal_id);
-        if (exists) { await cloudRemoveBookmark(anime.mal_id); showToast('Видалено з обраного'); }
-        else { await cloudAddBookmark(anime); showToast('Додано в обране'); }
+        try {
+            const { cloudGetBookmarks, cloudAddBookmark, cloudRemoveBookmark } = await import('./auth.js');
+            const bm = await cloudGetBookmarks();
+            const exists = bm.some(b => b.mal_id === anime.mal_id);
+            if (exists) { await cloudRemoveBookmark(anime.mal_id); showToast('Видалено з обраного'); }
+            else { await cloudAddBookmark(anime); showToast('Додано в обране'); }
+        } catch (err) {
+            console.error('Cloud bookmark error:', err);
+            showToast('❌ Помилка синхронізації');
+        }
     } else {
         let b = Storage.getBookmarks();
         const idx = b.findIndex(x => x.mal_id === anime.mal_id);
@@ -213,7 +223,7 @@ async function toggleBookmark(anime) {
         else { b.push(anime); showToast('Додано в обране'); }
         Storage.saveBookmarks(b);
     }
-    updateBadge();
+    updateBadge?.();
 }
 
 async function openDetailModal(url) {
@@ -231,8 +241,12 @@ async function openDetailModal(url) {
         const anime = await loadAnimeDetails(url);
 
         if (window.currentUser) {
-            const { cloudAddHistory } = await import('./auth.js');
-            await cloudAddHistory(anime);
+            try {
+                const { cloudAddHistory } = await import('./auth.js');
+                await cloudAddHistory(anime);
+            } catch (err) {
+                console.error('Cloud history save error:', err);
+            }
         } else {
             Storage.addHistory(anime);
         }
@@ -242,16 +256,24 @@ async function openDetailModal(url) {
 
         let isBookmarked = false;
         if (window.currentUser) {
-            const { cloudGetBookmarks } = await import('./auth.js');
-            isBookmarked = (await cloudGetBookmarks()).some(b => b.mal_id === anime.mal_id);
+            try {
+                const { cloudGetBookmarks } = await import('./auth.js');
+                isBookmarked = (await cloudGetBookmarks()).some(b => b.mal_id === anime.mal_id);
+            } catch (err) {
+                console.error('Cloud bookmarks fetch error:', err);
+            }
         } else {
             isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
         }
 
         let savedProgress = null;
         if (window.currentUser) {
-            const { cloudGetProgress } = await import('./auth.js');
-            savedProgress = await cloudGetProgress(anime.mal_id);
+            try {
+                const { cloudGetProgress } = await import('./auth.js');
+                savedProgress = await cloudGetProgress(anime.mal_id);
+            } catch (err) {
+                console.error('Cloud progress fetch error:', err);
+            }
         }
 
         const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
@@ -342,10 +364,14 @@ async function openDetailModal(url) {
             if (!file) { showToast('❌ Немає файлу'); return; }
             loadVideo(file, detailVideoEl);
             if (window.currentUser) {
-                const { cloudSaveProgress } = await import('./auth.js');
-                const s = seasonSelect.value, d = dubSelect.value;
-                const ep = (anime.seasons[s]?.[d] || []).find(e => e.file === file);
-                if (ep) await cloudSaveProgress(anime.mal_id, s, d, ep.episode);
+                try {
+                    const { cloudSaveProgress } = await import('./auth.js');
+                    const s = seasonSelect.value, d = dubSelect.value;
+                    const ep = (anime.seasons[s]?.[d] || []).find(e => e.file === file);
+                    if (ep) await cloudSaveProgress(anime.mal_id, s, d, ep.episode);
+                } catch (err) {
+                    console.error('Cloud progress save error:', err);
+                }
             }
         }
 
@@ -367,8 +393,12 @@ async function openDetailModal(url) {
             await toggleBookmark(anime);
             let nowBm = false;
             if (window.currentUser) {
-                const { cloudGetBookmarks } = await import('./auth.js');
-                nowBm = (await cloudGetBookmarks()).some(b => b.mal_id === anime.mal_id);
+                try {
+                    const { cloudGetBookmarks } = await import('./auth.js');
+                    nowBm = (await cloudGetBookmarks()).some(b => b.mal_id === anime.mal_id);
+                } catch (err) {
+                    console.error('Cloud bookmarks error:', err);
+                }
             } else {
                 nowBm = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
             }
