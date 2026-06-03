@@ -101,7 +101,7 @@ async function updateBadge() {
     badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-// ─── Ініціалізація ────────────────────────────────────────────────────────────
+// ─── Ініціалізація ──────────────────────────────────────────────────────────
 applyTheme(Storage.getTheme());
 updateBadge();
 
