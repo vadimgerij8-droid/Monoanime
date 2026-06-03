@@ -1,10 +1,175 @@
-<!-- Preconnect & preload for performance -->
-<link rel="preconnect" href="https://monoanime.animegran8.workers.dev">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" as="style">
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MONOANIME</title>
+    <link rel="preconnect" href="https://monoanime.animegran8.workers.dev">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-<!-- Basic Open Graph -->
-<meta property="og:title" content="MONOANIME - Pro версія">
-<meta property="og:description" content="Сучасна платформа для перегляду аніме з розширеними функціями">
-<meta property="og:type" content="website">
-<meta property="og:image" content="/og-image.png">
+    <!-- Basic Open Graph -->
+    <meta property="og:title" content="MONOANIME - Pro версія">
+    <meta property="og:description" content="Сучасна платформа для перегляду аніме з розширеними функціями">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/og-image.png">
+
+    <!-- CSS-файли -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modal-player.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="android-chrome-192x192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#0d0d0d">
+
+    <!-- Error overlay for debugging: shows runtime errors instead of blank screen -->
+    <script>
+      (function(){
+        function showOverlay(msg) {
+          try {
+            var existing = document.getElementById('errorOverlay');
+            if (!existing) {
+              existing = document.createElement('div');
+              existing.id = 'errorOverlay';
+              existing.style.position = 'fixed';
+              existing.style.top = '0';
+              existing.style.left = '0';
+              existing.style.right = '0';
+              existing.style.bottom = '0';
+              existing.style.background = 'rgba(0,0,0,0.85)';
+              existing.style.color = '#fff';
+              existing.style.zIndex = '99999';
+              existing.style.padding = '24px';
+              existing.style.overflow = 'auto';
+              existing.style.fontFamily = 'monospace';
+              existing.style.fontSize = '14px';
+              existing.innerHTML = '<h2 style="margin-top:0">Runtime error</h2><pre id="errorOverlayText" style="white-space:pre-wrap"></pre><button id="reloadBtn" style="margin-top:12px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;background:#fff;color:#000">Reload</button>';
+              (document.body || document.documentElement).appendChild(existing);
+              document.getElementById('reloadBtn').addEventListener('click', function(){ location.reload(); });
+            }
+            var txt = document.getElementById('errorOverlayText');
+            if (txt) txt.textContent = msg;
+            existing.style.display = 'block';
+          } catch(e){ console.error('Overlay failed', e); }
+        }
+
+        window.addEventListener('error', function(e){
+          var msg = (e && e.error && e.error.stack) ? e.error.stack : (e.message || String(e));
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function(){ showOverlay(msg); });
+          } else showOverlay(msg);
+        });
+        window.addEventListener('unhandledrejection', function(ev){
+          var reason = ev && ev.reason && (ev.reason.stack || ev.reason.message) ? (ev.reason.stack || ev.reason.message) : JSON.stringify(ev.reason);
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function(){ showOverlay(reason); });
+          } else showOverlay(reason);
+        });
+      })();
+    </script>
+
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="logo" id="logoHome">
+            <div class="logo-icon">⎈</div>
+            <div class="logo-text"><h1>MONOANIME</h1><span>чорно-білий каталог</span></div>
+        </div>
+        <div class="header-actions">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Пошук аніме..." autocomplete="off">
+            </div>
+            <button id="themeToggleBtn" class="btn-icon" title="Змінити тему"><i class="fas fa-moon"></i></button>
+            <button id="profileBtn" class="btn-icon" title="Профіль"><i class="fas fa-user"></i><span class="badge" id="bookmarkBadge">0</span></button>
+        </div>
+    </div>
+
+    <div class="category-section">
+        <div class="category-scroll" id="categoryScroll">
+            <span class="category-label">Жанри:</span>
+        </div>
+    </div>
+
+    <div class="tabs-row">
+        <button class="tab-btn active-tab" id="top100Btn">ТОП 100</button>
+        <button class="tab-btn" id="randomBtn">🎲 Випадкове аніме</button>
+    </div>
+
+    <div id="animeContainer" class="anime-grid">
+        <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження аніме...</div>
+    </div>
+
+    <div class="pagination-row" id="paginationRow"></div>
+
+    <footer><span>⚫ монохромний дизайн · джерело: AnimeUA · плеєр HLS</span></footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="animeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+        <div class="modal-header"><h2 id="modalTitle">...</h2><button class="close-modal" id="closeModalBtn">&times;</button></div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<div id="playerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header"><h2 id="playerModalTitle"> Плеєр</h2><button class="close-modal" id="closePlayerBtn">&times;</button></div>
+        <div class="modal-body">
+            <div class="player-container"><video id="mainVideoPlayer" controls crossorigin="anonymous"></video></div>
+            <div id="voiceSelector" class="voice-selector" style="display:none;"></div>
+            <div id="playerLoading" class="loader" style="display:none;"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
+        </div>
+    </div>
+</div>
+
+<div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header"><h2 id="profileModalTitle"> Профіль користувача</h2><button class="close-modal" id="closeProfileBtn">&times;</button></div>
+        <div class="modal-body" id="profileBody">
+            <div class="profile-section">
+                <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
+                <h3 style="color:var(--text);">Аніме-фанат</h3>
+                <p style="color:var(--text-secondary);">mono.anime@local</p>
+            </div>
+            <div class="profile-stats">
+                <div class="profile-stat"><div class="stat-num" id="statBookmarks">0</div><div class="stat-label">Обрано</div></div>
+                <div class="profile-stat"><div class="stat-num" id="statHistory">0</div><div class="stat-label">Переглянуто</div></div>
+                <div class="profile-stat"><div class="stat-num" id="statWatched">0</div><div class="stat-label">Епізодів</div></div>
+            </div>
+            <h4> Обрані аніме</h4>
+            <div class="bookmark-list" id="bookmarkList"><p>Немає обраних</p></div>
+            <h4> Історія переглядів</h4>
+            <div class="bookmark-list" id="historyList"><p>Немає історії</p></div>
+            <button class="btn-outline" id="clearHistoryBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Очистити історію</button>
+        </div>
+    </div>
+</div>
+
+<!-- Скрипти (звичайне підключення, без модулів) -->
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/api.js"></script>
+<script src="js/player.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/modals.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
