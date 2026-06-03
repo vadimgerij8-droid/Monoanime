@@ -2,36 +2,65 @@ const hlsInstances = new Map();
 
 function destroyHlsForVideo(videoEl) {
     if (hlsInstances.has(videoEl)) {
-        hlsInstances.get(videoEl).destroy();
+        try { hlsInstances.get(videoEl).destroy(); } catch(e) {}
         hlsInstances.delete(videoEl);
     }
 }
 
-function loadVideo(url, videoElement) {
+async function loadVideo(url, videoElement, options = {}) {
     if (!videoElement) return;
     destroyHlsForVideo(videoElement);
     videoElement.pause();
     videoElement.removeAttribute('src');
     videoElement.load();
-    if (!url) { showToast('❌ Немає URL відео'); return; }
-    const finalUrl = getProxyUrl(url);
-    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-        const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
-        hlsInstances.set(videoElement, hls);
-        hls.loadSource(finalUrl);
-        hls.attachMedia(videoElement);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => videoElement.play().catch(() => {}));
-        hls.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) {
-                switch (data.type) {
-                    case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
-                    case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
-                    default: destroyHlsForVideo(videoElement);
+    const playerLoading = document.getElementById('playerLoading');
+    if (playerLoading) playerLoading.style.display = 'block';
+
+    if (!url) { showToast('❌ Немає URL відео'); if (playerLoading) playerLoading.style.display = 'none'; return; }
+    const proxyUrl = getProxyUrl(url);
+
+    const maxRetries = options.maxRetries || 3;
+    let attempt = 0;
+
+    function attachHls() {
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+            const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
+            hlsInstances.set(videoElement, hls);
+            hls.loadSource(proxyUrl);
+            hls.attachMedia(videoElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                if (playerLoading) playerLoading.style.display = 'none';
+                videoElement.play().catch(() => {});
+            });
+
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (!data) return;
+                if (data.fatal) {
+                    attempt++;
+                    if (attempt <= maxRetries) {
+                        const backoff = 800 * Math.pow(2, attempt);
+                        setTimeout(() => {
+                            try { hls.startLoad(); } catch (e) { attachFallback(); }
+                        }, backoff);
+                    } else {
+                        // give up and fallback to direct src
+                        destroyHlsForVideo(videoElement);
+                        attachFallback();
+                        showToast('Помилка відтворення. Спробувати ще');
+                    }
                 }
-            }
-        });
-    } else {
-        videoElement.src = finalUrl;
+            });
+        } else {
+            attachFallback();
+        }
+    }
+
+    function attachFallback() {
+        if (playerLoading) playerLoading.style.display = 'none';
+        videoElement.src = proxyUrl;
         videoElement.play().catch(() => {});
     }
+
+    try { attachHls(); } catch (err) { attachFallback(); }
 }
+
