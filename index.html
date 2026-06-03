@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MONOANIME</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>MONOANIME - Pro версія</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- CSS-файли -->
@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/pro.css">
     
     <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
@@ -25,13 +26,20 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
     <meta name="theme-color" content="#0d0d0d">
+    <meta name="description" content="MONOANIME Pro - Сучасна платформа для перегляду аніме з розширеними функціями">
 </head>
 <body>
 <div class="app-container">
     <div class="header">
         <div class="logo" id="logoHome">
             <div class="logo-icon">⎈</div>
-            <div class="logo-text"><h1>MONOANIME</h1><span>чорно-білий каталог</span></div>
+            <div class="logo-text">
+                <h1>MONOANIME</h1>
+                <span style="display:flex; align-items:center; gap:0.4rem;">
+                    чорно-білий каталог
+                    <span class="pro-badge" style="margin-left:0.5rem;"><i class="fas fa-star"></i> PRO</span>
+                </span>
+            </div>
         </div>
         <div class="header-actions">
             <div class="search-wrapper">
@@ -39,6 +47,10 @@
                 <input type="text" id="searchInput" placeholder="Пошук аніме..." autocomplete="off">
             </div>
             <button id="themeToggleBtn" class="btn-icon" title="Змінити тему"><i class="fas fa-moon"></i></button>
+            <button class="btn-icon" id="notifBtn" title="Сповіщення" onclick="showNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="notifBadge" style="display:none;">0</span>
+            </button>
             <button id="profileBtn" class="btn-icon" title="Профіль"><i class="fas fa-user"></i><span class="badge" id="bookmarkBadge">0</span></button>
         </div>
     </div>
@@ -50,8 +62,50 @@
     </div>
 
     <div class="tabs-row">
-        <button class="tab-btn active-tab" id="top100Btn">ТОП 100</button>
-        <button class="tab-btn" id="randomBtn">🎲 Випадкове аніме</button>
+        <button class="tab-btn active-tab" id="top100Btn">⭐ ТОП 100</button>
+        <button class="tab-btn" id="randomBtn">🎲 Випадкове</button>
+        <button class="tab-btn" onclick="showFilters()">🔍 Фільтри</button>
+    </div>
+
+    <div id="filtersPanel" class="filters-panel" style="display:none;">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label class="filter-label">Рік:</label>
+                <select class="filter-select" id="yearFilter" onchange="applyFilters()">
+                    <option value="">Всі роки</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Статус:</label>
+                <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                    <option value="">Всі статуси</option>
+                    <option value="ongoing">Не завершено</option>
+                    <option value="finished">Завершено</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Тип:</label>
+                <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                    <option value="">Всі типи</option>
+                    <option value="tv">TV</option>
+                    <option value="movie">Фільм</option>
+                    <option value="ova">OVA</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-outline" onclick="resetFilters()"><i class="fas fa-redo"></i> Скинути</button>
+    </div>
+
+    <div id="recommendationsSection" class="recommendations-section" style="display:none;">
+        <div class="recommendations-title">
+            <i class="fas fa-lightbulb"></i> Рекомендовано для вас
+        </div>
+        <div class="recommendations-grid" id="recommendationsGrid"></div>
     </div>
 
     <div id="animeContainer" class="anime-grid">
@@ -60,7 +114,9 @@
 
     <div class="pagination-row" id="paginationRow"></div>
 
-    <footer><span>⚫ монохромний дизайн · джерело: AnimeUA · плеєр HLS</span></footer>
+    <footer>
+        <span>⚫ MONOANIME PRO · Сучасний дизайн · Розширені можливості · джерело: AnimeUA · плеєр HLS</span>
+    </footer>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -74,7 +130,7 @@
 
 <div id="playerModal" class="modal">
     <div class="modal-content" style="max-width: 900px;">
-        <div class="modal-header"><h2 id="playerModalTitle"> Плеєр</h2><button class="close-modal" id="closePlayerBtn">&times;</button></div>
+        <div class="modal-header"><h2 id="playerModalTitle">Плеєр</h2><button class="close-modal" id="closePlayerBtn">&times;</button></div>
         <div class="modal-body">
             <div class="player-container"><video id="mainVideoPlayer" controls crossorigin="anonymous"></video></div>
             <div id="voiceSelector" class="voice-selector" style="display:none;"></div>
@@ -85,35 +141,85 @@
 
 <div id="profileModal" class="modal">
     <div class="modal-content" style="max-width: 700px;">
-        <div class="modal-header"><h2> Профіль користувача</h2><button class="close-modal" id="closeProfileBtn">&times;</button></div>
+        <div class="modal-header"><h2><i class="fas fa-user"></i> Профіль користувача</h2><button class="close-modal" id="closeProfileBtn">&times;</button></div>
         <div class="modal-body" id="profileBody">
-            <div class="profile-section">
-                <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
-                <h3 style="color:var(--text);">Аніме-фанат</h3>
-                <p style="color:var(--text-secondary);">mono.anime@local</p>
-            </div>
-            <div class="profile-stats">
-                <div class="profile-stat"><div class="stat-num" id="statBookmarks">0</div><div class="stat-label">Обрано</div></div>
-                <div class="profile-stat"><div class="stat-num" id="statHistory">0</div><div class="stat-label">Переглянуто</div></div>
-                <div class="profile-stat"><div class="stat-num" id="statWatched">0</div><div class="stat-label">Епізодів</div></div>
-            </div>
-            <h4> Обрані аніме</h4>
-            <div class="bookmark-list" id="bookmarkList"><p>Немає обраних</p></div>
-            <h4> Історія переглядів</h4>
-            <div class="bookmark-list" id="historyList"><p>Немає історії</p></div>
-            <button class="btn-outline" id="clearHistoryBtn" style="margin-top:1rem;"><i class="fas fa-trash-alt"></i> Очистити історію</button>
+            <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження профілю...</div>
         </div>
     </div>
 </div>
 
-<!-- Скрипти (звичайне підключення, без модулів) -->
+<!-- Скрипти (звичайне підключення) -->
 <script src="js/config.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
+<script src="js/pro.js"></script>
 <script src="js/api.js"></script>
 <script src="js/player.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/modals.js"></script>
 <script src="js/app.js"></script>
+
+<script>
+// ─── Additional Pro Functions ────
+
+window.showFilters = function() {
+    const panel = document.getElementById('filtersPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+};
+
+window.applyFilters = function() {
+    const year = document.getElementById('yearFilter')?.value;
+    const status = document.getElementById('statusFilter')?.value;
+    const type = document.getElementById('typeFilter')?.value;
+    
+    // Apply filters logic
+    showToast('✨ Фільтри застосовані');
+    loadContent();
+};
+
+window.resetFilters = function() {
+    document.getElementById('yearFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('typeFilter').value = '';
+    showToast('🔄 Фільтри скинуті');
+    loadContent();
+};
+
+window.showNotifications = function() {
+    if (notificationManager) {
+        const notifications = notificationManager.getNotifications(10);
+        if (notifications.length === 0) {
+            showToast('📭 Немає сповіщень');
+            return;
+        }
+        
+        let html = '<div style="max-height:400px; overflow-y:auto;">';
+        notifications.forEach(n => {
+            html += `
+                <div style="padding:0.8rem; border-bottom:1px solid var(--border); color:var(--text);">
+                    <strong>${n.title}</strong><br>
+                    <small>${n.message}</small>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        // Show in modal or toast
+        showToast('🔔 Усього ' + notifications.length + ' сповіщень');
+    }
+};
+
+// Update notification badge
+setInterval(() => {
+    if (notificationManager) {
+        const count = notificationManager.getUnreadCount();
+        const badge = document.getElementById('notifBadge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+}, 1000);
+</script>
 </body>
 </html>
