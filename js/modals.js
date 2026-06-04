@@ -393,10 +393,9 @@ async function openDetailModal(url) {
         // При зміні серії — одразу грати
         episodeSelect.addEventListener('change', () => playEpisode(episodeSelect.value));
 
-        // ─── АВТОЗАПУСК при відкритті модалки ────────────────────────────────
-        // Грає одразу — юзер просто відкрив і дивиться без будь-яких дій
+        // Завантажуємо відео в плеєр — юзер сам натисне плей
         if (startFile) {
-            playEpisode(startFile);
+            loadVideo(startFile, detailVideoEl);
         }
 
         // Bookmark toggle
