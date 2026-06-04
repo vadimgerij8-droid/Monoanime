@@ -65,7 +65,7 @@ window.switchAuthTab = function (tab) {
     }
 };
 
-// ─── Profile Modal ──────────────────���──────────────────────────────────────────
+// ─── Profile Modal ───────────────────────────────────────────────────────────
 async function openProfileModal() {
 
     const profileModal = document.getElementById('profileModal');
@@ -332,9 +332,6 @@ async function openDetailModal(url) {
                             ${episodes.map((ep, i) => `<option value="${ep.file}" ${i === savedEpIndex ? 'selected' : ''}>Еп. ${ep.episode}</option>`).join('')}
                         </select>
                     </div>
-                    <button id="playSelectedBtn" class="btn-outline" style="align-self:flex-end;padding:0.4rem 0.8rem;background:#ffcc00;color:#333;border:none;font-size:0.85rem;margin-top:8px;">
-                        <i class="fas fa-play"></i> ДИВИТИСЯ
-                    </button>
                 </div>
                 <div class="player-container" style="margin-top:1rem;background:#000;border-radius:8px;overflow:hidden;aspect-ratio:16/9;">
                     <video id="detailVideoPlayer" controls crossorigin="anonymous" style="width:100%;height:100%;"></video>
@@ -377,7 +374,8 @@ async function openDetailModal(url) {
 
         seasonSelect.addEventListener('change', updateDubs);
         dubSelect.addEventListener('change', updateEpisodes);
-        document.getElementById('playSelectedBtn').addEventListener('click', () => playEpisode(episodeSelect.value));
+        // Автоматичне відтворення при виборі серії
+        episodeSelect.addEventListener('change', () => playEpisode(episodeSelect.value));
 
         const resumeBtn = document.getElementById('resumeBtn');
         if (resumeBtn && savedProgress) {
