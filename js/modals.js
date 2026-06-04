@@ -77,7 +77,6 @@ async function openProfileModal() {
     const profileBody = document.getElementById('profileBody');
     if (!profileBody) return;
 
-    // Якщо нема акаунта
     if (!window.currentUser) {
         const bookmarks = Storage.getBookmarks();
         const history = Storage.getHistory();
@@ -96,7 +95,6 @@ async function openProfileModal() {
                     <div style="font-size:1.6rem;font-weight:700;color:#e6b800;">${bookmarks.length}</div>
                     <div style="font-size:0.75rem;color:#888;">Обране</div>
                 </div>
-
                 <div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:0.9rem;text-align:center;">
                     <div style="font-size:1.6rem;font-weight:700;">${history.length}</div>
                     <div style="font-size:0.75rem;color:#888;">Історія</div>
@@ -107,11 +105,9 @@ async function openProfileModal() {
                 ${renderProfileGrid(bookmarks, 'Немає обраних аніме')}
             </div>
         `;
-
         return;
     }
 
-    // Користувач авторизований — хмарний профіль
     profileBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
 
     try {
@@ -192,7 +188,7 @@ window.switchProfileTab = function (btn, tab) {
     document.getElementById('profileTabHistory').style.display = tab === 'history' ? '' : 'none';
 };
 
-// ─── Detail Modal ──────────────────────────────────────────────────────────────
+// ─── Detail Modal ─────────────────────────────────────────────────────────────
 let currentDetailAnime = null;
 
 function closeDetailModal() {
@@ -266,7 +262,6 @@ async function openDetailModal(url) {
             isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
         }
 
-        // ─── Визначаємо стартовий стан ───────────────────────────────────────
         let savedProgress = null;
         if (window.currentUser) {
             try {
@@ -287,7 +282,6 @@ async function openDetailModal(url) {
             : (dubs[0] || '');
         const episodes = firstDub ? (anime.seasons[firstSeason][firstDub] || []) : [];
 
-        // Якщо є збережений прогрес — стартуємо з нього, інакше з першого епізоду
         const startEpIndex = savedProgress?.episode
             ? Math.max(0, episodes.findIndex(ep => ep.episode === savedProgress.episode))
             : 0;
@@ -365,6 +359,7 @@ async function openDetailModal(url) {
 
         async function playEpisode(file) {
             if (!file) { showToast('❌ Немає файлу'); return; }
+            // autoplay: true — бо юзер сам змінив серію/озвучку/сезон
             loadVideo(file, detailVideoEl, { autoplay: true });
             if (window.currentUser) {
                 try {
@@ -378,27 +373,15 @@ async function openDetailModal(url) {
             }
         }
 
-        // При зміні сезону — оновити озвучки і одразу грати перший епізод
-        seasonSelect.addEventListener('change', () => {
-            updateDubs();
-            playEpisode(episodeSelect.value);
-        });
-
-        // При зміні озвучки — оновити серії і одразу грати перший епізод
-        dubSelect.addEventListener('change', () => {
-            updateEpisodes();
-            playEpisode(episodeSelect.value);
-        });
-
-        // При зміні серії — одразу грати
+        seasonSelect.addEventListener('change', () => { updateDubs(); playEpisode(episodeSelect.value); });
+        dubSelect.addEventListener('change', () => { updateEpisodes(); playEpisode(episodeSelect.value); });
         episodeSelect.addEventListener('change', () => playEpisode(episodeSelect.value));
 
-        // Завантажуємо відео в плеєр — юзер сам натисне плей
+        // ─── Завантажуємо відео БЕЗ autoplay — юзер сам натисне плей ─────────
         if (startFile) {
-            loadVideo(startFile, detailVideoEl);
+            loadVideo(startFile, detailVideoEl, { autoplay: false });
         }
 
-        // Bookmark toggle
         document.getElementById('toggleBookmarkBtn').addEventListener('click', async () => {
             await toggleBookmark(anime);
             let nowBm = false;
@@ -416,7 +399,6 @@ async function openDetailModal(url) {
                 `<i class="fas fa-star"></i> ${nowBm ? 'В обраному' : 'Додати в обране'}`;
         });
 
-        // Synopsis expand
         const synopsisText = document.getElementById('synopsisText');
         const moreBtn = document.getElementById('moreBtn');
         if (synopsisText && moreBtn) {
