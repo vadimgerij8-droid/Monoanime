@@ -84,16 +84,24 @@ async function initGenres() {
     });
 }
 
-// ─── updateBadge (локальне сховище) ────────────────────────────────────────
+// ─── updateBadge (з підтримкою хмари) ────────────────────────────────────────
 async function updateBadge() {
     const badge = document.getElementById('bookmarkBadge');
     if (!badge) return;
-    const count = Storage.getBookmarks().length;
+    let count = 0;
+    if (window.currentUser) {
+        try {
+            const { cloudGetBookmarks } = await import('./auth.js');
+            count = (await cloudGetBookmarks()).length;
+        } catch { count = 0; }
+    } else {
+        count = Storage.getBookmarks().length;
+    }
     badge.textContent = count;
     badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-// ─── Ініціалізація ─────────────────────────────────────────────────────────
+// ─── Ініціалізація ────────────────────────────────────────────────────────────
 applyTheme(Storage.getTheme());
 updateBadge();
 
@@ -143,6 +151,7 @@ document.addEventListener('keydown', (e) => {
         if (playerModal) { playerModal.style.display = 'none'; destroyHlsForVideo(mainVideoPlayer); }
         document.body.style.overflow = '';
         if (profileModal) profileModal.style.display = 'none';
+        window.closeAuthModal?.();
     }
 });
 
