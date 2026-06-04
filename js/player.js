@@ -20,8 +20,7 @@ async function loadVideo(url, videoElement, options = {}) {
     const proxyUrl = getProxyUrl(url);
 
     const maxRetries = options.maxRetries || 3;
-    // autoplay: true тільки якщо явно передано, інакше false
-    const autoplay = options.autoplay === true;
+    const autoplay = options.autoplay === true; // false якщо не передано явно
     let attempt = 0;
 
     function attachHls() {
@@ -32,6 +31,7 @@ async function loadVideo(url, videoElement, options = {}) {
             hls.attachMedia(videoElement);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 if (playerLoading) playerLoading.style.display = 'none';
+                // play тільки якщо явно передано autoplay: true
                 if (autoplay) videoElement.play().catch(() => {});
             });
 
@@ -59,6 +59,7 @@ async function loadVideo(url, videoElement, options = {}) {
     function attachFallback() {
         if (playerLoading) playerLoading.style.display = 'none';
         videoElement.src = proxyUrl;
+        // play тільки якщо явно передано autoplay: true
         if (autoplay) videoElement.play().catch(() => {});
     }
 
