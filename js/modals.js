@@ -365,7 +365,7 @@ async function openDetailModal(url) {
 
         async function playEpisode(file) {
             if (!file) { showToast('❌ Немає файлу'); return; }
-            loadVideo(file, detailVideoEl);
+            loadVideo(file, detailVideoEl, { autoplay: true });
             if (window.currentUser) {
                 try {
                     const { cloudSaveProgress } = await import('./auth.js');
