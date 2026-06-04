@@ -372,9 +372,15 @@ async function openDetailModal(url) {
             }
         }
 
-        seasonSelect.addEventListener('change', updateDubs);
-        dubSelect.addEventListener('change', updateEpisodes);
-        // Автоматичне відтворення при виборі серії
+        // Змінений блок: автоматичне відтворення при зміні сезону або озвучки
+        seasonSelect.addEventListener('change', () => {
+            updateDubs();
+            playEpisode(episodeSelect.value);
+        });
+        dubSelect.addEventListener('change', () => {
+            updateEpisodes();
+            playEpisode(episodeSelect.value);
+        });
         episodeSelect.addEventListener('change', () => playEpisode(episodeSelect.value));
 
         const resumeBtn = document.getElementById('resumeBtn');
