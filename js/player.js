@@ -20,6 +20,8 @@ async function loadVideo(url, videoElement, options = {}) {
     const proxyUrl = getProxyUrl(url);
 
     const maxRetries = options.maxRetries || 3;
+    // autoplay: true тільки якщо явно передано, інакше false
+    const autoplay = options.autoplay === true;
     let attempt = 0;
 
     function attachHls() {
@@ -30,7 +32,7 @@ async function loadVideo(url, videoElement, options = {}) {
             hls.attachMedia(videoElement);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 if (playerLoading) playerLoading.style.display = 'none';
-                videoElement.play().catch(() => {});
+                if (autoplay) videoElement.play().catch(() => {});
             });
 
             hls.on(Hls.Events.ERROR, (event, data) => {
@@ -43,7 +45,6 @@ async function loadVideo(url, videoElement, options = {}) {
                             try { hls.startLoad(); } catch (e) { attachFallback(); }
                         }, backoff);
                     } else {
-                        // give up and fallback to direct src
                         destroyHlsForVideo(videoElement);
                         attachFallback();
                         showToast('Помилка відтворення. Спробувати ще');
@@ -58,9 +59,8 @@ async function loadVideo(url, videoElement, options = {}) {
     function attachFallback() {
         if (playerLoading) playerLoading.style.display = 'none';
         videoElement.src = proxyUrl;
-        videoElement.play().catch(() => {});
+        if (autoplay) videoElement.play().catch(() => {});
     }
 
     try { attachHls(); } catch (err) { attachFallback(); }
 }
-
