@@ -360,7 +360,7 @@ async function openDetailModal(url) {
         async function playEpisode(file) {
             if (!file) { showToast('❌ Немає файлу'); return; }
             // autoplay: true — бо юзер сам змінив серію/озвучку/сезон
-            loadVideo(file, detailVideoEl, { autoplay: true });
+            loadVideo(file, detailVideoEl, { autoplay: false });
             if (window.currentUser) {
                 try {
                     const { cloudSaveProgress } = await import('./auth.js');
