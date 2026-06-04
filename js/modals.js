@@ -266,6 +266,7 @@ async function openDetailModal(url) {
             isBookmarked = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
         }
 
+        // ─── Визначаємо стартовий стан ───────────────────────────────────────
         let savedProgress = null;
         if (window.currentUser) {
             try {
@@ -277,14 +278,26 @@ async function openDetailModal(url) {
         }
 
         const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
-        const firstSeason = (savedProgress?.season && anime.seasons[savedProgress.season]) ? savedProgress.season : (seasons[0] || '1');
+        const firstSeason = (savedProgress?.season && anime.seasons[savedProgress.season])
+            ? savedProgress.season
+            : (seasons[0] || '1');
         const dubs = Object.keys(anime.seasons[firstSeason] || {}).sort();
-        const firstDub = (savedProgress?.dub && dubs.includes(savedProgress.dub)) ? savedProgress.dub : (dubs[0] || '');
+        const firstDub = (savedProgress?.dub && dubs.includes(savedProgress.dub))
+            ? savedProgress.dub
+            : (dubs[0] || '');
         const episodes = firstDub ? (anime.seasons[firstSeason][firstDub] || []) : [];
+
+        // Якщо є збережений прогрес — стартуємо з нього, інакше з першого епізоду
+        const startEpIndex = savedProgress?.episode
+            ? Math.max(0, episodes.findIndex(ep => ep.episode === savedProgress.episode))
+            : 0;
+        const startFile = episodes[startEpIndex]?.file || '';
+
         const totalEpisodes = Object.values(anime.seasons).reduce((sum, s) =>
             sum + Object.values(s).reduce((s2, e) => Math.max(s2, e.length), 0), 0);
-        const ratingTag = anime.rating ? `<span class="tag rating-tag"><i class="fas fa-user-shield"></i> ${anime.rating}</span>` : '';
-        const savedEpIndex = savedProgress?.episode ? episodes.findIndex(ep => ep.episode === savedProgress.episode) : -1;
+        const ratingTag = anime.rating
+            ? `<span class="tag rating-tag"><i class="fas fa-user-shield"></i> ${anime.rating}</span>`
+            : '';
 
         modalBody.innerHTML = `
             <div class="anime-detail-grid">
@@ -306,13 +319,6 @@ async function openDetailModal(url) {
             </div>
 
             <div style="margin-top:1.5rem;">
-                ${savedProgress ? `
-                <div style="background:rgba(255,204,0,0.15);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.9rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <i class="fas fa-history" style="color:#e6b800;"></i>
-                    Продовжити: <strong>Сезон ${savedProgress.season} · ${savedProgress.dub} · Еп. ${savedProgress.episode}</strong>
-                    <button id="resumeBtn" style="margin-left:auto;padding:0.3rem 0.7rem;border-radius:6px;border:none;background:#ffcc00;color:#333;font-weight:600;cursor:pointer;">▶ Продовжити</button>
-                </div>` : ''}
-
                 <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;background:rgba(0,0,0,0.05);padding:1rem;border-radius:8px;">
                     <div style="display:flex;flex-direction:column;gap:0.3rem;">
                         <label style="font-size:0.8rem;font-weight:600;color:#666;">СЕЗОН</label>
@@ -329,7 +335,7 @@ async function openDetailModal(url) {
                     <div style="display:flex;flex-direction:column;gap:0.3rem;">
                         <label style="font-size:0.8rem;font-weight:600;color:#666;">СЕРІЯ</label>
                         <select id="episodeSelect" class="btn-outline" style="padding:0.5rem;min-width:100px;">
-                            ${episodes.map((ep, i) => `<option value="${ep.file}" ${i === savedEpIndex ? 'selected' : ''}>Еп. ${ep.episode}</option>`).join('')}
+                            ${episodes.map((ep, i) => `<option value="${ep.file}" ${i === startEpIndex ? 'selected' : ''}>Еп. ${ep.episode}</option>`).join('')}
                         </select>
                     </div>
                 </div>
@@ -372,27 +378,28 @@ async function openDetailModal(url) {
             }
         }
 
-        // Змінений блок: автоматичне відтворення при зміні сезону або озвучки
+        // При зміні сезону — оновити озвучки і одразу грати перший епізод
         seasonSelect.addEventListener('change', () => {
             updateDubs();
             playEpisode(episodeSelect.value);
         });
+
+        // При зміні озвучки — оновити серії і одразу грати перший епізод
         dubSelect.addEventListener('change', () => {
             updateEpisodes();
             playEpisode(episodeSelect.value);
         });
+
+        // При зміні серії — одразу грати
         episodeSelect.addEventListener('change', () => playEpisode(episodeSelect.value));
 
-        const resumeBtn = document.getElementById('resumeBtn');
-        if (resumeBtn && savedProgress) {
-            resumeBtn.addEventListener('click', () => {
-                if (anime.seasons[savedProgress.season]) { seasonSelect.value = savedProgress.season; updateDubs(); }
-                if (dubSelect.querySelector(`option[value="${CSS.escape(savedProgress.dub)}"]`)) { dubSelect.value = savedProgress.dub; updateEpisodes(); }
-                const ep = (anime.seasons[savedProgress.season]?.[savedProgress.dub] || []).find(e => e.episode === savedProgress.episode);
-                if (ep) { episodeSelect.value = ep.file; playEpisode(ep.file); }
-            });
+        // ─── АВТОЗАПУСК при відкритті модалки ────────────────────────────────
+        // Грає одразу — юзер просто відкрив і дивиться без будь-яких дій
+        if (startFile) {
+            playEpisode(startFile);
         }
 
+        // Bookmark toggle
         document.getElementById('toggleBookmarkBtn').addEventListener('click', async () => {
             await toggleBookmark(anime);
             let nowBm = false;
@@ -406,9 +413,11 @@ async function openDetailModal(url) {
             } else {
                 nowBm = Storage.getBookmarks().some(b => b.mal_id === anime.mal_id);
             }
-            document.getElementById('toggleBookmarkBtn').innerHTML = `<i class="fas fa-star"></i> ${nowBm ? 'В обраному' : 'Додати в обране'}`;
+            document.getElementById('toggleBookmarkBtn').innerHTML =
+                `<i class="fas fa-star"></i> ${nowBm ? 'В обраному' : 'Додати в обране'}`;
         });
 
+        // Synopsis expand
         const synopsisText = document.getElementById('synopsisText');
         const moreBtn = document.getElementById('moreBtn');
         if (synopsisText && moreBtn) {
