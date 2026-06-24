@@ -1,27 +1,20 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MONOANIME</title>
-    <link rel="preconnect" href="https://monoanime.animegran8.workers.dev">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <meta property="og:title" content="MONOANIME - Pro версія">
-    <meta property="og:description" content="Сучасна платформа для перегляду аніме з розширеними функціями">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="/og-image.png">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>MONOANIME • твій аніме каталог</title>
+    <link rel="preconnect" href="https://monoanime.animegran8.workers.dev" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" as="style" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <meta property="og:title" content="MONOANIME - твій аніме каталог" />
+    <meta property="og:description" content="Сучасна платформа для перегляду аніме" />
+    <meta property="og:type" content="website" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
-
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" href="android-chrome-192x192.png" sizes="192x192">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="manifest" href="site.webmanifest">
-    <meta name="theme-color" content="#0d0d0d">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <meta name="theme-color" content="#0d0d0d" />
 
     <style>
         :root {
@@ -60,6 +53,8 @@
             --radius-xl: 28px;
             --transition: 280ms cubic-bezier(.2, .9, .2, 1);
             --transition-smooth: 360ms cubic-bezier(.2, .9, .2, 1);
+            --sidebar-width: 340px;
+            --agnative-scale: 1;
         }
 
         .dark-mode {
@@ -82,194 +77,1038 @@
             --shadow-lg: 0 30px 60px rgba(0, 0, 0, 0.6);
         }
 
-        [data-theme="default"] { --accent: #ffcc00; --accent-rgb: 255,204,0; --accent-hover: #e6b800; --accent-text: #0b0b0b; --accent-gradient: linear-gradient(135deg, #ffcc00, #f59e0b); --accent-light: rgba(255,204,0,0.15); --accent-glow: rgba(255,204,0,0.35); }
-        [data-theme="grayscale"] { --accent: #6b7280; --accent-rgb: 107,114,128; --accent-hover: #4b5563; --accent-text: #ffffff; --accent-gradient: linear-gradient(135deg, #9ca3af, #6b7280); --accent-light: rgba(107,114,128,0.15); --accent-glow: rgba(107,114,128,0.35); }
-        [data-theme="gold"] { --accent: #d4a017; --accent-rgb: 212,160,23; --accent-hover: #b8860b; --accent-text: #0b0b0b; --accent-gradient: linear-gradient(135deg, #d4a017, #b8860b); --accent-light: rgba(212,160,23,0.15); --accent-glow: rgba(212,160,23,0.35); }
-        [data-theme="blue"] { --accent: #3b82f6; --accent-rgb: 59,130,246; --accent-hover: #2563ed; --accent-text: #ffffff; --accent-gradient: linear-gradient(135deg, #60a5fa, #3b82f6); --accent-light: rgba(59,130,246,0.15); --accent-glow: rgba(59,130,246,0.35); }
-        [data-theme="purple"] { --accent: #8b5cf6; --accent-rgb: 139,92,246; --accent-hover: #7c3aed; --accent-text: #ffffff; --accent-gradient: linear-gradient(135deg, #a78bfa, #8b5cf6); --accent-light: rgba(139,92,246,0.15); --accent-glow: rgba(139,92,246,0.35); }
-        [data-theme="red"] { --accent: #ef4444; --accent-rgb: 239,68,68; --accent-hover: #dc2626; --accent-text: #ffffff; --accent-gradient: linear-gradient(135deg, #f87171, #ef4444); --accent-light: rgba(239,68,68,0.15); --accent-glow: rgba(239,68,68,0.35); }
-        [data-theme="green"] { --accent: #22c55e; --accent-rgb: 34,197,94; --accent-hover: #16a34a; --accent-text: #ffffff; --accent-gradient: linear-gradient(135deg, #4ade80, #22c55e); --accent-light: rgba(34,197,94,0.15); --accent-glow: rgba(34,197,94,0.35); }
-        [data-theme] { --primary: var(--accent); --primary-rgb: var(--accent-rgb); --primary-hover: var(--accent-hover); }
+        [data-theme="default"] {
+            --accent: #ffcc00;
+            --accent-rgb: 255, 204, 0;
+            --accent-hover: #e6b800;
+            --accent-text: #0b0b0b;
+            --accent-gradient: linear-gradient(135deg, #ffcc00, #f59e0b);
+            --accent-light: rgba(255, 204, 0, 0.15);
+            --accent-glow: rgba(255, 204, 0, 0.35);
+        }
+        [data-theme="grayscale"] {
+            --accent: #6b7280;
+            --accent-rgb: 107, 114, 128;
+            --accent-hover: #4b5563;
+            --accent-text: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #9ca3af, #6b7280);
+            --accent-light: rgba(107, 114, 128, 0.15);
+            --accent-glow: rgba(107, 114, 128, 0.35);
+        }
+        [data-theme="gold"] {
+            --accent: #d4a017;
+            --accent-rgb: 212, 160, 23;
+            --accent-hover: #b8860b;
+            --accent-text: #0b0b0b;
+            --accent-gradient: linear-gradient(135deg, #d4a017, #b8860b);
+            --accent-light: rgba(212, 160, 23, 0.15);
+            --accent-glow: rgba(212, 160, 23, 0.35);
+        }
+        [data-theme="blue"] {
+            --accent: #3b82f6;
+            --accent-rgb: 59, 130, 246;
+            --accent-hover: #2563ed;
+            --accent-text: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #60a5fa, #3b82f6);
+            --accent-light: rgba(59, 130, 246, 0.15);
+            --accent-glow: rgba(59, 130, 246, 0.35);
+        }
+        [data-theme="purple"] {
+            --accent: #8b5cf6;
+            --accent-rgb: 139, 92, 246;
+            --accent-hover: #7c3aed;
+            --accent-text: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            --accent-light: rgba(139, 92, 246, 0.15);
+            --accent-glow: rgba(139, 92, 246, 0.35);
+        }
+        [data-theme="red"] {
+            --accent: #ef4444;
+            --accent-rgb: 239, 68, 68;
+            --accent-hover: #dc2626;
+            --accent-text: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #f87171, #ef4444);
+            --accent-light: rgba(239, 68, 68, 0.15);
+            --accent-glow: rgba(239, 68, 68, 0.35);
+        }
+        [data-theme="green"] {
+            --accent: #22c55e;
+            --accent-rgb: 34, 197, 94;
+            --accent-hover: #16a34a;
+            --accent-text: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #4ade80, #22c55e);
+            --accent-light: rgba(34, 197, 94, 0.15);
+            --accent-glow: rgba(34, 197, 94, 0.35);
+        }
+        [data-theme] {
+            --primary: var(--accent);
+            --primary-rgb: var(--accent-rgb);
+            --primary-hover: var(--accent-hover);
+        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; scroll-behavior: smooth; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html,
+        body {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-            background: var(--bg); color: var(--text);
-            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             transition: background var(--transition-smooth), color var(--transition-smooth);
             line-height: 1.5;
+            overflow-x: hidden;
         }
-        .app-container { max-width: 1320px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; min-height: 100vh; display: flex; flex-direction: column; }
-        @media (prefers-reduced-motion: reduce) { :root { --transition: 0ms; --transition-smooth: 0ms; } * { animation: none !important; transition: none !important; } }
+        .app-container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 3rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes subtlePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
-        @keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes subtlePulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes leftdockSlideIn {
+            from {
+                transform: translateX(-130%) translateY(-50%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0) translateY(-50%);
+                opacity: 1;
+            }
+        }
+        @keyframes skeletonShimmer {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: calc(200px + 100%) 0;
+            }
+        }
+        @keyframes floatUpDown {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
 
-        .glass { background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.03)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--border); border-radius: var(--radius); }
-        .img--blur { filter: blur(10px) scale(1.02); transform-origin: center; transition: filter 600ms ease, transform 600ms ease; }
-        .img--loaded { filter: blur(0) scale(1); }
-        .small { font-size: 0.85rem; }
+        .glass {
+            background: linear-gradient(180deg, var(--glass), rgba(255, 255, 255, 0.03));
+            backdrop-filter: blur(var(--blur-amount));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        .img--blur {
+            filter: blur(10px) scale(1.02);
+            transform-origin: center;
+            transition: filter 600ms ease, transform 600ms ease;
+        }
+        .img--loaded {
+            filter: blur(0) scale(1);
+        }
+        .small {
+            font-size: 0.85rem;
+        }
 
-        .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.2rem; margin-bottom: 1.8rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--border); transition: all var(--transition); }
-        .header:hover { border-bottom-color: var(--border-hover); }
-        .logo { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; user-select: none; text-decoration: none; transition: transform var(--transition); }
-        .logo:hover { transform: translateY(-2px); }
-        .logo-icon { font-size: 3.6rem; font-weight: 900; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; }
-        .logo:hover .logo-icon { transform: rotate(-8deg) scale(1.12); filter: brightness(1.1); }
-        .logo-text h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.04em; color: var(--text); margin: 0; transition: color var(--transition); }
-        .logo-text span { font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.5px; display: block; margin-top: -4px; }
-        .header-actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+            padding-bottom: 1.4rem;
+            border-bottom: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .burger-btn {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.3rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: 30;
+        }
+        .burger-btn:hover {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+        .burger-btn.active {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            user-select: none;
+            text-decoration: none;
+            transition: transform var(--transition);
+        }
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+        .logo-icon {
+            font-size: 3.6rem;
+            font-weight: 900;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .logo:hover .logo-icon {
+            transform: rotate(-8deg) scale(1.12);
+            filter: brightness(1.1);
+        }
+        .logo-text h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            margin: 0;
+            transition: color var(--transition);
+        }
+        .logo-text span {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            display: block;
+            margin-top: -4px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+        }
 
         .search-wrapper {
-            position: relative; display: flex; align-items: center; background: var(--surface);
-            border: 2px solid var(--border); border-radius: var(--radius-xl); padding: 0.55rem 1rem;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow-sm); min-width: 280px; backdrop-filter: blur(4px);
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 0.55rem 1rem;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            min-width: 280px;
+            backdrop-filter: blur(4px);
         }
-        .search-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-light), var(--shadow-md); transform: translateY(-2px); background: var(--surface); }
-        .search-wrapper i { color: var(--text-secondary); font-size: 1.1rem; margin-right: 0.65rem; transition: color var(--transition); }
-        .search-wrapper:focus-within i { color: var(--accent); }
-        #searchInput { border: none; outline: none; font-size: 0.97rem; background: transparent; width: 100%; font-weight: 500; color: var(--text); font-family: inherit; padding: 0; }
-        #searchInput::placeholder { color: var(--text-muted); font-weight: 400; transition: opacity 0.2s; }
-        .search-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; padding: 0.2rem; margin-left: 0.4rem; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; opacity: 0; visibility: hidden; pointer-events: none; }
-        .search-clear.visible { opacity: 0.7; visibility: visible; pointer-events: auto; }
-        .search-clear:hover { opacity: 1; color: var(--accent); background: var(--hover); transform: scale(1.1); }
-        .search-info { display: inline-block; margin-left: 0.75rem; font-size: 0.7rem; font-weight: 500; background: var(--accent-light); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 40px; white-space: nowrap; transition: all 0.2s; }
-        .btn-icon { background: var(--surface); border: 2px solid var(--border); color: var(--text); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); font-size: 1.15rem; position: relative; box-shadow: var(--shadow-sm); }
-        .btn-icon:hover { background: var(--accent); color: var(--accent-text); border-color: var(--accent); transform: scale(1.1) rotate(5deg); box-shadow: 0 8px 24px var(--accent-glow); }
-        .btn-icon .badge { position: absolute; top: -3px; right: -3px; background: #ef4444; color: white; border-radius: 50%; width: 19px; height: 19px; font-size: 0.68rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface); }
-
-        .category-section { margin-bottom: 1.6rem; }
-        .category-scroll { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; }
-        .category-label { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); margin-right: 0.4rem; white-space: nowrap; }
-        .category-pill, .action-pill { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.55rem 1.25rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; font-family: inherit; display: inline-flex; align-items: center; gap: 0.4rem; }
-        .category-pill:hover, .action-pill:hover { background: var(--hover); transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--accent); }
-        .category-pill.active-pill, .action-pill.active-pill { background: var(--accent-gradient); color: var(--accent-text); border-color: transparent; transform: scale(1.06); box-shadow: 0 8px 24px var(--accent-glow); font-weight: 700; }
-        .action-pill { padding: 0.6rem 1.4rem; font-size: 0.88rem; border-radius: var(--radius-xl); font-weight: 700; gap: 0.5rem; }
-        .action-pill i { font-size: 1rem; }
-        .actions-row { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 1.8rem; align-items: center; }
-
-        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 1.6rem; margin-top: 0.5rem; flex: 1; }
-        .anime-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition); cursor: pointer; position: relative; display: flex; flex-direction: column; height: 100%; animation: fadeInUp 0.5s ease both; overflow: hidden; }
-        .anime-card:nth-child(1) { animation-delay: 0.05s; } .anime-card:nth-child(2) { animation-delay: 0.10s; } .anime-card:nth-child(3) { animation-delay: 0.15s; } .anime-card:nth-child(4) { animation-delay: 0.20s; } .anime-card:nth-child(5) { animation-delay: 0.25s; } .anime-card:nth-child(6) { animation-delay: 0.30s; } .anime-card:nth-child(7) { animation-delay: 0.35s; } .anime-card:nth-child(8) { animation-delay: 0.40s; }
-        .anime-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-md); border-color: var(--accent); }
-        .anime-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-        .anime-poster { position: relative; padding-top: 140%; background: #e0e0e0; overflow: hidden; border-radius: var(--radius) var(--radius) 0 0; }
-        .dark-mode .anime-poster { background: #2a2a2a; }
-        .anime-poster img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
-        .anime-card:hover .anime-poster img { transform: scale(1.06); }
-        .anime-info { padding: 0.9rem 1rem 1rem; display: flex; flex-direction: column; flex: 1; }
-        .anime-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color var(--transition); }
-        .anime-card:hover .anime-title { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-        .anime-meta { display: flex; gap: 0.5rem; font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; flex-wrap: wrap; }
-        .skeleton-card .anime-poster { background: linear-gradient(90deg, var(--hover) 25%, var(--border-light) 50%, var(--hover) 75%); background-size: 200% 100%; animation: skeletonShimmer 1.8s infinite; }
-        .skeleton-card .anime-title, .skeleton-card .anime-meta { background: var(--hover); height: 0.9rem; border-radius: 6px; margin-top: 0.4rem; animation: skeletonShimmer 1.8s infinite; background-size: 200% 100%; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
-        .modal-content { background: var(--surface); max-width: 1000px; width: 100%; max-height: 90vh; border-radius: var(--radius-lg); overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: scaleIn 0.3s ease; scroll-behavior: smooth; }
-        .modal-content::-webkit-scrollbar { width: 6px; } .modal-content::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.3rem 1.8rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 5; border-radius: var(--radius-lg) var(--radius-lg) 0 0; transition: background var(--transition), border-color var(--transition); backdrop-filter: blur(10px); }
-        .modal-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text); }
-        .close-modal { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-secondary); transition: color var(--transition), transform 0.2s ease; padding: 0.3rem; line-height: 1; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
-        .close-modal:hover { color: var(--text); transform: rotate(90deg); background: var(--hover); }
-        .modal-body { padding: 1.8rem; }
-        .anime-detail-grid { display: flex; flex-wrap: wrap; gap: 2rem; }
-        .detail-poster { flex: 0 0 170px; } .detail-poster img { width: 100%; border-radius: var(--radius-sm); box-shadow: 0 8px 20px rgba(0,0,0,0.1); border: 1px solid var(--border); }
-        .detail-info { flex: 1; min-width: 250px; }
-        .synopsis { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; transition: all 0.3s ease; }
-        .synopsis.expanded { display: block; -webkit-line-clamp: unset; }
-        .more-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-weight: bold; padding: 0; margin-top: 5px; text-decoration: underline; display: none; }
-        .player-wrapper { position: relative; width: 100%; background: #000; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 1rem; }
-        .voice-selector { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
-        .voice-btn { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.4rem 1rem; font-weight: 600; font-size: 0.78rem; cursor: pointer; transition: all var(--transition); white-space: nowrap; box-shadow: var(--shadow-sm); font-family: inherit; }
-        .voice-btn:hover { background: var(--hover); transform: translateY(-1px); }
-        .voice-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); border-radius: var(--radius-xl); padding: 0.5rem 1.3rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all var(--transition); white-space: nowrap; box-shadow: var(--shadow-sm); font-family: inherit; }
-        .btn-outline:hover { background: var(--accent); color: var(--accent-text); border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 6px 18px var(--accent-glow); }
-        .btn-primary { background: var(--accent-gradient); color: var(--accent-text); border: none; border-radius: var(--radius-xl); padding: 0.65rem 1.5rem; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all var(--transition); white-space: nowrap; box-shadow: 0 4px 14px var(--accent-glow); font-family: inherit; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); filter: brightness(1.05); }
-        .btn-watch { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--accent-gradient); color: var(--accent-text); border: none; border-radius: var(--radius-xl); padding: 0.7rem 1.6rem; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all var(--transition); margin-top: 0.5rem; text-decoration: none; box-shadow: 0 4px 14px var(--accent-glow); font-family: inherit; }
-        .btn-watch:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
-        .pagination-row { display: flex; justify-content: center; align-items: center; gap: 0.6rem; margin-top: 2.5rem; flex-wrap: wrap; }
-        .page-btn { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all var(--transition); box-shadow: var(--shadow-sm); font-family: inherit; }
-        .page-btn:hover { background: var(--hover); transform: scale(1.07); border-color: var(--accent); }
-        .page-btn.active-page { background: var(--accent-gradient); color: var(--accent-text); border-color: transparent; }
-        .page-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
-        .tag { background: var(--tag-bg); display: inline-block; padding: 0.25rem 0.8rem; border-radius: 40px; font-size: 0.73rem; font-weight: 500; margin-right: 0.4rem; margin-bottom: 0.4rem; color: var(--text); transition: all var(--transition); }
-        .tag.rating-tag { background: var(--accent); color: var(--accent-text); font-weight: 700; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--active); color: var(--active-text); padding: 0.7rem 1.5rem; border-radius: var(--radius-xl); font-weight: 600; font-size: 0.85rem; z-index: 2000; transition: transform 0.3s ease, opacity 0.3s ease; box-shadow: var(--shadow-lg); pointer-events: none; opacity: 0; }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .loader { text-align: center; padding: 3rem; color: var(--text-secondary); font-weight: 500; grid-column: 1 / -1; }
-        .loader i { font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: subtlePulse 2s infinite; }
-        footer { margin-top: 3rem; text-align: center; font-size: 0.7rem; border-top: 1px solid var(--border); padding-top: 1.8rem; color: var(--text-muted); transition: all var(--transition); letter-spacing: 0.03em; }
-        .modal-overlay { position: fixed; inset: 0; width: 100%; height: 100%; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 999999; }
-        .modal-box { background: var(--surface); color: var(--text); width: calc(100% - 2rem); max-width: 420px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; animation: fadeInUp 0.3s ease; }
-        .settings-panel { position: fixed; top: 0; right: 0; width: 380px; max-width: 100vw; height: 100%; background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg); z-index: 1100; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; }
-        .settings-panel.open { transform: translateX(0); }
-        .settings-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.8rem; border-bottom: 1px solid var(--border); }
-        .settings-header h2 { font-size: 1.3rem; font-weight: 700; }
-        .settings-body { flex: 1; overflow-y: auto; padding: 1.5rem 1.8rem; }
-        .settings-group { margin-bottom: 2rem; }
-        .settings-group-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 1rem; }
-        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid var(--border-light); }
-        .settings-row:last-child { border-bottom: none; }
-        .settings-label { font-weight: 500; font-size: 0.9rem; }
-        .settings-value { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
-        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); transition: .3s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; transition: .3s; border-radius: 50%; }
-        input:checked+.slider { background: var(--accent); }
-        input:checked+.slider:before { transform: translateX(20px); }
-        .settings-select { padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.85rem; font-family: inherit; outline: none; cursor: pointer; transition: border-color var(--transition); }
-        .settings-select:focus { border-color: var(--accent); }
-        .range-input { width: 120px; accent-color: var(--accent); }
-        .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1099; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .settings-overlay.open { opacity: 1; pointer-events: all; }
-
-        /* ===== LAMPA PLAYER STYLES ===== */
-        .lampa-overlay {
-            background: linear-gradient(
-                to bottom,
-                rgba(0,0,0,0.6) 0%,
-                rgba(0,0,0,0.15) 40%,
-                rgba(0,0,0,0.1) 58%,
-                rgba(8,8,14,0.92) 100%
-            );
+        .search-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-light), var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .search-wrapper i {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-right: 0.65rem;
+            transition: color var(--transition);
+        }
+        .search-wrapper:focus-within i {
+            color: var(--accent);
+        }
+        #searchInput {
+            border: none;
+            outline: none;
+            font-size: 0.97rem;
+            background: transparent;
+            width: 100%;
+            font-weight: 500;
+            color: var(--text);
+            font-family: inherit;
+            padding: 0;
+        }
+        #searchInput::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .search-clear {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0.2rem;
+            margin-left: 0.4rem;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0;
+            visibility: hidden;
             pointer-events: none;
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            transition: opacity 0.3s;
+        }
+        .search-clear.visible {
+            opacity: 0.7;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .search-clear:hover {
+            opacity: 1;
+            color: var(--accent);
+            background: var(--hover);
+            transform: scale(1.1);
+        }
+        .search-shortcut {
+            font-size: 0.65rem;
+            background: var(--tag-bg);
+            color: var(--text-muted);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
         }
 
-        .lampa-player-container {
+        .btn-icon {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.15rem;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-icon:hover {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        /* LEFTDOCK */
+        .leftdock-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(3px);
+            z-index: 40;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .leftdock-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .agnative-leftdock {
+            position: fixed !important;
+            left: 1em !important;
+            top: 50% !important;
+            transform: translateX(-130%) translateY(-50%) !important;
+            z-index: 50 !important;
+            width: max-content !important;
+            max-width: 16em !important;
+            max-height: 80vh !important;
+            overflow-y: auto !important;
+            display: inline-flex !important;
+            flex-direction: column !important;
+            padding: .32em !important;
+            border-radius: 1.35em !important;
+            background: rgba(22, 24, 30, .42) !important;
+            border: 1px solid rgba(255, 255, 255, .10) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), 0 12px 32px rgba(0, 0, 0, .28) !important;
+            backdrop-filter: blur(22px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(22px) saturate(140%) !important;
+            font-size: calc(clamp(0.92rem, 0.5rem + 1.4vmin, 1.7rem) * var(--agnative-scale, 1)) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: transform .28s cubic-bezier(.22, .61, .36, 1), opacity .2s ease !important;
+        }
+        .agnative-leftdock.is-visible {
+            transform: translateX(0) translateY(-50%) !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        .agnative-leftdock::-webkit-scrollbar {
+            width: 3px;
+        }
+        .agnative-leftdock::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .agnative-leftdock::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+        }
+        .agnative-leftdock__inner {
+            display: flex;
+            flex-direction: column;
+            gap: .12em;
+        }
+        .agnative-leftdock__case {
+            display: flex;
+            flex-direction: column;
+            gap: .04em;
+        }
+        .agnative-leftdock__split {
+            height: 1px;
+            margin: .3em .4em;
+            background: rgba(255, 255, 255, .10);
+        }
+        .agnative-leftdock__item.selector {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 0;
+            background: none;
+            color: rgba(255, 255, 255, .92);
+            min-height: 2.6em;
+            display: flex;
+            align-items: center;
+            gap: .35em;
+            padding: .4em .9em;
+            border-radius: 999px;
+            font-size: .92em;
+            font-weight: 700;
+            line-height: 1.1;
+            white-space: nowrap;
+            transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
+            text-align: left;
+        }
+        .agnative-leftdock__item.selector:hover,
+        .agnative-leftdock__item.selector.is-active {
+            background: rgba(255, 255, 255, .16) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14) !important;
+            transform: translateX(.04em) !important;
+        }
+        .agnative-leftdock__item .menu__ico {
+            width: 1.5em;
+            height: 1.5em;
+            min-width: 1.5em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            margin-right: .3em !important;
+            color: currentColor;
+        }
+        .agnative-leftdock__item .menu__ico svg {
+            width: 1.5em;
+            height: 1.5em;
+            color: currentColor;
+        }
+        .agnative-leftdock__item .menu__text {
+            display: inline-block;
+            flex: 1 1 auto;
+        }
+
+        /* КАРУСЕЛЬ */
+        .carousel {
+            position: relative;
+            margin-bottom: 1.8rem;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        .carousel-inner {
             position: relative;
             width: 100%;
-            user-select: none;
-            -webkit-user-select: none;
+            overflow: hidden;
         }
-
-        .lampa-player-container video {
+        .carousel-inner::after {
+            content: '';
+            display: block;
+            padding-top: 42%;
+        }
+        .carousel-items {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            display: flex;
+            transition: transform 0.6s ease;
+            will-change: transform;
+        }
+        .carousel-item {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: #0b0b0b;
+            cursor: pointer;
+        }
+        .carousel-item.active {
+            display: flex;
+        }
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.85;
+        }
+        .carousel-caption {
+            position: relative;
+            z-index: 2;
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+            max-width: 80%;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+        }
+        .carousel-caption h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            border: none;
+            color: #fff;
+            font-size: 2.5rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background var(--transition), transform var(--transition);
+            backdrop-filter: blur(6px);
+        }
+        .carousel-control:hover {
+            background: rgba(0, 0, 0, 0.65);
+            transform: translateY(-50%) scale(1.08);
+        }
+        .carousel-control-prev {
+            left: 1rem;
+        }
+        .carousel-control-next {
+            right: 1rem;
+        }
+        .carousel-indicators {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            transition: all var(--transition);
+        }
+        .carousel-indicators button.active {
+            background: var(--accent);
+            border-color: #fff;
+            transform: scale(1.2);
+        }
+
+        /* СІТКА */
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+            gap: 1.6rem;
+            margin-top: 0.5rem;
+            flex: 1;
+        }
+        .anime-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeInUp 0.5s ease both;
+            overflow: hidden;
+        }
+        .anime-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent);
+        }
+        .anime-poster {
+            position: relative;
+            padding-top: 140%;
+            background: #e0e0e0;
+            overflow: hidden;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .dark-mode .anime-poster {
+            background: #2a2a2a;
+        }
+        .anime-poster img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
+        }
+        .anime-card:hover .anime-poster img {
+            transform: scale(1.06);
+        }
+        .anime-info {
+            padding: 0.9rem 1rem 1rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .anime-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .anime-card:hover .anime-title {
+            color: var(--accent);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .anime-meta {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            flex-wrap: wrap;
+        }
+
+        /* Скелетон */
+        .skeleton {
+            background: linear-gradient(90deg, var(--border-light) 0px, var(--hover) 40px, var(--border-light) 80px);
+            background-size: 200px 100%;
+            animation: skeletonShimmer 1.5s ease-in-out infinite;
+            border-radius: 8px;
+        }
+        .skeleton-poster {
+            padding-top: 140%;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .skeleton-title {
+            height: 1rem;
+            margin: 0.9rem 1rem 0.4rem;
+            width: 80%;
+        }
+        .skeleton-meta {
+            height: 0.6rem;
+            margin: 0 1rem 1rem;
+            width: 50%;
+        }
+
+        /* ДІЇ */
+        .actions-row {
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+            align-items: center;
+        }
+        .action-pill {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-xl);
+            padding: 0.6rem 1.4rem;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .action-pill:hover {
+            background: var(--hover);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent);
+        }
+        .action-pill.active-pill {
+            background: var(--accent-gradient);
+            color: var(--accent-text);
+            border-color: transparent;
+            transform: scale(1.06);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        /* МОДАЛКИ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: var(--surface);
+            max-width: 1000px;
+            width: 100%;
+            max-height: 90vh;
+            border-radius: var(--radius-lg);
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            animation: scaleIn 0.3s ease;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.3rem 1.8rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 5;
+        }
+        .modal-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            padding: 0.3rem;
+            line-height: 1;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-modal:hover {
+            color: var(--text);
+            transform: rotate(90deg);
+            background: var(--hover);
+        }
+        .modal-body {
+            padding: 1.8rem;
+        }
+
+        .anime-detail-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .detail-poster {
+            flex: 0 0 170px;
+        }
+        .detail-poster img {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+        .detail-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        .synopsis {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            transition: all 0.3s ease;
+        }
+        .synopsis.expanded {
             display: block;
+            -webkit-line-clamp: unset;
+        }
+        .more-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0;
+            margin-top: 5px;
+            text-decoration: underline;
+            display: none;
+        }
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: var(--accent-text);
+            border: none;
+            border-radius: var(--radius-xl);
+            padding: 0.65rem 1.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 14px var(--accent-glow);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+        .tag {
+            background: var(--tag-bg);
+            display: inline-block;
+            padding: 0.25rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.73rem;
+            font-weight: 500;
+            margin-right: 0.4rem;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .pagination-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-xl);
+            padding: 0.5rem 1.3rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+            font-family: inherit;
+        }
+        .btn-outline:hover {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px var(--accent-glow);
+        }
+        .btn-outline:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .page-indicator {
+            margin: 0 1rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            user-select: none;
+        }
+        .loader {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            grid-column: 1 / -1;
+        }
+        .loader i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            animation: subtlePulse 2s infinite;
         }
 
-        /* Приховано всі інтерфейсні елементи, крім віньєтки */
-        .lampa-topbar,
-        .lampa-bottom,
-        .lampa-loading,
-        .lampa-paused,
-        .lampa-close {
-            display: none !important;
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--active);
+            color: var(--active-text);
+            padding: 0.7rem 1.5rem;
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+            font-size: 0.85rem;
+            z-index: 9999;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            pointer-events: none;
+            opacity: 0;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
-        /* ===== PLAYER OVERLAY SELECTORS (центровані) ===== */
+        /* Back to top */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .back-to-top:hover {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.7rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.8rem;
+            color: var(--text-muted);
+        }
+
         .player-overlay-selectors {
             position: absolute;
             top: 12px;
@@ -280,7 +1119,6 @@
             gap: 8px;
             flex-wrap: nowrap;
         }
-
         .glass-select-wrap {
             position: relative;
             display: inline-flex;
@@ -289,7 +1127,6 @@
         .glass-select {
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 10px;
             padding: 0.45rem 2rem 0.45rem 0.8rem;
@@ -299,16 +1136,8 @@
             outline: none;
             cursor: pointer;
             appearance: none;
-            -webkit-appearance: none;
             font-family: inherit;
-            transition: all 0.2s;
-            white-space: nowrap;
             max-width: 160px;
-            text-overflow: ellipsis;
-        }
-        .glass-select:hover {
-            background: rgba(255, 255, 255, 0.18);
-            border-color: rgba(255, 255, 255, 0.3);
         }
         .glass-select option {
             background: #222;
@@ -319,921 +1148,1454 @@
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             pointer-events: none;
             font-size: 0.7rem;
         }
 
-        @media (max-width: 1024px) { .app-container { padding: 1.5rem; } .anime-grid { gap: 1.5rem; } .detail-poster { flex-basis: 150px; } .profile-hero { gap: 1.5rem; } }
+        /* АДАПТИВ */
         @media (max-width: 768px) {
-            .app-container { padding: 1rem; } .anime-grid { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-            .modal-body { padding: 1rem; } .detail-poster { flex-basis: 100px; margin: 0 auto; }
-            .header { gap: 0.6rem; margin-bottom: 1.2rem; padding-bottom: 1rem; }
-            .logo-icon { font-size: 2.8rem; } .logo-text h1 { font-size: 1.3rem; }
-            .search-wrapper { min-width: 200px; }
-            .voice-selector { justify-content: flex-start; gap: 0.5rem; } .voice-btn { padding: 0.4rem 0.9rem; font-size: 0.75rem; }
-            .modal-header { padding: 1rem 1.2rem; } .modal-header h2 { font-size: 1.2rem; }
-            .anime-detail-grid { gap: 1.5rem; }
-            .profile-stats-row { grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
-            .profile-stat-card { padding: 0.8rem 0.5rem; } .profile-stat-card .stat-num { font-size: 1.4rem; }
-            .profile-avatar-large { width: 90px; height: 90px; font-size: 2.5rem; }
-            .profile-hero-info h3 { font-size: 1.3rem; }
-            .profile-media-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.7rem; }
-            .category-pill, .action-pill { padding: 0.45rem 1rem; font-size: 0.78rem; }
-            footer { margin-top: 2rem; padding-top: 1.5rem; font-size: 0.7rem; }
-            .settings-panel { width: 320px; }
-            .player-overlay-selectors { top: 6px; gap: 4px; }
-            .glass-select { padding: 0.38rem 1.6rem 0.38rem 0.55rem; font-size: 0.7rem; max-width: 130px; }
-            .glass-select-arrow { right: 7px; font-size: 0.6rem; }
+            .app-container {
+                padding: 1rem;
+            }
+            .anime-grid {
+                gap: 1rem;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .header {
+                gap: 0.6rem;
+                margin-bottom: 1.2rem;
+                padding-bottom: 1rem;
+            }
+            .logo-icon {
+                font-size: 2.8rem;
+            }
+            .logo-text h1 {
+                font-size: 1.3rem;
+            }
+            .search-wrapper {
+                min-width: 200px;
+            }
+            .carousel-inner::after {
+                padding-top: 50%;
+            }
+            .carousel-caption h3 {
+                font-size: 1.3rem;
+            }
+            .carousel-control {
+                width: 40px;
+                height: 40px;
+                font-size: 2rem;
+            }
+            .back-to-top {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            .agnative-leftdock {
+                font-size: calc(clamp(0.82rem, 0.4rem + 1.2vmin, 1.4rem) * var(--agnative-scale, 1)) !important;
+                max-width: 14em !important;
+                left: 0.6em !important;
+            }
+            .agnative-leftdock__item.selector {
+                min-height: 2.3em;
+                padding: .3em .7em;
+            }
+            .search-shortcut {
+                display: none;
+            }
         }
         @media (max-width: 480px) {
-            .app-container { padding: 0.8rem; } .anime-grid { grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 0.8rem; }
-            .anime-card:hover { transform: translateY(-6px); }
-            .header { flex-direction: column; gap: 0.8rem; align-items: flex-start; }
-            .header-actions { width: 100%; gap: 0.5rem; }
-            .search-wrapper { flex: 1; min-width: 0; } #searchInput { width: 100%; }
-            .logo { width: 100%; } .logo-icon { font-size: 2.2rem; } .logo-text h1 { font-size: 1.1rem; }
-            .modal-header { padding: 0.8rem 1rem; } .modal-body { padding: 0.8rem; }
-            .anime-detail-grid { flex-direction: column; gap: 1rem; }
-            .detail-poster { flex-basis: auto; margin: 0; max-width: 140px; }
-            .btn-watch { width: 100%; justify-content: center; }
-            .pagination-row { gap: 0.5rem; } .page-btn { width: 36px; height: 36px; font-size: 0.75rem; }
-            .profile-stats-row { grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
-            .profile-stat-card .stat-num { font-size: 1.2rem; } .profile-stat-card .stat-icon { font-size: 1.3rem; }
-            .profile-media-grid { grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 0.5rem; }
-            .profile-avatar-large { width: 70px; height: 70px; font-size: 2rem; }
-            .profile-hero { gap: 1rem; padding: 1rem 0 1.5rem; } .profile-hero-info h3 { font-size: 1.1rem; }
-            .actions-row { gap: 0.4rem; } .action-pill { padding: 0.45rem 1rem; font-size: 0.78rem; }
-            .category-pill { padding: 0.4rem 0.9rem; font-size: 0.7rem; } .category-scroll { gap: 0.5rem; }
-            .modal { padding: 0.5rem; } .modal-content { border-radius: var(--radius); }
-            .settings-panel { width: 100%; } .profile-tab-btn { font-size: 0.75rem; padding: 0.55rem 0.5rem; }
-            .player-overlay-selectors { top: 4px; gap: 3px; }
-            .glass-select { padding: 0.32rem 1.3rem 0.32rem 0.4rem; font-size: 0.64rem; max-width: 100px; border-radius: 7px; }
-            .glass-select-arrow { right: 5px; font-size: 0.55rem; }
+            .app-container {
+                padding: 0.8rem;
+            }
+            .anime-grid {
+                grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+                gap: 0.8rem;
+            }
+            .header {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: flex-start;
+            }
+            .header-actions {
+                width: 100%;
+                gap: 0.5rem;
+            }
+            .search-wrapper {
+                flex: 1;
+                min-width: 0;
+            }
+            .logo-icon {
+                font-size: 2.2rem;
+            }
+            .logo-text h1 {
+                font-size: 1.1rem;
+            }
+            .modal-header {
+                padding: 0.8rem 1rem;
+            }
+            .modal-body {
+                padding: 0.8rem;
+            }
+            .anime-detail-grid {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .detail-poster {
+                flex-basis: auto;
+                max-width: 140px;
+            }
+            .carousel-inner::after {
+                padding-top: 56%;
+            }
+            .carousel-caption h3 {
+                font-size: 1.1rem;
+            }
+            .carousel-control {
+                width: 36px;
+                height: 36px;
+                font-size: 1.8rem;
+            }
+            .agnative-leftdock {
+                font-size: calc(clamp(0.72rem, 0.3rem + 1vmin, 1.1rem) * var(--agnative-scale, 1)) !important;
+                max-width: 12em !important;
+                left: 0.4em !important;
+                padding: .24em !important;
+                border-radius: 1em !important;
+            }
+            .agnative-leftdock__item.selector {
+                min-height: 2em;
+                padding: .25em .6em;
+                font-size: .85em;
+            }
+            .agnative-leftdock__item .menu__ico {
+                width: 1.2em;
+                height: 1.2em;
+                min-width: 1.2em;
+            }
+            .agnative-leftdock__item .menu__ico svg {
+                width: 1.2em;
+                height: 1.2em;
+            }
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body data-theme="default">
-<div class="app-container">
-    <div class="header">
-        <div class="logo" id="logoHome">
-            <div class="logo-icon">⎈</div>
-            <div class="logo-text"><h1>MONOANIME</h1><span>чорно-білий каталог</span></div>
-        </div>
-        <div class="header-actions">
-            <div class="search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Пошук аніме..." autocomplete="off">
-                <button class="search-clear" id="searchClearBtn" aria-label="Очистити"><i class="fas fa-times-circle"></i></button>
-                <span class="search-info" id="searchInfo"></span>
+    <div class="app-container">
+        <!-- ХЕДЕР -->
+        <div class="header">
+            <div class="header-left">
+                <button class="burger-btn" id="burgerBtn" aria-label="Відкрити меню" title="Меню (M)">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo" id="logoHome" title="На головну">
+                    <div class="logo-icon">⎈</div>
+                    <div class="logo-text"><h1>MONOANIME</h1><span>чорно-білий каталог</span></div>
+                </div>
             </div>
-            <button id="themeToggleBtn" class="btn-icon" title="Змінити тему"><i class="fas fa-moon"></i></button>
-            <button id="settingsBtn" class="btn-icon" title="Налаштування"><i class="fas fa-sliders-h"></i></button>
-            <button id="profileBtn" class="btn-icon" title="Профіль"><i class="fas fa-user"></i><span class="badge" id="bookmarkBadge">0</span></button>
-        </div>
-    </div>
-
-    <div class="category-section">
-        <div class="category-scroll" id="categoryScroll"><span class="category-label">Жанри:</span></div>
-    </div>
-
-    <div class="actions-row" id="actionsRow">
-        <button class="action-pill" id="top100Btn"><i class="fas fa-crown"></i> ТОП 100</button>
-        <button class="action-pill" id="randomBtn"><i class="fas fa-dice-d6"></i> Випадкове аніме</button>
-    </div>
-
-    <div id="animeContainer" class="anime-grid">
-        <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження аніме...</div>
-    </div>
-
-    <div class="pagination-row" id="paginationRow"></div>
-
-    <footer><span>MONOANIME &copy; 2026 — Усі права захищено</span></footer>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div id="animeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-content">
-        <div class="modal-header"><h2 id="modalTitle">...</h2><button class="close-modal" id="closeModalBtn">&times;</button></div>
-        <div class="modal-body" id="modalBody"></div>
-    </div>
-</div>
-
-<div id="playerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle">
-    <div class="modal-content" style="max-width: 900px;">
-        <div class="modal-header"><h2 id="playerModalTitle">Плеєр</h2><button class="close-modal" id="closePlayerBtn">&times;</button></div>
-        <div class="modal-body">
-            <div class="player-wrapper" id="lampaPlayerWrapper"></div>
-            <div id="voiceSelector" class="voice-selector" style="display:none;"></div>
-            <div id="playerLoading" class="loader" style="display:none;"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
-        </div>
-    </div>
-</div>
-
-<div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
-    <div class="modal-content" style="max-width: 750px;">
-        <div class="modal-header"><h2 id="profileModalTitle">👤 Профіль</h2><button class="close-modal" id="closeProfileBtn">&times;</button></div>
-        <div class="modal-body" id="profileBody"></div>
-    </div>
-</div>
-
-<div class="settings-overlay" id="settingsOverlay"></div>
-<aside class="settings-panel" id="settingsPanel">
-    <div class="settings-header"><h2>⚙️ Налаштування</h2><button class="close-modal" id="closeSettingsBtn">&times;</button></div>
-    <div class="settings-body">
-        <div class="settings-group">
-            <div class="settings-group-title">🎨 Оформлення</div>
-            <div class="settings-row">
-                <div class="settings-label">Кольорова тема</div>
-                <select class="settings-select" id="themeSelect">
-                    <option value="default">Жовта (за замовчуванням)</option>
-                    <option value="grayscale">Чорно-біла</option>
-                    <option value="gold">Золота</option>
-                    <option value="blue">Синя</option>
-                    <option value="purple">Фіолетова</option>
-                    <option value="red">Червона</option>
-                    <option value="green">Зелена</option>
-                </select>
-            </div>
-            <div class="settings-row">
-                <div class="settings-label">Темний режим</div>
-                <label class="toggle-switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
-            </div>
-            <div class="settings-row">
-                <div class="settings-label">Анімації</div>
-                <label class="toggle-switch"><input type="checkbox" id="animationsToggle" checked><span class="slider"></span></label>
+            <div class="header-actions">
+                <div class="search-wrapper" id="searchWrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Пошук аніме..." autocomplete="off" />
+                    <span class="search-shortcut">/</span>
+                    <button class="search-clear" id="searchClearBtn" aria-label="Очистити"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <button id="themeToggleBtn" class="btn-icon" title="Змінити тему (T)">
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
         </div>
-        <div class="settings-group">
-            <div class="settings-group-title">▶️ Відтворення</div>
-            <div class="settings-row">
-                <div class="settings-label">Автовідтворення</div>
-                <label class="toggle-switch"><input type="checkbox" id="autoplayToggle" checked><span class="slider"></span></label>
-            </div>
-            <div class="settings-row">
-                <div class="settings-label">Якість за замовчуванням</div>
-                <select class="settings-select" id="qualitySelect"><option>Авто</option><option>1080p</option><option>720p</option><option>480p</option></select>
-            </div>
-            <div class="settings-row">
-                <div class="settings-label">Гучність (за замовчуванням)</div>
-                <input type="range" class="range-input" id="volumeRange" min="0" max="100" value="80">
-            </div>
+
+        <!-- ОВЕРЛЕЙ LEFTDOCK -->
+        <div class="leftdock-overlay" id="leftdockOverlay"></div>
+
+        <!-- LEFTDOCK -->
+        <aside class="agnative-leftdock" id="leftdock" aria-label="Головне меню">
+            <div class="agnative-leftdock__inner" id="leftdockInner"></div>
+        </aside>
+
+        <!-- КАРУСЕЛЬ -->
+        <div id="featuredCarousel" class="carousel">
+            <div class="carousel-inner"><div class="carousel-items"></div></div>
+            <button class="carousel-control carousel-control-prev" data-carousel-slide="prev" title="Попередній (←)">‹</button>
+            <button class="carousel-control carousel-control-next" data-carousel-slide="next" title="Наступний (→)">›</button>
+            <div class="carousel-indicators"></div>
         </div>
-        <div class="settings-group">
-            <div class="settings-group-title">📝 Субтитри</div>
-            <div class="settings-row">
-                <div class="settings-label">Субтитри</div>
-                <select class="settings-select" id="subtitleSelect"><option>Вимкнено</option><option>Українська</option><option>Англійська</option></select>
-            </div>
-            <div class="settings-row">
-                <div class="settings-label">Розмір тексту</div>
-                <select class="settings-select" id="subtitleSizeSelect"><option>Середній</option><option>Малий</option><option>Великий</option></select>
-            </div>
+
+        <!-- ДІЇ -->
+        <div class="actions-row" id="actionsRow">
+            <button class="action-pill" id="top100Btn" title="ТОП 100 аніме"><i class="fas fa-crown"></i> ТОП 100</button>
+            <button class="action-pill" id="randomBtn" title="Випадкове аніме (R)"><i class="fas fa-dice-d6"></i> Випадкове</button>
         </div>
-        <div class="settings-group">
-            <div class="settings-group-title">🌐 Інтерфейс</div>
-            <div class="settings-row">
-                <div class="settings-label">Мова</div>
-                <select class="settings-select" id="langSelect"><option>Українська</option><option>English</option></select>
+
+        <!-- СІТКА -->
+        <div id="animeContainer" class="anime-grid">
+            <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження аніме...</div>
+        </div>
+        <div class="pagination-row" id="paginationRow"></div>
+
+        <footer><span>MONOANIME &copy; 2026 — Усі права захищено • Клавіші: / пошук, M меню, T тема, R випадкове, ← → карусель, Esc закрити</span></footer>
+    </div>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="backToTopBtn" title="Нагору" aria-label="Прокрутити нагору">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- МОДАЛКА ДЕТАЛЕЙ -->
+    <div id="animeModal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modalTitle">...</h2><button class="close-modal" id="closeModalBtn" title="Закрити (Esc)">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ПЛЕЄРА -->
+    <div id="playerModal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content" style="max-width:900px;">
+            <div class="modal-header"><h2>Плеєр</h2><button class="close-modal" id="closePlayerBtn" title="Закрити (Esc)">&times;</button></div>
+            <div class="modal-body">
+                <div class="player-wrapper" id="lampaPlayerWrapper"></div>
+                <div id="playerLoading" class="loader" style="display:none;"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
             </div>
         </div>
     </div>
-</aside>
 
-<script>
-    // ===== LAMPA PLAYER (Vanilla JS) – мінімалістичний плеєр із віньєткою =====
-    class LampaPlayer {
-        constructor(container, options = {}) {
-            this.container = container;
-            this.options = options;
-            this.hls = null;
-            this.watchTimer = null;
-            this.state = {
-                playing: false,
-                currentTime: 0,
-                duration: 0,
-                volume: 0.8,
-                muted: false,
-                fullscreen: false,
-                uiVisible: false,
-                loading: true,
-                src: null
-            };
-            this.videoRef = null;
-            this.containerRef = null;
-            this._init();
-        }
+    <script>
+        // ========================================================================
+        //  MONOANIME — ОЧИЩЕНА ВЕРСІЯ (без профілю/обраного/історії)
+        // ========================================================================
 
-        _init() {
-            this.container.innerHTML = '';
-            this.containerRef = document.createElement('div');
-            this.containerRef.className = 'lampa-player-container';
-            this.containerRef.style.cssText = 'width:100%; aspect-ratio:16/9; background:#000; position:relative; border-radius:12px; overflow:hidden;';
-            
-            // Відео без нативних елементів керування
-            this.videoRef = document.createElement('video');
-            this.videoRef.setAttribute('crossorigin', 'anonymous');
-            this.videoRef.setAttribute('playsinline', '');
-            this.videoRef.controls = false;
-            this.videoRef.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-            this.containerRef.appendChild(this.videoRef);
-            
-            // Лише віньєтувальний ефект (напівпрозорий градієнт)
-            const overlay = document.createElement('div');
-            overlay.className = 'lampa-overlay';
-            this.containerRef.appendChild(overlay);
-            this.overlay = overlay;
-            
-            this.container.appendChild(this.containerRef);
-            this._bindEvents();
-        }
+        const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
+        const ANIMEUA_BASE = 'https://animeua.club';
+        const GENRE_MAP = {
+            "Бойові мистецтва": "boivie",
+            "Бойовики": "boyovik",
+            "Воєнні": "voenne",
+            "Гарем": "garems",
+            "Драми": "drama",
+            "Детектив": "detektiv",
+            "Демони": "demons",
+            "Комедії": "komik",
+            "Роботи": "meha",
+            "Повсякденність": "posyardnevnist",
+            "Пригоди": "adventures",
+            "Психологічні": "psih",
+            "Романтика": "romantik",
+            "Надприродні": "weird",
+            "Фантастика": "fantastika",
+            "Фентезі": "fentezi",
+            "Школа": "classes",
+            "Еччі": "echhi"
+        };
 
-        _bindEvents() {
-            const v = this.videoRef;
-            
-            // Відстеження стану відтворення
-            v.addEventListener('play', () => { this.state.playing = true; });
-            v.addEventListener('pause', () => { this.state.playing = false; });
-            v.addEventListener('timeupdate', () => {
-                this.state.currentTime = v.currentTime;
-                this.state.duration = v.duration || 0;
-            });
-            v.addEventListener('volumechange', () => {
-                this.state.volume = v.volume;
-                this.state.muted = v.muted;
-            });
-            v.addEventListener('waiting', () => { this.state.loading = true; });
-            v.addEventListener('canplay', () => { this.state.loading = false; });
-            v.addEventListener('error', () => { this.state.loading = false; });
-            
-            // Таймер перегляду
-            this.watchTimer = setInterval(() => {
-                if (!v.paused && typeof Storage !== 'undefined') {
-                    Storage.addWatchTime(5);
-                }
-            }, 5000);
-            
-            // Клік по плеєру – play/pause
-            this.containerRef.addEventListener('click', (e) => {
-                // Не реагуємо на кліки по селекторах (вони мають власний z-index)
-                if (e.target.closest('.player-overlay-selectors')) return;
-                this.togglePlay();
-            });
-            
-            // Подвійний клік – повноекранний режим
-            this.containerRef.addEventListener('dblclick', (e) => {
-                if (e.target.closest('.player-overlay-selectors')) return;
-                this.toggleFullscreen();
-            });
-            
-            // Відстеження повноекранного режиму
-            document.addEventListener('fullscreenchange', () => {
-                this.state.fullscreen = !!document.fullscreenElement;
-            });
-        }
+        String.prototype.hashCode = function() { let h = 0; for (let i = 0; i < this.length; i++) { h = ((h << 5) - h) + this
+                    .charCodeAt(i);
+                h |= 0; } return Math.abs(h); };
 
-        loadSource(src, animeTitle = '', episodeTitle = '') {
-            this.state.src = src;
-            const v = this.videoRef;
-            this.state.loading = true;
-            this.state.playing = false;
-            this.state.currentTime = 0;
-            this.state.duration = 0;
-            
-            if (this.hls) {
-                this.hls.destroy();
-                this.hls = null;
+        function safeQuery(sel, parent) { try { return (parent || document).querySelector(sel); } catch { return null; } }
+
+        function safeQueryAll(sel, parent) { try { return Array.from((parent || document).querySelectorAll(sel)); } catch {
+                return []; } }
+
+        function getProxyUrl(url) { if (!url) return null; return PROXY_URL + '?url=' + encodeURIComponent(url); }
+
+        // ==================== ТЕМИ ====================
+        const Storage = {
+            getTheme() { try { return localStorage.getItem('mono_anime_theme') || 'light'; } catch { return 'light'; } },
+            setTheme(t) { localStorage.setItem('mono_anime_theme', t); },
+            getColorTheme() { try { return localStorage.getItem('mono_anime_color_theme') || 'default'; } catch { return 'default'; } },
+            setColorTheme(t) { localStorage.setItem('mono_anime_color_theme', t); },
+            getSettings() { try { return JSON.parse(localStorage.getItem('mono_anime_settings') || '{}'); } catch { return {}; } },
+            saveSettings(s) { localStorage.setItem('mono_anime_settings', JSON.stringify(s)); }
+        };
+
+        function applyTheme(theme) {
+            const btn = document.getElementById('themeToggleBtn');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
             }
-            v.pause();
-            
-            if (!src) {
-                this.state.loading = false;
+        }
+
+        function applyColorTheme(colorTheme) {
+            document.body.setAttribute('data-theme', colorTheme);
+            const ts = document.getElementById('themeSelectLeft');
+            if (ts) ts.value = colorTheme;
+            Storage.setColorTheme(colorTheme);
+        }
+
+        function toggleTheme() {
+            const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
+            Storage.setTheme(next);
+            applyTheme(next);
+            showToast(next === 'dark' ? '🌙 Темний режим' : '☀️ Світлий режим');
+        }
+
+        // ==================== TOAST ====================
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ==================== API ====================
+        async function fetchUA(url) {
+            const proxyUrl = getProxyUrl(url);
+            const resp = await fetch(proxyUrl);
+            if (!resp.ok) throw new Error(`Помилка ${resp.status}`);
+            const html = await resp.text();
+            return new DOMParser().parseFromString(html, 'text/html');
+        }
+
+        function parseCards(doc) {
+            const cards = safeQueryAll('.poster', doc);
+            if (cards.length) return cards.map(card => {
+                const linkEl = card.tagName === 'A' ? card : safeQuery('a', card);
+                const href = linkEl?.getAttribute('href') || '';
+                const img = safeQuery('img', card);
+                const posterSrc = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
+                const titleEl = safeQuery('.poster__title', card) || safeQuery('h3', card);
+                const title = (titleEl?.textContent || '').trim() || 'Без назви';
+                return {
+                    mal_id: href.hashCode(),
+                    title,
+                    url: href.startsWith('http') ? href : ANIMEUA_BASE + href,
+                    images: { jpg: { large_image_url: posterSrc.startsWith('http') ? posterSrc : (posterSrc ? ANIMEUA_BASE +
+                            posterSrc : '') } },
+                    score: null,
+                    year: null,
+                    from: 'animeua'
+                };
+            });
+            const links = safeQueryAll('a[href*="/anime/"]', doc);
+            const unique = new Map();
+            links.forEach(a => { if (!unique.has(a.href)) unique.set(a.href, a); });
+            return Array.from(unique.values()).map(a => {
+                const img = safeQuery('img', a);
+                const src = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
+                const title = (safeQuery('.poster__title', a)?.textContent || a.textContent || '').trim();
+                return {
+                    mal_id: a.href.hashCode(),
+                    title: title || 'Без назви',
+                    url: a.href,
+                    images: { jpg: { large_image_url: src.startsWith('http') ? src : ANIMEUA_BASE + src } },
+                    score: null,
+                    year: null,
+                    from: 'animeua'
+                };
+            });
+        }
+
+        async function fetchMainPage(page) { const doc = await fetchUA(`${ANIMEUA_BASE}/page/${page}/`); return parseCards(
+                doc); }
+        async function searchAnimeUA(query, page) { const doc = await fetchUA(
+                `${ANIMEUA_BASE}/index.php?do=search&subaction=search&story=${encodeURIComponent(query)}&page=${page}`); return parseCards(
+                doc); }
+        async function fetchByGenre(genreSlug, page) {
+            const url = page > 1 ? `${ANIMEUA_BASE}/${genreSlug}/page/${page}/` : `${ANIMEUA_BASE}/${genreSlug}/`;
+            const doc = await fetchUA(url);
+            return parseCards(doc);
+        }
+        async function fetchTop100() { const doc = await fetchUA(`${ANIMEUA_BASE}/top.html`); return parseCards(doc); }
+
+        function fetchGenres() { return Object.entries(GENRE_MAP).map(([name, slug]) => ({ slug, name })).sort((a, b) => a.name
+                .localeCompare(b.name, 'uk')); }
+
+        function extractSourcesFromText(text, providerName) {
+            let sources = [];
+            const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) || text.match(
+                /playlist\s*:\s*(\[[\s\S]+?\])/i);
+            if (jsonMatch) {
+                try {
+                    let raw = jsonMatch[1].trim();
+                    if ((raw.startsWith("'") && raw.endsWith("'")) || (raw.startsWith('"') && raw.endsWith('"'))) raw = raw.slice(
+                    1, -1);
+                    if (raw.startsWith('{') && raw.endsWith('}')) raw = `[${raw}]`;
+                    const clean = raw.replace(/,\s*\]/g, ']').replace(/,\s*\}/g, '}');
+                    const arr = JSON.parse(clean);
+                    const walk = (items, dub, season) => {
+                        dub = dub || '';
+                        season = season || '1';
+                        items.forEach(item => {
+                            if (item.folder || item.playlist) {
+                                let nd = dub,
+                                    ns = season;
+                                const ft = item.title || '';
+                                const sm = ft.match(/[Сс]езон\s*(\d+)/);
+                                if (sm) { ns = sm[1]; if (ft.trim().toLowerCase() !== `сезон ${ns}`.toLowerCase()) nd = ft
+                                        .replace(/[Сс]езон\s*\d+/g, '').replace(/\//g, '').trim() || dub; } else if (ft)
+                                    nd = ft;
+                                walk(item.folder || item.playlist, nd, ns);
+                            } else if (item.file) {
+                                const epT = item.title || 'Серія';
+                                let fd = dub || providerName || 'UA',
+                                    fs = season;
+                                const esm = epT.match(/[Сс]езон\s*(\d+)/);
+                                if (esm) fs = esm[1];
+                                const epm = epT.match(/(\d+)\s*[Сс]ері[яіяа]|[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/);
+                                sources.push({ label: epT, file: item.file, provider: providerName, dub: fd.trim(),
+                                    season: fs, episode: epm ? (epm[1] || epm[2] || epm[3]) : '1' });
+                            }
+                        });
+                    };
+                    if (Array.isArray(arr)) walk(arr);
+                    else if (arr.file) sources.push({ label: arr.title || 'Озвучка', file: arr.file, provider: providerName,
+                        dub: providerName || 'UA', season: '1', episode: '1' });
+                } catch (e) { console.warn('JSON parse error', e); }
+            }
+            if (sources.length === 0) {
+                const urlMatches = [...text.matchAll(/https?:\/\/[^\s\'"<>]+\.m3u8[^\s\'"<>]*/g)];
+                urlMatches.forEach((m, idx) => {
+                    if (!sources.some(s => s.file === m[0])) sources.push({ label: `Потік ${idx+1}`, file: m[0],
+                        provider: providerName, dub: providerName || 'UA', season: '1', episode: String(idx + 1) });
+                });
+            }
+            return sources;
+        }
+
+        function extractPlayerIframeUrls(doc) {
+            const selectors = ['.video-responsive iframe', '.player-responsive iframe', '#player iframe',
+                '.pmovie__player iframe', 'iframe[src]', 'iframe[data-src]'
+            ];
+            const urls = [];
+            for (const sel of selectors) {
+                safeQueryAll(sel, doc).forEach(el => {
+                    let src = el.getAttribute('src') || el.getAttribute('data-src');
+                    if (!src || src === 'about:blank') return;
+                    if (src.startsWith('//')) src = 'https:' + src;
+                    if (!src.startsWith('http')) src = ANIMEUA_BASE + src;
+                    urls.push(src);
+                });
+            }
+            const scripts = safeQueryAll('script:not([src])', doc);
+            for (const s of scripts) {
+                const matches = s.textContent.matchAll(/(?:playerUrl|iframeUrl|src)\s*[:=]\s*['"]([^'"]+)['"]/g);
+                for (const match of matches) {
+                    let url = match[1];
+                    if (url.includes('ashdi.vip') || url.includes('vidmoly') || url.includes('player')) {
+                        if (url.startsWith('//')) url = 'https:' + url;
+                        if (!url.startsWith('http')) url = ANIMEUA_BASE + url;
+                        urls.push(url);
+                    }
+                }
+            }
+            return [...new Set(urls)];
+        }
+
+        async function loadAnimeDetails(animeUrl) {
+            const doc = await fetchUA(animeUrl);
+            let title = '';
+            for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
+                const el = safeQuery(sel, doc);
+                if (el?.textContent.trim()) { title = el.textContent.trim(); break; }
+            }
+            let poster = '';
+            for (const sel of ['div.page__subcol-side .img-fit-cover img', '.pmovie__poster img', '.anime__poster img']) {
+                const el = safeQuery(sel, doc);
+                if (el) {
+                    const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+                    if (src) { poster = src.startsWith('http') ? src : ANIMEUA_BASE + src; break; }
+                }
+            }
+            const genres = safeQueryAll('.pmovie__genres a, .genres a', doc).map(a => a.textContent.trim()).filter(Boolean);
+            const yearEl = safeQuery('.pmovie__year, .release-year', doc);
+            const yearMatch = (yearEl?.textContent || '').match(/\d{4}/);
+            const year = yearMatch ? parseInt(yearMatch[0]) : null;
+            let synopsis = '';
+            for (const sel of ['.full-text', '.pmovie__description', '.anime__description']) {
+                const el = safeQuery(sel, doc);
+                if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
+            }
+            let rating = '';
+            const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
+            if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
+
+            const playerUrls = extractPlayerIframeUrls(doc);
+            const allRawSources = [];
+            for (const playerUrl of playerUrls) {
+                try {
+                    let provider = 'Джерело';
+                    if (playerUrl.includes('ashdi')) provider = 'Ashdi';
+                    else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
+                    else if (playerUrl.includes('player')) provider = 'Player';
+                    const playerHtml = await fetchUA(playerUrl);
+                    const text = playerHtml.body?.innerHTML || '';
+                    allRawSources.push(...extractSourcesFromText(text, provider));
+                    const nestedIframes = safeQueryAll('iframe', playerHtml);
+                    for (const nested of nestedIframes) {
+                        let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
+                        if (nestedUrl && nestedUrl !== 'about:blank') {
+                            if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
+                            if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
+                            const nestedHtml = await fetchUA(nestedUrl);
+                            allRawSources.push(...extractSourcesFromText(nestedHtml.body?.innerHTML || '', provider));
+                        }
+                    }
+                } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
+            }
+
+            const seasons = {};
+            const seenKeys = new Set();
+            allRawSources.forEach(s => {
+                const sn = s.season || '1',
+                    dn = s.dub || 'UA',
+                    en = s.episode || '1';
+                const uk = `${sn}-${dn}-${en}-${s.file}`;
+                if (!seenKeys.has(uk)) {
+                    seenKeys.add(uk);
+                    if (!seasons[sn]) seasons[sn] = {};
+                    if (!seasons[sn][dn]) seasons[sn][dn] = [];
+                    seasons[sn][dn].push({ title: s.label, season: sn, episode: en, file: s.file, dub: dn, provider: s
+                            .provider });
+                }
+            });
+            for (const s in seasons)
+                for (const d in seasons[s]) seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
+            return { mal_id: animeUrl.hashCode(), title, images: { jpg: { large_image_url: poster, image_url: poster } },
+                genres, year, synopsis, seasons, url: animeUrl, from: 'animeua', rating };
+        }
+
+        // ==================== СТАН ====================
+        let currentTab = 'main',
+            currentPage = 1,
+            currentSearchQuery = '',
+            currentGenreSlug = null,
+            currentList = [];
+
+        window.changePage = (p) => { currentPage = p;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            loadContent(); };
+
+        function showSkeleton() {
+            const container = document.getElementById('animeContainer');
+            if (!container) return;
+            const cols = Math.floor(container.offsetWidth / 195) || 4;
+            let html = '';
+            for (let i = 0; i < cols * 2; i++) {
+                html +=
+                    `<div class="anime-card"><div class="skeleton skeleton-poster"></div><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function loadContent() {
+            const container = document.getElementById('animeContainer');
+            if (!container) return;
+            showSkeleton();
+            try {
+                if (currentTab === 'top100') currentList = await fetchTop100();
+                else if (currentSearchQuery) currentList = await searchAnimeUA(currentSearchQuery, currentPage);
+                else if (currentGenreSlug) currentList = await fetchByGenre(currentGenreSlug, currentPage);
+                else currentList = await fetchMainPage(currentPage);
+                renderCards(currentList);
+            } catch (err) {
+                container.innerHTML =
+                    `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="loadContent()">🔄 Спробувати знову</button></div>`;
+            }
+        }
+
+        function renderCards(list) {
+            const container = document.getElementById('animeContainer');
+            if (!container) return;
+            if (!list.length) {
+                container.innerHTML = `
+              <div class="loader" style="grid-column:1/-1;text-align:center;">
+                <i class="fas fa-search" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--text-muted);"></i>
+                <p style="font-size:1.1rem;margin-bottom:0.5rem;">Нічого не знайдено</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);">Спробуйте змінити пошуковий запит або фільтри</p>
+                <button class="btn-outline" style="margin-top:1rem;" onclick="showMainPage()">🏠 На головну</button>
+              </div>`;
+                document.getElementById('paginationRow').innerHTML = '';
                 return;
             }
-            
-            const proxyUrl = (typeof getProxyUrl === 'function') ? getProxyUrl(src) : src;
-            
-            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
-                this.hls = hls;
-                hls.loadSource(proxyUrl);
-                hls.attachMedia(v);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    this.state.loading = false;
-                });
-                hls.on(Hls.Events.ERROR, (ev, data) => {
-                    if (data && data.fatal) {
-                        this.state.loading = false;
-                        v.src = proxyUrl;
-                    }
-                });
-            } else {
-                v.src = proxyUrl;
-                const onCanPlay = () => {
-                    this.state.loading = false;
-                    v.removeEventListener('canplay', onCanPlay);
-                };
-                v.addEventListener('canplay', onCanPlay);
-            }
+            container.innerHTML = list.map((a, idx) => `
+            <div class="anime-card" data-url="${a.url}" tabindex="0" role="button" aria-label="${a.title}" style="animation-delay:${idx*0.04}s">
+              <div class="anime-poster"><img src="${a.images.jpg.large_image_url}" alt="${a.title}" loading="lazy" class="img--blur" onload="this.classList.add('img--loaded')" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22280%22><rect fill=%22%23ddd%22 width=%22200%22 height=%22280%22/><text x=%22100%22 y=%22140%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2214%22>Немає зображення</text></svg>'"></div>
+              <div class="anime-info"><div class="anime-title">${a.title}</div><div class="anime-meta">${a.year||'—'} • UA</div></div>
+            </div>`).join('');
+            container.querySelectorAll('.anime-card').forEach(card => {
+                card.addEventListener('click', () => openDetailModal(card.dataset.url));
+                card.addEventListener('keydown', e => { if (e.key === 'Enter') openDetailModal(card.dataset.url); });
+            });
+            renderPagination();
         }
 
-        togglePlay() {
-            const v = this.videoRef;
-            if (v.paused) v.play().catch(() => {});
-            else v.pause();
+        function renderPagination() {
+            const row = document.getElementById('paginationRow');
+            if (!row) return;
+            if (currentTab === 'top100') { row.innerHTML = ''; return; }
+            const prevDisabled = currentPage <= 1 ? 'disabled' : '';
+            row.innerHTML = `
+            <button class="btn-outline" onclick="changePage(${currentPage-1})" ${prevDisabled}><i class="fas fa-chevron-left"></i> Назад</button>
+            <span class="page-indicator">Сторінка ${currentPage}</span>
+            <button class="btn-outline" onclick="changePage(${currentPage+1})">Вперед <i class="fas fa-chevron-right"></i></button>
+          `;
         }
 
-        toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                this.containerRef.requestFullscreen().catch(() => {});
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        destroy() {
-            clearInterval(this.watchTimer);
-            if (this.hls) {
-                this.hls.destroy();
-                this.hls = null;
-            }
-            this.videoRef.pause();
-            this.videoRef.removeAttribute('src');
-            this.videoRef.load();
-            if (this.container) {
-                this.container.innerHTML = '';
-            }
-        }
-    }
-
-    // ===== utils =====
-    String.prototype.hashCode = function() { let hash = 0; for (let i = 0; i < this.length; i++) { hash = ((hash << 5) - hash) + this.charCodeAt(i); hash |= 0; } return Math.abs(hash); };
-    function safeQuery(sel, parent = document) { try { return parent.querySelector(sel); } catch (e) { return null; } }
-    function safeQueryAll(sel, parent = document) { try { return Array.from(parent.querySelectorAll(sel)); } catch (e) { return []; } }
-
-    // ===== config =====
-    const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
-    const ANIMEUA_BASE = 'https://animeua.club';
-    const GENRE_MAP = {
-        "Бойові мистецтва":"boivie","Бойовики":"boyovik","Воєнні":"voenne","Гарем":"garems","Драми":"drama",
-        "Детектив":"detektiv","Демони":"demons","Комедії":"komik","Роботи":"meha","Повсякденність":"posyardnevnist",
-        "Пригоди":"adventures","Психологічні":"psih","Романтика":"romantik","Надприродні":"weird",
-        "Фантастика":"fantastika","Фентезі":"fentezi","Школа":"classes","Еччі":"echhi"
-    };
-    function getProxyUrl(url) { if (!url) return null; return PROXY_URL + '?url=' + encodeURIComponent(url); }
-
-    // ===== local auth =====
-    const LOCAL_USERS_KEY = 'mono_anime_local_users';
-    const LOCAL_CURRENT_USER_KEY = 'mono_anime_local_current_user';
-
-    function getLocalUsers() { try { return JSON.parse(localStorage.getItem(LOCAL_USERS_KEY) || '[]'); } catch { return []; } }
-    function saveLocalUsers(users) { localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users)); }
-    function getCurrentLocalUser() { return localStorage.getItem(LOCAL_CURRENT_USER_KEY); }
-    function setCurrentLocalUser(nick) { if (nick) localStorage.setItem(LOCAL_CURRENT_USER_KEY, nick); else localStorage.removeItem(LOCAL_CURRENT_USER_KEY); }
-
-    window.getCurrentUser = function() {
-        const nick = getCurrentLocalUser();
-        if (!nick) return null;
-        const users = getLocalUsers();
-        const user = users.find(u => u.nick === nick);
-        return user ? { nick: user.nick, displayName: user.nick } : null;
-    };
-
-    window.authLoginLocal = function() {
-        const nick = document.getElementById('authNick')?.value?.trim();
-        const password = document.getElementById('authPassword')?.value;
-        if (!nick || !password) { showToast('❌ Заповніть нік та пароль'); return; }
-        if (nick.length < 2) { showToast('❌ Нік має бути не менше 2 символів'); return; }
-        const users = getLocalUsers();
-        const existing = users.find(u => u.nick === nick);
-        if (existing) {
-            if (existing.password !== password) { showToast('❌ Невірний пароль'); return; }
-            setCurrentLocalUser(nick);
-        } else {
-            users.push({ nick, password });
-            saveLocalUsers(users);
-            setCurrentLocalUser(nick);
-        }
-        closeAuthModal();
-        showToast('✅ Успішний вхід');
-        openProfileModal();
-    };
-
-    window.authSignOutLocal = function() {
-        setCurrentLocalUser(null);
-        showToast('👋 Ви вийшли');
-        openProfileModal();
-    };
-
-    // ===== storage =====
-    const Storage = {
-        getBookmarks() { try { return JSON.parse(localStorage.getItem('mono_anime_bookmarks') || '[]'); } catch { return []; } },
-        saveBookmarks(arr) { localStorage.setItem('mono_anime_bookmarks', JSON.stringify(arr)); },
-        getHistory() { try { return JSON.parse(localStorage.getItem('mono_anime_history') || '[]'); } catch { return []; } },
-        addHistory(anime) {
-            if (!anime || !anime.mal_id) return;
-            const hist = this.getHistory().filter(h => h.mal_id !== anime.mal_id);
-            hist.unshift({ mal_id: anime.mal_id, title: anime.title, image_url: anime.images?.jpg?.large_image_url || '', url: anime.url || '', score: anime.score, year: anime.year, timestamp: Date.now() });
-            localStorage.setItem('mono_anime_history', JSON.stringify(hist.slice(0, 50)));
-        },
-        clearHistory() { localStorage.setItem('mono_anime_history', '[]'); },
-        getTheme() { return localStorage.getItem('mono_anime_theme') || 'light'; },
-        setTheme(theme) { localStorage.setItem('mono_anime_theme', theme); },
-        getColorTheme() { return localStorage.getItem('mono_anime_color_theme') || 'default'; },
-        setColorTheme(theme) { localStorage.setItem('mono_anime_color_theme', theme); },
-        getSettings() { try { return JSON.parse(localStorage.getItem('mono_anime_settings') || '{}'); } catch { return {}; } },
-        saveSettings(s) { localStorage.setItem('mono_anime_settings', JSON.stringify(s)); },
-        getWatchTime() { try { return JSON.parse(localStorage.getItem('mono_anime_watch_time') || '0'); } catch { return 0; } },
-        addWatchTime(seconds) { const cur = this.getWatchTime(); localStorage.setItem('mono_anime_watch_time', JSON.stringify(cur + Math.floor(seconds))); }
-    };
-
-    function updateBadge() { const badge = document.getElementById('bookmarkBadge'); if (!badge) return; const count = Storage.getBookmarks().length; badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
-
-    function applyTheme(theme) {
-        const btn = document.getElementById('themeToggleBtn');
-        const darkToggle = document.getElementById('darkModeToggle');
-        if (theme === 'dark') { document.body.classList.add('dark-mode'); if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>'; if (darkToggle) darkToggle.checked = true; }
-        else { document.body.classList.remove('dark-mode'); if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>'; if (darkToggle) darkToggle.checked = false; }
-    }
-    function applyColorTheme(colorTheme) { document.body.setAttribute('data-theme', colorTheme); const themeSelect = document.getElementById('themeSelect'); if (themeSelect) themeSelect.value = colorTheme; Storage.setColorTheme(colorTheme); }
-    function toggleTheme() { const next = Storage.getTheme() === 'dark' ? 'light' : 'dark'; Storage.setTheme(next); applyTheme(next); }
-
-    // ===== api =====
-    async function fetchUA(url) {
-        const proxyUrl = getProxyUrl(url);
-        const resp = await fetch(proxyUrl);
-        if (!resp.ok) throw new Error(`status ${resp.status}`);
-        const html = await resp.text();
-        return new DOMParser().parseFromString(html, 'text/html');
-    }
-    function parseCards(doc) {
-        const cards = safeQueryAll('.poster', doc);
-        if (cards.length) return cards.map(card => {
-            const linkEl = card.tagName === 'A' ? card : safeQuery('a', card);
-            const href = linkEl?.getAttribute('href') || '';
-            const img = safeQuery('img', card);
-            const posterSrc = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
-            const titleEl = safeQuery('.poster__title', card) || safeQuery('h3', card);
-            const title = (titleEl?.textContent || '').trim() || 'Без назви';
-            return { mal_id: href.hashCode(), title, url: href.startsWith('http') ? href : ANIMEUA_BASE + href, images: { jpg: { large_image_url: posterSrc.startsWith('http') ? posterSrc : (posterSrc ? ANIMEUA_BASE + posterSrc : '') } }, score: null, year: null, from: 'animeua' };
-        });
-        const links = safeQueryAll('a[href*="/anime/"]', doc);
-        const unique = new Map(); links.forEach(a => { if (!unique.has(a.href)) unique.set(a.href, a); });
-        return Array.from(unique.values()).map(a => {
-            const img = safeQuery('img', a); const src = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
-            const title = (safeQuery('.poster__title', a)?.textContent || a.textContent || '').trim();
-            return { mal_id: a.href.hashCode(), title: title || 'Без назви', url: a.href, images: { jpg: { large_image_url: src.startsWith('http') ? src : ANIMEUA_BASE + src } }, score: null, year: null, from: 'animeua' };
-        });
-    }
-    async function fetchMainPage(page = 1) { const doc = await fetchUA(`${ANIMEUA_BASE}/page/${page}/`); return parseCards(doc); }
-    async function searchAnimeUA(query, page = 1) { const doc = await fetchUA(`${ANIMEUA_BASE}/index.php?do=search&subaction=search&story=${encodeURIComponent(query)}&page=${page}`); return parseCards(doc); }
-    async function fetchByGenre(genreSlug, page = 1) { 
-        const url = page > 1 ? `${ANIMEUA_BASE}/${genreSlug}/page/${page}/` : `${ANIMEUA_BASE}/${genreSlug}/`;
-        const doc = await fetchUA(url); return parseCards(doc); 
-    }
-    async function fetchTop100() { const doc = await fetchUA(`${ANIMEUA_BASE}/top.html`); return parseCards(doc); }
-    function fetchGenres() { return Object.entries(GENRE_MAP).map(([name, slug]) => ({ slug, name })).sort((a,b) => a.name.localeCompare(b.name, 'uk')); }
-
-    function extractSourcesFromText(text, providerName='') { let sources = []; const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) || text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i); if (jsonMatch) { try { let raw = jsonMatch[1].trim(); if ((raw.startsWith("'")&&raw.endsWith("'"))||(raw.startsWith('"')&&raw.endsWith('"'))) raw=raw.slice(1,-1); if (raw.startsWith('{')&&raw.endsWith('}')) raw=`[${raw}]`; const clean=raw.replace(/,\s*\]/g,']').replace(/,\s*\}/g,'}'); const arr=JSON.parse(clean); const walk=(items,dub='',season='1')=>{ items.forEach(item=>{ if(item.folder||item.playlist){ let nd=dub,ns=season; const folderTitle=item.title||''; const sm=folderTitle.match(/[Сс]езон\s*(\d+)/); if(sm){ ns=sm[1]; if(folderTitle.trim().toLowerCase()!==`сезон ${ns}`.toLowerCase()) nd=folderTitle.replace(/[Сс]езон\s*\d+/g,'').replace(/\//g,'').trim()||dub; } else if(folderTitle) nd=folderTitle; walk(item.folder||item.playlist,nd,ns); } else if(item.file){ const epTitle=item.title||'Серія'; let fd=dub||providerName||'UA', fs=season; const esm=epTitle.match(/[Сс]езон\s*(\d+)/); if(esm) fs=esm[1]; const epm=epTitle.match(/(\d+)\s*[Сс]ері[яіяа]|[Сс]ері[яіяа]\s*(\d+)|[Ее]п\.?\s*(\d+)/); const epNum=epm?(epm[1]||epm[2]||epm[3]):'1'; sources.push({label:epTitle,file:item.file,provider:providerName,dub:fd.trim(),season:fs,episode:epNum}); } }); }; if(Array.isArray(arr)) walk(arr); else if(arr.file) sources.push({label:arr.title||'Озвучка',file:arr.file,provider:providerName,dub:providerName||'UA',season:'1',episode:'1'}); } catch(e){ console.warn('JSON parse error',e); } } if(sources.length===0){ const urlMatches=[...text.matchAll(/https?:\/\/[^\s\'"<>]+\.m3u8[^\s\'"<>]*/g)]; urlMatches.forEach((m,idx)=>{ if(!sources.some(s=>s.file===m[0])) sources.push({label:`Потік ${idx+1}`,file:m[0],provider:providerName,dub:providerName||'UA',season:'1',episode:String(idx+1)}); }); } return sources; }
-
-    function extractPlayerIframeUrls(doc) { const selectors=['.video-responsive iframe','.player-responsive iframe','#player iframe','.pmovie__player iframe','iframe[src]','iframe[data-src]']; const urls=[]; for(const sel of selectors){ safeQueryAll(sel,doc).forEach(el=>{ let src=el.getAttribute('src')||el.getAttribute('data-src'); if(!src||src==='about:blank') return; if(src.startsWith('//')) src='https:'+src; if(!src.startsWith('http')) src=ANIMEUA_BASE+src; urls.push(src); }); } const scripts=safeQueryAll('script:not([src])',doc); for(const s of scripts){ const matches=s.textContent.matchAll(/(?:playerUrl|iframeUrl|src)\s*[:=]\s*['"]([^'"]+)['"]/g); for(const match of matches){ let url=match[1]; if(url.includes('ashdi.vip')||url.includes('vidmoly')||url.includes('player')){ if(url.startsWith('//')) url='https:'+url; if(!url.startsWith('http')) url=ANIMEUA_BASE+url; urls.push(url); } } } return [...new Set(urls)]; }
-
-    async function loadAnimeDetails(animeUrl) {
-        const doc = await fetchUA(animeUrl);
-        let title=''; for(const sel of ['.page__subcol-main h1','.pmovie__title','h1.title','h1']){ const el=safeQuery(sel,doc); if(el?.textContent.trim()){ title=el.textContent.trim(); break; } }
-        let poster=''; for(const sel of ['div.page__subcol-side .img-fit-cover img','.pmovie__poster img','.anime__poster img']){ const el=safeQuery(sel,doc); if(el){ const src=el.getAttribute('data-src')||el.getAttribute('src')||''; if(src){ poster=src.startsWith('http')?src:ANIMEUA_BASE+src; break; } } }
-        const genres=safeQueryAll('.pmovie__genres a, .genres a',doc).map(a=>a.textContent.trim()).filter(Boolean);
-        const yearEl=safeQuery('.pmovie__year, .release-year',doc); const yearMatch=(yearEl?.textContent||'').match(/\d{4}/); const year=yearMatch?parseInt(yearMatch[0]):null;
-        let synopsis=''; for(const sel of ['.full-text','.pmovie__description','.anime__description']){ const el=safeQuery(sel,doc); if(el?.textContent.trim()){ synopsis=el.textContent.trim(); break; } }
-        let rating=''; const ratingEl=doc.querySelector('.pmovie__age p, .pmovie__age'); if(ratingEl) rating=ratingEl.textContent.replace('Рейтинг:','').trim();
-
-        const playerUrls=extractPlayerIframeUrls(doc);
-        const allRawSources=[];
-        for(const playerUrl of playerUrls){ try{ let provider='Джерело'; if(playerUrl.includes('ashdi')) provider='Ashdi'; else if(playerUrl.includes('vidmoly')) provider='Vidmoly'; else if(playerUrl.includes('player')) provider='Player'; const playerHtml=await fetchUA(playerUrl); const text=playerHtml.body?.innerHTML||''; allRawSources.push(...extractSourcesFromText(text,provider)); const nestedIframes=safeQueryAll('iframe',playerHtml); for(const nested of nestedIframes){ let nestedUrl=nested.getAttribute('src')||nested.getAttribute('data-src'); if(nestedUrl&&nestedUrl!=='about:blank'){ if(nestedUrl.startsWith('//')) nestedUrl='https:'+nestedUrl; if(!nestedUrl.startsWith('http')) nestedUrl=ANIMEUA_BASE+nestedUrl; const nestedHtml=await fetchUA(nestedUrl); allRawSources.push(...extractSourcesFromText(nestedHtml.body?.innerHTML||'',provider)); } } }catch(e){ console.warn('Player fetch failed',playerUrl,e); } }
-
-        const seasons={}; const seenKeys=new Set();
-        allRawSources.forEach(s=>{ const seasonNum=s.season||'1'; const dubName=s.dub||'UA'; const episodeNum=s.episode||'1'; const uniqueKey=`${seasonNum}-${dubName}-${episodeNum}-${s.file}`; if(!seenKeys.has(uniqueKey)){ seenKeys.add(uniqueKey); if(!seasons[seasonNum]) seasons[seasonNum]={}; if(!seasons[seasonNum][dubName]) seasons[seasonNum][dubName]=[]; seasons[seasonNum][dubName].push({title:s.label,season:seasonNum,episode:episodeNum,file:s.file,dub:dubName,provider:s.provider}); } });
-        for(const s in seasons) for(const d in seasons[s]) seasons[s][d].sort((a,b)=>parseInt(a.episode)-parseInt(b.episode));
-        return { mal_id: animeUrl.hashCode(), title, images:{jpg:{large_image_url:poster,image_url:poster}}, genres, year, synopsis, seasons, url:animeUrl, from:'animeua', rating };
-    }
-
-    // ===== ui =====
-    function showToast(msg){ const toast=document.getElementById('toast'); if(!toast) return; toast.textContent=msg; toast.classList.add('show'); clearTimeout(toast._timeout); toast._timeout=setTimeout(()=>toast.classList.remove('show'),2200); }
-    
-    function renderCards(list){
-        const container=document.getElementById('animeContainer'); if(!container) return;
-        if(!list.length){ container.innerHTML='<div class="loader"><i class="fas fa-search"></i> Нічого не знайдено</div>'; return; }
-        container.innerHTML=list.map(a=>`
-        <div class="anime-card" data-url="${a.url}" tabindex="0" role="button" aria-label="Переглянути ${a.title}">
-            <div class="anime-poster"><img src="${a.images.jpg.large_image_url}" alt="${a.title}" loading="lazy" class="img--blur" onload="this.classList.add('img--loaded')"></div>
-            <div class="anime-info"><div class="anime-title">${a.title}</div><div class="anime-meta">${a.year||''} • UA</div></div>
-        </div>`).join('');
-        container.querySelectorAll('.anime-card').forEach(card=>{ card.addEventListener('click',()=>openDetailModal(card.dataset.url)); card.addEventListener('keydown',(e)=>{ if(e.key==='Enter') openDetailModal(card.dataset.url); }); });
-        renderPagination();
-        const infoSpan = document.getElementById('searchInfo');
-        if(infoSpan && currentSearchQuery) {
-            infoSpan.textContent = ` знайдено ${list.length}`;
-            infoSpan.style.display = 'inline-block';
-        } else if(infoSpan && !currentSearchQuery) {
-            infoSpan.style.display = 'none';
-        }
-    }
-    
-    function renderPagination(){ 
-        const row = document.getElementById('paginationRow'); 
-        if(!row) return; 
-        if (currentTab === 'top100') {
-            row.innerHTML = ''; 
-            return;
-        }
-        let html = ''; 
-        if(currentPage > 1) html += `<button class="btn-outline" onclick="changePage(${currentPage-1})"><i class="fas fa-chevron-left"></i> Назад</button>`; 
-        html += `<span style="margin:0 1rem;font-weight:700;font-size:0.9rem;color:var(--text);">Сторінка ${currentPage}</span>`; 
-        html += `<button class="btn-outline" onclick="changePage(${currentPage+1})">Вперед <i class="fas fa-chevron-right"></i></button>`; 
-        row.innerHTML = html; 
-    }
-
-    function clearSearch() {
-        const searchInput = document.getElementById('searchInput');
-        if(searchInput) {
-            searchInput.value = '';
+        function clearSearch() {
+            const si = document.getElementById('searchInput');
+            if (si) si.value = '';
             currentSearchQuery = '';
             currentPage = 1;
             currentTab = 'main';
             currentGenreSlug = null;
-            document.querySelectorAll('.action-pill').forEach(p=>p.classList.remove('active-pill'));
-            document.querySelectorAll('.category-pill').forEach(p=>p.classList.remove('active-pill'));
-            const allBtn = document.querySelector('.category-pill');
-            if(allBtn) allBtn.classList.add('active-pill');
+            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
+            document.querySelectorAll('.genre-item').forEach(p => p.classList.remove('active-genre'));
             loadContent();
-            const clearBtn = document.getElementById('searchClearBtn');
-            if(clearBtn) clearBtn.classList.remove('visible');
-            const infoSpan = document.getElementById('searchInfo');
-            if(infoSpan) infoSpan.style.display = 'none';
+            const cb = document.getElementById('searchClearBtn');
+            if (cb) cb.classList.remove('visible');
+            syncLeftdockActive();
         }
-    }
-    
-    // ===== modals =====
-    function openAuthModal(){
-        let modal=document.getElementById('authModal');
-        if(!modal){
-            modal=document.createElement('div'); modal.id='authModal'; modal.className='modal-overlay';
-            modal.innerHTML=`
-            <div class="modal-box" style="max-width:380px;padding:2rem;position:relative;border-radius:var(--radius-lg);">
-                <button onclick="window.closeAuthModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-secondary);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;">✕</button>
-                <h3 style="margin-bottom:1.5rem;text-align:center;">🔐 Увійти до профілю</h3>
-                <div style="margin-bottom:0.75rem;">
-                    <input id="authNick" type="text" placeholder="Нік" style="width:100%;padding:0.7rem 1rem;border-radius:10px;border:1px solid var(--border);font-size:1rem;box-sizing:border-box;background:var(--surface);color:var(--text);font-family:inherit;outline:none;">
-                </div>
-                <div style="margin-bottom:1.25rem;">
-                    <input id="authPassword" type="password" placeholder="Пароль" style="width:100%;padding:0.7rem 1rem;border-radius:10px;border:1px solid var(--border);font-size:1rem;box-sizing:border-box;background:var(--surface);color:var(--text);font-family:inherit;outline:none;">
-                </div>
-                <button onclick="window.authLoginLocal()" style="width:100%;padding:0.75rem;border-radius:10px;border:none;background:var(--accent-gradient);color:var(--accent-text);font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;">Увійти</button>
-                <p style="text-align:center;margin-top:1rem;font-size:0.75rem;color:var(--text-muted);">Новий нік буде автоматично зареєстровано</p>
-            </div>`;
-            document.body.appendChild(modal);
-            modal.addEventListener('click',(e)=>{ if(e.target===modal) window.closeAuthModal(); });
+
+        function showTop100() {
+            currentTab = 'top100';
+            currentPage = 1;
+            currentSearchQuery = '';
+            currentGenreSlug = null;
+            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
+            document.getElementById('top100Btn')?.classList.add('active-pill');
+            document.querySelectorAll('.genre-item').forEach(p => p.classList.remove('active-genre'));
+            const si = document.getElementById('searchInput');
+            if (si) si.value = '';
+            const cb = document.getElementById('searchClearBtn');
+            if (cb) cb.classList.remove('visible');
+            loadContent();
+            syncLeftdockActive();
+            showToast('👑 ТОП 100 аніме');
         }
-        modal.style.display='flex'; document.body.style.overflow='hidden';
-    }
-    window.closeAuthModal=function(){ const modal=document.getElementById('authModal'); if(modal){ modal.style.display='none'; document.body.style.overflow=''; const nick=document.getElementById('authNick'); const pass=document.getElementById('authPassword'); if(nick) nick.value=''; if(pass) pass.value=''; } };
 
-    async function toggleBookmark(anime){
-        const bookmarkData={ mal_id:anime.mal_id, title:anime.title, image_url:anime.images?.jpg?.large_image_url||'', url:anime.url||'', score:anime.score||null, year:anime.year||null, timestamp:Date.now() };
-        let b=Storage.getBookmarks(); const idx=b.findIndex(x=>x.mal_id===anime.mal_id);
-        if(idx>-1){ b.splice(idx,1); showToast('Видалено з обраного'); }
-        else { b.push(bookmarkData); showToast('Додано в обране ❤️'); }
-        Storage.saveBookmarks(b); updateBadge();
-    }
-
-    function openProfileModal(){
-        const profileModal=document.getElementById('profileModal'); if(!profileModal) return;
-        profileModal.style.display='flex'; document.body.style.overflow='hidden';
-        const profileBody=document.getElementById('profileBody'); if(!profileBody) return;
-        const user=window.getCurrentUser();
-        if(!user){
-            const bookmarks=Storage.getBookmarks(); const history=Storage.getHistory(); const watchTime=Storage.getWatchTime();
-            const hours=Math.floor(watchTime/3600); const mins=Math.floor((watchTime%3600)/60);
-            profileBody.innerHTML=`
-            <div class="profile-hero">
-                <div class="profile-avatar-large"><i class="fas fa-user"></i></div>
-                <div class="profile-hero-info"><h3>Гість</h3><div class="profile-email">Локальний профіль</div><div class="profile-badge"><i class="fas fa-globe"></i> Офлайн</div><button class="profile-edit-btn" onclick="openAuthModal()"><i class="fas fa-sign-in-alt"></i> Увійти</button></div>
-            </div>
-            <div class="profile-stats-row">
-                <div class="profile-stat-card"><span class="stat-icon"><i class="fas fa-bookmark"></i></span><div class="stat-num">${bookmarks.length}</div><div class="stat-label">Обране</div></div>
-                <div class="profile-stat-card"><span class="stat-icon"><i class="fas fa-history"></i></span><div class="stat-num">${history.length}</div><div class="stat-label">Історія</div></div>
-                <div class="profile-stat-card"><span class="stat-icon"><i class="fas fa-clock"></i></span><div class="stat-num">${hours}г ${mins}хв</div><div class="stat-label">Переглянуто</div></div>
-            </div>
-            <div class="profile-tabs-row">
-                <button class="profile-tab-btn active-profile-tab" data-ptab="bookmarks" onclick="switchProfileTab(this,'bookmarks')"><i class="fas fa-star"></i> Обране</button>
-                <button class="profile-tab-btn" data-ptab="history" onclick="switchProfileTab(this,'history')"><i class="fas fa-history"></i> Історія</button>
-            </div>
-            <div id="profileTabBookmarks">${renderProfileMediaGrid(bookmarks,'Немає обраних аніме','bookmark')}</div>
-            <div id="profileTabHistory" style="display:none;">${renderProfileMediaGrid(history,'Історія порожня','history')}</div>`;
-            bindProfileCardClicks(profileModal); return;
+        function showMainPage() {
+            currentTab = 'main';
+            currentPage = 1;
+            currentSearchQuery = '';
+            currentGenreSlug = null;
+            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
+            document.querySelectorAll('.genre-item').forEach(p => p.classList.remove('active-genre'));
+            const si = document.getElementById('searchInput');
+            if (si) si.value = '';
+            const cb = document.getElementById('searchClearBtn');
+            if (cb) cb.classList.remove('visible');
+            loadContent();
+            syncLeftdockActive();
         }
-        const bookmarks=Storage.getBookmarks(); const history=Storage.getHistory(); const watchTime=Storage.getWatchTime();
-        const hours=Math.floor(watchTime/3600); const mins=Math.floor((watchTime%3600)/60);
-        profileBody.innerHTML=`
-        <div class="profile-hero">
-            <div class="profile-avatar-large"><i class="fas fa-user"></i></div>
-            <div class="profile-hero-info"><h3>${user.nick}</h3><div class="profile-email">Локальний акаунт</div><div class="profile-badge"><i class="fas fa-check-circle"></i> Активний</div><button class="profile-edit-btn" onclick="window.authSignOutLocal()"><i class="fas fa-sign-out-alt"></i> Вийти</button></div>
-        </div>
-        <div class="profile-stats-row">
-            <div class="profile-stat-card"><span class="stat-icon"><i class="fas fa-bookmark"></i></span><div class="stat-num">${bookmarks.length}</div><div class="stat-label">Обране</div></div>
-            <div class="profile-stat-card"><span class="stat-icon"><i class="fas fa-history"></i></span><div class="stat-num">${history.length}</div><div class="stat-label">Історія</div></div>
-            <div class="profile-stat-card"><span class="stat-icon"><i class="fas fa-clock"></i></span><div class="stat-num">${hours}г ${mins}хв</div><div class="stat-label">Переглянуто</div></div>
-        </div>
-        <div class="profile-tabs-row">
-            <button class="profile-tab-btn active-profile-tab" data-ptab="bookmarks" onclick="switchProfileTab(this,'bookmarks')"><i class="fas fa-star"></i> Обране</button>
-            <button class="profile-tab-btn" data-ptab="history" onclick="switchProfileTab(this,'history')"><i class="fas fa-history"></i> Історія</button>
-        </div>
-        <div id="profileTabBookmarks">${renderProfileMediaGrid(bookmarks,'Немає обраних аніме','bookmark')}</div>
-        <div id="profileTabHistory" style="display:none;">${renderProfileMediaGrid(history,'Історія порожня','history')}</div>`;
-        bindProfileCardClicks(profileModal);
-    }
 
-    function renderProfileMediaGrid(list, emptyMsg, type){
-        if(!list.length) return `<div class="profile-empty"><i class="fas fa-${type==='bookmark'?'bookmark':'history'}"></i><p>${emptyMsg}</p></div>`;
-        return `<div class="profile-media-grid">${list.slice(0,36).map(item=>`
-            <div class="profile-media-card" data-url="${item.url}" tabindex="0" role="button">
-                <img src="${item.image_url||''}" alt="${item.title}" loading="lazy"><div class="pmc-info" title="${item.title}">${item.title}</div>
-            </div>`).join('')}</div>`;
-    }
-    function bindProfileCardClicks(modal){ modal.querySelectorAll('.profile-media-card').forEach(card=>{ card.addEventListener('click',()=>{ modal.style.display='none'; document.body.style.overflow=''; openDetailModal(card.dataset.url); }); card.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ modal.style.display='none'; document.body.style.overflow=''; openDetailModal(card.dataset.url); } }); }); }
-    window.switchProfileTab=function(btn,tab){
-        document.querySelectorAll('.profile-tab-btn').forEach(b=>{ b.classList.remove('active-profile-tab'); b.style.background='transparent'; b.style.color='var(--text-secondary)'; });
-        btn.classList.add('active-profile-tab'); btn.style.background='var(--accent-gradient)'; btn.style.color='var(--accent-text)';
-        document.getElementById('profileTabBookmarks').style.display=tab==='bookmarks'?'':'none';
-        document.getElementById('profileTabHistory').style.display=tab==='history'?'':'none';
-    };
-
-    let currentDetailAnime=null;
-    let lampaPlayerInstance=null;
-
-    function closeDetailModal(){ 
-        const modal=document.getElementById('animeModal'); 
-        if(!modal) return; 
-        modal.style.display='none'; 
-        document.body.style.overflow=''; 
-        if(lampaPlayerInstance){ 
-            lampaPlayerInstance.destroy(); 
-            lampaPlayerInstance=null; 
-        }
-    }
-
-    async function openDetailModal(url){
-        const modal=document.getElementById('animeModal'), modalTitle=document.getElementById('modalTitle'), modalBody=document.getElementById('modalBody');
-        if(!modal) return; 
-        
-        if(lampaPlayerInstance){ lampaPlayerInstance.destroy(); lampaPlayerInstance=null; }
-        
-        modalTitle.textContent='Завантаження...'; 
-        modalBody.innerHTML='<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>'; 
-        modal.style.display='flex'; 
-        document.body.style.overflow='hidden';
-        
-        try{
-            const anime=await loadAnimeDetails(url);
-            Storage.addHistory(anime); 
-            currentDetailAnime=anime; 
-            modalTitle.textContent=anime.title;
-            
-            const bookmarks=Storage.getBookmarks(); 
-            const isBookmarked=bookmarks.some(b=>b.mal_id===anime.mal_id);
-            const seasons=Object.keys(anime.seasons).sort((a,b)=>parseInt(a)-parseInt(b)); 
-            const firstSeason=seasons[0]||'1';
-            const dubs=Object.keys(anime.seasons[firstSeason]||{}).sort(); 
-            const firstDub=dubs[0]||'';
-            const episodes=firstDub?anime.seasons[firstSeason][firstDub]||[]:[]; 
-            const startFile=episodes[0]?.file||'';
-            const totalEpisodes=Object.values(anime.seasons).reduce((sum,s)=>sum+Object.values(s).reduce((s2,e)=>Math.max(s2,e.length),0),0);
-            const ratingTag=anime.rating?`<span class="tag rating-tag"><i class="fas fa-user-shield"></i> ${anime.rating}</span>`:'';
-            
-            modalBody.innerHTML=`
-            <div class="anime-detail-grid">
-                <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}"></div>
-                <div class="detail-info">
-                    <div><span class="tag"><i class="fas fa-calendar"></i> ${anime.year||'—'}</span><span class="tag"><i class="fas fa-film"></i> ${totalEpisodes} еп.</span></div>
-                    <div style="margin:0.5rem 0">${anime.genres.map(g=>`<span class="tag">${g}</span>`).join('')} ${ratingTag}</div>
-                    <div class="synopsis-container"><div class="synopsis" id="synopsisText">${anime.synopsis||'Опис відсутній.'}</div><button class="more-btn" id="moreBtn" style="display:none;">більше</button></div>
-                    <button class="btn-primary" id="toggleBookmarkBtn" style="margin-top:1.2rem;"><i class="fas fa-star"></i> ${isBookmarked?'В обраному':'Додати в обране'}</button>
-                </div>
-            </div>
-            <div style="margin-top:1.5rem;">
-                <!-- Мінімалістичний плеєр із селекторами -->
-                <div style="position:relative; width:100%;">
-                    <div id="lampaDetailPlayer" style="width:100%; background:#000; border-radius:12px; overflow:hidden; aspect-ratio:16/9;"></div>
-                    <div class="player-overlay-selectors" id="playerSelectorsOverlay">
-                        <div class="glass-select-wrap">
-                            <select class="glass-select" id="seasonSelect">${seasons.map(s=>`<option value="${s}" ${s===firstSeason?'selected':''}>Сезон ${s}</option>`).join('')}</select>
-                            <span class="glass-select-arrow">▼</span>
-                        </div>
-                        <div class="glass-select-wrap">
-                            <select class="glass-select" id="dubSelect">${dubs.map(d=>`<option value="${d}" ${d===firstDub?'selected':''}>${d}</option>`).join('')}</select>
-                            <span class="glass-select-arrow">▼</span>
-                        </div>
-                        <div class="glass-select-wrap">
-                            <select class="glass-select" id="episodeSelect">${episodes.map((ep,i)=>`<option value="${ep.file}" ${i===0?'selected':''}>Еп. ${ep.episode}</option>`).join('')}</select>
-                            <span class="glass-select-arrow">▼</span>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-            
-            const playerContainer = document.getElementById('lampaDetailPlayer');
-            if (playerContainer) {
-                lampaPlayerInstance = new LampaPlayer(playerContainer, {
-                    onClose: () => closeDetailModal()
-                });
-                
-                const seasonSelect=document.getElementById('seasonSelect'); 
-                const dubSelect=document.getElementById('dubSelect'); 
-                const episodeSelect=document.getElementById('episodeSelect');
-                
-                function updateDubs(){ 
-                    const s=seasonSelect.value; 
-                    const avail=Object.keys(anime.seasons[s]||{}).sort(); 
-                    dubSelect.innerHTML=avail.map(d=>`<option value="${d}">${d}</option>`).join(''); 
-                    updateEpisodes(); 
-                }
-                function updateEpisodes(){ 
-                    const s=seasonSelect.value, d=dubSelect.value; 
-                    const eps=anime.seasons[s]?.[d]||[]; 
-                    episodeSelect.innerHTML=eps.map(ep=>`<option value="${ep.file}">Еп. ${ep.episode}</option>`).join(''); 
-                }
-                function playEpisode(file){ 
-                    if(!file){ showToast('❌ Немає файлу'); return; } 
-                    lampaPlayerInstance.loadSource(file, '', '');
-                }
-                
-                seasonSelect.addEventListener('change',()=>{ updateDubs(); playEpisode(episodeSelect.value); }); 
-                dubSelect.addEventListener('change',()=>{ updateEpisodes(); playEpisode(episodeSelect.value); }); 
-                episodeSelect.addEventListener('change',()=>playEpisode(episodeSelect.value));
-                
-                if(startFile) {
-                    lampaPlayerInstance.loadSource(startFile, '', '');
-                }
-            }
-            
-            document.getElementById('toggleBookmarkBtn').addEventListener('click',async()=>{ 
-                await toggleBookmark(anime); 
-                const bm=Storage.getBookmarks(); 
-                const now=bm.some(b=>b.mal_id===anime.mal_id); 
-                document.getElementById('toggleBookmarkBtn').innerHTML=`<i class="fas fa-star"></i> ${now?'В обраному':'Додати в обране'}`; 
-            });
-            
-            const synopsisText=document.getElementById('synopsisText'); 
-            const moreBtn=document.getElementById('moreBtn'); 
-            if(synopsisText&&moreBtn){ 
-                if(synopsisText.scrollHeight>synopsisText.clientHeight) moreBtn.style.display='block'; 
-                moreBtn.addEventListener('click',()=>{ 
-                    const expanded=synopsisText.classList.toggle('expanded'); 
-                    moreBtn.textContent=expanded?'менше':'більше'; 
-                }); 
-            }
-        }catch(err){ 
-            modalBody.innerHTML=`<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`; 
-        }
-    }
-
-    // ===== app =====
-    let currentTab='main', currentPage=1, currentSearchQuery='', currentGenreSlug=null, currentList=[];
-    window.changePage=(p)=>{ currentPage=p; window.scrollTo({top:0,behavior:'smooth'}); loadContent(); };
-    async function loadContent(){
-        const container=document.getElementById('animeContainer'); if(!container) return; container.innerHTML='<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
-        try{
-            if(currentTab==='top100') currentList=await fetchTop100();
-            else if(currentSearchQuery) currentList=await searchAnimeUA(currentSearchQuery,currentPage);
-            else if(currentGenreSlug) currentList=await fetchByGenre(currentGenreSlug,currentPage);
-            else currentList=await fetchMainPage(currentPage);
-            renderCards(currentList);
-        }catch(err){ container.innerHTML=`<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}</div>`; }
-    }
-    async function showTop100(){ 
-        currentTab='top100'; currentPage=1; currentSearchQuery=''; currentGenreSlug=null; 
-        document.querySelectorAll('.action-pill').forEach(p=>p.classList.remove('active-pill')); 
-        document.getElementById('top100Btn')?.classList.add('active-pill'); 
-        document.querySelectorAll('.category-pill').forEach(p=>p.classList.remove('active-pill')); 
-        const searchInput = document.getElementById('searchInput');
-        if(searchInput) searchInput.value = '';
-        const clearBtn = document.getElementById('searchClearBtn');
-        if(clearBtn) clearBtn.classList.remove('visible');
-        const infoSpan = document.getElementById('searchInfo');
-        if(infoSpan) infoSpan.style.display = 'none';
-        loadContent();
-    }
-    function openRandomAnime(){ openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`); document.querySelectorAll('.action-pill').forEach(p=>p.classList.remove('active-pill')); }
-    function showMainPage(){ 
-        currentTab='main'; currentPage=1; currentSearchQuery=''; currentGenreSlug=null; 
-        document.querySelectorAll('.action-pill').forEach(p=>p.classList.remove('active-pill')); 
-        document.querySelectorAll('.category-pill').forEach(p=>p.classList.remove('active-pill')); 
-        const allBtn = document.querySelector('.category-pill');
-        if(allBtn) allBtn.classList.add('active-pill');
-        const searchInput = document.getElementById('searchInput');
-        if(searchInput) searchInput.value = '';
-        const clearBtn = document.getElementById('searchClearBtn');
-        if(clearBtn) clearBtn.classList.remove('visible');
-        const infoSpan = document.getElementById('searchInfo');
-        if(infoSpan) infoSpan.style.display = 'none';
-        loadContent(); 
-    }
-    async function initGenres(){
-        const cat=document.getElementById('categoryScroll'); if(!cat) return; cat.querySelectorAll('.category-pill').forEach(p=>p.remove());
-        const allBtn=document.createElement('button'); allBtn.className='category-pill'; allBtn.textContent='Усі'; allBtn.addEventListener('click',()=>{ currentGenreSlug=null; currentPage=1; currentTab='main'; document.querySelectorAll('.category-pill').forEach(p=>p.classList.remove('active-pill')); allBtn.classList.add('active-pill'); document.querySelectorAll('.action-pill').forEach(p=>p.classList.remove('active-pill')); loadContent(); }); cat.appendChild(allBtn);
-        fetchGenres().forEach(genre=>{ const btn=document.createElement('button'); btn.className='category-pill'; btn.textContent=genre.name; btn.addEventListener('click',()=>{ currentGenreSlug=genre.slug; currentPage=1; currentTab='main'; document.querySelectorAll('.category-pill').forEach(p=>p.classList.remove('active-pill')); btn.classList.add('active-pill'); document.querySelectorAll('.action-pill').forEach(p=>p.classList.remove('active-pill')); loadContent(); }); cat.appendChild(btn); });
-        showMainPage();
-    }
-
-    // settings panel
-    const settingsPanel=document.getElementById('settingsPanel'), settingsOverlay=document.getElementById('settingsOverlay');
-    function openSettings(){ settingsPanel.classList.add('open'); settingsOverlay.classList.add('open'); document.body.style.overflow='hidden'; }
-    function closeSettings(){ settingsPanel.classList.remove('open'); settingsOverlay.classList.remove('open'); document.body.style.overflow=''; }
-    settingsOverlay.addEventListener('click',closeSettings); document.getElementById('closeSettingsBtn').addEventListener('click',closeSettings); document.getElementById('settingsBtn').addEventListener('click',openSettings);
-    (function loadSettingsUI(){
-        const s=Storage.getSettings();
-        if(s.autoplay===false) document.getElementById('autoplayToggle').checked=false;
-        if(s.quality) document.getElementById('qualitySelect').value=s.quality;
-        if(s.volume!==undefined) document.getElementById('volumeRange').value=s.volume;
-        if(s.subtitle) document.getElementById('subtitleSelect').value=s.subtitle;
-        if(s.subtitleSize) document.getElementById('subtitleSizeSelect').value=s.subtitleSize;
-        if(s.lang) document.getElementById('langSelect').value=s.lang;
-        if(s.animations===false) document.getElementById('animationsToggle').checked=false;
-        if(s.darkMode===true){ Storage.setTheme('dark'); applyTheme('dark'); }
-        applyColorTheme(Storage.getColorTheme());
-    })();
-    function saveSettings(){
-        const darkMode=document.getElementById('darkModeToggle').checked; Storage.setTheme(darkMode?'dark':'light'); applyTheme(darkMode?'dark':'light');
-        Storage.saveSettings({ autoplay:document.getElementById('autoplayToggle').checked, quality:document.getElementById('qualitySelect').value, volume:document.getElementById('volumeRange').value, subtitle:document.getElementById('subtitleSelect').value, subtitleSize:document.getElementById('subtitleSizeSelect').value, lang:document.getElementById('langSelect').value, animations:document.getElementById('animationsToggle').checked, darkMode });
-        showToast('✅ Налаштування збережено');
-    }
-    document.querySelectorAll('#settingsPanel input, #settingsPanel select').forEach(el=>el.addEventListener('change',saveSettings));
-    document.getElementById('themeSelect').addEventListener('change',()=>{ applyColorTheme(document.getElementById('themeSelect').value); showToast('🎨 Тему змінено'); });
-    document.getElementById('darkModeToggle').addEventListener('change',()=>{ saveSettings(); });
-
-    // init
-    applyTheme(Storage.getTheme()); applyColorTheme(Storage.getColorTheme()); updateBadge();
-    document.getElementById('themeToggleBtn').addEventListener('click',toggleTheme);
-    document.getElementById('profileBtn').addEventListener('click',openProfileModal);
-    const searchInput = document.getElementById('searchInput');
-    const clearBtn = document.getElementById('searchClearBtn');
-    const infoSpan = document.getElementById('searchInfo');
-    
-    function handleSearchInput() {
-        const query = searchInput.value.trim();
-        if(query !== currentSearchQuery) {
-            currentSearchQuery = query;
+        function selectGenre(slug, name) {
+            currentGenreSlug = slug;
             currentPage = 1;
             currentTab = 'main';
+            currentSearchQuery = '';
+            document.querySelectorAll('.genre-item').forEach(p => p.classList.remove('active-genre'));
+            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
+            const si = document.getElementById('searchInput');
+            if (si) si.value = '';
+            const cb = document.getElementById('searchClearBtn');
+            if (cb) cb.classList.remove('visible');
             loadContent();
+            syncLeftdockActive();
+            if (name) showToast(`🎬 Жанр: ${name}`);
         }
-        if(clearBtn) {
-            if(query.length > 0) clearBtn.classList.add('visible');
-            else clearBtn.classList.remove('visible');
+
+        function openRandomAnime() { openDetailModal(`${ANIMEUA_BASE}/index.php?do=rand`);
+            showToast('🎲 Випадкове аніме'); }
+
+        // ==================== МОДАЛКИ ====================
+        let currentDetailAnime = null,
+            lampaPlayerInstance = null;
+
+        function closeDetailModal() {
+            const modal = document.getElementById('animeModal');
+            if (!modal) return;
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            if (lampaPlayerInstance) { lampaPlayerInstance.destroy();
+                lampaPlayerInstance = null; }
         }
-        if(infoSpan) {
-            if(query.length > 0) infoSpan.style.display = 'inline-block';
-            else infoSpan.style.display = 'none';
+
+        async function openDetailModal(url) {
+            const modal = document.getElementById('animeModal'),
+                modalTitle = document.getElementById('modalTitle'),
+                modalBody = document.getElementById('modalBody');
+            if (!modal) return;
+            if (lampaPlayerInstance) { lampaPlayerInstance.destroy();
+                lampaPlayerInstance = null; }
+            modalTitle.textContent = 'Завантаження...';
+            modalBody.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            try {
+                const anime = await loadAnimeDetails(url);
+                currentDetailAnime = anime;
+                modalTitle.textContent = anime.title;
+                const seasons = Object.keys(anime.seasons).sort((a, b) => parseInt(a) - parseInt(b));
+                const firstSeason = seasons[0] || '1';
+                const dubs = Object.keys(anime.seasons[firstSeason] || {}).sort();
+                const firstDub = dubs[0] || '';
+                const episodes = firstDub ? anime.seasons[firstSeason][firstDub] || [] : [];
+                const startFile = episodes[0]?.file || '';
+                const totalEpisodes = Object.values(anime.seasons).reduce((sum, s) => sum + Object.values(s).reduce((s2, e) =>
+                    Math.max(s2, e.length), 0), 0);
+                modalBody.innerHTML = `
+              <div class="anime-detail-grid">
+                <div class="detail-poster"><img src="${anime.images.jpg.large_image_url}" alt="${anime.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22170%22 height=%22240%22><rect fill=%22%23ddd%22 width=%22170%22 height=%22240%22/><text x=%2285%22 y=%22120%22 text-anchor=%22middle%22 fill=%22%23999%22>Немає</text></svg>'"></div>
+                <div class="detail-info">
+                  <div><span class="tag"><i class="fas fa-calendar"></i> ${anime.year||'—'}</span><span class="tag"><i class="fas fa-film"></i> ${totalEpisodes} еп.</span></div>
+                  <div style="margin:0.5rem 0">${anime.genres.map(g=>`<span class="tag">${g}</span>`).join('')} ${anime.rating?`<span class="tag" style="background:var(--accent);color:var(--accent-text);"><i class="fas fa-user-shield"></i> ${anime.rating}</span>`:''}</div>
+                  <div class="synopsis-container"><div class="synopsis" id="synopsisText">${anime.synopsis||'Опис відсутній.'}</div><button class="more-btn" id="moreBtn">більше</button></div>
+                </div>
+              </div>
+              <div style="margin-top:1.5rem;position:relative;">
+                <div id="lampaDetailPlayer" style="width:100%;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;"></div>
+                <div class="player-overlay-selectors">
+                  <div class="glass-select-wrap"><select class="glass-select" id="seasonSelect">${seasons.map(s=>`<option value="${s}" ${s===firstSeason?'selected':''}>Сезон ${s}</option>`).join('')}</select><span class="glass-select-arrow">▼</span></div>
+                  <div class="glass-select-wrap"><select class="glass-select" id="dubSelect">${dubs.map(d=>`<option value="${d}" ${d===firstDub?'selected':''}>${d}</option>`).join('')}</select><span class="glass-select-arrow">▼</span></div>
+                  <div class="glass-select-wrap"><select class="glass-select" id="episodeSelect">${episodes.map((ep,i)=>`<option value="${ep.file}" ${i===0?'selected':''}>Еп. ${ep.episode}</option>`).join('')}</select><span class="glass-select-arrow">▼</span></div>
+                </div>
+              </div>`;
+                const playerContainer = document.getElementById('lampaDetailPlayer');
+                if (playerContainer) {
+                    lampaPlayerInstance = new LampaPlayer(playerContainer, {});
+                    const seasonSel = document.getElementById('seasonSelect'),
+                        dubSel = document.getElementById('dubSelect'),
+                        epSel = document.getElementById('episodeSelect');
+
+                    function updateDubs() {
+                        const s = seasonSel.value;
+                        const avail = Object.keys(anime.seasons[s] || {}).sort();
+                        dubSel.innerHTML = avail.map(d => `<option value="${d}">${d}</option>`).join('');
+                        updateEpisodes();
+                    }
+
+                    function updateEpisodes() {
+                        const s = seasonSel.value,
+                            d = dubSel.value;
+                        const eps = anime.seasons[s]?.[d] || [];
+                        epSel.innerHTML = eps.map(ep => `<option value="${ep.file}">Еп. ${ep.episode}</option>`).join(
+                        '');
+                    }
+
+                    function playEpisode(file) {
+                        if (!file) { showToast('❌ Немає файлу для відтворення'); return; }
+                        lampaPlayerInstance.loadSource(file, '', '');
+                    }
+                    seasonSel.addEventListener('change', () => { updateDubs();
+                        playEpisode(epSel.value); });
+                    dubSel.addEventListener('change', () => { updateEpisodes();
+                        playEpisode(epSel.value); });
+                    epSel.addEventListener('change', () => playEpisode(epSel.value));
+                    if (startFile) lampaPlayerInstance.loadSource(startFile, '', '');
+                }
+                const synText = document.getElementById('synopsisText'),
+                    moreBtn = document.getElementById('moreBtn');
+                if (synText && moreBtn) {
+                    const checkOverflow = () => {
+                        if (synText.scrollHeight > synText.clientHeight + 2) { moreBtn.style.display = 'block'; } else { moreBtn
+                                .style.display = 'none'; }
+                    };
+                    setTimeout(checkOverflow, 100);
+                    moreBtn.addEventListener('click', () => {
+                        const exp = synText.classList.toggle('expanded');
+                        moreBtn.textContent = exp ? 'менше' : 'більше';
+                    });
+                }
+            } catch (err) { modalBody.innerHTML =
+                    `<div class="loader"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="openDetailModal('${url}')">🔄 Спробувати знову</button></div>`; }
         }
-    }
-    searchInput.addEventListener('input', handleSearchInput);
-    if(clearBtn) clearBtn.addEventListener('click', clearSearch);
-    
-    document.getElementById('top100Btn').addEventListener('click',showTop100);
-    document.getElementById('randomBtn').addEventListener('click',openRandomAnime);
-    document.getElementById('closeModalBtn').addEventListener('click',closeDetailModal);
-    document.getElementById('closePlayerBtn').addEventListener('click',()=>{ 
-        const pm=document.getElementById('playerModal'); 
-        if(pm){ 
-            pm.style.display='none'; 
-            document.body.style.overflow=''; 
-            if(lampaPlayerInstance){ lampaPlayerInstance.destroy(); lampaPlayerInstance=null; }
-        } 
-    });
-    document.getElementById('closeProfileBtn').addEventListener('click',()=>{ document.getElementById('profileModal').style.display='none'; document.body.style.overflow=''; });
-    document.getElementById('logoHome').addEventListener('click',showMainPage);
-    window.addEventListener('click',(e)=>{ 
-        if(e.target===document.getElementById('animeModal')) closeDetailModal(); 
-        if(e.target===document.getElementById('playerModal')){ 
-            const pm=document.getElementById('playerModal'); 
-            pm.style.display='none'; 
-            if(lampaPlayerInstance){ lampaPlayerInstance.destroy(); lampaPlayerInstance=null; } 
-        } 
-        if(e.target===document.getElementById('profileModal')){ document.getElementById('profileModal').style.display='none'; document.body.style.overflow=''; } 
-    });
-    document.addEventListener('keydown',(e)=>{ 
-        if(e.key==='Escape'){ 
-            closeDetailModal(); 
-            const pm=document.getElementById('playerModal'); 
-            if(pm){ pm.style.display='none'; if(lampaPlayerInstance){ lampaPlayerInstance.destroy(); lampaPlayerInstance=null; } } 
-            document.getElementById('profileModal').style.display='none'; 
-            closeSettings(); 
-            if(typeof closeAuthModal === 'function') closeAuthModal(); 
-            document.body.style.overflow=''; 
-        } 
-    });
-    document.addEventListener('DOMContentLoaded',()=>{ initGenres(); });
-</script>
+
+        // ==================== LAMPA PLAYER ====================
+        class LampaPlayer {
+            constructor(container, options) {
+                this.container = container;
+                this.options = options || {};
+                this.hls = null;
+                this.state = { playing: false, currentTime: 0, duration: 0, volume: 0.8, muted: false, fullscreen: false,
+                    loading: true, src: null };
+                this.videoRef = null;
+                this.containerRef = null;
+                this._init();
+            }
+            _init() {
+                this.container.innerHTML = '';
+                this.containerRef = document.createElement('div');
+                this.containerRef.className = 'lampa-player-container';
+                this.containerRef.style.cssText =
+                    'width:100%;aspect-ratio:16/9;background:#000;position:relative;border-radius:12px;overflow:hidden;';
+                this.videoRef = document.createElement('video');
+                this.videoRef.setAttribute('crossorigin', 'anonymous');
+                this.videoRef.setAttribute('playsinline', '');
+                this.videoRef.controls = false;
+                this.videoRef.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+                this.containerRef.appendChild(this.videoRef);
+                this.container.appendChild(this.containerRef);
+                this._bindEvents();
+            }
+            _bindEvents() {
+                const v = this.videoRef;
+                v.addEventListener('play', () => { this.state.playing = true; });
+                v.addEventListener('pause', () => { this.state.playing = false; });
+                v.addEventListener('timeupdate', () => { this.state.currentTime = v.currentTime;
+                    this.state.duration = v.duration || 0; });
+                v.addEventListener('waiting', () => { this.state.loading = true; });
+                v.addEventListener('canplay', () => { this.state.loading = false; });
+                v.addEventListener('error', () => { this.state.loading = false; });
+                this.containerRef.addEventListener('click', e => {
+                    if (e.target.closest('.player-overlay-selectors')) return;
+                    this.togglePlay();
+                });
+                this.containerRef.addEventListener('dblclick', e => {
+                    if (e.target.closest('.player-overlay-selectors')) return;
+                    this.toggleFullscreen();
+                });
+                document.addEventListener('fullscreenchange', () => { this.state.fullscreen = !!document.fullscreenElement; });
+            }
+            loadSource(src, animeTitle, episodeTitle) {
+                this.state.src = src;
+                const v = this.videoRef;
+                this.state.loading = true;
+                this.state.playing = false;
+                if (this.hls) { this.hls.destroy();
+                    this.hls = null; }
+                v.pause();
+                if (!src) { this.state.loading = false; return; }
+                const proxyUrl = typeof getProxyUrl === 'function' ? getProxyUrl(src) : src;
+                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
+                    this.hls = hls;
+                    hls.loadSource(proxyUrl);
+                    hls.attachMedia(v);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; });
+                    hls.on(Hls.Events.ERROR, (ev, data) => { if (data && data.fatal) { this.state.loading = false;
+                            v.src = proxyUrl; } });
+                } else {
+                    v.src = proxyUrl;
+                    const onCanPlay = () => { this.state.loading = false;
+                        v.removeEventListener('canplay', onCanPlay); };
+                    v.addEventListener('canplay', onCanPlay);
+                }
+            }
+            togglePlay() { const v = this.videoRef; if (v.paused) v.play().catch(() => {}); else v.pause(); }
+            toggleFullscreen() { if (!document.fullscreenElement) this.containerRef.requestFullscreen().catch(() => {}); else document
+                    .exitFullscreen(); }
+            destroy() { if (this.hls) { this.hls.destroy();
+                    this.hls = null; } this.videoRef.pause();
+                this.videoRef.removeAttribute('src');
+                this.videoRef.load(); if (this.container) this.container.innerHTML = ''; }
+        }
+
+        // ==================== КАРУСЕЛЬ ====================
+        class Carousel {
+            constructor(element, options) {
+                this._element = element;
+                this._interval = options.interval || 5000;
+                this._wrap = options.wrap !== false;
+                this._pause = options.pause || 'hover';
+                this._touch = options.touch !== false;
+                this._keyboard = options.keyboard !== false;
+                this._isSliding = false;
+                this._activeIndex = 0;
+                this._items = [];
+                this._indicators = [];
+                this._timer = null;
+                this._touchStartX = 0;
+                this._init();
+            }
+            _init() {
+                const inner = this._element.querySelector('.carousel-items');
+                if (!inner) return;
+                this._items = Array.from(inner.querySelectorAll('.carousel-item'));
+                if (this._items.length === 0) return;
+                this._activeIndex = Math.max(0, this._items.findIndex(item => item.classList.contains('active')));
+                this._createIndicators();
+                this._addControlListeners();
+                this._slideTo(this._activeIndex);
+                this.cycle();
+                if (this._pause === 'hover') {
+                    this._element.addEventListener('mouseenter', () => this.pause());
+                    this._element.addEventListener('mouseleave', () => this.cycle());
+                }
+                if (this._touch) {
+                    this._element.addEventListener('touchstart', this._touchStartHandler, { passive: true });
+                    this._element.addEventListener('touchend', this._touchEndHandler, { passive: true });
+                }
+                document.addEventListener('visibilitychange', this._visibilityHandler);
+            }
+            _createIndicators() {
+                const ic = this._element.querySelector('.carousel-indicators');
+                if (!ic) return;
+                ic.innerHTML = '';
+                this._indicators = [];
+                for (let i = 0; i < this._items.length; i++) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.setAttribute('data-carousel-slide-to', i);
+                    btn.setAttribute('aria-label', `Слайд ${i+1}`);
+                    if (i === this._activeIndex) btn.classList.add('active');
+                    btn.addEventListener('click', () => { this._slideTo(i);
+                        this.cycle(); });
+                    ic.appendChild(btn);
+                    this._indicators.push(btn);
+                }
+            }
+            _addControlListeners() {
+                const pb = this._element.querySelector('[data-carousel-slide="prev"]'),
+                    nb = this._element.querySelector('[data-carousel-slide="next"]');
+                if (pb) pb.addEventListener('click', () => { this.prev();
+                    this.cycle(); });
+                if (nb) nb.addEventListener('click', () => { this.next();
+                    this.cycle(); });
+            }
+            _slideTo(nextIndex) {
+                const items = this._items,
+                    activeIndex = this._activeIndex;
+                if (nextIndex === activeIndex || this._isSliding || items.length === 0) return;
+                this._isSliding = true;
+                this._activeIndex = nextIndex;
+                items.forEach((item, idx) => { item.classList.remove('active'); if (idx === nextIndex) item.classList.add(
+                        'active'); });
+                this._indicators.forEach((ind, idx) => ind.classList.toggle('active', idx === nextIndex));
+                const inner = this._element.querySelector('.carousel-items');
+                if (inner) inner.style.transform = `translateX(-${nextIndex*100}%)`;
+                const onEnd = () => { inner.removeEventListener('transitionend', onEnd);
+                    this._isSliding = false; };
+                inner.addEventListener('transitionend', onEnd);
+            }
+            next() {
+                const ni = (this._activeIndex + 1) % this._items.length;
+                if (!this._wrap && this._activeIndex === this._items.length - 1) return;
+                this._slideTo(ni);
+            }
+            prev() {
+                const pi = (this._activeIndex - 1 + this._items.length) % this._items.length;
+                if (!this._wrap && this._activeIndex === 0) return;
+                this._slideTo(pi);
+            }
+            cycle() { this.pause(); if (this._interval && this._items.length > 1) this._timer = setInterval(() => this
+                    .next(), this._interval); }
+            pause() { if (this._timer) { clearInterval(this._timer);
+                    this._timer = null; } }
+            _touchStartHandler = (e) => { if (e.touches.length === 1) this._touchStartX = e.touches[0].clientX; };
+            _touchEndHandler = (e) => {
+                if (!this._touchStartX) return;
+                const ex = e.changedTouches[0].clientX;
+                const dx = ex - this._touchStartX;
+                if (Math.abs(dx) > 50) { if (dx > 0) { this.prev();
+                        this.cycle(); } else { this.next();
+                        this.cycle(); } }
+                this._touchStartX = 0;
+            };
+            _visibilityHandler = () => { if (document.hidden) this.pause();
+                else this.cycle(); };
+            dispose() { this.pause();
+                document.removeEventListener('visibilitychange', this._visibilityHandler); }
+            goToSlide(index) { this._slideTo(index);
+                this.cycle(); }
+        }
+
+        let carouselInstance = null;
+
+        async function initCarousel() {
+            const carouselEl = document.getElementById('featuredCarousel');
+            if (!carouselEl) return;
+            if (carouselInstance) carouselInstance.dispose();
+            try {
+                const topAnime = await fetchTop100();
+                const slides = topAnime.slice(0, 5).filter(a => a.images.jpg.large_image_url);
+                if (slides.length === 0) return;
+                const inner = carouselEl.querySelector('.carousel-items');
+                inner.innerHTML = slides.map((anime, idx) => `
+                <div class="carousel-item ${idx===0?'active':''}">
+                  <img src="${anime.images.jpg.large_image_url}" alt="${anime.title}" loading="${idx===0?'eager':'lazy'}">
+                  <div class="carousel-caption"><h3>${anime.title}</h3><p>${anime.year||''}</p></div>
+                </div>`).join('');
+                carouselInstance = new Carousel(carouselEl, { interval: 5000, wrap: true, pause: 'hover', touch: true,
+                    keyboard: false });
+                inner.querySelectorAll('.carousel-item').forEach((item, idx) => {
+                    item.addEventListener('click', () => {
+                        if (slides[idx]?.url) openDetailModal(slides[idx].url);
+                    });
+                });
+            } catch (err) { console.warn('Помилка каруселі:', err); }
+        }
+
+        // ==================== LEFTDOCK ====================
+        const leftdock = document.getElementById('leftdock');
+        const leftdockOverlay = document.getElementById('leftdockOverlay');
+        let leftdockOpen = false;
+        let leftdockHideTimer = 0;
+
+        function toggleLeftdock(force) {
+            const shouldOpen = force !== undefined ? force : !leftdockOpen;
+            if (shouldOpen) showLeftdock();
+            else hideLeftdock(true);
+        }
+
+        function showLeftdock() {
+            leftdockOpen = true;
+            leftdock.classList.add('is-visible');
+            leftdockOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            if (leftdockHideTimer) { clearTimeout(leftdockHideTimer);
+                leftdockHideTimer = 0; }
+            syncLeftdockActive();
+            document.getElementById('burgerBtn')?.classList.add('active');
+        }
+
+        function hideLeftdock(immediate) {
+            if (immediate) {
+                if (leftdockHideTimer) { clearTimeout(leftdockHideTimer);
+                    leftdockHideTimer = 0; }
+                leftdock.classList.remove('is-visible');
+                leftdockOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+                leftdockOpen = false;
+                document.getElementById('burgerBtn')?.classList.remove('active');
+                return;
+            }
+            if (leftdockHideTimer) clearTimeout(leftdockHideTimer);
+            leftdockHideTimer = setTimeout(() => {
+                leftdock.classList.remove('is-visible');
+                leftdockOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+                leftdockOpen = false;
+                document.getElementById('burgerBtn')?.classList.remove('active');
+                leftdockHideTimer = 0;
+            }, 260);
+        }
+
+        leftdockOverlay.addEventListener('click', () => hideLeftdock(true));
+
+        function iconCircleLetter(label) {
+            const letter = (label || '?').trim().charAt(0).toUpperCase();
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">${letter}</text></svg>`;
+        }
+
+        function iconSearchSvg() {
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`;
+        }
+
+        function iconDiceSvg() {
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>`;
+        }
+
+        function iconCrownSvg() {
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M4 16h16v4H4z"/></svg>`;
+        }
+
+        function iconPaletteSvg() {
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M12 2a10 10 0 0 0 0 20"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`;
+        }
+
+        function buildLeftdock() {
+            const inner = document.getElementById('leftdockInner');
+            if (!inner) return;
+
+            const genres = fetchGenres();
+            let html = '';
+
+            // Головні пункти
+            html += `<div class="agnative-leftdock__case">`;
+            html += `
+            <div class="agnative-leftdock__item selector" data-action="main" data-selector="true" tabindex="0">
+              <div class="menu__ico">${iconCircleLetter('Г')}</div>
+              <div class="menu__text">Головна</div>
+            </div>
+            <div class="agnative-leftdock__item selector" data-action="search" data-selector="true" tabindex="0">
+              <div class="menu__ico">${iconSearchSvg()}</div>
+              <div class="menu__text">Пошук</div>
+            </div>
+            <div class="agnative-leftdock__item selector" data-action="top100" data-selector="true" tabindex="0">
+              <div class="menu__ico">${iconCrownSvg()}</div>
+              <div class="menu__text">ТОП 100</div>
+            </div>
+            <div class="agnative-leftdock__item selector" data-action="random" data-selector="true" tabindex="0">
+              <div class="menu__ico">${iconDiceSvg()}</div>
+              <div class="menu__text">Випадкове</div>
+            </div>`;
+            html += `</div>`;
+
+            // Роздільник + жанри
+            html += `<div class="agnative-leftdock__split"></div>`;
+            html += `<div class="agnative-leftdock__case">`;
+            const visibleGenres = genres.slice(0, 8);
+            visibleGenres.forEach(g => {
+                html += `
+              <div class="agnative-leftdock__item selector genre-item-dock" data-action="genre-${g.slug}" data-selector="true" tabindex="0" data-genre="${g.slug}">
+                <div class="menu__ico">${iconCircleLetter(g.name.charAt(0))}</div>
+                <div class="menu__text">${g.name}</div>
+              </div>`;
+            });
+            html += `
+            <div class="agnative-leftdock__item selector" data-action="all-genres" data-selector="true" tabindex="0">
+              <div class="menu__ico">${iconCircleLetter('+')}</div>
+              <div class="menu__text">Всі жанри</div>
+            </div>`;
+            html += `</div>`;
+
+            // Роздільник + тема
+            html += `<div class="agnative-leftdock__split"></div>`;
+            html += `<div class="agnative-leftdock__case" style="padding:0.2rem 0.6rem;">`;
+            html += `
+            <div style="display:flex;flex-direction:column;gap:0.3rem;padding:0.2rem 0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.85);">
+                <span><span style="margin-right:0.3rem;">${iconPaletteSvg()}</span> Колірна тема</span>
+                <select class="settings-select" id="themeSelectLeft" style="width:90px;font-size:0.7rem;padding:0.2rem 0.5rem;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:6px;">
+                  <option value="default" style="background:#222;color:#fff;">Жовта</option>
+                  <option value="grayscale" style="background:#222;color:#fff;">Ч/б</option>
+                  <option value="gold" style="background:#222;color:#fff;">Золота</option>
+                  <option value="blue" style="background:#222;color:#fff;">Синя</option>
+                  <option value="purple" style="background:#222;color:#fff;">Фіол.</option>
+                  <option value="red" style="background:#222;color:#fff;">Червона</option>
+                  <option value="green" style="background:#222;color:#fff;">Зелена</option>
+                </select>
+              </div>
+            </div>`;
+            html += `</div>`;
+
+            inner.innerHTML = html;
+
+            // Прив'язка подій
+            inner.querySelectorAll('.agnative-leftdock__item.selector').forEach(btn => {
+                const action = btn.dataset.action;
+                btn.addEventListener('click', () => {
+                    handleLeftdockAction(action);
+                    hideLeftdock(true);
+                });
+                btn.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        handleLeftdockAction(action);
+                        hideLeftdock(true);
+                    }
+                });
+            });
+
+            // Тема
+            const themeSelectLeft = document.getElementById('themeSelectLeft');
+            if (themeSelectLeft) {
+                themeSelectLeft.value = Storage.getColorTheme();
+                themeSelectLeft.addEventListener('change', () => {
+                    applyColorTheme(themeSelectLeft.value);
+                    showToast('🎨 Тему змінено');
+                });
+            }
+
+            syncLeftdockActive();
+        }
+
+        function handleLeftdockAction(action) {
+            if (!action) return;
+            if (action === 'main') showMainPage();
+            else if (action === 'search') {
+                document.getElementById('searchInput')?.focus();
+                showToast('🔍 Введіть пошуковий запит');
+            } else if (action === 'top100') showTop100();
+            else if (action === 'random') openRandomAnime();
+            else if (action.startsWith('genre-')) {
+                const slug = action.replace('genre-', '');
+                const name = fetchGenres().find(g => g.slug === slug)?.name || slug;
+                selectGenre(slug, name);
+            } else if (action === 'all-genres') openAllGenresModal();
+        }
+
+        function openAllGenresModal() {
+            let modal = document.getElementById('genresModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'genresModal';
+                modal.className = 'modal';
+                modal.style.zIndex = '3000';
+                modal.innerHTML = `
+              <div class="modal-content" style="max-width:520px;">
+                <div class="modal-header"><h3>🎬 Усі жанри</h3><button class="close-modal" onclick="document.getElementById('genresModal').style.display='none';document.body.style.overflow='';">&times;</button></div>
+                <div class="modal-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;" id="genresModalGrid"></div></div>
+              </div>`;
+                document.body.appendChild(modal);
+            }
+            const grid = document.getElementById('genresModalGrid');
+            if (grid) {
+                grid.innerHTML = '';
+                const allBtn = document.createElement('button');
+                allBtn.className = 'genre-item';
+                allBtn.textContent = '📺 Усі жанри';
+                allBtn.style.gridColumn = '1/-1';
+                allBtn.style.background = 'var(--accent-gradient)';
+                allBtn.style.color = 'var(--accent-text)';
+                allBtn.style.fontWeight = '700';
+                allBtn.addEventListener('click', () => {
+                    selectGenre(null, 'Усі');
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                });
+                grid.appendChild(allBtn);
+                fetchGenres().forEach(g => {
+                    const btn = document.createElement('button');
+                    btn.className = 'genre-item';
+                    btn.textContent = g.name;
+                    btn.style.fontSize = '0.82rem';
+                    btn.addEventListener('click', () => {
+                        selectGenre(g.slug, g.name);
+                        modal.style.display = 'none';
+                        document.body.style.overflow = '';
+                    });
+                    grid.appendChild(btn);
+                });
+            }
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function syncLeftdockActive() {
+            const dock = document.getElementById('leftdock');
+            if (!dock) return;
+            dock.querySelectorAll('.agnative-leftdock__item.selector').forEach(btn => {
+                btn.classList.remove('is-active');
+                const action = btn.dataset.action;
+                if (!action) return;
+                if (action === 'main' && currentTab === 'main' && !currentSearchQuery && !currentGenreSlug) btn
+                    .classList.add('is-active');
+                else if (action === 'top100' && currentTab === 'top100') btn.classList.add('is-active');
+                else if (action.startsWith('genre-') && currentGenreSlug === action.replace('genre-', '')) btn.classList
+                    .add('is-active');
+            });
+        }
+
+        // ==================== BACK TO TOP ====================
+        const backToTopBtn = document.getElementById('backToTopBtn');
+
+        function updateBackToTop() {
+            if (window.scrollY > 500) backToTopBtn.classList.add('visible');
+            else backToTopBtn.classList.remove('visible');
+        }
+        backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        window.addEventListener('scroll', updateBackToTop, { passive: true });
+
+        // ==================== КЛАВІАТУРНІ СКОРОЧЕННЯ ====================
+        document.addEventListener('keydown', (e) => {
+            // Не спрацьовуємо в полях вводу (крім спеціальних)
+            const tag = document.activeElement?.tagName?.toLowerCase();
+            const isInput = tag === 'input' || tag === 'textarea' || tag === 'select' || document.activeElement
+                ?.isContentEditable;
+
+            if (e.key === 'Escape') {
+                closeDetailModal();
+                if (leftdockOpen) hideLeftdock(true);
+                const pm = document.getElementById('playerModal');
+                if (pm && pm.style.display === 'flex') {
+                    pm.style.display = 'none';
+                    document.body.style.overflow = '';
+                    if (lampaPlayerInstance) { lampaPlayerInstance.destroy();
+                        lampaPlayerInstance = null; }
+                }
+                const gm = document.getElementById('genresModal');
+                if (gm && gm.style.display === 'flex') { gm.style.display = 'none';
+                    document.body.style.overflow = ''; }
+                return;
+            }
+
+            if (isInput) return;
+
+            if (e.key === '/' || (e.key === 'k' && (e.ctrlKey || e.metaKey))) {
+                e.preventDefault();
+                document.getElementById('searchInput')?.focus();
+                return;
+            }
+            if (e.key === 'm' || e.key === 'M') { e.preventDefault();
+                toggleLeftdock(); return; }
+            if (e.key === 't' || e.key === 'T') { e.preventDefault();
+                toggleTheme(); return; }
+            if (e.key === 'r' || e.key === 'R') { e.preventDefault();
+                openRandomAnime(); return; }
+            if (e.key === 'ArrowLeft' && !leftdockOpen) {
+                const carousel = document.getElementById('featuredCarousel');
+                if (carousel && carouselInstance && carousel.matches(':hover')) { e.preventDefault();
+                    carouselInstance.prev();
+                    carouselInstance.cycle(); }
+            }
+            if (e.key === 'ArrowRight' && !leftdockOpen) {
+                const carousel = document.getElementById('featuredCarousel');
+                if (carousel && carouselInstance && carousel.matches(':hover')) { e.preventDefault();
+                    carouselInstance.next();
+                    carouselInstance.cycle(); }
+            }
+        });
+
+        // ==================== ПОДІЇ ІНІЦІАЛІЗАЦІЇ ====================
+        document.getElementById('burgerBtn').addEventListener('click', (e) => { e.stopPropagation();
+            toggleLeftdock(); });
+        document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+        document.getElementById('top100Btn').addEventListener('click', showTop100);
+        document.getElementById('randomBtn').addEventListener('click', openRandomAnime);
+        document.getElementById('closeModalBtn').addEventListener('click', closeDetailModal);
+        document.getElementById('closePlayerBtn').addEventListener('click', () => {
+            const pm = document.getElementById('playerModal');
+            if (pm) { pm.style.display = 'none';
+                document.body.style.overflow = '';
+                if (lampaPlayerInstance) { lampaPlayerInstance.destroy();
+                    lampaPlayerInstance = null; } }
+        });
+        document.getElementById('logoHome').addEventListener('click', showMainPage);
+
+        const searchInput = document.getElementById('searchInput'),
+            clearBtn = document.getElementById('searchClearBtn');
+        let searchDebounce = 0;
+
+        function handleSearchInput() {
+            const q = searchInput.value.trim();
+            if (clearBtn) {
+                if (q.length > 0) clearBtn.classList.add('visible');
+                else clearBtn.classList.remove('visible');
+            }
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                if (q !== currentSearchQuery) {
+                    currentSearchQuery = q;
+                    currentPage = 1;
+                    currentTab = 'main';
+                    currentGenreSlug = null;
+                    document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
+                    document.querySelectorAll('.genre-item').forEach(p => p.classList.remove('active-genre'));
+                    loadContent();
+                    syncLeftdockActive();
+                }
+            }, 400);
+        }
+        searchInput.addEventListener('input', handleSearchInput);
+        if (clearBtn) clearBtn.addEventListener('click', clearSearch);
+
+        // Клік по оверлею модалок
+        window.addEventListener('click', e => {
+            if (e.target === document.getElementById('animeModal')) closeDetailModal();
+            if (e.target === document.getElementById('playerModal')) {
+                const pm = document.getElementById('playerModal');
+                pm.style.display = 'none';
+                document.body.style.overflow = '';
+                if (lampaPlayerInstance) { lampaPlayerInstance.destroy();
+                    lampaPlayerInstance = null; }
+            }
+            if (e.target === document.getElementById('genresModal')) {
+                document.getElementById('genresModal').style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Стиль для жанрів у модалці
+        const extraStyle = document.createElement('style');
+        extraStyle.textContent = `
+          .genre-item {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.8rem;
+            font-weight: 600;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            font-family: inherit;
+          }
+          .genre-item:hover {
+            background: var(--hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+          }
+          .genre-item.active-genre {
+            background: var(--accent-gradient);
+            color: var(--accent-text);
+            border-color: transparent;
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px var(--accent-glow);
+          }
+          .settings-select {
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.78rem;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            width: 120px;
+          }
+          .settings-select:focus {
+            border-color: var(--accent);
+          }
+          .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+          }
+          .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+          }
+          .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border);
+            transition: .3s;
+            border-radius: 22px;
+          }
+          .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .3s;
+            border-radius: 50%;
+          }
+          input:checked+.slider {
+            background: var(--accent);
+          }
+          input:checked+.slider:before {
+            transform: translateX(18px);
+          }
+        `;
+        document.head.appendChild(extraStyle);
+
+        // ==================== ФІНАЛЬНИЙ СТАРТ ====================
+        function init() {
+            applyTheme(Storage.getTheme());
+            applyColorTheme(Storage.getColorTheme());
+            buildLeftdock();
+            initCarousel();
+            showMainPage();
+            updateBackToTop();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+        console.log('🚀 MONOANIME готовий до перегляду!');
+        console.log('⌨️ Клавіші: / пошук • M меню • T тема • R випадкове • ← → карусель • Esc закрити');
+    </script>
 </body>
 </html>
