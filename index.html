@@ -4538,6 +4538,7 @@
             _initialized: false,
             _googleProvider: null,
             _isGuest: false,
+            _loadingData: false,
 
             init() {
                 if (!firebaseInitialized) {
@@ -4566,6 +4567,11 @@
                         if (!this._welcomeShown) {
                             this._welcomeShown = true;
                             showToast('Привіт, ' + (user.displayName || user.email || 'користувач'));
+                        }
+                        // Якщо на сторінці профілю — оновити UI
+                        const profContainer = document.getElementById('profilePageContainer');
+                        if (profContainer && profContainer.classList.contains('active')) {
+                            renderProfilePage();
                         }
                     } else {
                         this._welcomeShown = false;
@@ -4606,6 +4612,8 @@
 
             async _loadUserData(uid) {
                 if (!firebaseInitialized || !db) return;
+                if (this._loadingData) return; // Запобігти подвійному завантаженню
+                this._loadingData = true;
                 // Зберегти гостеві дані перед завантаженням
                 const guestData = {
                     profile: Storage.getProfile(),
@@ -4645,6 +4653,8 @@
                     }
                 } catch (e) {
                     console.warn('Error loading user data:', e);
+                } finally {
+                    this._loadingData = false;
                 }
             },
 
@@ -4698,7 +4708,7 @@
                     const profile = getDefaultProfile();
                     profile.nickname = displayName || email.split('@')[0] || 'Користувач';
                     Storage._setProfile(profile);
-                    await this._createUserDoc(cred.user.uid);
+                    // НЕ викликаємо _createUserDoc тут — onAuthStateChanged зробить _loadUserData
                     this._notifyListeners();
                     showToast('Акаунт створено');
                     if (Router.currentRoute === 'profile') renderProfilePage();
@@ -4716,10 +4726,9 @@
                 try {
                     const result = await signInWithPopup(auth, this._googleProvider);
                     this._user = result.user;
-                    await this._loadUserData(result.user.uid);
                     this._notifyListeners();
-                    showToast('Вхід через Google');
-                    if (Router.currentRoute === 'profile') renderProfilePage();
+                    showToast('Вхід через Google...');
+                    // _loadUserData викличеться через onAuthStateChanged — не дублюємо
                     return { success: true };
                 } catch (e) {
                     console.warn('Google sign-in error:', e);
@@ -6534,7 +6543,7 @@
             document.getElementById('authGuestBtn').addEventListener('click', () => {
                 Auth.setGuest(true);
                 showToast('Продовжуємо як гість');
-                Router.goTo('main');
+                Router.goTo('profile');
             });
 
             syncLeftdockActive();
