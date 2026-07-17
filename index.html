@@ -4545,6 +4545,9 @@
                 // ВИПРАВЛЕННЯ 1: примусовий вибір акаунта при вході через Google
                 this._googleProvider.setCustomParameters({ prompt: 'select_account' });
                 onAuthStateChanged(auth, async (user) => {
+                    if (user && this._user && this._user.uid !== user.uid) {
+                        this._welcomeShown = false;
+                    }
                     this._user = user;
                     this._notifyListeners();
                     if (user) {
@@ -4688,23 +4691,21 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
-                try {
-                    await this.syncUserData();
-                    await signOut(auth);
-                    this._user = null;
-                    // ВИПРАВЛЕННЯ 2: очищуємо localStorage перед сповіщенням
-                    Storage.clear();
-                    this._notifyListeners();
-                    showToast('Ви вийшли з акаунту');
-                    // Повний скид стану — перехід на головну + перезавантаження
-                    Router.goTo('main');
-                    window.location.reload();
-                    return { success: true };
-                } catch (e) {
-                    console.warn('Logout error:', e);
-                    return { success: false, error: e.message };
+                try { await this.syncUserData(); } catch(syncErr) {
+                    console.warn('Sync failed during logout (non-fatal):', syncErr);
                 }
-            },
+                try { await signOut(auth); } catch(signErr) {
+                    console.warn('signOut error:', signErr);
+                }
+                this._user = null;
+                this._welcomeShown = false;
+                Storage.clear();
+                this._notifyListeners();
+                showToast('Ви вийшли з акаунту');
+                Router.goTo('main');
+                window.location.reload();
+                return { success: true };
+            },          },
 
             async syncUserData() {
                 if (!firebaseInitialized || !db || !this._user) return;
@@ -4805,6 +4806,7 @@
                 localStorage.removeItem('vakdab_bookmarks');
                 localStorage.removeItem('vakdab_likes');
                 localStorage.removeItem('vakdab_watchTime');
+                localStorage.removeItem('vakdab_category');
             }
         };
 
