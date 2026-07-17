@@ -4561,22 +4561,25 @@
                     this._notifyListeners();
                     if (user) {
                         await this._loadUserData(user.uid);
+                        // Оновлюємо профіль ТІЛЬКИ якщо ми на сторінці профілю
                         if (Router.currentRoute === 'profile') {
-                            renderProfilePage();
+                            const profContainer = document.getElementById('profilePageContainer');
+                            if (profContainer && profContainer.classList.contains('active')) {
+                                renderProfilePage();
+                            }
                         }
                         if (!this._welcomeShown) {
                             this._welcomeShown = true;
                             showToast('Привіт, ' + (user.displayName || user.email || 'користувач'));
                         }
-                        // Якщо на сторінці профілю — оновити UI
-                        const profContainer = document.getElementById('profilePageContainer');
-                        if (profContainer && profContainer.classList.contains('active')) {
-                            renderProfilePage();
-                        }
                     } else {
                         this._welcomeShown = false;
+                        // ТІЛЬКИ якщо ми на сторінці профілю показуємо форму входу
                         if (Router.currentRoute === 'profile') {
-                            renderAuthPage();
+                            const profContainer = document.getElementById('profilePageContainer');
+                            if (profContainer && profContainer.classList.contains('active')) {
+                                renderAuthPage();
+                            }
                         }
                     }
                 });
@@ -4611,6 +4614,80 @@
             },
 
             async _loadUserData(uid) {
+                if (!firebaseInitialized || !db) return;
+                if (this._loadingData) return;
+                this._loadingData = true;
+                // ВАЖЛИВО: спочатку зберігаємо гостеві дані (щоб перенести в новий акаунт)
+                const guestData = {
+                    profile: Storage.getProfile(),
+                    history: Storage.getHistory(),
+                    bookmarks: Storage.getBookmarks(),
+                    likes: Storage.getLikes(),
+                    watchTime: Storage.getWatchTime()
+                };
+                // ВАЖЛИВО: ОЧИЩАЄМО localStorage перед завантаженням — щоб дані
+                // попереднього акаунта НЕ переходили в новий
+                Storage.clear();
+                try {
+                    const docRef = doc(db, 'users', uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        // Існуючий юзер — завантажуємо його дані з Firestore
+                        const data = docSnap.data();
+                        if (data.profile) {
+                            const mergedProfile = Object.assign(getDefaultProfile(), data.profile);
+                            // Доповнюємо Google displayName/photoURL якщо в Firestore порожньо
+                            if ((!mergedProfile.nickname || mergedProfile.nickname === 'Користувач') && this._user && this._user.displayName) {
+                                mergedProfile.nickname = this._user.displayName;
+                            }
+                            if (!mergedProfile.avatar && this._user && this._user.photoURL) {
+                                mergedProfile.avatar = this._user.photoURL;
+                            }
+                            Storage._setProfile(mergedProfile);
+                        } else if (this._user && this._user.displayName) {
+                            const p = getDefaultProfile();
+                            p.nickname = this._user.displayName;
+                            if (this._user.photoURL) p.avatar = this._user.photoURL;
+                            Storage._setProfile(p);
+                        } else {
+                            Storage._setProfile(getDefaultProfile());
+                        }
+                        if (data.history) Storage._setHistory(data.history);
+                        if (data.bookmarks) Storage._setBookmarks(data.bookmarks);
+                        if (data.likes) Storage._setLikes(data.likes);
+                        if (data.watchTime) Storage._setWatchTime(data.watchTime);
+                    } else {
+                        // Новий юзер — переносимо ГОСТЕВІ дані (не чужі!)
+                        if (guestData.profile && guestData.profile.nickname && guestData.profile.nickname !== 'Користувач') {
+                            Storage._setProfile(guestData.profile);
+                        } else if (this._user && this._user.displayName) {
+                            const p = getDefaultProfile();
+                            p.nickname = this._user.displayName;
+                            if (this._user.photoURL) p.avatar = this._user.photoURL;
+                            Storage._setProfile(p);
+                        } else {
+                            Storage._setProfile(getDefaultProfile());
+                        }
+                        if (guestData.history && guestData.history.length) Storage._setHistory(guestData.history);
+                        if (guestData.bookmarks && guestData.bookmarks.length) Storage._setBookmarks(guestData.bookmarks);
+                        if (guestData.likes && Object.keys(guestData.likes).length) Storage._setLikes(guestData.likes);
+                        if (guestData.watchTime) Storage._setWatchTime(guestData.watchTime);
+                        await this._createUserDoc(uid);
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                    // При помилці — створюємо мінімальний профіль
+                    if (this._user && this._user.displayName) {
+                        const p = getDefaultProfile();
+                        p.nickname = this._user.displayName;
+                        if (this._user.photoURL) p.avatar = this._user.photoURL;
+                        Storage._setProfile(p);
+                    } else {
+                        Storage._setProfile(getDefaultProfile());
+                    }
+                } finally {
+                    this._loadingData = false;
+                }sync _loadUserData(uid) {
                 if (!firebaseInitialized || !db) return;
                 if (this._loadingData) return;
                 this._loadingData = true;
@@ -4786,23 +4863,23 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
-                // Спочатку зберігаємо дані в Firestore, ПОТІМ очищаємо
-                try { await this.syncUserData(); } catch(e) { console.warn('Sync error:', e); }
-                signOut(auth).catch(e => console.warn('signOut error:', e));
+                // syncUserData в фоні — НЕ блокуємо logout
+                this.syncUserData().catch(() => {});
+                // Миттєво очищаємо стан
                 this._user = null;
                 this._welcomeShown = false;
                 this._isGuest = false;
                 Storage.clear();
                 this._notifyListeners();
                 showToast('Ви вийшли з акаунту');
-                // Одразу показуємо форму входу
+                // Показуємо форму входу
+                try { signOut(auth).catch(() => {}); } catch(e) {}
                 Router.showProfile();
                 return { success: true };
             },
 
             handleExit() {
                 if (this.isGuest()) {
-                    // Гість — просто виходимо з гостевого режиму
                     this._isGuest = false;
                     localStorage.removeItem('vakdab_guest');
                     Storage.clear();
@@ -4810,8 +4887,9 @@
                     showToast('Гостевий сеанс завершено');
                     Router.showProfile();
                 } else {
-                    // Юзер — повний logout через Firebase
-                    this.logout();
+                    // Юзер — повний logout
+                    this.logout().catch(e => console.warn('Logout error:', e));
+                    // Не чекаємо — logout синхронно очищає стан
                 }
             },
 
