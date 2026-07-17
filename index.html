@@ -4612,47 +4612,81 @@
 
             async _loadUserData(uid) {
                 if (!firebaseInitialized || !db) return;
-                if (this._loadingData) return; // Запобігти подвійному завантаженню
+                if (this._loadingData) return;
                 this._loadingData = true;
-                // Зберегти гостеві дані перед завантаженням
-                const guestData = {
+                // Зберегти локальні дані перед завантаженням
+                const localData = {
                     profile: Storage.getProfile(),
                     history: Storage.getHistory(),
                     bookmarks: Storage.getBookmarks(),
                     likes: Storage.getLikes(),
                     watchTime: Storage.getWatchTime()
                 };
-                Storage.clear();
                 try {
                     const docRef = doc(db, 'users', uid);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        if (data.profile) Storage._setProfile(data.profile);
-                        else if (guestData.profile) Storage._setProfile(guestData.profile);
+                        // Профіль: пріоритет Firestore, але доповнюємо з локальних
+                        if (data.profile) {
+                            const mergedProfile = Object.assign(getDefaultProfile(), data.profile);
+                            // Якщо в Firestore немає фото — беремо з локальних
+                            if (!mergedProfile.avatar && localData.profile && localData.profile.avatar) {
+                                mergedProfile.avatar = localData.profile.avatar;
+                            }
+                            if (!mergedProfile.banner && localData.profile && localData.profile.banner) {
+                                mergedProfile.banner = localData.profile.banner;
+                            }
+                            // Якщо в Firestore ніка немає — беремо Google displayName
+                            if ((!mergedProfile.nickname || mergedProfile.nickname === 'Користувач') && this._user && this._user.displayName) {
+                                mergedProfile.nickname = this._user.displayName;
+                            }
+                            Storage._setProfile(mergedProfile);
+                        } else if (localData.profile) {
+                            Storage._setProfile(localData.profile);
+                        } else if (this._user && this._user.displayName) {
+                            const p = getDefaultProfile();
+                            p.nickname = this._user.displayName;
+                            if (this._user.photoURL) p.avatar = this._user.photoURL;
+                            Storage._setProfile(p);
+                        }
                         if (data.history) Storage._setHistory(data.history);
-                        else if (guestData.history && guestData.history.length) Storage._setHistory(guestData.history);
+                        else if (localData.history && localData.history.length) Storage._setHistory(localData.history);
                         if (data.bookmarks) Storage._setBookmarks(data.bookmarks);
-                        else if (guestData.bookmarks && guestData.bookmarks.length) Storage._setBookmarks(guestData.bookmarks);
+                        else if (localData.bookmarks && localData.bookmarks.length) Storage._setBookmarks(localData.bookmarks);
                         if (data.likes) Storage._setLikes(data.likes);
-                        else if (guestData.likes && Object.keys(guestData.likes).length) Storage._setLikes(guestData.likes);
+                        else if (localData.likes && Object.keys(localData.likes).length) Storage._setLikes(localData.likes);
                         if (data.watchTime) {
-                            const current = guestData.watchTime || 0;
-                            Storage._setWatchTime(Math.max(current, data.watchTime));
-                        } else if (guestData.watchTime) {
-                            Storage._setWatchTime(guestData.watchTime);
+                            Storage._setWatchTime(Math.max(localData.watchTime || 0, data.watchTime));
+                        } else if (localData.watchTime) {
+                            Storage._setWatchTime(localData.watchTime);
                         }
                     } else {
-                        // Новий юзер — переносимо гостеві дані
-                        if (guestData.profile) Storage._setProfile(guestData.profile);
-                        if (guestData.history && guestData.history.length) Storage._setHistory(guestData.history);
-                        if (guestData.bookmarks && guestData.bookmarks.length) Storage._setBookmarks(guestData.bookmarks);
-                        if (guestData.likes && Object.keys(guestData.likes).length) Storage._setLikes(guestData.likes);
-                        if (guestData.watchTime) Storage._setWatchTime(guestData.watchTime);
+                        // Новий юзер — переносимо локальні дані + Google фото
+                        if (localData.profile) {
+                            Storage._setProfile(localData.profile);
+                        } else if (this._user && this._user.displayName) {
+                            const p = getDefaultProfile();
+                            p.nickname = this._user.displayName;
+                            if (this._user.photoURL) p.avatar = this._user.photoURL;
+                            Storage._setProfile(p);
+                        }
+                        if (localData.history && localData.history.length) Storage._setHistory(localData.history);
+                        if (localData.bookmarks && localData.bookmarks.length) Storage._setBookmarks(localData.bookmarks);
+                        if (localData.likes && Object.keys(localData.likes).length) Storage._setLikes(localData.likes);
+                        if (localData.watchTime) Storage._setWatchTime(localData.watchTime);
                         await this._createUserDoc(uid);
+                        // Зберегти профіль з Google фото
+                        this.syncUserData().catch(() => {});
                     }
                 } catch (e) {
                     console.warn('Error loading user data:', e);
+                    // При помилці — відновлюємо локальні дані
+                    if (localData.profile) Storage._setProfile(localData.profile);
+                    if (localData.history && localData.history.length) Storage._setHistory(localData.history);
+                    if (localData.bookmarks && localData.bookmarks.length) Storage._setBookmarks(localData.bookmarks);
+                    if (localData.likes && Object.keys(localData.likes).length) Storage._setLikes(localData.likes);
+                    if (localData.watchTime) Storage._setWatchTime(localData.watchTime);
                 } finally {
                     this._loadingData = false;
                 }
@@ -4661,10 +4695,22 @@
             async _createUserDoc(uid) {
                 if (!firebaseInitialized || !db) return;
                 try {
-                    const profile = Storage.getProfile() || getDefaultProfile();
+                    let profile = Storage.getProfile() || getDefaultProfile();
+                    // Доповнюємо з Google дані
+                    if (this._user && this._user.displayName && (!profile.nickname || profile.nickname === 'Користувач')) {
+                        profile.nickname = this._user.displayName;
+                    }
+                    if (this._user && this._user.photoURL && !profile.avatar) {
+                        profile.avatar = this._user.photoURL;
+                    }
+                    Storage._setProfile(profile);
                     const docRef = doc(db, 'users', uid);
+                    // Стискаємо фото для Firestore
+                    const profileSync = JSON.parse(JSON.stringify(profile));
+                    if (profileSync.avatar && profileSync.avatar.length > 100000) profileSync.avatar = '';
+                    if (profileSync.banner && profileSync.banner.length > 100000) profileSync.banner = '';
                     await setDoc(docRef, {
-                        profile: profile,
+                        profile: profileSync,
                         history: Storage.getHistory(),
                         bookmarks: Storage.getBookmarks(),
                         likes: Storage.getLikes(),
@@ -4740,10 +4786,9 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
-                // Запускаємо sync і signOut у фоні — НЕ чекаємо
-                this.syncUserData().catch(e => console.warn('Sync error:', e));
+                // Спочатку зберігаємо дані в Firestore, ПОТІМ очищаємо
+                try { await this.syncUserData(); } catch(e) { console.warn('Sync error:', e); }
                 signOut(auth).catch(e => console.warn('signOut error:', e));
-                // Миттєво очищаємо стан
                 this._user = null;
                 this._welcomeShown = false;
                 this._isGuest = false;
@@ -4772,20 +4817,53 @@
 
             async syncUserData() {
                 if (!firebaseInitialized || !db || !this._user) return;
+                const uid = this._user.uid;
+                const docRef = doc(db, 'users', uid);
+                const profile = Storage.getProfile();
+                const history = Storage.getHistory();
+                const bookmarks = Storage.getBookmarks();
+                const likes = Storage.getLikes();
+                const watchTime = Storage.getWatchTime() || 0;
+                // Спроба 1: повні дані з фото
                 try {
-                    const uid = this._user.uid;
-                    const docRef = doc(db, 'users', uid);
-                    const data = {
-                        profile: Storage.getProfile(),
-                        history: Storage.getHistory(),
-                        bookmarks: Storage.getBookmarks(),
-                        likes: Storage.getLikes(),
-                        watchTime: Storage.getWatchTime() || 0,
+                    await setDoc(docRef, {
+                        profile: profile,
+                        history: history,
+                        bookmarks: bookmarks,
+                        likes: likes,
+                        watchTime: watchTime,
                         updatedAt: serverTimestamp()
-                    };
-                    await setDoc(docRef, data, { merge: true });
+                    }, { merge: true });
+                    return;
                 } catch (e) {
-                    console.warn('Sync error:', e);
+                    console.warn('Sync error (full), trying without images:', e.message);
+                }
+                // Спроба 2: без великих base64 фото
+                try {
+                    const profileNoImg = JSON.parse(JSON.stringify(profile));
+                    if (profileNoImg.avatar && profileNoImg.avatar.length > 100000) profileNoImg.avatar = '';
+                    if (profileNoImg.banner && profileNoImg.banner.length > 100000) profileNoImg.banner = '';
+                    await setDoc(docRef, {
+                        profile: profileNoImg,
+                        history: history,
+                        bookmarks: bookmarks,
+                        likes: likes,
+                        watchTime: watchTime,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                    console.log('Synced without images');
+                } catch (e) {
+                    console.warn('Sync error (no images):', e.message);
+                    // Спроба 3: тільки текстові поля профілю
+                    try {
+                        await setDoc(docRef, {
+                            profile: { nickname: profile.nickname, bio: profile.bio, avatar: '', banner: '' },
+                            watchTime: watchTime,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                    } catch (e2) {
+                        console.warn('Sync error (minimal):', e2.message);
+                    }
                 }
             }
         };
@@ -6245,7 +6323,32 @@
             }];
         }
 
-        function renderProfilePage() {
+        
+        // Стиснення зображення перед збереженням (щоб Firestore не падав)
+        function compressImage(file, maxW, maxH, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, hh = img.height;
+                    if (w > maxW) { hh = hh * (maxW / w); w = maxW; }
+                    if (hh > maxH) { w = w * (maxH / hh); hh = maxH; }
+                    canvas.width = Math.round(w);
+                    canvas.height = Math.round(hh);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    let result = canvas.toDataURL('image/jpeg', quality);
+                    if (result.length > 500000) result = canvas.toDataURL('image/jpeg', 0.4);
+                    if (result.length > 500000) result = canvas.toDataURL('image/jpeg', 0.2);
+                    callback(result);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+function renderProfilePage() {
             const container = document.getElementById('profilePageContainer');
             if (!container) return;
             if (!Auth.isAuthenticated() && !Auth.isGuest()) {
@@ -6782,34 +6885,28 @@
         document.getElementById('avatarFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                const dataUrl = ev.target.result;
+            compressImage(file, 256, 256, 0.7, (dataUrl) => {
                 const profile = getProfile();
                 profile.avatar = dataUrl;
                 saveProfile(profile);
                 if (Router.currentRoute === 'profile') renderProfilePage();
                 showToast('Аватарку оновлено');
                 e.target.value = '';
-            };
-            reader.readAsDataURL(file);
+            });
         });
 
         document.getElementById('bannerFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                const dataUrl = ev.target.result;
+            compressImage(file, 1200, 400, 0.7, (dataUrl) => {
                 const profile = getProfile();
                 profile.banner = dataUrl;
                 saveProfile(profile);
                 if (Router.currentRoute === 'profile') renderProfilePage();
                 showToast('Банер оновлено');
                 e.target.value = '';
-            };
-            reader.readAsDataURL(file);
-        });
+            });
+        });;
 
         // ====================================================================
         //  СТОРІНКА ЖАНРУ
