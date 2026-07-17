@@ -4542,6 +4542,8 @@
                 if (this._initialized) return;
                 this._initialized = true;
                 this._googleProvider = new GoogleAuthProvider();
+                // ВИПРАВЛЕННЯ 1: примусовий вибір акаунта при вході через Google
+                this._googleProvider.setCustomParameters({ prompt: 'select_account' });
                 onAuthStateChanged(auth, async (user) => {
                     this._user = user;
                     this._notifyListeners();
@@ -4690,9 +4692,13 @@
                     await this.syncUserData();
                     await signOut(auth);
                     this._user = null;
+                    // ВИПРАВЛЕННЯ 2: очищуємо localStorage перед сповіщенням
+                    Storage.clear();
                     this._notifyListeners();
                     showToast('Ви вийшли з акаунту');
-                    if (Router.currentRoute === 'profile') renderAuthPage();
+                    // Повний скид стану — перехід на головну + перезавантаження
+                    Router.goTo('main');
+                    window.location.reload();
                     return { success: true };
                 } catch (e) {
                     console.warn('Logout error:', e);
@@ -7496,7 +7502,7 @@
                 Router.goTo('settings');
             }
 
-            console.log('VAKDAB v6.2 — без емодзі, чистий профіль');
+            console.log('VAKDAB v6.3 — виправлено: вибір акаунта Google + logout очищує localStorage');
             console.log('Клавіші: / пошук • M меню • T тема • R випадкове • Esc закрити');
         }
 
