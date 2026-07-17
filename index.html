@@ -5708,7 +5708,15 @@
 
             goTo(route, params) {
                 const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-                window.location.hash = route + qs;
+                const newHash = route + qs;
+                if (window.location.hash === '#' + newHash) {
+                    // Хеш не змінився — hashchange не спрацює, викликаємо вручну
+                    this.currentRoute = route;
+                    this.params = params || {};
+                    this.navigate(route, params || {});
+                } else {
+                    window.location.hash = newHash;
+                }
             }
         };
 
