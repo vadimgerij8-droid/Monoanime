@@ -4537,6 +4537,7 @@
             _listeners: [],
             _initialized: false,
             _googleProvider: null,
+            _isGuest: false,
 
             init() {
                 if (!firebaseInitialized) {
@@ -4545,6 +4546,8 @@
                 }
                 if (this._initialized) return;
                 this._initialized = true;
+                // Відновити guest стан з localStorage
+                this._isGuest = localStorage.getItem('vakdab_guest') === '1';
                 this._googleProvider = new GoogleAuthProvider();
                 // ВИПРАВЛЕННЯ 1: примусовий вибір акаунта при вході через Google
                 this._googleProvider.setCustomParameters({ prompt: 'select_account' });
@@ -4552,6 +4555,7 @@
                     if (user && this._user && this._user.uid !== user.uid) {
                         this._welcomeShown = false;
                     }
+                    if (user) this._isGuest = false;
                     this._user = user;
                     this._notifyListeners();
                     if (user) {
@@ -4583,6 +4587,17 @@
 
             isAuthenticated() {
                 return !!this._user && firebaseInitialized;
+            },
+
+            isGuest() {
+                return this._isGuest;
+            },
+
+            setGuest(val) {
+                this._isGuest = val;
+                if (val) localStorage.setItem('vakdab_guest', '1');
+                else localStorage.removeItem('vakdab_guest');
+                this._notifyListeners();
             },
 
             getUser() {
@@ -4722,12 +4737,27 @@
                 // Миттєво очищаємо стан
                 this._user = null;
                 this._welcomeShown = false;
+                this._isGuest = false;
                 Storage.clear();
                 this._notifyListeners();
                 showToast('Ви вийшли з акаунту');
-                // Одразу на сторінку входу
-                window.location.hash = 'profile';
+                // Одразу показуємо форму входу
+                renderAuthPage();
                 return { success: true };
+            },
+
+            handleExit() {
+                if (this.isGuest()) {
+                    // Гість — просто виходимо з гостевого режиму
+                    this._isGuest = false;
+                    Storage.clear();
+                    this._notifyListeners();
+                    showToast('Гостевий сеанс завершено');
+                    renderAuthPage();
+                } else {
+                    // Юзер — повний logout через Firebase
+                    this.logout();
+                }
             },
 
             async syncUserData() {
@@ -4830,6 +4860,7 @@
                 localStorage.removeItem('vakdab_likes');
                 localStorage.removeItem('vakdab_watchTime');
                 localStorage.removeItem('vakdab_category');
+                localStorage.removeItem('vakdab_guest');
             }
         };
 
@@ -5634,7 +5665,7 @@
                 const container = document.getElementById('profilePageContainer');
                 container.style.display = 'block';
                 container.classList.add('active');
-                if (Auth.isAuthenticated()) {
+                if (Auth.isAuthenticated() || Auth.isGuest()) {
                     renderProfilePage();
                 } else {
                     renderAuthPage();
@@ -6199,10 +6230,11 @@
         function renderProfilePage() {
             const container = document.getElementById('profilePageContainer');
             if (!container) return;
-            if (!Auth.isAuthenticated()) {
+            if (!Auth.isAuthenticated() && !Auth.isGuest()) {
                 renderAuthPage();
                 return;
             }
+            const isGuestMode = Auth.isGuest();
             const profile = getProfile();
             const stats = getProfileStats();
             container.innerHTML = `
@@ -6254,10 +6286,10 @@
                   </div>
                 </div>
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="btn-outline" onclick="Auth.logout()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
+                  <button class="btn-outline" id="profileLogoutBtn" onclick="Auth.handleExit()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sign-out-alt"></i> Вийти
                   </button>
-                  <button class="btn-outline" onclick="Auth.syncUserData();showToast('Дані синхронізовано');" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
+                  <button class="btn-outline" id="profileSyncBtn" onclick="Auth.syncUserData();showToast('Дані синхронізовано');" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sync"></i> Синхронізувати
                   </button>
                 </div>
@@ -6298,6 +6330,19 @@
                     document.getElementById('profilePanel-' + target).classList.add('active');
                 });
             });
+            // Guest mode: ховаємо sync кнопку, міняємо "Вийти" на "Увійти"
+            if (typeof isGuestMode !== 'undefined' && isGuestMode) {
+                const syncBtn = document.getElementById('profileSyncBtn');
+                if (syncBtn) syncBtn.style.display = 'none';
+                const logoutBtn = document.getElementById('profileLogoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Увійти';
+                    logoutBtn.onclick = () => {
+                        Auth.setGuest(false);
+                        renderAuthPage();
+                    };
+                }
+            }
             syncLeftdockActive();
         }
 
@@ -6487,6 +6532,7 @@
             });
 
             document.getElementById('authGuestBtn').addEventListener('click', () => {
+                Auth.setGuest(true);
                 showToast('Продовжуємо як гість');
                 Router.goTo('main');
             });
