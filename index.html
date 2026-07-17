@@ -4751,7 +4751,7 @@
                 this._notifyListeners();
                 showToast('Ви вийшли з акаунту');
                 // Одразу показуємо форму входу
-                renderAuthPage();
+                Router.showProfile();
                 return { success: true };
             },
 
@@ -4759,10 +4759,11 @@
                 if (this.isGuest()) {
                     // Гість — просто виходимо з гостевого режиму
                     this._isGuest = false;
+                    localStorage.removeItem('vakdab_guest');
                     Storage.clear();
                     this._notifyListeners();
                     showToast('Гостевий сеанс завершено');
-                    renderAuthPage();
+                    Router.showProfile();
                 } else {
                     // Юзер — повний logout через Firebase
                     this.logout();
@@ -6551,7 +6552,9 @@
             document.getElementById('authGuestBtn').addEventListener('click', () => {
                 Auth.setGuest(true);
                 showToast('Продовжуємо як гість');
-                Router.goTo('profile');
+                // Не використовуємо Router.goTo — хеш вже #profile і hashchange не спрацює
+                // Викликаємо showProfile напряму, який перевірить isGuest() і покаже профіль
+                Router.showProfile();
             });
 
             syncLeftdockActive();
