@@ -5359,6 +5359,7 @@
                 const selectedOrdinary = getRandomItems(ordinaryAnime, 4);
                 heroItems = [...selectedTop, ...selectedOrdinary].sort(() => 0.5 - Math.random());
                 if (heroItems.length === 0) { wrapper.style.display = 'none'; return; }
+                if (Router.currentRoute !== 'main') { wrapper.style.display = 'none'; return; }
                 wrapper.style.display = 'block';
                 heroCurrentIndex = 0;
                 await loadHeroItemDetails(0);
