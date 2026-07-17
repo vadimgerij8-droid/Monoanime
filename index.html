@@ -4791,6 +4791,14 @@
                 this._setWatchTime(total);
                 if (Auth.isAuthenticated()) Auth.syncUserData();
                 return total;
+            },
+
+            clear() {
+                localStorage.removeItem('vakdab_profile');
+                localStorage.removeItem('vakdab_history');
+                localStorage.removeItem('vakdab_bookmarks');
+                localStorage.removeItem('vakdab_likes');
+                localStorage.removeItem('vakdab_watchTime');
             }
         };
 
@@ -4805,15 +4813,9 @@
             }
             const settingsBtn = document.getElementById('settingsThemeBtn');
             if (settingsBtn) {
-                const icon = settingsBtn.querySelector('.theme-icon');
-                if (icon) {
-                    icon.textContent = theme === 'dark' ? '☀️' : '🌙';
-                }
-                settingsBtn.textContent = theme === 'dark' ? '☀️ Світла тема' : '🌙 Темна тема';
-                const newIcon = document.createElement('span');
-                newIcon.className = 'theme-icon';
-                newIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
-                settingsBtn.prepend(newIcon);
+                const icon = theme === 'dark' ? 'fa-moon' : 'fa-sun';
+                const label = theme === 'dark' ? 'Темна тема' : 'Світла тема';
+                settingsBtn.innerHTML = `<i class="fas ${icon}"></i> ${label}`;
             }
         }
 
@@ -6012,9 +6014,11 @@
             const container = document.getElementById('settingsPageContainer');
             if (!container) return;
             const theme = Storage.getTheme();
-            const themeLabel = theme === 'dark' ? 'Темний режим' : 'Світлий режим';
-            const themeEmoji = theme === 'dark' ? '🌙' : '☀️';
-            const nextThemeLabel = theme === 'dark' ? '☀️ Світла тема' : '🌙 Темна тема';
+            const isDark = theme === 'dark';
+            const icon = isDark ? 'fa-moon' : 'fa-sun';
+            const label = isDark ? 'Темна тема' : 'Світла тема';
+            const nextIcon = isDark ? 'fa-sun' : 'fa-moon';
+            const nextLabel = isDark ? 'Світла тема' : 'Темна тема';
             container.innerHTML = `
             <div class="settings-page-header">
               <h2>Налаштування</h2>
@@ -6024,11 +6028,11 @@
                 <i class="fas fa-paint-brush"></i>
                 <div>
                   <div class="label">Тема інтерфейсу</div>
-                  <div class="desc">${themeLabel} — ${theme === 'dark' ? 'нічний режим' : 'денний режим'}</div>
+                  <div class="desc">${label} — ${isDark ? 'нічний режим' : 'денний режим'}</div>
                 </div>
               </div>
               <button class="settings-toggle-btn" id="settingsThemeBtn">
-                <span class="theme-icon">${themeEmoji}</span> ${nextThemeLabel}
+                <i class="fas ${nextIcon}"></i> ${nextLabel}
               </button>
             </div>
             <div class="settings-card" style="opacity:0.6;pointer-events:none;">
@@ -6039,7 +6043,7 @@
                   <div class="desc">animeua.club (завжди актуальне)</div>
                 </div>
               </div>
-              <span style="font-size:0.75rem;color:var(--text-muted);">✔️</span>
+              <span style="font-size:0.75rem;color:var(--text-muted);"><i class="fas fa-check"></i></span>
             </div>
             <div class="settings-card" style="opacity:0.6;pointer-events:none;">
               <div class="settings-card-left">
@@ -6049,7 +6053,7 @@
                   <div class="desc">Українська (завжди)</div>
                 </div>
               </div>
-              <span style="font-size:0.75rem;color:var(--text-muted);">🇺🇦</span>
+              <span style="font-size:0.75rem;color:var(--text-muted);"><i class="fas fa-flag"></i></span>
             </div>
           `;
             const themeBtn = document.getElementById('settingsThemeBtn');
@@ -6064,11 +6068,10 @@
         // ====================================================================
         function getDefaultProfile() {
             return {
-                nickname: 'Salon Vpu',
-                avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop',
-                banner: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&h=300&fit=crop',
-                bio: 'Аніме ентузіаст. Дивлюсь усе підряд — від слайс-оф-лайф до психологічного трилера.',
-                joined: '2025'
+                nickname: 'Користувач',
+                avatar: '',
+                banner: '',
+                bio: 'Аніме ентузіаст. Дивлюсь усе підряд — від слайс-оф-лайф до психологічного трилера.'
             };
         }
 
@@ -6198,9 +6201,6 @@
                 </div>
                 <div class="profile-meta">
                   <span>@${profile.nickname.toLowerCase().replace(/\s/g,'_')}</span>
-                  <span class="dot"></span>
-                  <span>На платформі з ${profile.joined}</span>
-                  ${Auth.isAuthenticated() ? '<span class="dot"></span><span style="color:var(--accent);">✔️ синхронізовано</span>' : ''}
                 </div>
                 <div class="profile-bio-row">
                   <div class="profile-bio" id="profileBioText">${profile.bio}</div>
@@ -7131,7 +7131,7 @@
                 addedAt: Date.now()
             });
             Storage.setBookmarks(bookmarks);
-            showToast('Додано до закладок! ❤️');
+            showToast('Додано до закладок');
             updateBookmarkButton(url);
             if (Router.currentRoute === 'profile') renderProfilePage();
         }
@@ -7496,7 +7496,7 @@
                 Router.goTo('settings');
             }
 
-            console.log('VAKDAB v6.1 — з Firebase');
+            console.log('VAKDAB v6.2 — без емодзі, чистий профіль');
             console.log('Клавіші: / пошук • M меню • T тема • R випадкове • Esc закрити');
         }
 
