@@ -4587,21 +4587,41 @@
 
             async _loadUserData(uid) {
                 if (!firebaseInitialized || !db) return;
+                // Зберегти гостеві дані перед завантаженням
+                const guestData = {
+                    profile: Storage.getProfile(),
+                    history: Storage.getHistory(),
+                    bookmarks: Storage.getBookmarks(),
+                    likes: Storage.getLikes(),
+                    watchTime: Storage.getWatchTime()
+                };
                 Storage.clear();
                 try {
                     const docRef = doc(db, 'users', uid);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        if (data.history) Storage._setHistory(data.history);
-                        if (data.bookmarks) Storage._setBookmarks(data.bookmarks);
-                        if (data.likes) Storage._setLikes(data.likes);
                         if (data.profile) Storage._setProfile(data.profile);
+                        else if (guestData.profile) Storage._setProfile(guestData.profile);
+                        if (data.history) Storage._setHistory(data.history);
+                        else if (guestData.history && guestData.history.length) Storage._setHistory(guestData.history);
+                        if (data.bookmarks) Storage._setBookmarks(data.bookmarks);
+                        else if (guestData.bookmarks && guestData.bookmarks.length) Storage._setBookmarks(guestData.bookmarks);
+                        if (data.likes) Storage._setLikes(data.likes);
+                        else if (guestData.likes && Object.keys(guestData.likes).length) Storage._setLikes(guestData.likes);
                         if (data.watchTime) {
-                            const current = Storage.getWatchTime() || 0;
+                            const current = guestData.watchTime || 0;
                             Storage._setWatchTime(Math.max(current, data.watchTime));
+                        } else if (guestData.watchTime) {
+                            Storage._setWatchTime(guestData.watchTime);
                         }
                     } else {
+                        // Новий юзер — переносимо гостеві дані
+                        if (guestData.profile) Storage._setProfile(guestData.profile);
+                        if (guestData.history && guestData.history.length) Storage._setHistory(guestData.history);
+                        if (guestData.bookmarks && guestData.bookmarks.length) Storage._setBookmarks(guestData.bookmarks);
+                        if (guestData.likes && Object.keys(guestData.likes).length) Storage._setLikes(guestData.likes);
+                        if (guestData.watchTime) Storage._setWatchTime(guestData.watchTime);
                         await this._createUserDoc(uid);
                     }
                 } catch (e) {
@@ -4692,19 +4712,21 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
+                // syncUserData в background — не блокує вихід
                 try { await this.syncUserData(); } catch(syncErr) {
                     console.warn('Sync failed during logout (non-fatal):', syncErr);
                 }
                 try { await signOut(auth); } catch(signErr) {
                     console.warn('signOut error:', signErr);
                 }
+                // Очищаємо стан і localStorage
                 this._user = null;
                 this._welcomeShown = false;
                 Storage.clear();
                 this._notifyListeners();
                 showToast('Ви вийшли з акаунту');
-                Router.goTo('main');
-                window.location.reload();
+                // Перенаправляємо на сторінку профілю — покаже форму входу
+                Router.goTo('profile');
                 return { success: true };
             },
 
