@@ -4449,7 +4449,9 @@
             GoogleAuthProvider,
             onAuthStateChanged,
             signOut,
-            updateProfile
+            updateProfile,
+            setPersistence,
+            inMemoryPersistence
         } from "firebase/auth";
         import {
             getFirestore,
@@ -4517,6 +4519,8 @@
         try {
             firebaseApp = initializeApp(FIREBASE_CONFIG);
             auth = getAuth(firebaseApp);
+            // ВИПРАВЛЕННЯ: inMemoryPersistence — НЕ зберігати сесію після закриття/перезавантаження
+            setPersistence(auth, inMemoryPersistence).catch(e => console.warn('Persistence error:', e));
             db = getFirestore(firebaseApp);
             firebaseInitialized = true;
             console.log('Firebase initialized');
@@ -4712,21 +4716,17 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
-                // syncUserData в background — не блокує вихід
-                try { await this.syncUserData(); } catch(syncErr) {
-                    console.warn('Sync failed during logout (non-fatal):', syncErr);
-                }
-                try { await signOut(auth); } catch(signErr) {
-                    console.warn('signOut error:', signErr);
-                }
-                // Очищаємо стан і localStorage
+                // Запускаємо sync і signOut у фоні — НЕ чекаємо
+                this.syncUserData().catch(e => console.warn('Sync error:', e));
+                signOut(auth).catch(e => console.warn('signOut error:', e));
+                // Миттєво очищаємо стан
                 this._user = null;
                 this._welcomeShown = false;
                 Storage.clear();
                 this._notifyListeners();
                 showToast('Ви вийшли з акаунту');
-                // Перенаправляємо на сторінку профілю — покаже форму входу
-                Router.goTo('profile');
+                // Одразу на сторінку входу
+                window.location.hash = 'profile';
                 return { success: true };
             },
 
