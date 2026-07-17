@@ -16,7 +16,6 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <meta name="theme-color" content="#0d0d0d" />
 
-    <!-- Firebase import map (використовується для ES Modules) -->
     <script type="importmap">
         {
             "imports": {
@@ -28,9 +27,6 @@
     </script>
 
     <style>
-        /* ============================================================
-           CSS ЗМІННІ (Mobile-First)
-           ============================================================ */
         :root {
             --accent: #0b0b0b;
             --accent-rgb: 11, 11, 11;
@@ -137,7 +133,6 @@
             .hero-wrapper { width: calc(100% + 4rem); margin-left: -2rem; margin-right: -2rem; }
         }
 
-        /* Анімації */
         @keyframes fadeInUp {
             from { opacity:0; transform:translateY(16px); }
             to { opacity:1; transform:translateY(0); }
@@ -155,21 +150,11 @@
             0% { background-position:-200px 0; }
             100% { background-position:calc(200px + 100%) 0; }
         }
-        @keyframes kenBurns {
-            0% { transform:scale(1) translateX(0); object-position:center center; }
-            50% { transform:scale(1.08) translateX(2%); object-position:center top; }
-            100% { transform:scale(1) translateX(0); object-position:center center; }
-        }
-        @keyframes fadeIn {
-            from { opacity:0; transform:scale(1.03); }
-            to { opacity:1; transform:scale(1); }
-        }
         @keyframes heroFadeIn {
             from { opacity:0; transform:scale(1.04) rotate(0.5deg); }
             to { opacity:1; transform:scale(1) rotate(0); }
         }
 
-        /* ===== ХЕДЕР — ПРОЗОРИЙ, ПЛАВАЮЧИЙ ===== */
         .header {
             display: flex;
             flex-wrap: wrap;
@@ -427,9 +412,6 @@
             }
         }
 
-        /* ============================================================
-                   НОВИЙ ГЕРО-БАНЕР — ПРЕМІУМ (ПОВНОРОЗМІРНИЙ ПОСТЕР)
-                   ============================================================ */
         .hero-wrapper {
             position: relative;
             width: calc(100% + 1.5rem);
@@ -525,35 +507,6 @@
             background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.1) 60%, transparent 100%);
         }
 
-        .hero-brand-title {
-            display: none !important;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 3;
-            font-size: clamp(2.2rem, 8vw, 5.5rem);
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.06);
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-            text-shadow: 0 0 60px rgba(0, 0, 0, 0.2);
-            font-family: 'Inter', sans-serif;
-        }
-        body:not(.dark-mode) .hero-brand-title {
-            color: rgba(255, 255, 255, 0.06);
-            text-shadow: 0 0 60px rgba(0, 0, 0, 0.2);
-        }
-        @media (max-width: 600px) {
-            .hero-brand-title {
-                font-size: clamp(1.6rem, 6vw, 3rem);
-                letter-spacing: 0.15em;
-            }
-        }
-
         .hero-slide-content {
             position: absolute;
             inset: 0;
@@ -593,14 +546,6 @@
             }
         }
 
-        .hero-slide-subtitle {
-            font-size: clamp(0.7rem, 1.2vw, 1rem);
-            color: rgba(255, 255, 255, 0.6) !important;
-            font-weight: 400;
-            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
-            text-align: left;
-        }
-
         .hero-slide-tags {
             display: flex;
             gap: 8px;
@@ -620,33 +565,10 @@
             text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.3px;
         }
-        .hero-tag.rating {
-            background: rgba(255, 255, 255, 0.10);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #ffffff !important;
-        }
         .hero-tag.genre-tag {
             background: rgba(255, 255, 255, 0.07);
             border-color: rgba(255, 255, 255, 0.10);
             color: rgba(255, 255, 255, 0.85) !important;
-        }
-
-        .hero-slide-desc {
-            font-size: clamp(0.7rem, 0.9vw, 0.95rem);
-            color: rgba(255, 255, 255, 0.7) !important;
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            text-align: left;
-        }
-        @media (min-width: 768px) {
-            .hero-slide-desc {
-                -webkit-line-clamp: 3;
-            }
         }
 
         .hero-slide-btn {
@@ -805,7 +727,6 @@
             background: transparent;
         }
 
-        /* ===== КАРТКА АНІМЕ ===== */
         .anime-card {
             background: var(--surface);
             border-radius: var(--radius-sm);
@@ -959,7 +880,6 @@
             }
         }
 
-        /* ===== ЛІВЕ МЕНЮ ===== */
         .leftdock-overlay {
             position: fixed;
             inset: 0;
@@ -1117,7 +1037,6 @@
             flex: 1 1 auto;
         }
 
-        /* Жанрові секції */
         #genreSectionsContainer {
             display: flex;
             flex-direction: column;
@@ -1323,7 +1242,6 @@
             box-shadow: 0 8px 24px var(--accent-glow);
         }
 
-        /* ===== СТОРІНКА ПОШУКУ ===== */
         #searchPageContainer {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -1479,7 +1397,6 @@
             color: var(--text-muted);
         }
 
-        /* ===== СТОРІНКА НАЛАШТУВАНЬ ===== */
         #settingsPageContainer {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -1579,7 +1496,6 @@
             font-size: 0.9rem;
         }
 
-        /* ===== СТОРІНКА ПРОФІЛЮ ===== */
         #profilePageContainer {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -2404,13 +2320,8 @@
             animation: profileShimmer 8s ease-in-out infinite;
         }
         @keyframes profileShimmer {
-            0%,
-            100% {
-                transform: translate(0, 0);
-            }
-            50% {
-                transform: translate(-20px, 20px);
-            }
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 20px); }
         }
 
         .profile-wt-label {
@@ -2481,7 +2392,6 @@
             font-size: 0.9rem;
         }
 
-        /* ===== СТОРІНКА ЖАНРУ ===== */
         #genrePageContainer {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -2538,9 +2448,6 @@
             .loader i { font-size: 2rem; }
         }
 
-        /* ============================================================
-                   ПЛЕЄР
-                   ============================================================ */
         #playerPageModal {
             display: none;
             position: fixed;
@@ -3627,7 +3534,6 @@
             opacity: 0.4;
         }
 
-        /* ===== BOTTOM SHEET ===== */
         .bottom-sheet-overlay {
             position: fixed;
             inset: 0;
@@ -3843,7 +3749,6 @@
             box-shadow: 0 12px 32px var(--accent-glow);
         }
 
-        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -4087,7 +3992,6 @@
             display: none !important;
         }
 
-        /* ===== АВТОРИЗАЦІЯ — вбудована у профіль ===== */
         .auth-card {
             background: var(--surface);
             border-radius: var(--radius-lg);
@@ -4155,10 +4059,7 @@
             transition: color 0.25s ease;
         }
         .auth-card .switcher button.active {
-            color: #0a0a0a;
-        }
-        .dark-mode .auth-card .switcher button.active {
-            color: #f7f7f7;
+            color: var(--accent-text);
         }
         .auth-card .switcher-thumb {
             position: absolute;
@@ -4377,7 +4278,6 @@
 
     <div class="app-container" id="appRoot">
 
-        <!-- ===== ХЕДЕР — ПРОЗОРИЙ, ПЛАВАЮЧИЙ ===== -->
         <header class="header">
             <div class="header-left">
                 <button class="burger-btn" id="burgerBtn" aria-label="Відкрити меню" title="Меню (M)">
@@ -4403,15 +4303,11 @@
             <div class="agnative-topnav-clock" id="agnativeTopnavClock">00:00</div>
         </header>
 
-        <!-- ===== ЛІВЕ МЕНЮ ===== -->
         <div class="leftdock-overlay" id="leftdockOverlay"></div>
         <aside class="agnative-leftdock" id="leftdock" aria-label="Головне меню">
             <div class="agnative-leftdock__inner" id="leftdockInner"></div>
         </aside>
 
-        <!-- ============================================================
-        НОВИЙ ПРЕМІУМ ГЕРО-БАНЕР (ПОВНОРОЗМІРНИЙ ПОСТЕР)
-        ============================================================ -->
         <div class="hero-wrapper" id="heroWrapper">
             <div id="heroSlidesContainer"></div>
             <button class="hero-nav hero-nav-prev" id="heroPrevBtn" aria-label="Попередній"><i class="fas fa-chevron-left"></i></button>
@@ -4419,42 +4315,32 @@
             <div class="hero-dots" id="heroDots"></div>
         </div>
 
-        <!-- ===== РЯД ДІЙ ===== -->
         <div class="actions-row" id="actionsRow">
             <button class="action-pill" id="top100Btn" title="ТОП 100 аніме"><i class="fas fa-crown"></i> ТОП 100</button>
             <button class="action-pill" id="randomBtn" title="Випадкове аніме (R)"><i class="fas fa-dice-d6"></i> Випадкове</button>
         </div>
 
-        <!-- ===== ГОЛОВНА СТОРІНКА ===== -->
         <div id="genreSectionsContainer"></div>
         <div id="animeContainer" class="anime-grid" style="display:none;">
             <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження аніме...</div>
         </div>
 
-        <!-- ===== СТОРІНКИ ===== -->
         <div id="searchPageContainer"></div>
         <div id="settingsPageContainer"></div>
         <div id="profilePageContainer"></div>
         <div id="genrePageContainer"></div>
 
-        <!-- ===== ПАГІНАЦІЯ ===== -->
         <div class="pagination-row" id="paginationRow"></div>
 
-        <!-- ===== ФУТЕР ===== -->
-        <footer><span>VAKDAB © 2026 — Усі права захищено • Клавіші: / пошук, M меню, T тема, R випадкове, Esc закрити</span></footer>
+        <footer><span>VAKDAB 2026 — Усі права захищено • Клавіші: / пошук, M меню, T тема, R випадкове, Esc закрити</span></footer>
     </div>
 
-    <!-- ===== КНОПКА "ВГОРУ" ===== -->
     <button class="back-to-top" id="backToTopBtn" title="Нагору" aria-label="Прокрутити нагору">
         <i class="fas fa-chevron-up"></i>
     </button>
 
-    <!-- ===== TOAST ===== -->
     <div class="toast" id="toast"></div>
 
-    <!-- ============================================================
-    ПЛЕЄР
-    ============================================================ -->
     <div id="playerPageModal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
             <div class="player-blur-bg" id="playerBlurBg"></div>
@@ -4510,9 +4396,6 @@
         </div>
     </div>
 
-    <!-- ============================================================
-    BOTTOM SHEET
-    ============================================================ -->
     <div class="bottom-sheet-overlay" id="bottomSheetOverlay">
         <div class="bottom-sheet" id="bottomSheet">
             <div class="bottom-sheet-handle"></div>
@@ -4537,30 +4420,25 @@
         </div>
     </div>
 
-    <!-- ===== ПРИХОВАНІ ПОЛЯ ===== -->
     <input type="file" id="avatarFileInput" class="hidden-file-input" accept="image/*" />
     <input type="file" id="bannerFileInput" class="hidden-file-input" accept="image/*" />
 
-    <!-- ====================================================================
-    ГОЛОВНИЙ СКРИПТ — ТИП МОДУЛЬ (виправлено помилку import)
-    ==================================================================== -->
     <script type="module">
         // ====================================================================
-        //  FIREBASE КОНФІГУРАЦІЯ
-        //  🔐 ЗАМІНІТЬ ЦІ ЗНАЧЕННЯ НА СВОЇ З КОНСОЛІ FIREBASE
+        //  FIREBASE КОНФІГУРАЦІЯ (РЕАЛЬНІ ДАНІ)
         // ====================================================================
         const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyDemoKey123456789", // ← ЗАМІНІТЬ НА СВІЙ API KEY
-            authDomain: "your-project.firebaseapp.com", // ← ЗАМІНІТЬ
-            projectId: "your-project", // ← ЗАМІНІТЬ
-            storageBucket: "your-project.firebasestorage.app", // ← ЗАМІНІТЬ
-            messagingSenderId: "123456789", // ← ЗАМІНІТЬ
-            appId: "1:123456789:web:abcdef123456", // ← ЗАМІНІТЬ
-            measurementId: "G-XXXXXXX" // ← ЗАМІНІТЬ (опціонально)
+            apiKey: "AIzaSyDxEGgR8KuZh9IEeAEv5yXa2lAzdLGP5jI",
+            authDomain: "monoanime-46d6f.firebaseapp.com",
+            projectId: "monoanime-46d6f",
+            storageBucket: "monoanime-46d6f.firebasestorage.app",
+            messagingSenderId: "645025854458",
+            appId: "1:645025854458:web:f41af5e48b79517522aa43",
+            measurementId: "G-ZJB9D0CJQL"
         };
 
         // ====================================================================
-        //  ІМПОРТИ FIREBASE (працює завдяки type="module")
+        //  ІМПОРТИ FIREBASE
         // ====================================================================
         import { initializeApp } from "firebase/app";
         import {
@@ -4608,7 +4486,6 @@
             "Школа": "classes",
             "Еччі": "echhi"
         };
-        const GENRE_NAMES = Object.keys(GENRE_MAP);
 
         String.prototype.hashCode = function() {
             let h = 0;
@@ -4642,14 +4519,14 @@
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
             firebaseInitialized = true;
-            console.log('✅ Firebase ініціалізовано');
+            console.log('Firebase initialized');
         } catch (e) {
-            console.warn('⚠️ Firebase не ініціалізовано:', e.message);
+            console.warn('Firebase init error:', e.message);
             firebaseInitialized = false;
         }
 
         // ====================================================================
-        //  СИСТЕМА АВТОРИЗАЦІЇ (обгортка над Firebase)
+        //  СИСТЕМА АВТОРИЗАЦІЇ
         // ====================================================================
         const Auth = {
             _user: null,
@@ -4659,7 +4536,7 @@
 
             init() {
                 if (!firebaseInitialized) {
-                    console.warn('⚠️ Firebase не доступний, авторизація вимкнена');
+                    console.warn('Firebase not available, auth disabled');
                     return;
                 }
                 if (this._initialized) return;
@@ -4673,10 +4550,9 @@
                         if (Router.currentRoute === 'profile') {
                             renderProfilePage();
                         }
-                        // Показуємо привітання тільки при першому вході
                         if (!this._welcomeShown) {
                             this._welcomeShown = true;
-                            showToast('👋 Привіт, ' + (user.displayName || user.email || 'користувач'));
+                            showToast('Привіт, ' + (user.displayName || user.email || 'користувач'));
                         }
                     } else {
                         this._welcomeShown = false;
@@ -4748,14 +4624,14 @@
 
             async login(email, password) {
                 if (!firebaseInitialized || !auth) {
-                    return { success: false, error: 'Firebase не доступний' };
+                    return { success: false, error: 'Firebase not available' };
                 }
                 try {
                     const cred = await signInWithEmailAndPassword(auth, email, password);
                     this._user = cred.user;
                     await this._loadUserData(cred.user.uid);
                     this._notifyListeners();
-                    showToast('✅ Успішний вхід!');
+                    showToast('Успішний вхід');
                     if (Router.currentRoute === 'profile') renderProfilePage();
                     return { success: true };
                 } catch (e) {
@@ -4766,7 +4642,7 @@
 
             async register(email, password, displayName) {
                 if (!firebaseInitialized || !auth) {
-                    return { success: false, error: 'Firebase не доступний' };
+                    return { success: false, error: 'Firebase not available' };
                 }
                 try {
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -4779,7 +4655,7 @@
                     Storage._setProfile(profile);
                     await this._createUserDoc(cred.user.uid);
                     this._notifyListeners();
-                    showToast('🎉 Акаунт створено!');
+                    showToast('Акаунт створено');
                     if (Router.currentRoute === 'profile') renderProfilePage();
                     return { success: true };
                 } catch (e) {
@@ -4790,14 +4666,14 @@
 
             async signInWithGoogle() {
                 if (!firebaseInitialized || !auth || !this._googleProvider) {
-                    return { success: false, error: 'Firebase не доступний' };
+                    return { success: false, error: 'Firebase not available' };
                 }
                 try {
                     const result = await signInWithPopup(auth, this._googleProvider);
                     this._user = result.user;
                     await this._loadUserData(result.user.uid);
                     this._notifyListeners();
-                    showToast('✅ Вхід через Google');
+                    showToast('Вхід через Google');
                     if (Router.currentRoute === 'profile') renderProfilePage();
                     return { success: true };
                 } catch (e) {
@@ -4808,14 +4684,14 @@
 
             async logout() {
                 if (!firebaseInitialized || !auth) {
-                    return { success: false, error: 'Firebase не доступний' };
+                    return { success: false, error: 'Firebase not available' };
                 }
                 try {
                     await this.syncUserData();
                     await signOut(auth);
                     this._user = null;
                     this._notifyListeners();
-                    showToast('👋 Ви вийшли з акаунту');
+                    showToast('Ви вийшли з акаунту');
                     if (Router.currentRoute === 'profile') renderAuthPage();
                     return { success: true };
                 } catch (e) {
@@ -4845,7 +4721,7 @@
         };
 
         // ====================================================================
-        //  РОЗШИРЕНЕ СХОВИЩЕ З СИНХРОНІЗАЦІЄЮ
+        //  СХОВИЩЕ
         // ====================================================================
         const Storage = {
             getTheme() { try { return localStorage.getItem('mono_anime_theme') || 'light'; } catch { return 'light'; } },
@@ -4945,7 +4821,7 @@
             const next = Storage.getTheme() === 'dark' ? 'light' : 'dark';
             Storage.setTheme(next);
             applyTheme(next);
-            showToast(next === 'dark' ? '🌙 Темний режим' : '☀️ Світлий режим');
+            showToast(next === 'dark' ? 'Темний режим' : 'Світлий режим');
             if (Router.currentRoute === 'settings') {
                 renderSettingsPage();
             }
@@ -4961,7 +4837,7 @@
         }
 
         // ====================================================================
-        //  API-ФУНКЦІЇ
+        //  API ФУНКЦІЇ
         // ====================================================================
         async function fetchUA(url) {
             const proxyUrl = getProxyUrl(url);
@@ -5205,7 +5081,7 @@
         }
 
         // ====================================================================
-        //  ПЛЕЄР LampaPlayer
+        //  ПЛЕЄР
         // ====================================================================
         class LampaPlayer {
             constructor(container, options) {
@@ -5311,13 +5187,11 @@
         }
 
         // ====================================================================
-        //  НОВИЙ ХЕРО-БАНЕР
+        //  ГЕРО БАНЕР
         // ====================================================================
         let heroItems = [],
             heroCurrentIndex = 0,
-            heroCurrentItem = null,
-            heroRotationTimer = null,
-            heroTransitionTimer = null;
+            heroRotationTimer = null;
 
         async function buildHeroBanner() {
             const wrapper = document.getElementById('heroWrapper');
@@ -5371,7 +5245,6 @@
         function renderHeroSlide(item) {
             const container = document.getElementById('heroSlidesContainer');
             if (!container || !item) return;
-            heroCurrentItem = item;
             const poster = item.images?.jpg?.large_image_url || '';
             const title = item.title || 'Без назви';
             const genres = item.genres || ['Аніме'];
@@ -5532,13 +5405,11 @@
             return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">${letter}</text></svg>`;
         }
 
-        function iconSearchSvg() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`; }
-
-        function iconSettingsSvg() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`; }
+        function iconHomeSvg() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11l2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>`; }
 
         function iconProfileSvg() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`; }
 
-        function iconHomeSvg() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11l2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>`; }
+        function iconSettingsSvg() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`; }
 
         function loadGenres() { return Object.entries(GENRE_MAP).map(([name, slug]) => ({ slug, name })).sort((a, b) => a.name
                 .localeCompare(b.name, 'uk')); }
@@ -5639,7 +5510,6 @@
                 const route = parts[0];
                 const query = parts[1] || '';
                 const params = Object.fromEntries(new URLSearchParams(query));
-
                 this.currentRoute = route;
                 this.params = params;
                 this.navigate(route, params);
@@ -5775,8 +5645,7 @@
         let currentTab = 'main',
             currentPage = 1,
             currentSearchQuery = '',
-            currentCategory = '',
-            currentList = [];
+            currentCategory = '';
 
         async function fetchContent() {
             if (currentTab === 'top100') { return await fetchAnimeuaTop100(); }
@@ -5813,7 +5682,6 @@
             showSkeleton();
             try {
                 const list = await fetchContent();
-                currentList = list;
                 renderCards(list);
             } catch (err) {
                 container.innerHTML =
@@ -5870,29 +5738,6 @@
             loadContent();
         };
 
-        function clearSearch() {
-            const si = document.getElementById('searchInput');
-            if (si) si.value = '';
-            currentSearchQuery = '';
-            currentPage = 1;
-            currentTab = 'main';
-            currentCategory = '';
-            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
-            const cb = document.getElementById('searchClearBtn');
-            if (cb) cb.classList.remove('visible');
-            if (Router.currentRoute === 'main') {
-                loadContent();
-                document.getElementById('genreSectionsContainer').style.display = 'flex';
-                document.getElementById('animeContainer').style.display = 'none';
-                document.getElementById('paginationRow').innerHTML = '';
-                if (!document.getElementById('genreSectionsContainer').hasChildNodes() ||
-                    document.getElementById('genreSectionsContainer').querySelector('.loader')) {
-                    loadAndDisplayGenreSections();
-                }
-            }
-            syncLeftdockActive();
-        }
-
         function showTop100() {
             currentTab = 'top100';
             currentPage = 1;
@@ -5900,10 +5745,6 @@
             currentCategory = '';
             document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
             document.getElementById('top100Btn')?.classList.add('active-pill');
-            const si = document.getElementById('searchInput');
-            if (si) si.value = '';
-            const cb = document.getElementById('searchClearBtn');
-            if (cb) cb.classList.remove('visible');
             if (Router.currentRoute === 'main') loadContent();
             syncLeftdockActive();
             showToast('ТОП 100 аніме');
@@ -5926,7 +5767,6 @@
             container.style.display = 'flex';
 
             try {
-                // 🔥 ПАРАЛЕЛЬНЕ завантаження всіх жанрів (виправлено проблему послідовності)
                 const genrePromises = genreList.map(async (genre) => {
                     try {
                         const items = await fetchAnimeuaByCategory(genre.slug, 1);
@@ -6177,14 +6017,14 @@
             const nextThemeLabel = theme === 'dark' ? '☀️ Світла тема' : '🌙 Темна тема';
             container.innerHTML = `
             <div class="settings-page-header">
-              <h2>⚙️ Налаштування</h2>
+              <h2>Налаштування</h2>
             </div>
             <div class="settings-card">
               <div class="settings-card-left">
                 <i class="fas fa-paint-brush"></i>
                 <div>
                   <div class="label">Тема інтерфейсу</div>
-                  <div class="desc">${themeLabel} — ${theme === 'dark' ? '🌙 нічний режим' : '☀️ денний режим'}</div>
+                  <div class="desc">${themeLabel} — ${theme === 'dark' ? 'нічний режим' : 'денний режим'}</div>
                 </div>
               </div>
               <button class="settings-toggle-btn" id="settingsThemeBtn">
@@ -6331,8 +6171,6 @@
             }
             const profile = getProfile();
             const stats = getProfileStats();
-            const hours = stats.watchHours;
-            const minutes = stats.watchMinutes;
             container.innerHTML = `
             <div class="profile-wrapper">
               <div class="profile-banner" onclick="document.getElementById('bannerFileInput').click()">
@@ -6388,7 +6226,7 @@
                   <button class="btn-outline" onclick="Auth.logout()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sign-out-alt"></i> Вийти
                   </button>
-                  <button class="btn-outline" onclick="Auth.syncUserData();showToast('✅ Дані синхронізовано');" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
+                  <button class="btn-outline" onclick="Auth.syncUserData();showToast('Дані синхронізовано');" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sync"></i> Синхронізувати
                   </button>
                 </div>
@@ -6474,7 +6312,7 @@
                   </div>
                   <div class="row-between">
                     <label class="remember"><input type="checkbox" id="loginRemember">Запам'ятати мене</label>
-                    <a href="#" onclick="showToast('🔐 Скидання пароля — звʼяжіться з підтримкою');return false;">Забули пароль?</a>
+                    <a href="#" onclick="showToast('Скидання пароля — звʼяжіться з підтримкою');return false;">Забули пароль?</a>
                   </div>
                   <div class="auth-error" id="authError"></div>
                   <button class="submit-btn" type="submit" id="authLoginSubmit">Увійти</button>
@@ -6514,7 +6352,6 @@
             </div>
           `;
 
-            // === Логіка перемикання режимів ===
             const switcher = document.getElementById('authSwitcher');
             const btnLogin = switcher.querySelector('[data-mode="login"]');
             const btnRegister = switcher.querySelector('[data-mode="register"]');
@@ -6555,7 +6392,6 @@
                 document.getElementById('authFootToggle').addEventListener('click', () => setAuthMode('register'));
             }
 
-            // === ЛОГІН ===
             document.getElementById('authLoginForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const email = document.getElementById('loginEmail').value.trim();
@@ -6565,18 +6401,17 @@
                 errorEl.textContent = '';
                 if (!email || !pass) { errorEl.textContent = 'Будь ласка, заповніть усі поля.'; return; }
                 submitBtn.disabled = true;
-                submitBtn.textContent = '⏳ Вхід...';
+                submitBtn.textContent = 'Вхід...';
                 const result = await Auth.login(email, pass);
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Увійти';
                 if (!result.success) {
-                    errorEl.textContent = '❌ ' + (result.error || 'Помилка входу');
+                    errorEl.textContent = result.error || 'Помилка входу';
                 } else {
                     renderProfilePage();
                 }
             });
 
-            // === РЕЄСТРАЦІЯ ===
             document.getElementById('authRegisterForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const name = document.getElementById('regName').value.trim();
@@ -6588,21 +6423,20 @@
                 if (!name || !email || !pass) { errorEl.textContent = 'Будь ласка, заповніть усі поля.'; return; }
                 if (pass.length < 6) { errorEl.textContent = 'Пароль має містити щонайменше 6 символів.'; return; }
                 submitBtn.disabled = true;
-                submitBtn.textContent = '⏳ Створення...';
+                submitBtn.textContent = 'Створення...';
                 const result = await Auth.register(email, pass, name);
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Створити акаунт';
                 if (!result.success) {
-                    errorEl.textContent = '❌ ' + (result.error || 'Помилка реєстрації');
+                    errorEl.textContent = result.error || 'Помилка реєстрації';
                 } else {
                     renderProfilePage();
                 }
             });
 
-            // === Google ===
             document.getElementById('authGoogleBtn').addEventListener('click', async function() {
                 this.disabled = true;
-                this.textContent = '⏳ Завантаження...';
+                this.textContent = 'Завантаження...';
                 const result = await Auth.signInWithGoogle();
                 this.disabled = false;
                 this.innerHTML = `
@@ -6615,15 +6449,14 @@
               Продовжити через Google
             `;
                 if (!result.success) {
-                    document.getElementById('authError').textContent = '❌ ' + (result.error || 'Помилка Google входу');
+                    document.getElementById('authError').textContent = result.error || 'Помилка Google входу';
                 } else {
                     renderProfilePage();
                 }
             });
 
-            // === ГІСТЬ ===
             document.getElementById('authGuestBtn').addEventListener('click', () => {
-                showToast('👤 Продовжуємо як гість');
+                showToast('Продовжуємо як гість');
                 Router.goTo('main');
             });
 
@@ -6769,7 +6602,7 @@
         }
 
         // ====================================================================
-        //  ФУНКЦІЇ РЕДАГУВАННЯ ПРОФІЛЮ
+        //  РЕДАГУВАННЯ ПРОФІЛЮ
         // ====================================================================
         function profileEditNick() {
             const nickEl = document.getElementById('profileNickText');
@@ -7345,7 +7178,7 @@
             } else {
                 likes[url] = 'like';
                 Storage.setLikes(likes);
-                showToast('❤️ Лайк!');
+                showToast('Лайк');
             }
             updateLikeButton();
             updateDislikeButton();
@@ -7363,7 +7196,7 @@
             } else {
                 likes[url] = 'dislike';
                 Storage.setLikes(likes);
-                showToast('👎 Дизлайк');
+                showToast('Дизлайк');
             }
             updateLikeButton();
             updateDislikeButton();
@@ -7621,37 +7454,30 @@
         window.showViewMode = showViewMode;
 
         // ====================================================================
-        //  ІНІЦІАЛІЗАЦІЯ — ОПТИМІЗОВАНА: спочатку контент, потім Firebase
+        //  ІНІЦІАЛІЗАЦІЯ
         // ====================================================================
         async function init() {
-            // 1️⃣ Спочатку — тема та базове UI
             applyTheme(Storage.getTheme());
             await buildLeftdock();
             startClock();
             updateBackToTop();
 
-            // 2️⃣ Завантажуємо основний контент (жанрові секції) — це головне!
-            // Використовуємо setTimeout, щоб дати браузеру час на рендеринг
             setTimeout(() => {
                 if (Router.currentRoute === 'main') {
                     loadAndDisplayGenreSections();
                 }
             }, 50);
 
-            // 3️⃣ Hero-банер завантажуємо паралельно (не блокує основний контент)
             setTimeout(() => {
                 buildHeroBanner();
             }, 100);
 
-            // 4️⃣ Ініціалізуємо Router (після того, як DOM готовий)
             Router.init();
 
-            // 5️⃣ Firebase — у фоновому режимі, не блокує завантаження
             setTimeout(() => {
                 Auth.init();
             }, 200);
 
-            // 6️⃣ Обробка хеш-посилань
             const hash = window.location.hash.slice(1);
             if (hash === 'profile') {
                 Router.goTo('profile');
@@ -7670,21 +7496,17 @@
                 Router.goTo('settings');
             }
 
-            console.log('🚀 VAKDAB v6.1 — з Firebase (фоновий режим)');
-            console.log('⌨️ Клавіші: / пошук • M меню • T тема • R випадкове • Esc закрити');
-            console.log('📦 Firebase працює у фоновому режимі, не блокує контент');
+            console.log('VAKDAB v6.1 — з Firebase');
+            console.log('Клавіші: / пошук • M меню • T тема • R випадкове • Esc закрити');
         }
 
-        // Запускаємо після повного завантаження DOM
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
             init();
         }
 
-        // Глобальні функції (для доступу з HTML-атрибутів onclick)
         window.Router = Router;
-        window.clearSearch = clearSearch;
         window.showTop100 = showTop100;
         window.openRandomAnime = openRandomAnime;
         window.openPlayerPage = openPlayerPage;
