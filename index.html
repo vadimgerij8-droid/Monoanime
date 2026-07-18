@@ -4740,10 +4740,18 @@
                     const profileSync = JSON.parse(JSON.stringify(profile));
                     if (profileSync.avatar && profileSync.avatar.length > 100000) profileSync.avatar = '';
                     if (profileSync.banner && profileSync.banner.length > 100000) profileSync.banner = '';
+                    const createHistory = Storage.getHistory().slice(-100).map(h => {
+                        if (h.poster && h.poster.startsWith('data:')) return { ...h, poster: '' };
+                        return h;
+                    });
+                    const createBookmarks = Storage.getBookmarks().map(b => {
+                        if (b.poster && b.poster.startsWith('data:')) return { ...b, poster: '' };
+                        return b;
+                    });
                     await setDoc(docRef, {
                         profile: profileSync,
-                        history: Storage.getHistory(),
-                        bookmarks: Storage.getBookmarks(),
+                        history: createHistory,
+                        bookmarks: createBookmarks,
                         likes: Storage.getLikes(),
                         watchTime: Storage.getWatchTime() || 0,
                         createdAt: serverTimestamp(),
@@ -4785,7 +4793,9 @@
                     const profile = getDefaultProfile();
                     profile.nickname = displayName || email.split('@')[0] || 'Користувач';
                     Storage._setProfile(profile);
-                    // НЕ викликаємо _createUserDoc тут — onAuthStateChanged зробить _loadUserData
+                    // Явно створюємо документ в Firestore — не покладаємося тільки на onAuthStateChanged
+                    // (може бути race condition якщо _loadingData вже true)
+                    this._createUserDoc(cred.user.uid).catch(e => console.warn('Register _createUserDoc:', e.message));
                     this._notifyListeners();
                     showToast('Акаунт створено');
                     if (Router.currentRoute === 'profile') renderProfilePage();
@@ -4883,7 +4893,15 @@
                 if (cleanProfile.banner && cleanProfile.banner.startsWith('data:')) {
                     cleanProfile.banner = '';
                 }
-                const trimHistory = history.slice(-200);
+                // BUG FIX: Strip base64 posters from history/bookmarks — they blow up the 1MB Firestore limit
+                const trimHistory = history.slice(-200).map(h => {
+                    if (h.poster && h.poster.startsWith('data:')) return { ...h, poster: '' };
+                    return h;
+                });
+                const cleanBookmarks = bookmarks.map(b => {
+                    if (b.poster && b.poster.startsWith('data:')) return { ...b, poster: '' };
+                    return b;
+                });
                 console.log('[Sync] profile avatar:', cleanProfile.avatar ? cleanProfile.avatar.substring(0,50) : 'EMPTY');
                 console.log('[Sync] profile banner:', cleanProfile.banner ? cleanProfile.banner.substring(0,50) : 'EMPTY');
                 // Спроба 1: повні дані
@@ -4891,7 +4909,7 @@
                     await setDoc(docRef, {
                         profile: cleanProfile,
                         history: trimHistory,
-                        bookmarks: bookmarks,
+                        bookmarks: cleanBookmarks,
                         likes: likes,
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
@@ -4906,7 +4924,7 @@
                     await setDoc(docRef, {
                         profile: cleanProfile,
                         history: trimHistory.slice(-50),
-                        bookmarks: bookmarks,
+                        bookmarks: cleanBookmarks,
                         likes: likes,
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
@@ -6438,8 +6456,8 @@
         // Стиснення зображення перед збереженням (щоб Firestore не падав)
         // Upload image to Cloudinary, return URL
         async function uploadToCloudinary(file, maxW, maxH, quality) {
-            // First compress locally
-            const dataUrl = await new Promise((resolve, reject) => {
+            // Compress image locally, returns a Blob
+            const compressedBlob = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = function(ev) {
                     const img = new Image();
@@ -6452,23 +6470,32 @@
                         canvas.height = Math.round(hh);
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        canvas.toBlob(resolve, 'image/jpeg', quality);
+                        // toBlob is async and returns Blob, not dataURL
+                        canvas.toBlob(blob => {
+                            if (blob) resolve(blob);
+                            else reject(new Error('Canvas toBlob failed'));
+                        }, 'image/jpeg', quality);
                     };
-                    img.onerror = reject;
+                    img.onerror = () => reject(new Error('Image load failed'));
                     img.src = ev.target.result;
                 };
-                reader.onerror = reject;
+                reader.onerror = () => reject(new Error('FileReader failed'));
                 reader.readAsDataURL(file);
             });
 
-            // Upload to Cloudinary
+            // Upload Blob to Cloudinary
             const formData = new FormData();
-            formData.append('file', dataUrl);
+            formData.append('file', compressedBlob, 'upload.jpg');
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-            const resp = await fetch(url, { method: 'POST', body: formData });
-            if (!resp.ok) throw new Error('Cloudinary upload failed: ' + resp.status);
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const resp = await fetch(uploadUrl, { method: 'POST', body: formData });
+            if (!resp.ok) {
+                const errText = await resp.text().catch(() => '');
+                throw new Error('Cloudinary upload failed: ' + resp.status + ' ' + errText.substring(0,100));
+            }
             const data = await resp.json();
+            if (!data.secure_url) throw new Error('Cloudinary: no secure_url in response');
+            console.log('[Cloudinary] Upload OK:', data.secure_url.substring(0, 60));
             return data.secure_url;
         }
 
