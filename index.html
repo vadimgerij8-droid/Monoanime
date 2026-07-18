@@ -4819,30 +4819,32 @@
                     clearTimeout(Storage._syncTimer);
                     Storage._syncTimer = null;
                 }
-                // 2. ЗАЧЕКАТИ синхронізацію з Firestore ДО signOut.
-                // РАНІШЕ: syncUserData() викликався без await, а signOut(auth)
-                // інвалідував токен → Firestore-запис падав → дані профілю
-                // (аватарка, банер, біо) губилися. Тепер чекаємо з timeout 8с.
-                console.log('Logout: syncing data to Firestore (awaiting)...');
-                try {
-                    const syncPromise = this.syncUserData();
-                    const timeoutPromise = new Promise((_, rej) =>
-                        setTimeout(() => rej(new Error('sync timeout')), 8000));
-                    await Promise.race([syncPromise, timeoutPromise])
-                        .catch(e => console.warn('Logout sync failed:', e.message));
-                } catch(e) {
-                    console.warn('Logout sync error:', e.message);
-                }
-                // 3. ТІЛЬКИ ТЕПЕР очищаємо стан та виходимо
+                // 2. Запустити синхронізацію — syncUserData захоплює всі дані
+                // СИНХРОННО до першого await (uid, profile, history...),
+                // тож подальші this._user = null і Storage.clear() не вплинуть.
+                console.log('Logout: starting Firestore sync...');
+                const syncPromise = this.syncUserData()
+                    .catch(e => console.warn('Logout sync failed:', e.message));
+                // 3. Миттєво очищаємо стан та оновлюємо UI (не блокуємо юзера)
                 this._user = null;
                 this._authResolved = true;
                 this._welcomeShown = false;
                 this._isGuest = false;
                 Storage.clear();
                 this._notifyListeners();
-                showToast('Ви вийшли з акаунту');
-                try { signOut(auth).catch(() => {}); } catch(e) {}
+                showToast('Збереження даних і вихід...');
                 Router.showProfile();
+                // 4. Чекати завершення синхронізації (max 5с) ДО signOut —
+                // signOut інвалідує токен і Firestore-запис би впав.
+                try {
+                    const timeoutP = new Promise(r => setTimeout(r, 5000));
+                    await Promise.race([syncPromise, timeoutP]);
+                    console.log('Logout: sync done, signing out');
+                } catch(e) {
+                    console.warn('Logout: sync wait error', e.message);
+                }
+                try { signOut(auth).catch(() => {}); } catch(e) {}
+                showToast('Ви вийшли з акаунту');
                 return { success: true };
             },
 
