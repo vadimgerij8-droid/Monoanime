@@ -4619,6 +4619,8 @@
                 if (!firebaseInitialized || !db) return;
                 if (this._loadingData) return;
                 this._loadingData = true;
+                // Flush будь-які відкладені debounce-запити перед завантаженням
+                Storage._flushSync();
                 // ВАЖЛИВО: спочатку зберігаємо гостеві дані (щоб перенести в новий акаунт)
                 const guestData = {
                     profile: Storage.getProfile(),
@@ -4785,10 +4787,17 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
-                // syncUserData в фоні — НЕ блокуємо logout
-                this.syncUserData().catch(() => {});
-                // Миттєво очищаємо стан
+                // 1. Спочатку flush будь-які відкладені debounce-запити
+                Storage._flushSync();
+                // 2. Дочекатися запису в Firestore ПЕРЕД очищенням localStorage
+                try {
+                    await this.syncUserData();
+                } catch (e) {
+                    console.warn('Sync before logout failed:', e.message);
+                }
+                // 3. ТІЛЬКИ тепер очищаємо локальний стан
                 this._user = null;
+                this._authResolved = true;
                 this._welcomeShown = false;
                 this._isGuest = false;
                 Storage.clear();
@@ -4800,7 +4809,7 @@
                 return { success: true };
             },
 
-            handleExit() {
+            async handleExit() {
                 if (this.isGuest()) {
                     this._isGuest = false;
                     localStorage.removeItem('vakdab_guest');
@@ -4809,9 +4818,12 @@
                     showToast('Гостевий сеанс завершено');
                     Router.showProfile();
                 } else {
-                    // Юзер — повний logout
-                    this.logout().catch(e => console.warn('Logout error:', e));
-                    // Не чекаємо — logout синхронно очищає стан
+                    // Юзер — повний logout (async — чекаємо синхронізацію з Firestore)
+                    try {
+                        await this.logout();
+                    } catch(e) {
+                        console.warn('Logout error:', e);
+                    }
                 }
             },
 
@@ -4838,6 +4850,7 @@
                     return { ok: true };
                 } catch (e) {
                     console.warn('Sync error (full), trying without images:', e.message);
+                    // При логауті кидаємо помилку далі — caller знає що запис не вдався
                 }
                 // Спроба 2: без великих base64 фото
                 try {
