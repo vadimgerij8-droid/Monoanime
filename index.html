@@ -4562,8 +4562,8 @@
                     this._authResolved = true;
                     this._notifyListeners();
                     if (user) {
-                        await this._loadUserData(user.uid);
-                        // Оновлюємо профіль ТІЛЬКИ якщо ми на сторінці профілю
+                        // РЕНДЕРИМО ПРОФІЛЬ ОДРАЗУ з поточними localStorage даними
+                        // — не чекаємо _loadUserData (який може висіти на Firestore)
                         if (Router.currentRoute === 'profile') {
                             const profContainer = document.getElementById('profilePageContainer');
                             if (profContainer && profContainer.classList.contains('active')) {
@@ -4573,6 +4573,18 @@
                         if (!this._welcomeShown) {
                             this._welcomeShown = true;
                             showToast('Привіт, ' + (user.displayName || user.email || 'користувач'));
+                        }
+                        // Завантажуємо з Firestore в фоні — оновимо профіль коли дані прийдуть
+                        try {
+                            await this._loadUserData(user.uid);
+                            if (Router.currentRoute === 'profile') {
+                                const profContainer = document.getElementById('profilePageContainer');
+                                if (profContainer && profContainer.classList.contains('active')) {
+                                    renderProfilePage();
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Background load failed, using local data:', e.message);
                         }
                     } else {
                         this._welcomeShown = false;
@@ -4619,6 +4631,8 @@
                 if (!firebaseInitialized || !db) return;
                 if (this._loadingData) return;
                 this._loadingData = true;
+                // Timeout 5с — не висіти вічно якщо Firestore недоступний
+                const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Firestore timeout')), 5000));
                 // ВАЖЛИВО: спочатку зберігаємо гостеві дані (щоб перенести в новий акаунт)
                 const guestData = {
                     profile: Storage.getProfile(),
@@ -4631,7 +4645,7 @@
                 // якщо завантаження впаде, локальні дані залишаться.
                 try {
                     const docRef = doc(db, 'users', uid);
-                    const docSnap = await getDoc(docRef);
+                    const docSnap = await Promise.race([getDoc(docRef), timeout]);
                     if (docSnap.exists()) {
                         // Існуючий юзер — завантажуємо його дані з Firestore
                         const data = docSnap.data();
@@ -4793,7 +4807,8 @@
                 // 2. Запустити синхронізацію — НЕ чекаємо.
                 // syncUserData зчитує дані з localStorage в локальні змінні
                 // СИНХРОННО до першого await, тож Storage.clear() не вплине.
-                this.syncUserData().catch(() => {});
+                console.log('Logout: syncing data to Firestore...');
+                this.syncUserData().catch(e => console.warn('Logout sync failed:', e.message));
                 // 3. Миттєво очищаємо стан
                 this._user = null;
                 this._authResolved = true;
@@ -5793,7 +5808,7 @@
                                 renderAuthPage();
                             }
                         }
-                    }, 3000);
+                    }, 1500);
                 } else if (Auth.isAuthenticated() || Auth.isGuest()) {
                     renderProfilePage();
                 } else {
