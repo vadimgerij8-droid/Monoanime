@@ -4451,7 +4451,7 @@
             signOut,
             updateProfile,
             setPersistence,
-            inMemoryPersistence
+            browserLocalPersistence
         } from "firebase/auth";
         import {
             getFirestore,
@@ -4519,8 +4519,8 @@
         try {
             firebaseApp = initializeApp(FIREBASE_CONFIG);
             auth = getAuth(firebaseApp);
-            // ВИПРАВЛЕННЯ: inMemoryPersistence — НЕ зберігати сесію після закриття/перезавантаження
-            setPersistence(auth, inMemoryPersistence).catch(e => console.warn('Persistence error:', e));
+            // browserLocalPersistence — сесія зберігається в браузері (localStorage)
+            setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
             db = getFirestore(firebaseApp);
             firebaseInitialized = true;
             console.log('Firebase initialized');
@@ -4551,7 +4551,7 @@
                 this._isGuest = localStorage.getItem('vakdab_guest') === '1';
                 this._googleProvider = new GoogleAuthProvider();
                 // ВИПРАВЛЕННЯ 1: примусовий вибір акаунта при вході через Google
-                this._googleProvider.setCustomParameters({ prompt: 'select_account' });
+                // prompt select_account прибрано — Google може входити автоматично якщо вже є сесія
                 onAuthStateChanged(auth, async (user) => {
                     if (user && this._user && this._user.uid !== user.uid) {
                         this._welcomeShown = false;
@@ -4625,9 +4625,8 @@
                     likes: Storage.getLikes(),
                     watchTime: Storage.getWatchTime()
                 };
-                // ВАЖЛИВО: ОЧИЩАЄМО localStorage перед завантаженням — щоб дані
-                // попереднього акаунта НЕ переходили в новий
-                Storage.clear();
+                // Завантажуємо з Firestore. НЕ очищаємо localStorage спереду —
+                // якщо завантаження впаде, локальні дані залишаться.
                 try {
                     const docRef = doc(db, 'users', uid);
                     const docSnap = await getDoc(docRef);
