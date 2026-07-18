@@ -439,6 +439,22 @@
         }
 
         /* Button — glassmorphism */
+        .hero-slide-btn-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 480px) {
+            .hero-slide-btn-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.7rem;
+            }
+        }
+        .hero-slide-btn-row .hero-rating-row {
+            flex-wrap: wrap;
+        }
         .hero-slide-btn {
             display: inline-flex;
             align-items: center;
@@ -4212,6 +4228,24 @@
             display: none !important;
         }
 
+        /* ===== Header layout — burger + title + search в одному рядку ===== */
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+            min-width: 0;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .header {
+            align-items: center !important;
+        }
+
         /* ===== Burger + Search buttons — glassmorphism blur ===== */
         .burger-btn,
         .search-circle-btn {
@@ -5478,7 +5512,8 @@
             const container = document.getElementById('heroSlidesContainer');
             if (!container || !item) return;
             const poster = item.images?.jpg?.large_image_url || '';
-            const title = item.title || 'Без назви';
+            const rawTitle = item.title || 'Без назви';
+            const title = rawTitle.length > 38 ? rawTitle.substring(0, 38) + '…' : rawTitle;
             const genres = item.genres || ['Аніме'];
             const rating = item.rating || '0.0';
             const year = item.year || '';
@@ -5505,19 +5540,21 @@
                 <div class="hero-slide-bg" style="background-image: url('${poster}');"></div>
                 <div class="hero-slide-overlay"></div>
                 <div class="hero-slide-content">
-                    <div class="hero-rating-row">
-                        <div class="hero-rating-badge"><span class="star">★</span> ${rating}</div>
-                        ${metaHtml}
-                    </div>
                     <div class="hero-slide-title">${title}</div>
                     ${synopsisHtml}
                     <div class="hero-slide-tags">
                         ${genres.slice(0, 4).map(g => `<span class="hero-tag genre-tag">${g}</span>`).join('')}
                     </div>
-                    <button class="hero-slide-btn">
-                        <span>Дивитися</span>
-                        <span class="btn-icon"><i class="fas fa-play"></i></span>
-                    </button>
+                    <div class="hero-slide-btn-row">
+                        <button class="hero-slide-btn">
+                            <span>Дивитися</span>
+                            <span class="btn-icon"><i class="fas fa-play"></i></span>
+                        </button>
+                        <div class="hero-rating-row">
+                            <div class="hero-rating-badge"><span class="star">★</span> ${rating}</div>
+                            ${metaHtml}
+                        </div>
+                    </div>
                 </div>
             `;
             container.innerHTML = '';
@@ -6859,7 +6896,8 @@ function renderProfilePage() {
           `;
             history.slice(0, 30).forEach(item => {
                 const poster = item.poster || '';
-                const title = item.title || 'Без назви';
+                const rawTitle = item.title || 'Без назви';
+            const title = rawTitle.length > 38 ? rawTitle.substring(0, 38) + '…' : rawTitle;
                 const ep = item.episode || '?';
                 const season = item.season || '';
                 const time = item.timestamp ? new Date(item.timestamp).toLocaleDateString('uk-UA') : 'невідомо';
@@ -6910,7 +6948,8 @@ function renderProfilePage() {
           `;
             bookmarks.slice(0, 30).forEach(item => {
                 const poster = item.poster || '';
-                const title = item.title || 'Без назви';
+                const rawTitle = item.title || 'Без назви';
+            const title = rawTitle.length > 38 ? rawTitle.substring(0, 38) + '…' : rawTitle;
                 const sub = item.episodes || '';
                 html += `
               <div class="profile-bookmark-card" onclick="openPlayerPage('${item.url || ''}')">
