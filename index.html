@@ -4819,12 +4819,21 @@
                     clearTimeout(Storage._syncTimer);
                     Storage._syncTimer = null;
                 }
-                // 2. Запустити синхронізацію — НЕ чекаємо.
-                // syncUserData зчитує дані з localStorage в локальні змінні
-                // СИНХРОННО до першого await, тож Storage.clear() не вплине.
-                console.log('Logout: syncing data to Firestore...');
-                this.syncUserData().catch(e => console.warn('Logout sync failed:', e.message));
-                // 3. Миттєво очищаємо стан
+                // 2. ЗАЧЕКАТИ синхронізацію з Firestore ДО signOut.
+                // РАНІШЕ: syncUserData() викликався без await, а signOut(auth)
+                // інвалідував токен → Firestore-запис падав → дані профілю
+                // (аватарка, банер, біо) губилися. Тепер чекаємо з timeout 8с.
+                console.log('Logout: syncing data to Firestore (awaiting)...');
+                try {
+                    const syncPromise = this.syncUserData();
+                    const timeoutPromise = new Promise((_, rej) =>
+                        setTimeout(() => rej(new Error('sync timeout')), 8000));
+                    await Promise.race([syncPromise, timeoutPromise])
+                        .catch(e => console.warn('Logout sync failed:', e.message));
+                } catch(e) {
+                    console.warn('Logout sync error:', e.message);
+                }
+                // 3. ТІЛЬКИ ТЕПЕР очищаємо стан та виходимо
                 this._user = null;
                 this._authResolved = true;
                 this._welcomeShown = false;
@@ -4832,7 +4841,6 @@
                 Storage.clear();
                 this._notifyListeners();
                 showToast('Ви вийшли з акаунту');
-                // Показуємо форму входу
                 try { signOut(auth).catch(() => {}); } catch(e) {}
                 Router.showProfile();
                 return { success: true };
@@ -7858,6 +7866,13 @@ function renderProfilePage() {
             // Зберегти дані при закритті вкладки
             window.addEventListener('beforeunload', () => {
                 Storage._flushSync();
+            });
+
+            // Синхронізувати дані при приховуванні вкладки (більш надійно ніж beforeunload)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && Auth.isAuthenticated()) {
+                    Storage._flushSync();
+                }
             });
 
             console.log('VAKDAB v6.3 — виправлено: вибір акаунта Google + logout очищує localStorage');
