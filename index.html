@@ -4882,7 +4882,7 @@
                 }
                 // Trim history to last 200 items to keep doc size manageable
                 const trimHistory = history.slice(-200);
-                // Спроба 1: повні дані (тепер з Cloudinary URLs замість base64)
+                // Спроба 1: повні дані (Cloudinary URLs + текстові поля)
                 try {
                     await setDoc(docRef, {
                         profile: cleanProfile,
@@ -4895,9 +4895,13 @@
                     console.log('[Firestore] Sync OK');
                     return { ok: true };
                 } catch (e) {
-                    console.warn('Sync error (full):', e.code, e.message);
+                    console.error('[Firestore] Sync FAILED:', e.code, e.message);
+                    // Якщо Firestore не існує або немає прав — показати юзеру
+                    if (e.code === 'unavailable' || e.code === 'permission-denied' || e.code === 'not-found') {
+                        console.error('[Firestore] База даних недоступна! Перевір Firebase Console → Firestore.');
                     }
-                // Спроба 2: без фото взагалі (якщо Cloudinary URL теж не допоміг)
+                }
+                // Спроба 2: без фото (на випадок якщо URL завеликий)
                 try {
                     const profileNoImg = JSON.parse(JSON.stringify(cleanProfile));
                     if (profileNoImg.avatar && profileNoImg.avatar.length > 100000) profileNoImg.avatar = '';
@@ -4910,10 +4914,10 @@
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    console.log('Synced without images');
+                    console.log('[Firestore] Synced without images');
                     return { ok: true };
                 } catch (e) {
-                    console.warn('Sync error (no images):', e.message);
+                    console.error('[Firestore] Sync FAILED (no images):', e.code, e.message);
                     // Спроба 3: тільки текстові поля профілю
                     try {
                         await setDoc(docRef, {
