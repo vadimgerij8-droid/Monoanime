@@ -4619,8 +4619,6 @@
                 if (!firebaseInitialized || !db) return;
                 if (this._loadingData) return;
                 this._loadingData = true;
-                // Flush будь-які відкладені debounce-запити перед завантаженням
-                Storage._flushSync();
                 // ВАЖЛИВО: спочатку зберігаємо гостеві дані (щоб перенести в новий акаунт)
                 const guestData = {
                     profile: Storage.getProfile(),
@@ -4787,15 +4785,16 @@
                 if (!firebaseInitialized || !auth) {
                     return { success: false, error: 'Firebase not available' };
                 }
-                // 1. Спочатку flush будь-які відкладені debounce-запити
-                Storage._flushSync();
-                // 2. Дочекатися запису в Firestore ПЕРЕД очищенням localStorage
-                try {
-                    await this.syncUserData();
-                } catch (e) {
-                    console.warn('Sync before logout failed:', e.message);
+                // 1. Скасувати відкладений debounce-таймер
+                if (Storage._syncTimer) {
+                    clearTimeout(Storage._syncTimer);
+                    Storage._syncTimer = null;
                 }
-                // 3. ТІЛЬКИ тепер очищаємо локальний стан
+                // 2. Запустити синхронізацію — НЕ чекаємо.
+                // syncUserData зчитує дані з localStorage в локальні змінні
+                // СИНХРОННО до першого await, тож Storage.clear() не вплине.
+                this.syncUserData().catch(() => {});
+                // 3. Миттєво очищаємо стан
                 this._user = null;
                 this._authResolved = true;
                 this._welcomeShown = false;
@@ -4809,7 +4808,7 @@
                 return { success: true };
             },
 
-            async handleExit() {
+            handleExit() {
                 if (this.isGuest()) {
                     this._isGuest = false;
                     localStorage.removeItem('vakdab_guest');
@@ -4818,12 +4817,8 @@
                     showToast('Гостевий сеанс завершено');
                     Router.showProfile();
                 } else {
-                    // Юзер — повний logout (async — чекаємо синхронізацію з Firestore)
-                    try {
-                        await this.logout();
-                    } catch(e) {
-                        console.warn('Logout error:', e);
-                    }
+                    // Юзер — повний logout
+                    this.logout().catch(e => console.warn('Logout error:', e));
                 }
             },
 
@@ -5788,6 +5783,17 @@
                 if (!Auth._authResolved) {
                     // Firebase ще не перевірив сесію — показуємо заглушку
                     container.innerHTML = '<div class="loader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:1rem;"><i class="fas fa-spinner fa-pulse" style="font-size:2rem;"></i><p>Перевірка сесії...</p></div>';
+                    // Fallback: якщо Firebase не відповів за 3 секунди — показуємо сторінку
+                    setTimeout(() => {
+                        if (!Auth._authResolved && Router.currentRoute === 'profile') {
+                            Auth._authResolved = true;
+                            if (Auth.isAuthenticated() || Auth.isGuest()) {
+                                renderProfilePage();
+                            } else {
+                                renderAuthPage();
+                            }
+                        }
+                    }, 3000);
                 } else if (Auth.isAuthenticated() || Auth.isGuest()) {
                     renderProfilePage();
                 } else {
