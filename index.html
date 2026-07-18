@@ -4539,6 +4539,7 @@
             _googleProvider: null,
             _isGuest: false,
             _loadingData: false,
+            _authResolved: false,
 
             init() {
                 if (!firebaseInitialized) {
@@ -4558,6 +4559,7 @@
                     }
                     if (user) this._isGuest = false;
                     this._user = user;
+                    this._authResolved = true;
                     this._notifyListeners();
                     if (user) {
                         await this._loadUserData(user.uid);
@@ -4814,7 +4816,8 @@
             },
 
             async syncUserData() {
-                if (!firebaseInitialized || !db || !this._user) return;
+                if (!firebaseInitialized || !db || !this._user) return { ok: false, error: 'no-auth' };
+                if (!this.isAuthenticated()) return { ok: false, error: 'not-authenticated' };
                 const uid = this._user.uid;
                 const docRef = doc(db, 'users', uid);
                 const profile = Storage.getProfile();
@@ -4832,7 +4835,7 @@
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    return;
+                    return { ok: true };
                 } catch (e) {
                     console.warn('Sync error (full), trying without images:', e.message);
                 }
@@ -4850,6 +4853,7 @@
                         updatedAt: serverTimestamp()
                     }, { merge: true });
                     console.log('Synced without images');
+                    return { ok: true };
                 } catch (e) {
                     console.warn('Sync error (no images):', e.message);
                     // Спроба 3: тільки текстові поля профілю
@@ -4859,8 +4863,10 @@
                             watchTime: watchTime,
                             updatedAt: serverTimestamp()
                         }, { merge: true });
+                        return { ok: true };
                     } catch (e2) {
                         console.warn('Sync error (minimal):', e2.message);
+                        return { ok: false, error: e2.message };
                     }
                 }
             }
@@ -4870,6 +4876,20 @@
         //  СХОВИЩЕ
         // ====================================================================
         const Storage = {
+            _syncTimer: null,
+            _debounceSync() {
+                if (this._syncTimer) clearTimeout(this._syncTimer);
+                this._syncTimer = setTimeout(() => {
+                    if (Auth.isAuthenticated()) Auth.syncUserData();
+                }, 2000);
+            },
+            _flushSync() {
+                if (this._syncTimer) {
+                    clearTimeout(this._syncTimer);
+                    this._syncTimer = null;
+                }
+                if (Auth.isAuthenticated()) Auth.syncUserData();
+            },
             getTheme() { try { return localStorage.getItem('mono_anime_theme') || 'light'; } catch { return 'light'; } },
             setTheme(t) { localStorage.setItem('mono_anime_theme', t); },
             getCategory() { try { return localStorage.getItem('vakdab_category') || ''; } catch { return ''; } },
@@ -4885,7 +4905,7 @@
             _setProfile(data) { localStorage.setItem('vakdab_profile', JSON.stringify(data)); },
             setProfile(data) {
                 this._setProfile(data);
-                if (Auth.isAuthenticated()) Auth.syncUserData();
+                this._debounceSync();
             },
 
             getHistory() {
@@ -4897,7 +4917,7 @@
             _setHistory(h) { localStorage.setItem('vakdab_history', JSON.stringify(h)); },
             setHistory(h) {
                 this._setHistory(h);
-                if (Auth.isAuthenticated()) Auth.syncUserData();
+                this._debounceSync();
             },
 
             getBookmarks() {
@@ -4909,7 +4929,7 @@
             _setBookmarks(b) { localStorage.setItem('vakdab_bookmarks', JSON.stringify(b)); },
             setBookmarks(b) {
                 this._setBookmarks(b);
-                if (Auth.isAuthenticated()) Auth.syncUserData();
+                this._debounceSync();
             },
 
             getLikes() {
@@ -4921,7 +4941,7 @@
             _setLikes(l) { localStorage.setItem('vakdab_likes', JSON.stringify(l)); },
             setLikes(l) {
                 this._setLikes(l);
-                if (Auth.isAuthenticated()) Auth.syncUserData();
+                this._debounceSync();
             },
 
             getWatchTime() {
@@ -4935,7 +4955,7 @@
                 const current = this.getWatchTime();
                 const total = current + seconds;
                 this._setWatchTime(total);
-                if (Auth.isAuthenticated()) Auth.syncUserData();
+                this._debounceSync();
                 return total;
             },
 
@@ -5752,7 +5772,10 @@
                 const container = document.getElementById('profilePageContainer');
                 container.style.display = 'block';
                 container.classList.add('active');
-                if (Auth.isAuthenticated() || Auth.isGuest()) {
+                if (!Auth._authResolved) {
+                    // Firebase ще не перевірив сесію — показуємо заглушку
+                    container.innerHTML = '<div class="loader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:1rem;"><i class="fas fa-spinner fa-pulse" style="font-size:2rem;"></i><p>Перевірка сесії...</p></div>';
+                } else if (Auth.isAuthenticated() || Auth.isGuest()) {
                     renderProfilePage();
                 } else {
                     renderAuthPage();
@@ -6409,7 +6432,7 @@ function renderProfilePage() {
                   <button class="btn-outline" id="profileLogoutBtn" onclick="Auth.handleExit()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sign-out-alt"></i> Вийти
                   </button>
-                  <button class="btn-outline" id="profileSyncBtn" onclick="Auth.syncUserData();showToast('Дані синхронізовано');" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
+                  <button class="btn-outline" id="profileSyncBtn" onclick="Auth.syncUserData().then(r => { if (r && r.ok) showToast('Дані синхронізовано'); else if (r && r.error === 'not-authenticated') showToast('Спочатку увійдіть в акаунт'); else showToast('Помилка синхронізації'); });" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sync"></i> Синхронізувати
                   </button>
                 </div>
@@ -7665,11 +7688,9 @@ function renderProfilePage() {
                 buildHeroBanner();
             }, 100);
 
+            // Auth.init() синхронно ДО Router — щоб Firebase перевірив сесію перш ніж показувати форму входу
+            Auth.init();
             Router.init();
-
-            setTimeout(() => {
-                Auth.init();
-            }, 200);
 
             const hash = window.location.hash.slice(1);
             if (hash === 'profile') {
@@ -7688,6 +7709,11 @@ function renderProfilePage() {
             } else if (hash === 'settings') {
                 Router.goTo('settings');
             }
+
+            // Зберегти дані при закритті вкладки
+            window.addEventListener('beforeunload', () => {
+                Storage._flushSync();
+            });
 
             console.log('VAKDAB v6.3 — виправлено: вибір акаунта Google + logout очищує localStorage');
             console.log('Клавіші: / пошук • M меню • T тема • R випадкове • Esc закрити');
