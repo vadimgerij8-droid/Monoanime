@@ -2928,9 +2928,13 @@
 
         .player-fullscreen-btn:hover { background: rgba(0,0,0,0.8) !important; }
         .player-fullscreen-btn:active { transform: scale(0.9); }
-        .player-video-container:fullscreen { width: 100vw; max-width: none; border-radius: 0; }
-        .player-video-container:-webkit-full-screen { width: 100vw; max-width: none; border-radius: 0; }
-        .player-video-container:-ms-fullscreen { width: 100vw; max-width: none; border-radius: 0; }
+        .player-video-container:fullscreen { width: 100vw; height: 100vh; max-width: none; max-height: none; border-radius: 0; }
+        .player-video-container:-webkit-full-screen { width: 100vw; height: 100vh; max-width: none; max-height: none; border-radius: 0; }
+        .player-video-container:-ms-fullscreen { width: 100vw; height: 100vh; max-width: none; max-height: none; border-radius: 0; }
+        .player-video-container:fullscreen #playerPageVideo,
+        .player-video-container:-webkit-full-screen #playerPageVideo { width: 100%; height: 100%; }
+        .player-video-container:fullscreen iframe,
+        .player-video-container:-webkit-full-screen iframe { width: 100% !important; height: 100% !important; }
         .player-video-container {
             display: none;
             position: relative;
@@ -4382,7 +4386,7 @@
 
             <div class="player-video-container" id="playerVideoContainer">
                 <div id="playerPageVideo" style="width:100%;height:100%;position:relative;"></div>
-                <button class="player-fullscreen-btn" id="playerFullscreenBtn" title="Повний екран" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;z-index:9999;pointer-events:auto;transition:background 0.2s;">
+                <button class="player-fullscreen-btn" id="playerFullscreenBtn" title="Повний екран" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;z-index:9999;pointer-events:auto;transition:background 0.2s;">
                     <i class="fas fa-expand" style="font-size:16px;"></i>
                 </button>
             </div>
@@ -4474,6 +4478,8 @@
         //  КОНФІГУРАЦІЯ ПРОКСІ ТА API
         // ====================================================================
         const PROXY_URL = 'https://monoanime.animegran8.workers.dev';
+        const CLOUDINARY_CLOUD_NAME = 'dv6ehoqiq';
+        const CLOUDINARY_UPLOAD_PRESET = 'VPU19VB';
         const ANIMEUA_BASE = 'https://animeua.club';
 
         const GENRE_MAP = {
@@ -4856,24 +4862,34 @@
                 const bookmarks = Storage.getBookmarks();
                 const likes = Storage.getLikes();
                 const watchTime = Storage.getWatchTime() || 0;
-                // Спроба 1: повні дані з фото
+                // Clean profile - strip any remaining base64 data (use URL from Cloudinary)
+                const cleanProfile = JSON.parse(JSON.stringify(profile || {}));
+                if (cleanProfile.avatar && cleanProfile.avatar.startsWith('data:')) {
+                    cleanProfile.avatar = '';
+                }
+                if (cleanProfile.banner && cleanProfile.banner.startsWith('data:')) {
+                    cleanProfile.banner = '';
+                }
+                // Trim history to last 200 items to keep doc size manageable
+                const trimHistory = history.slice(-200);
+                // Спроба 1: повні дані (тепер з Cloudinary URLs замість base64)
                 try {
                     await setDoc(docRef, {
-                        profile: profile,
-                        history: history,
+                        profile: cleanProfile,
+                        history: trimHistory,
                         bookmarks: bookmarks,
                         likes: likes,
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
+                    console.log('[Firestore] Sync OK');
                     return { ok: true };
                 } catch (e) {
-                    console.warn('Sync error (full), trying without images:', e.message);
-                    // При логауті кидаємо помилку далі — caller знає що запис не вдався
-                }
-                // Спроба 2: без великих base64 фото
+                    console.warn('Sync error (full):', e.code, e.message);
+                    }
+                // Спроба 2: без фото взагалі (якщо Cloudinary URL теж не допоміг)
                 try {
-                    const profileNoImg = JSON.parse(JSON.stringify(profile));
+                    const profileNoImg = JSON.parse(JSON.stringify(cleanProfile));
                     if (profileNoImg.avatar && profileNoImg.avatar.length > 100000) profileNoImg.avatar = '';
                     if (profileNoImg.banner && profileNoImg.banner.length > 100000) profileNoImg.banner = '';
                     await setDoc(docRef, {
@@ -4912,8 +4928,11 @@
             _debounceSync() {
                 if (this._syncTimer) clearTimeout(this._syncTimer);
                 this._syncTimer = setTimeout(() => {
-                    if (Auth.isAuthenticated()) Auth.syncUserData();
-                }, 2000);
+                    if (Auth.isAuthenticated()) Auth.syncUserData().then(r => {
+                        if (r && r.ok) console.log('[Storage] Synced to Firestore');
+                        else if (r) console.warn('[Storage] Sync failed:', r.error);
+                    });
+                }, 1500);
             },
             _flushSync() {
                 if (this._syncTimer) {
@@ -6404,6 +6423,42 @@
 
         
         // Стиснення зображення перед збереженням (щоб Firestore не падав)
+        // Upload image to Cloudinary, return URL
+        async function uploadToCloudinary(file, maxW, maxH, quality) {
+            // First compress locally
+            const dataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, hh = img.height;
+                        if (w > maxW) { hh = hh * (maxW / w); w = maxW; }
+                        if (hh > maxH) { w = w * (maxH / hh); hh = maxH; }
+                        canvas.width = Math.round(w);
+                        canvas.height = Math.round(hh);
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob(resolve, 'image/jpeg', quality);
+                    };
+                    img.onerror = reject;
+                    img.src = ev.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+            // Upload to Cloudinary
+            const formData = new FormData();
+            formData.append('file', dataUrl);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const resp = await fetch(url, { method: 'POST', body: formData });
+            if (!resp.ok) throw new Error('Cloudinary upload failed: ' + resp.status);
+            const data = await resp.json();
+            return data.secure_url;
+        }
+
         function compressImage(file, maxW, maxH, quality, callback) {
             const reader = new FileReader();
             reader.onload = function(ev) {
@@ -6959,31 +7014,41 @@ function renderProfilePage() {
             });
         }
 
-        document.getElementById('avatarFileInput').addEventListener('change', function(e) {
+        document.getElementById('avatarFileInput').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            compressImage(file, 256, 256, 0.7, (dataUrl) => {
+            showToast('Завантаження аватарки...');
+            try {
+                const imageUrl = await uploadToCloudinary(file, 256, 256, 0.7);
                 const profile = getProfile();
-                profile.avatar = dataUrl;
+                profile.avatar = imageUrl;
                 saveProfile(profile);
                 if (Router.currentRoute === 'profile') renderProfilePage();
                 showToast('Аватарку оновлено');
-                e.target.value = '';
-            });
+            } catch (err) {
+                console.error('Avatar upload error:', err);
+                showToast('Помилка завантаження аватарки');
+            }
+            e.target.value = '';
         });
 
-        document.getElementById('bannerFileInput').addEventListener('change', function(e) {
+        document.getElementById('bannerFileInput').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            compressImage(file, 1200, 400, 0.7, (dataUrl) => {
+            showToast('Завантаження банера...');
+            try {
+                const imageUrl = await uploadToCloudinary(file, 1200, 400, 0.7);
                 const profile = getProfile();
-                profile.banner = dataUrl;
+                profile.banner = imageUrl;
                 saveProfile(profile);
                 if (Router.currentRoute === 'profile') renderProfilePage();
                 showToast('Банер оновлено');
-                e.target.value = '';
-            });
-        });;
+            } catch (err) {
+                console.error('Banner upload error:', err);
+                showToast('Помилка завантаження банера');
+            }
+            e.target.value = '';
+        });
 
         // ====================================================================
         //  СТОРІНКА ЖАНРУ
