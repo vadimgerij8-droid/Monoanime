@@ -4350,9 +4350,7 @@
         <div class="modal-content">
             <div class="player-blur-bg" id="playerBlurBg"></div>
             <div class="player-topbar">
-                <button class="player-back-btn" id="closePlayerPageBtn" title="Назад">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
+                <!-- кнопка "Назад" прибрана за запитом -->
                 <div class="player-topbar-title" id="playerTopbarTitle"></div>
                 <div class="player-source-chip" id="playerSourceChip" title="Джерело">
                     <span class="dot"></span>
@@ -5141,7 +5139,7 @@
             for (const playerUrl of playerUrls) {
                 try {
                     let provider = 'Джерело';
-                    if (playerUrl.includes('ashdi')) provider = 'Ashdi';
+                    if (playerUrl.includes('ashdi')) provider = 'AnimeUA';
                     else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
                     else if (playerUrl.includes('player')) provider = 'Player';
                     const playerHtml = await fetchUA(playerUrl);
@@ -7100,7 +7098,7 @@ function renderProfilePage() {
                 const posterUrl = anime.images?.jpg?.large_image_url || '';
                 document.getElementById('playerPosterImg').src = posterUrl;
                 document.getElementById('playerPosterTitle').textContent = anime.title;
-                document.getElementById('playerTopbarTitle').textContent = anime.title;
+                document.getElementById('playerTopbarTitle').textContent = '';
                 document.getElementById('playerBlurBg').style.backgroundImage = `url(${posterUrl})`;
                 const totalEpisodes = Object.values(anime.seasons || {}).reduce((sum, s) => sum + Object.values(s).reduce((s2,
                     e) => Math.max(s2, e.length), 0), 0);
@@ -7279,22 +7277,6 @@ function renderProfilePage() {
             if (playerPagePlayer) { playerPagePlayer.destroy();
                 playerPagePlayer = null; }
             playerPagePlayer = new LampaPlayer(videoDiv, {});
-            // Кнопка повного екрана
-            const fsBtn = document.getElementById('playerFullscreenBtn');
-            if (fsBtn) {
-                fsBtn.onclick = () => {
-                    const container = document.getElementById('playerVideoContainer');
-                    if (!document.fullscreenElement) {
-                        if (container.requestFullscreen) container.requestFullscreen().catch(()=>{});
-                        else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
-                        else if (container.msRequestFullscreen) container.msRequestFullscreen();
-                    } else {
-                        if (document.exitFullscreen) document.exitFullscreen();
-                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                        else if (document.msExitFullscreen) document.msExitFullscreen();
-                    }
-                };
-            }
             playerPagePlayer.loadSource(file, playerPageAnime?.title || '', `Серія ${epNum}`);
             playerPageHistoryUpdated = false;
             playerPageWatchStartTime = Date.now();
@@ -7630,7 +7612,26 @@ function renderProfilePage() {
         document.getElementById('randomBtn').addEventListener('click', openRandomAnime);
         document.getElementById('logoHome').addEventListener('click', () => Router.goTo('main'));
 
-        document.getElementById('closePlayerPageBtn').addEventListener('click', closePlayerPage);
+        const cpBtn = document.getElementById('closePlayerPageBtn'); if (cpBtn) cpBtn.addEventListener('click', closePlayerPage);
+        // Fullscreen button — global handler
+        const playerFsBtn = document.getElementById('playerFullscreenBtn');
+        if (playerFsBtn) {
+            playerFsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const container = document.getElementById('playerVideoContainer');
+                if (!container) return;
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    if (container.requestFullscreen) container.requestFullscreen().catch(()=>{});
+                    else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+                    else if (container.msRequestFullscreen) container.msRequestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    else if (document.msExitFullscreen) document.msExitFullscreen();
+                }
+            });
+        }
 
         document.getElementById('playerSourceChip').addEventListener('click', () => {
             openBottomSheet('source');
