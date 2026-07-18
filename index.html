@@ -4211,6 +4211,41 @@
         .agnative-topnav-clock {
             display: none !important;
         }
+
+        /* ===== Burger + Search buttons — glassmorphism blur ===== */
+        .burger-btn,
+        .search-circle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12) !important;
+            backdrop-filter: blur(18px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+            border: 1px solid rgba(255,255,255,0.18) !important;
+            color: #ffffff !important;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+            box-shadow: none;
+            flex-shrink: 0;
+        }
+        body:not(.dark-mode) .burger-btn,
+        body:not(.dark-mode) .search-circle-btn {
+            color: #ffffff !important;
+        }
+        .burger-btn:hover,
+        .search-circle-btn:hover {
+            background: rgba(255,255,255,0.22) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            transform: scale(1.06);
+        }
+        .burger-btn i,
+        .search-circle-btn i {
+            color: #ffffff !important;
+        }
 </style>
 </head>
 <body class="appletv-agnative-topnav">
@@ -4226,7 +4261,7 @@
                     <div class="logo-text">
                         <div class="logo-title-row">
                             <h1>VakDab</h1>
-                            <div class="logo-icon">⎈</div>
+                            
                         </div>
                         
                     </div>
