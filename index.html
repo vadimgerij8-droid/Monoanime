@@ -4664,6 +4664,9 @@
                     if (docSnap.exists()) {
                         // Існуючий юзер — завантажуємо його дані з Firestore
                         const data = docSnap.data();
+                        console.log('[Load] Firestore doc fields:', Object.keys(data));
+                        console.log('[Load] profile avatar:', data.profile?.avatar ? data.profile.avatar.substring(0,50) : 'EMPTY');
+                        console.log('[Load] profile banner:', data.profile?.banner ? data.profile.banner.substring(0,50) : 'EMPTY');
                         if (data.profile) {
                             const mergedProfile = Object.assign(getDefaultProfile(), data.profile);
                             // Доповнюємо Google displayName/photoURL якщо в Firestore порожньо
@@ -4872,7 +4875,7 @@
                 const bookmarks = Storage.getBookmarks();
                 const likes = Storage.getLikes();
                 const watchTime = Storage.getWatchTime() || 0;
-                // Clean profile - strip any remaining base64 data (use URL from Cloudinary)
+                // Clean profile - strip base64, keep Cloudinary URLs
                 const cleanProfile = JSON.parse(JSON.stringify(profile || {}));
                 if (cleanProfile.avatar && cleanProfile.avatar.startsWith('data:')) {
                     cleanProfile.avatar = '';
@@ -4880,9 +4883,10 @@
                 if (cleanProfile.banner && cleanProfile.banner.startsWith('data:')) {
                     cleanProfile.banner = '';
                 }
-                // Trim history to last 200 items to keep doc size manageable
                 const trimHistory = history.slice(-200);
-                // Спроба 1: повні дані (Cloudinary URLs + текстові поля)
+                console.log('[Sync] profile avatar:', cleanProfile.avatar ? cleanProfile.avatar.substring(0,50) : 'EMPTY');
+                console.log('[Sync] profile banner:', cleanProfile.banner ? cleanProfile.banner.substring(0,50) : 'EMPTY');
+                // Спроба 1: повні дані
                 try {
                     await setDoc(docRef, {
                         profile: cleanProfile,
@@ -4892,44 +4896,39 @@
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    console.log('[Firestore] Sync OK');
+                    console.log('[Firestore] Sync OK (full)');
                     return { ok: true };
                 } catch (e) {
-                    console.error('[Firestore] Sync FAILED:', e.code, e.message);
-                    // Якщо Firestore не існує або немає прав — показати юзеру
-                    if (e.code === 'unavailable' || e.code === 'permission-denied' || e.code === 'not-found') {
-                        console.error('[Firestore] База даних недоступна! Перевір Firebase Console → Firestore.');
-                    }
+                    console.error('[Firestore] Sync FAILED (full):', e.code, e.message);
                 }
-                // Спроба 2: без фото (на випадок якщо URL завеликий)
+                // Спроба 2: менше історії (можливо документ > 1MB)
                 try {
-                    const profileNoImg = JSON.parse(JSON.stringify(cleanProfile));
-                    if (profileNoImg.avatar && profileNoImg.avatar.length > 100000) profileNoImg.avatar = '';
-                    if (profileNoImg.banner && profileNoImg.banner.length > 100000) profileNoImg.banner = '';
                     await setDoc(docRef, {
-                        profile: profileNoImg,
-                        history: history,
+                        profile: cleanProfile,
+                        history: trimHistory.slice(-50),
                         bookmarks: bookmarks,
                         likes: likes,
                         watchTime: watchTime,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    console.log('[Firestore] Synced without images');
+                    console.log('[Firestore] Sync OK (trimmed history)');
                     return { ok: true };
                 } catch (e) {
-                    console.error('[Firestore] Sync FAILED (no images):', e.code, e.message);
-                    // Спроба 3: тільки текстові поля профілю
-                    try {
-                        await setDoc(docRef, {
-                            profile: { nickname: profile.nickname, bio: profile.bio, avatar: '', banner: '' },
-                            watchTime: watchTime,
-                            updatedAt: serverTimestamp()
-                        }, { merge: true });
-                        return { ok: true };
-                    } catch (e2) {
-                        console.warn('Sync error (minimal):', e2.message);
-                        return { ok: false, error: e2.message };
-                    }
+                    console.error('[Firestore] Sync FAILED (trimmed):', e.code, e.message);
+                }
+                // Спроба 3: ТІЛЬКИ профіль (БЕЗ перезапису avatar/banner!)
+                // ВАЖЛИВО: не пишемо avatar: '' — це зітре Cloudinary URL!
+                try {
+                    await setDoc(docRef, {
+                        profile: cleanProfile,
+                        watchTime: watchTime,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                    console.log('[Firestore] Sync OK (profile only)');
+                    return { ok: true };
+                } catch (e2) {
+                    console.error('[Firestore] Sync FAILED (profile only):', e2.code, e2.message);
+                    return { ok: false, error: e2.message };
                 }
             }
         };
