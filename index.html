@@ -4822,32 +4822,32 @@
                     clearTimeout(Storage._syncTimer);
                     Storage._syncTimer = null;
                 }
-                // 2. Запустити синхронізацію — syncUserData захоплює всі дані
-                // СИНХРОННО до першого await (uid, profile, history...),
-                // тож подальші this._user = null і Storage.clear() не вплинуть.
-                console.log('Logout: starting Firestore sync...');
-                const syncPromise = this.syncUserData()
-                    .catch(e => console.warn('Logout sync failed:', e.message));
-                // 3. Миттєво очищаємо стан та оновлюємо UI (не блокуємо юзера)
+
+                showToast('Збереження даних і вихід...');
+
+                // 2. СПОЧАТКУ синхронізуємо — чекаємо завершення (max 6с)
+                // Storage.clear() викликається ТІЛЬКИ після запису в Firestore
+                try {
+                    const timeoutP = new Promise(r => setTimeout(r, 6000));
+                    await Promise.race([this.syncUserData(), timeoutP]);
+                    console.log('Logout: sync done');
+                } catch(e) {
+                    console.warn('Logout: sync error', e.message);
+                }
+
+                // 3. ТІЛЬКИ ПІСЛЯ синхронізації очищаємо стан і localStorage
                 this._user = null;
                 this._authResolved = true;
                 this._welcomeShown = false;
                 this._isGuest = false;
                 Storage.clear();
                 this._notifyListeners();
-                showToast('Збереження даних і вихід...');
-                Router.showProfile();
-                // 4. Чекати завершення синхронізації (max 5с) ДО signOut —
-                // signOut інвалідує токен і Firestore-запис би впав.
-                try {
-                    const timeoutP = new Promise(r => setTimeout(r, 5000));
-                    await Promise.race([syncPromise, timeoutP]);
-                    console.log('Logout: sync done, signing out');
-                } catch(e) {
-                    console.warn('Logout: sync wait error', e.message);
-                }
-                try { signOut(auth).catch(() => {}); } catch(e) {}
+
+                // 4. Виходимо з Firebase Auth
+                try { await signOut(auth); } catch(e) {}
+
                 showToast('Ви вийшли з акаунту');
+                Router.showProfile();
                 return { success: true };
             },
 
