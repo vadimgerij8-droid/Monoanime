@@ -2926,6 +2926,11 @@
             color: #ffd700;
         }
 
+        .player-fullscreen-btn:hover { background: rgba(0,0,0,0.8) !important; }
+        .player-fullscreen-btn:active { transform: scale(0.9); }
+        .player-video-container:fullscreen { width: 100vw; max-width: none; border-radius: 0; }
+        .player-video-container:-webkit-full-screen { width: 100vw; max-width: none; border-radius: 0; }
+        .player-video-container:-ms-fullscreen { width: 100vw; max-width: none; border-radius: 0; }
         .player-video-container {
             display: none;
             width: 94%;
@@ -4376,6 +4381,9 @@
 
             <div class="player-video-container" id="playerVideoContainer">
                 <div id="playerPageVideo" style="width:100%;height:100%;"></div>
+                <button class="player-fullscreen-btn" id="playerFullscreenBtn" title="Повний екран" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;z-index:10;transition:background 0.2s;">
+                    <i class="fas fa-expand" style="font-size:16px;"></i>
+                </button>
             </div>
 
             <div class="episode-panel" id="episodePanel">
@@ -5317,8 +5325,11 @@
                 this.containerRef.addEventListener('dblclick', e => { if (e.target.closest('.player-overlay-selectors'))
                         return;
                     this.toggleFullscreen(); });
-                document.addEventListener('fullscreenchange', () => { this.state.fullscreen = !!document
-                        .fullscreenElement; });
+                document.addEventListener('fullscreenchange', () => {
+                        this.state.fullscreen = !!document.fullscreenElement;
+                        const fsIcon = document.querySelector('#playerFullscreenBtn i');
+                        if (fsIcon) fsIcon.className = this.state.fullscreen ? 'fas fa-compress' : 'fas fa-expand';
+                    });
             }
             loadSource(src, animeTitle, episodeTitle) {
                 if (isEmbedUrl(src)) {
@@ -5334,7 +5345,8 @@
                     if (this.hls) { this.hls.destroy();
                         this.hls = null; }
                     this.videoRef = null;
-                    this.containerRef = null;
+                    // Зберігаємо containerRef для fullscreen
+                    this.containerRef = this.container;
                     return;
                 }
                 if (!this.videoRef) { this._init(); }
@@ -6466,9 +6478,7 @@ function renderProfilePage() {
                   <button class="btn-outline" id="profileLogoutBtn" onclick="Auth.handleExit()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sign-out-alt"></i> Вийти
                   </button>
-                  <button class="btn-outline" id="profileSyncBtn" onclick="Auth.syncUserData().then(r => { if (r && r.ok) showToast('Дані синхронізовано'); else if (r && r.error === 'not-authenticated') showToast('Спочатку увійдіть в акаунт'); else showToast('Помилка синхронізації'); });" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
-                    <i class="fas fa-sync"></i> Синхронізувати
-                  </button>
+                  
                 </div>
               </div>
             </div>
@@ -7269,6 +7279,22 @@ function renderProfilePage() {
             if (playerPagePlayer) { playerPagePlayer.destroy();
                 playerPagePlayer = null; }
             playerPagePlayer = new LampaPlayer(videoDiv, {});
+            // Кнопка повного екрана
+            const fsBtn = document.getElementById('playerFullscreenBtn');
+            if (fsBtn) {
+                fsBtn.onclick = () => {
+                    const container = document.getElementById('playerVideoContainer');
+                    if (!document.fullscreenElement) {
+                        if (container.requestFullscreen) container.requestFullscreen().catch(()=>{});
+                        else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+                        else if (container.msRequestFullscreen) container.msRequestFullscreen();
+                    } else {
+                        if (document.exitFullscreen) document.exitFullscreen();
+                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                        else if (document.msExitFullscreen) document.msExitFullscreen();
+                    }
+                };
+            }
             playerPagePlayer.loadSource(file, playerPageAnime?.title || '', `Серія ${epNum}`);
             playerPageHistoryUpdated = false;
             playerPageWatchStartTime = Date.now();
@@ -7280,15 +7306,17 @@ function renderProfilePage() {
                     const duration = video.duration;
                     if (!duration || duration === Infinity) return;
                     const progress = (video.currentTime / duration) * 100;
-                    if (progress >= 50) {
+                    const watchSecondsSoFar = Math.floor((Date.now() - playerPageWatchStartTime) / 1000);
+                    // Зберігаємо в історію через 2 хвилини перегляду
+                    if (watchSecondsSoFar >= 120) {
                         playerPageHistoryUpdated = true;
                         const ep = epNum || playerPageCurrentEpisodeNum || '1';
                         const season = playerPageCurrentSeason || '1';
                         const history = Storage.getHistory();
                         const idx = history.findIndex(h => h.url === playerPageAnime.url);
-                        const watchSeconds = Math.floor((Date.now() - playerPageWatchStartTime) / 1000);
-                        if (watchSeconds > 0) {
-                            Storage.addWatchTime(watchSeconds);
+                        // watchTime вже обчислено вище
+                        if (watchSecondsSoFar > 0) {
+                            Storage.addWatchTime(watchSecondsSoFar);
                         }
                         if (idx >= 0) {
                             history[idx].episode = ep;
