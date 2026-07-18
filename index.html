@@ -4350,7 +4350,9 @@
         <div class="modal-content">
             <div class="player-blur-bg" id="playerBlurBg"></div>
             <div class="player-topbar">
-                <!-- кнопка "Назад" прибрана за запитом -->
+                <button class="player-back-btn" id="closePlayerPageBtn" title="Назад">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <div class="player-topbar-title" id="playerTopbarTitle"></div>
                 <div class="player-source-chip" id="playerSourceChip" title="Джерело">
                     <span class="dot"></span>
@@ -4527,7 +4529,7 @@
             auth = getAuth(firebaseApp);
             // browserLocalPersistence — сесія зберігається в браузері (localStorage)
             setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
-            db = getFirestore(firebaseApp, 'default');
+            db = getFirestore(firebaseApp);
             firebaseInitialized = true;
             console.log('Firebase initialized');
         } catch (e) {
@@ -5378,9 +5380,16 @@
                 if (v.paused) v.play().catch(() => {}); else v.pause();
             }
             toggleFullscreen() {
-                if (this.containerRef) {
-                    if (!document.fullscreenElement) this.containerRef.requestFullscreen().catch(() => {});
-                    else document.exitFullscreen();
+                if (!this.containerRef) return;
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    if (this.containerRef.requestFullscreen) {
+                        const p = this.containerRef.requestFullscreen();
+                        if (p && p.catch) p.catch(() => {});
+                    }
+                    else if (this.containerRef.webkitRequestFullscreen) this.containerRef.webkitRequestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
                 }
             }
             destroy() { if (this.hls) { this.hls.destroy();
@@ -7612,17 +7621,25 @@ function renderProfilePage() {
         document.getElementById('randomBtn').addEventListener('click', openRandomAnime);
         document.getElementById('logoHome').addEventListener('click', () => Router.goTo('main'));
 
-        const cpBtn = document.getElementById('closePlayerPageBtn'); if (cpBtn) cpBtn.addEventListener('click', closePlayerPage);
+        const cpBtn = document.getElementById('closePlayerPageBtn');
+        if (cpBtn) cpBtn.addEventListener('click', closePlayerPage);
         // Fullscreen button — global handler
         const playerFsBtn = document.getElementById('playerFullscreenBtn');
         if (playerFsBtn) {
-            playerFsBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            playerFsBtn.addEventListener('click', () => {
+                // Використовуємо toggleFullscreen з LampaPlayer якщо доступний
+                if (playerPagePlayer && typeof playerPagePlayer.toggleFullscreen === 'function') {
+                    playerPagePlayer.toggleFullscreen();
+                    return;
+                }
+                // Fallback — fullscreen на контейнер
                 const container = document.getElementById('playerVideoContainer');
                 if (!container) return;
                 if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    if (container.requestFullscreen) container.requestFullscreen().catch(()=>{});
+                    if (container.requestFullscreen) {
+                        const p = container.requestFullscreen();
+                        if (p && p.catch) p.catch(()=>{});
+                    }
                     else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
                     else if (container.msRequestFullscreen) container.msRequestFullscreen();
                 } else {
