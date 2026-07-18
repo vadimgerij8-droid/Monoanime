@@ -4521,7 +4521,7 @@
             auth = getAuth(firebaseApp);
             // browserLocalPersistence — сесія зберігається в браузері (localStorage)
             setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
-            db = getFirestore(firebaseApp);
+            db = getFirestore(firebaseApp, 'default');
             firebaseInitialized = true;
             console.log('Firebase initialized');
         } catch (e) {
