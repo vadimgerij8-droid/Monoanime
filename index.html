@@ -12,7 +12,7 @@
     <meta property="og:title" content="VakDab - твій аніме каталог" />
     <meta property="og:description" content="Сучасна платформа для перегляду аніме" />
     <meta property="og:type" content="website" />
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <meta name="theme-color" content="#0d0d0d" />
 
@@ -5096,7 +5096,10 @@
             const resp = await fetch(proxyUrl);
             if (!resp.ok) throw new Error(`Помилка ${resp.status}`);
             const html = await resp.text();
-            return new DOMParser().parseFromString(html, 'text/html');
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            // Зберігаємо сирий HTML для парсингу скриптів (DOMParser вирізає scripts на деяких Android)
+            doc._rawHtml = html;
+            return doc;
         }
 
         function parseAnimeuaCards(doc) {
@@ -5196,7 +5199,8 @@
                     else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
                     else if (playerUrl.includes('player')) provider = 'Player';
                     const playerHtml = await fetchUA(playerUrl);
-                    const text = playerHtml.body?.innerHTML || '';
+                    // Використовуємо сирий HTML для надійного парсингу scripts на Android
+                    const text = playerHtml._rawHtml || playerHtml.body?.innerHTML || '';
                     allRawSources.push(...extractSourcesFromText(text, provider));
                     const nestedIframes = safeQueryAll('iframe', playerHtml);
                     for (const nested of nestedIframes) {
@@ -5205,7 +5209,7 @@
                             if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
                             if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
                             const nestedHtml = await fetchUA(nestedUrl);
-                            allRawSources.push(...extractSourcesFromText(nestedHtml.body?.innerHTML || '',
+                            allRawSources.push(...extractSourcesFromText(nestedHtml._rawHtml || nestedHtml.body?.innerHTML || '',
                             provider));
                         }
                     }
@@ -5410,20 +5414,35 @@
                 v.pause();
                 if (!src) { this.state.loading = false; return; }
                 const proxyUrl = (typeof getProxyUrl === 'function' && !src.startsWith(PROXY_URL)) ? getProxyUrl(src) : src;
-                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                    const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
-                    this.hls = hls;
-                    hls.loadSource(proxyUrl);
-                    hls.attachMedia(v);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; v.play().catch(()=>{}); });
-                    hls.on(Hls.Events.ERROR, (ev, data) => { if (data && data.fatal) { this.state.loading = false;
-                            v.src = proxyUrl; } });
-                } else {
-                    v.src = proxyUrl;
-                    const onCanPlay = () => { this.state.loading = false;
-                        v.removeEventListener('canplay', onCanPlay); };
-                    v.addEventListener('canplay', onCanPlay);
-                }
+                const tryHls = () => {
+                    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                        const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
+                        this.hls = hls;
+                        hls.loadSource(proxyUrl);
+                        hls.attachMedia(v);
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; v.play().catch(()=>{}); });
+                        hls.on(Hls.Events.ERROR, (ev, data) => { if (data && data.fatal) { this.state.loading = false; v.src = proxyUrl; } });
+                    } else if (v.canPlayType('application/vnd.apple.mpegurl') || v.canPlayType('audio/mpegurl')) {
+                        // Safari / iOS — нативний HLS
+                        v.src = proxyUrl;
+                        const onCanPlay = () => { this.state.loading = false; v.removeEventListener('canplay', onCanPlay); };
+                        v.addEventListener('canplay', onCanPlay);
+                        v.play().catch(()=>{});
+                    } else {
+                        // Android Chrome без hls.js — чекаємо завантаження
+                        if (typeof Hls === 'undefined') {
+                            const s = document.createElement('script');
+                            s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
+                            s.onload = () => tryHls();
+                            document.head.appendChild(s);
+                        } else {
+                            v.src = proxyUrl;
+                            const onCanPlay = () => { this.state.loading = false; v.removeEventListener('canplay', onCanPlay); };
+                            v.addEventListener('canplay', onCanPlay);
+                        }
+                    }
+                };
+                tryHls();
             }
             togglePlay() {
                 if (!this.videoRef) return;
