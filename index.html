@@ -5165,6 +5165,15 @@
 
         async function loadAnimeuaDetail(animeUrl) {
             const doc = await fetchUA(animeUrl);
+            
+            // Перевіряємо чи сторінка є реальною сторінкою аніме (не 404/головна)
+            const hasAnimeContent = safeQuery('.pmovie__title, .page__subcol-main h1, .pmovie__player, .video-responsive iframe, .video-responsive iframe[data-src]', doc);
+            const rawHtml = doc._rawHtml || '';
+            const hasIframe = rawHtml.includes('ashdi.vip') || rawHtml.includes('vidmoly') || rawHtml.includes('iframe');
+            if (!hasAnimeContent && !hasIframe) {
+                throw new Error('Це аніме не знайдено на сайті. Можливо воно ще не додане або URL застарів.');
+            }
+            
             let title = '';
             for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
                 const el = safeQuery(sel, doc);
@@ -7309,11 +7318,24 @@ function renderProfilePage() {
                 buildEpisodeViews();
                 updateFilterChip();
                 document.getElementById('episodePanel').classList.add('visible');
+                // Якщо серій немає — показати зрозуміле повідомлення
+                if (seasons.length === 0 || Object.keys(anime.seasons || {}).length === 0) {
+                    document.getElementById('episodeViewGrid').innerHTML =
+                        '<div class="episode-empty"><i class="fas fa-search"></i> Серії не знайдені на джерелі. Спробуйте інше аніме.</div>';
+                }
                 buildBottomSheetData();
             } catch (err) {
-                document.getElementById('playerSynopsis').textContent = 'Помилка завантаження.';
+                const isNotFound = err.message && err.message.includes('не знайдено');
+                document.getElementById('playerSynopsis').textContent = isNotFound
+                    ? 'Це аніме поки що недоступне на animeua.club.'
+                    : 'Помилка завантаження. Спробуйте пізніше.';
+                const icon = isNotFound ? 'fa-search' : 'fa-exclamation-circle';
+                const msg = isNotFound
+                    ? 'Аніме не знайдено на джерелі'
+                    : `Помилка: ${err.message}`;
                 document.getElementById('episodeViewGrid').innerHTML =
-                    `<div class="episode-empty"><i class="fas fa-exclamation-circle"></i> Помилка: ${err.message}</div>`;
+                    `<div class="episode-empty"><i class="fas ${icon}"></i> ${msg}</div>`;
+                document.getElementById('episodePanel').classList.add('visible');
                 console.error('Player load error:', err);
             }
         }
