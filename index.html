@@ -5092,12 +5092,17 @@
         //  API ФУНКЦІЇ
         // ====================================================================
         async function fetchUA(url) {
+            if (url && url.startsWith('http://')) url = 'https://' + url.slice(7);
             const proxyUrl = getProxyUrl(url);
-            const resp = await fetch(proxyUrl);
-            if (!resp.ok) throw new Error(`Помилка ${resp.status}`);
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 15000);
+            let resp;
+            try {
+                resp = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit', cache: 'no-cache', signal: controller.signal });
+            } finally { clearTimeout(timer); }
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
             const html = await resp.text();
             const doc = new DOMParser().parseFromString(html, 'text/html');
-            // Зберігаємо сирий HTML для парсингу скриптів (DOMParser вирізає scripts на деяких Android)
             doc._rawHtml = html;
             return doc;
         }
@@ -5294,8 +5299,19 @@
 
         function extractSourcesFromText(text, providerName) {
             let sources = [];
-            const jsonMatch = text.match(/file\s*:\s*(\[[\s\S]+?\]|\'[\s\S]+?\'|\"[\s\S]+?\"|\{[\s\S]+?\})/i) || text
-                .match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
+            // Покращений regex для Playerjs file:'[...]'
+            let jsonMatch = null;
+            const _pjsM = text.match(/Playerjs\s*\(\s*\{[\s\S]*?file\s*:\s*'(\[[\s\S]*?\])'\s*[,\n]/);
+            if (_pjsM) { jsonMatch = [null, _pjsM[1]]; }
+            if (!jsonMatch) {
+                const _fmA = text.match(/file\s*:\s*'(\[[\s\S]+?\])'/i);
+                const _fmB = text.match(/file\s*:\s*"(\[[\s\S]+?\])"/i);
+                if (_fmA) jsonMatch = [null, _fmA[1]];
+                else if (_fmB) jsonMatch = [null, _fmB[1]];
+            }
+            if (!jsonMatch) {
+                jsonMatch = text.match(/playlist\s*:\s*(\[[\s\S]+?\])/i);
+            }
             if (jsonMatch) {
                 try {
                     let raw = jsonMatch[1].trim();
@@ -5414,6 +5430,7 @@
                     return;
                 }
                 if (!this.videoRef) { this._init(); }
+                if (src && src.startsWith('http://')) src = 'https://' + src.slice(7);
                 this.state.src = src;
                 const v = this.videoRef;
                 this.state.loading = true;
@@ -5423,32 +5440,42 @@
                 v.pause();
                 if (!src) { this.state.loading = false; return; }
                 const proxyUrl = (typeof getProxyUrl === 'function' && !src.startsWith(PROXY_URL)) ? getProxyUrl(src) : src;
-                const tryHls = () => {
-                    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                        const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
-                        this.hls = hls;
-                        hls.loadSource(proxyUrl);
-                        hls.attachMedia(v);
-                        hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; v.play().catch(()=>{}); });
-                        hls.on(Hls.Events.ERROR, (ev, data) => { if (data && data.fatal) { this.state.loading = false; v.src = proxyUrl; } });
-                    } else if (v.canPlayType('application/vnd.apple.mpegurl') || v.canPlayType('audio/mpegurl')) {
-                        // Safari / iOS — нативний HLS
-                        v.src = proxyUrl;
-                        const onCanPlay = () => { this.state.loading = false; v.removeEventListener('canplay', onCanPlay); };
-                        v.addEventListener('canplay', onCanPlay);
-                        v.play().catch(()=>{});
-                    } else {
-                        // Android Chrome без hls.js — чекаємо завантаження
-                        if (typeof Hls === 'undefined') {
-                            const s = document.createElement('script');
-                            s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
-                            s.onload = () => tryHls();
-                            document.head.appendChild(s);
-                        } else {
-                            v.src = proxyUrl;
-                            const onCanPlay = () => { this.state.loading = false; v.removeEventListener('canplay', onCanPlay); };
-                            v.addEventListener('canplay', onCanPlay);
+                const _startHls = () => {
+                    const hls = new Hls({
+                        enableWorker: false,
+                        lowLatencyMode: false,
+                        backBufferLength: 90,
+                        maxBufferLength: 30,
+                        xhrSetup: function(xhr) { xhr.withCredentials = false; }
+                    });
+                    this.hls = hls;
+                    hls.loadSource(proxyUrl);
+                    hls.attachMedia(v);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; v.play().catch(() => {}); });
+                    hls.on(Hls.Events.ERROR, (ev, ed) => {
+                        if (ed && ed.fatal) {
+                            console.warn('[HLS fatal]', ed.type, ed.details);
+                            hls.destroy(); this.hls = null;
+                            this.state.loading = false;
+                            v.src = proxyUrl; v.load(); v.play().catch(() => {});
                         }
+                    });
+                };
+                const tryHls = () => {
+                    if (proxyUrl && proxyUrl.startsWith('http://')) proxyUrl = 'https://' + proxyUrl.slice(7);
+                    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                        _startHls();
+                    } else if (v.canPlayType('application/vnd.apple.mpegurl') !== '' || v.canPlayType('audio/mpegurl') !== '') {
+                        v.src = proxyUrl; v.load();
+                        const onCP = () => { this.state.loading = false; v.removeEventListener('canplay', onCP); };
+                        v.addEventListener('canplay', onCP);
+                        v.play().catch(() => {});
+                    } else {
+                        const s = document.createElement('script');
+                        s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
+                        s.onload = () => { if (Hls.isSupported()) _startHls(); else { v.src = proxyUrl; v.load(); v.play().catch(() => {}); this.state.loading = false; } };
+                        s.onerror = () => { v.src = proxyUrl; v.load(); this.state.loading = false; };
+                        document.head.appendChild(s);
                     }
                 };
                 tryHls();
@@ -6557,7 +6584,7 @@
             formData.append('file', compressedBlob, 'upload.jpg');
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-            const resp = await fetch(uploadUrl, { method: 'POST', body: formData });
+            const resp = await fetch(uploadUrl, { method: 'POST', body: formData, mode: 'cors', credentials: 'omit' });
             if (!resp.ok) {
                 const errText = await resp.text().catch(() => '');
                 throw new Error('Cloudinary upload failed: ' + resp.status + ' ' + errText.substring(0,100));
