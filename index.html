@@ -2836,7 +2836,7 @@
             border-radius: 12px;
             overflow: hidden;
             aspect-ratio: 16/9;
-            position: relative;
+            min-height: 200px;
             z-index: 3;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         }
@@ -4384,7 +4384,7 @@
             </div>
 
             <div class="player-video-container" id="playerVideoContainer">
-                <div id="playerPageVideo" style="width:100%;height:100%;position:relative;"></div>
+                <div id="playerPageVideo" style="width:100%;height:100%;min-height:200px;position:relative;"></div>
                 <button class="player-fullscreen-btn" id="playerFullscreenBtn" title="Повний екран" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;z-index:9999;pointer-events:auto;transition:background 0.2s;">
                     <i class="fas fa-expand" style="font-size:16px;"></i>
                 </button>
@@ -5122,23 +5122,34 @@
             }
         }
 
-        async function fetchUA(url) {
+        async function fetchUA(url, retries = 1) {
             if (url && url.startsWith('http://')) url = 'https://' + url.slice(7);
             const proxyUrl = getProxyUrl(url);
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 15000);
-            let resp;
+            const doFetch = async () => {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 12000);
+                try {
+                    const resp = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit', cache: 'no-cache', signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    const html = await resp.text();
+                    const doc = new DOMParser().parseFromString(html, 'text/html');
+                    doc._rawHtml = html;
+                    return doc;
+                } catch (e) {
+                    clearTimeout(timer);
+                    throw e;
+                }
+            };
             try {
-                resp = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit', cache: 'no-cache', signal: controller.signal });
-            } finally { clearTimeout(timer); }
-            if (!resp.ok) throw new Error('HTTP ' + resp.status);
-            const html = await resp.text();
-            console.log('[fetchUA] url=', url, 'proxyUrl=', proxyUrl);
-            console.log('[fetchUA] resp.ok=', resp.ok, 'status=', resp.status);
-            console.log('[fetchUA] html.length=', html?.length);
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            doc._rawHtml = html;
-            return doc;
+                return await doFetch();
+            } catch (e) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 600));
+                    return fetchUA(url, retries - 1);
+                }
+                throw e;
+            }
         }
 
         function parseAnimeuaCards(doc) {
@@ -5409,56 +5420,427 @@
             return sources;
         }
 
+
         // ====================================================================
-        //  ПЛЕЄР
+        //  ПЛЕЄР — ПОВНИЙ КАСТОМНИЙ ПЛЕЄР З КОНТРОЛЯМИ
         // ====================================================================
+        (function injectPlayerStyles() {
+            if (document.getElementById('lampa-player-styles')) return;
+            const s = document.createElement('style');
+            s.id = 'lampa-player-styles';
+            s.textContent = `
+                .lampa-player-container {
+                    width: 100%;
+                    aspect-ratio: 16/9;
+                    background: #000;
+                    position: relative;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    user-select: none;
+                }
+                .lampa-player-container video {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    display: block;
+                }
+                .lampa-player-container iframe {
+                    width: 100%;
+                    height: 100%;
+                    border: none;
+                    position: absolute;
+                    top: 0; left: 0;
+                }
+                .lp-spinner {
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0,0,0,0.45);
+                    z-index: 10;
+                    pointer-events: none;
+                    transition: opacity 0.3s;
+                }
+                .lp-spinner.hidden { opacity: 0; pointer-events: none; }
+                .lp-spinner-ring {
+                    width: 48px;
+                    height: 48px;
+                    border: 4px solid rgba(255,255,255,0.2);
+                    border-top-color: #fff;
+                    border-radius: 50%;
+                    animation: lp-spin 0.8s linear infinite;
+                }
+                @keyframes lp-spin { to { transform: rotate(360deg); } }
+                .lp-controls {
+                    position: absolute;
+                    bottom: 0; left: 0; right: 0;
+                    padding: 10px 14px 12px;
+                    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+                    z-index: 20;
+                    transition: opacity 0.3s;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                .lp-controls.hidden { opacity: 0; pointer-events: none; }
+                .lp-progress-wrap {
+                    width: 100%;
+                    height: 4px;
+                    background: rgba(255,255,255,0.25);
+                    border-radius: 4px;
+                    cursor: pointer;
+                    position: relative;
+                }
+                .lp-progress-wrap:hover { height: 6px; }
+                .lp-progress-fill {
+                    height: 100%;
+                    background: #fff;
+                    border-radius: 4px;
+                    pointer-events: none;
+                    transition: width 0.1s linear;
+                    position: relative;
+                }
+                .lp-progress-fill::after {
+                    content: '';
+                    position: absolute;
+                    right: -5px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 12px;
+                    height: 12px;
+                    background: #fff;
+                    border-radius: 50%;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                }
+                .lp-progress-wrap:hover .lp-progress-fill::after { opacity: 1; }
+                .lp-bottom-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .lp-btn {
+                    background: none;
+                    border: none;
+                    color: #fff;
+                    cursor: pointer;
+                    padding: 4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0.9;
+                    transition: opacity 0.15s, transform 0.1s;
+                    flex-shrink: 0;
+                }
+                .lp-btn:hover { opacity: 1; transform: scale(1.1); }
+                .lp-btn svg { width: 20px; height: 20px; fill: #fff; }
+                .lp-btn.lp-fs-btn svg { width: 18px; height: 18px; }
+                .lp-time {
+                    font-size: 12px;
+                    color: rgba(255,255,255,0.85);
+                    font-family: 'Inter', monospace;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+                .lp-spacer { flex: 1; }
+                .lp-volume-wrap {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .lp-volume-slider {
+                    width: 72px;
+                    height: 4px;
+                    -webkit-appearance: none;
+                    appearance: none;
+                    background: rgba(255,255,255,0.3);
+                    border-radius: 4px;
+                    outline: none;
+                    cursor: pointer;
+                }
+                .lp-volume-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background: #fff;
+                    cursor: pointer;
+                }
+                .lp-center-play {
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 15;
+                    pointer-events: none;
+                }
+                .lp-center-play-btn {
+                    width: 64px;
+                    height: 64px;
+                    background: rgba(0,0,0,0.55);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0;
+                    transform: scale(0.7);
+                    transition: opacity 0.25s, transform 0.25s;
+                    backdrop-filter: blur(4px);
+                }
+                .lp-center-play-btn.show {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                .lp-center-play-btn svg { width: 28px; height: 28px; fill: #fff; }
+            `;
+            document.head.appendChild(s);
+        })();
+
+        // SVG icons
+        const LP_ICONS = {
+            play: `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`,
+            pause: `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`,
+            volOn: `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`,
+            volOff: `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>`,
+            fsEnter: `<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>`,
+            fsExit: `<svg viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`
+        };
+
+        function lpFmtTime(sec) {
+            if (!isFinite(sec) || sec < 0) return '0:00';
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return m + ':' + String(s).padStart(2, '0');
+        }
+
         class LampaPlayer {
             constructor(container, options) {
                 this.container = container;
                 this.options = options || {};
                 this.hls = null;
-                this.state = { playing: false, currentTime: 0, duration: 0, volume: 0.8, muted: false, fullscreen: false,
-                    loading: true, src: null };
+                this.state = { playing: false, currentTime: 0, duration: 0, volume: 0.8, muted: false, fullscreen: false, loading: true, src: null };
                 this.videoRef = null;
                 this.containerRef = null;
+                this._controlsTimer = null;
+                this._centerTimer = null;
                 this._init();
             }
+
             _init() {
                 this.container.innerHTML = '';
-                this.containerRef = document.createElement('div');
-                this.containerRef.className = 'lampa-player-container';
-                this.containerRef.style.cssText =
-                    'width:100%;aspect-ratio:16/9;background:#000;position:relative;border-radius:12px;overflow:hidden;';
-                this.videoRef = document.createElement('video');
-                this.videoRef.setAttribute('crossorigin', 'anonymous');
-                this.videoRef.setAttribute('playsinline', '');
-                this.videoRef.controls = false;
-                this.videoRef.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-                this.containerRef.appendChild(this.videoRef);
-                this.container.appendChild(this.containerRef);
+                const wrap = document.createElement('div');
+                wrap.className = 'lampa-player-container';
+                this.containerRef = wrap;
+
+                // Video element
+                const v = document.createElement('video');
+                v.setAttribute('crossorigin', 'anonymous');
+                v.setAttribute('playsinline', '');
+                v.controls = false;
+                this.videoRef = v;
+                wrap.appendChild(v);
+
+                // Spinner
+                const spinner = document.createElement('div');
+                spinner.className = 'lp-spinner';
+                spinner.innerHTML = '<div class="lp-spinner-ring"></div>';
+                this._spinner = spinner;
+                wrap.appendChild(spinner);
+
+                // Center play/pause flash
+                const centerPlay = document.createElement('div');
+                centerPlay.className = 'lp-center-play';
+                centerPlay.innerHTML = `<div class="lp-center-play-btn" id="lpCenterBtn">${LP_ICONS.play}</div>`;
+                this._centerBtn = centerPlay.querySelector('#lpCenterBtn');
+                wrap.appendChild(centerPlay);
+
+                // Controls
+                const controls = document.createElement('div');
+                controls.className = 'lp-controls';
+                controls.innerHTML = `
+                    <div class="lp-progress-wrap" id="lpProgress">
+                        <div class="lp-progress-fill" id="lpProgressFill" style="width:0%"></div>
+                    </div>
+                    <div class="lp-bottom-row">
+                        <button class="lp-btn" id="lpPlayBtn" title="Play/Pause">${LP_ICONS.play}</button>
+                        <span class="lp-time" id="lpTime">0:00 / 0:00</span>
+                        <div class="lp-spacer"></div>
+                        <div class="lp-volume-wrap">
+                            <button class="lp-btn" id="lpVolBtn" title="Mute">${LP_ICONS.volOn}</button>
+                            <input type="range" class="lp-volume-slider" id="lpVolSlider" min="0" max="1" step="0.05" value="0.8">
+                        </div>
+                        <button class="lp-btn lp-fs-btn" id="lpFsBtn" title="Fullscreen">${LP_ICONS.fsEnter}</button>
+                    </div>
+                `;
+                this._controls = controls;
+                wrap.appendChild(controls);
+
+                this.container.appendChild(wrap);
                 this._bindEvents();
+                this._showControls();
             }
+
             _bindEvents() {
                 const v = this.videoRef;
-                v.addEventListener('play', () => { this.state.playing = true; });
-                v.addEventListener('pause', () => { this.state.playing = false; });
-                v.addEventListener('timeupdate', () => { this.state.currentTime = v.currentTime;
-                    this.state.duration = v.duration || 0; });
-                v.addEventListener('waiting', () => { this.state.loading = true; });
-                v.addEventListener('canplay', () => { this.state.loading = false; });
-                v.addEventListener('error', () => { this.state.loading = false; });
-                this.containerRef.addEventListener('click', e => { if (e.target.closest('.player-overlay-selectors'))
-                        return;
-                    this.togglePlay(); });
-                this.containerRef.addEventListener('dblclick', e => { if (e.target.closest('.player-overlay-selectors'))
-                        return;
-                    this.toggleFullscreen(); });
-                document.addEventListener('fullscreenchange', () => {
-                        this.state.fullscreen = !!document.fullscreenElement;
-                        const fsIcon = document.querySelector('#playerFullscreenBtn i');
-                        if (fsIcon) fsIcon.className = this.state.fullscreen ? 'fas fa-compress' : 'fas fa-expand';
+                const wrap = this.containerRef;
+
+                v.addEventListener('play', () => {
+                    this.state.playing = true;
+                    this._updatePlayBtn();
+                });
+                v.addEventListener('pause', () => {
+                    this.state.playing = false;
+                    this._updatePlayBtn();
+                });
+                v.addEventListener('timeupdate', () => {
+                    this.state.currentTime = v.currentTime;
+                    this.state.duration = v.duration || 0;
+                    this._updateProgress();
+                });
+                v.addEventListener('waiting', () => {
+                    this.state.loading = true;
+                    this._spinner.classList.remove('hidden');
+                });
+                v.addEventListener('playing', () => {
+                    this.state.loading = false;
+                    this._spinner.classList.add('hidden');
+                });
+                v.addEventListener('canplay', () => {
+                    this.state.loading = false;
+                    this._spinner.classList.add('hidden');
+                });
+                v.addEventListener('error', () => {
+                    this.state.loading = false;
+                    this._spinner.classList.add('hidden');
+                });
+                v.addEventListener('ended', () => {
+                    this.state.playing = false;
+                    this._updatePlayBtn();
+                });
+
+                // Click on wrap — toggle play, show controls
+                wrap.addEventListener('click', e => {
+                    if (e.target.closest('.lp-controls')) return;
+                    this._flashCenter();
+                    this.togglePlay();
+                    this._showControls();
+                });
+                wrap.addEventListener('dblclick', e => {
+                    if (e.target.closest('.lp-controls')) return;
+                    this.toggleFullscreen();
+                });
+                wrap.addEventListener('mousemove', () => this._showControls());
+                wrap.addEventListener('touchstart', () => this._showControls(), { passive: true });
+
+                // Play button
+                const playBtn = wrap.querySelector('#lpPlayBtn');
+                if (playBtn) playBtn.addEventListener('click', e => { e.stopPropagation(); this._flashCenter(); this.togglePlay(); });
+
+                // Progress bar seek
+                const progress = wrap.querySelector('#lpProgress');
+                if (progress) {
+                    const seek = e => {
+                        const rect = progress.getBoundingClientRect();
+                        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                        if (v.duration) v.currentTime = pct * v.duration;
+                    };
+                    let dragging = false;
+                    progress.addEventListener('mousedown', e => { dragging = true; seek(e); e.preventDefault(); });
+                    document.addEventListener('mousemove', e => { if (dragging) seek(e); });
+                    document.addEventListener('mouseup', () => { dragging = false; });
+                    progress.addEventListener('touchstart', e => { seek(e.touches[0]); }, { passive: true });
+                    progress.addEventListener('touchmove', e => { seek(e.touches[0]); }, { passive: true });
+                }
+
+                // Volume
+                const volSlider = wrap.querySelector('#lpVolSlider');
+                const volBtn = wrap.querySelector('#lpVolBtn');
+                if (volSlider) {
+                    volSlider.value = this.state.volume;
+                    v.volume = this.state.volume;
+                    volSlider.addEventListener('input', () => {
+                        v.volume = parseFloat(volSlider.value);
+                        this.state.volume = v.volume;
+                        this.state.muted = v.volume === 0;
+                        this._updateVolBtn();
                     });
+                }
+                if (volBtn) volBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    v.muted = !v.muted;
+                    this.state.muted = v.muted;
+                    this._updateVolBtn();
+                });
+
+                // Fullscreen
+                const fsBtn = wrap.querySelector('#lpFsBtn');
+                if (fsBtn) fsBtn.addEventListener('click', e => { e.stopPropagation(); this.toggleFullscreen(); });
+
+                document.addEventListener('fullscreenchange', () => {
+                    this.state.fullscreen = !!document.fullscreenElement;
+                    if (fsBtn) fsBtn.innerHTML = this.state.fullscreen ? LP_ICONS.fsExit : LP_ICONS.fsEnter;
+                    const fsIcon = document.querySelector('#playerFullscreenBtn i');
+                    if (fsIcon) fsIcon.className = this.state.fullscreen ? 'fas fa-compress' : 'fas fa-expand';
+                });
+
+                // Keyboard
+                document.addEventListener('keydown', e => {
+                    const modal = document.getElementById('playerPageModal');
+                    if (!modal || modal.style.display === 'none' || modal.style.display === '') return;
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    if (e.code === 'Space') { e.preventDefault(); this._flashCenter(); this.togglePlay(); this._showControls(); }
+                    else if (e.code === 'ArrowRight') { e.preventDefault(); if (v.duration) v.currentTime = Math.min(v.duration, v.currentTime + 10); this._showControls(); }
+                    else if (e.code === 'ArrowLeft') { e.preventDefault(); v.currentTime = Math.max(0, v.currentTime - 10); this._showControls(); }
+                    else if (e.code === 'KeyF') { e.preventDefault(); this.toggleFullscreen(); }
+                    else if (e.code === 'KeyM') { e.preventDefault(); v.muted = !v.muted; this.state.muted = v.muted; this._updateVolBtn(); }
+                });
             }
+
+            _updatePlayBtn() {
+                const btn = this.containerRef?.querySelector('#lpPlayBtn');
+                if (btn) btn.innerHTML = this.state.playing ? LP_ICONS.pause : LP_ICONS.play;
+            }
+
+            _updateVolBtn() {
+                const btn = this.containerRef?.querySelector('#lpVolBtn');
+                const v = this.videoRef;
+                if (btn) btn.innerHTML = (v && (v.muted || v.volume === 0)) ? LP_ICONS.volOff : LP_ICONS.volOn;
+            }
+
+            _updateProgress() {
+                const fill = this.containerRef?.querySelector('#lpProgressFill');
+                const time = this.containerRef?.querySelector('#lpTime');
+                const v = this.videoRef;
+                if (fill && v && v.duration) {
+                    fill.style.width = (v.currentTime / v.duration * 100) + '%';
+                }
+                if (time && v) {
+                    time.textContent = lpFmtTime(v.currentTime) + ' / ' + lpFmtTime(v.duration);
+                }
+            }
+
+            _showControls() {
+                const c = this._controls;
+                if (!c) return;
+                c.classList.remove('hidden');
+                clearTimeout(this._controlsTimer);
+                if (this.state.playing) {
+                    this._controlsTimer = setTimeout(() => c.classList.add('hidden'), 3000);
+                }
+            }
+
+            _flashCenter() {
+                const btn = this._centerBtn;
+                if (!btn) return;
+                btn.innerHTML = this.state.playing ? LP_ICONS.pause : LP_ICONS.play;
+                btn.classList.add('show');
+                clearTimeout(this._centerTimer);
+                this._centerTimer = setTimeout(() => btn.classList.remove('show'), 600);
+            }
+
             loadSource(src, animeTitle, episodeTitle) {
                 if (isEmbedUrl(src)) {
                     this.container.innerHTML = '';
@@ -5466,28 +5848,35 @@
                     iframe.src = src;
                     iframe.setAttribute('allowfullscreen', '');
                     iframe.setAttribute('allow', 'autoplay; fullscreen');
-                    iframe.style.cssText =
-                        'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
-                    this.container.appendChild(iframe);
-                    this.state.loading = false;
-                    if (this.hls) { this.hls.destroy();
-                        this.hls = null; }
+                    iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
+                    const wrap = document.createElement('div');
+                    wrap.className = 'lampa-player-container';
+                    wrap.style.cssText = 'width:100%;aspect-ratio:16/9;background:#000;position:relative;border-radius:12px;overflow:hidden;';
+                    wrap.appendChild(iframe);
+                    this.container.appendChild(wrap);
+                    this.containerRef = wrap;
+                    if (this.hls) { this.hls.destroy(); this.hls = null; }
                     this.videoRef = null;
-                    // Зберігаємо containerRef для fullscreen
-                    this.containerRef = this.container;
+                    this.state.loading = false;
                     return;
                 }
-                if (!this.videoRef) { this._init(); }
+
+                if (!this.videoRef) this._init();
+                // Ensure https
                 if (src && src.startsWith('http://')) src = 'https://' + src.slice(7);
                 this.state.src = src;
                 const v = this.videoRef;
                 this.state.loading = true;
                 this.state.playing = false;
-                if (this.hls) { this.hls.destroy();
-                    this.hls = null; }
+                this._spinner.classList.remove('hidden');
+                this._updatePlayBtn();
+
+                if (this.hls) { this.hls.destroy(); this.hls = null; }
                 v.pause();
                 if (!src) { this.state.loading = false; return; }
+
                 const proxyUrl = (typeof getProxyUrl === 'function' && !src.startsWith(PROXY_URL)) ? getProxyUrl(src) : src;
+
                 const _startHls = () => {
                     const hls = new Hls({
                         enableWorker: false,
@@ -5499,63 +5888,74 @@
                     this.hls = hls;
                     hls.loadSource(proxyUrl);
                     hls.attachMedia(v);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; v.play().catch(() => {}); });
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        this.state.loading = false;
+                        this._spinner.classList.add('hidden');
+                        v.play().catch(() => {});
+                    });
                     hls.on(Hls.Events.ERROR, (ev, ed) => {
                         if (ed && ed.fatal) {
                             console.warn('[HLS fatal]', ed.type, ed.details);
                             hls.destroy(); this.hls = null;
                             this.state.loading = false;
+                            this._spinner.classList.add('hidden');
                             v.src = proxyUrl; v.load(); v.play().catch(() => {});
                         }
                     });
                 };
-                const tryHls = () => {
-                    if (proxyUrl && proxyUrl.startsWith('http://')) proxyUrl = 'https://' + proxyUrl.slice(7);
-                    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                        _startHls();
-                    } else if (v.canPlayType('application/vnd.apple.mpegurl') !== '' || v.canPlayType('audio/mpegurl') !== '') {
-                        v.src = proxyUrl; v.load();
-                        const onCP = () => { this.state.loading = false; v.removeEventListener('canplay', onCP); };
-                        v.addEventListener('canplay', onCP);
-                        v.play().catch(() => {});
-                    } else {
-                        const s = document.createElement('script');
-                        s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
-                        s.onload = () => { if (Hls.isSupported()) _startHls(); else { v.src = proxyUrl; v.load(); v.play().catch(() => {}); this.state.loading = false; } };
-                        s.onerror = () => { v.src = proxyUrl; v.load(); this.state.loading = false; };
-                        document.head.appendChild(s);
-                    }
-                };
-                tryHls();
+
+                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    _startHls();
+                } else if (v.canPlayType('application/vnd.apple.mpegurl') !== '' || v.canPlayType('audio/mpegurl') !== '') {
+                    v.src = proxyUrl; v.load();
+                    v.addEventListener('canplay', () => { this.state.loading = false; this._spinner.classList.add('hidden'); }, { once: true });
+                    v.play().catch(() => {});
+                } else {
+                    const sc = document.createElement('script');
+                    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
+                    sc.onload = () => {
+                        if (Hls.isSupported()) _startHls();
+                        else { v.src = proxyUrl; v.load(); v.play().catch(() => {}); this.state.loading = false; this._spinner.classList.add('hidden'); }
+                    };
+                    sc.onerror = () => { v.src = proxyUrl; v.load(); this.state.loading = false; this._spinner.classList.add('hidden'); };
+                    document.head.appendChild(sc);
+                }
             }
+
             togglePlay() {
                 if (!this.videoRef) return;
                 const v = this.videoRef;
                 if (v.paused) v.play().catch(() => {}); else v.pause();
             }
+
             toggleFullscreen() {
                 const target = (this.containerRef && document.body.contains(this.containerRef))
-                    ? this.containerRef
-                    : this.container;
+                    ? this.containerRef : this.container;
                 if (!target) return;
                 if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    if (target.requestFullscreen) {
-                        const p = target.requestFullscreen();
-                        if (p && p.catch) p.catch(() => {});
-                    }
-                    else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+                    const p = target.requestFullscreen ? target.requestFullscreen() : (target.webkitRequestFullscreen ? target.webkitRequestFullscreen() : null);
+                    if (p && p.catch) p.catch(() => {});
                 } else {
                     if (document.exitFullscreen) document.exitFullscreen();
                     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
                 }
             }
-            destroy() { if (this.hls) { this.hls.destroy();
-                    this.hls = null; } if (this.videoRef) { this.videoRef.pause();
-                    this.videoRef.removeAttribute('src');
-                    this.videoRef.load(); } if (this.container) this.container.innerHTML = ''; }
+
+            destroy() {
+                clearTimeout(this._controlsTimer);
+                clearTimeout(this._centerTimer);
+                if (this.hls) { this.hls.destroy(); this.hls = null; }
+                if (this.videoRef) { this.videoRef.pause(); this.videoRef.removeAttribute('src'); this.videoRef.load(); }
+                if (this.container) this.container.innerHTML = '';
+                this.videoRef = null;
+                this.containerRef = null;
+                this._controls = null;
+                this._spinner = null;
+            }
         }
 
-        // ====================================================================
+
+                // ====================================================================
         //  ГЕРО БАНЕР
         // ====================================================================
         let heroItems = [],
@@ -5565,28 +5965,52 @@
         async function buildHeroBanner() {
             const wrapper = document.getElementById('heroWrapper');
             if (!wrapper) return;
-            try {
-                const topAnime = await fetchAnimeuaTop100();
-                const ordinaryAnime = await fetchAnimeuaMain(1);
-                const getRandomItems = (arr, n) => {
-                    const validItems = arr.filter(a => a.images?.jpg?.large_image_url);
-                    const shuffled = [...validItems].sort(() => 0.5 - Math.random());
-                    return shuffled.slice(0, n);
-                };
-                const selectedTop = getRandomItems(topAnime, 4);
-                const selectedOrdinary = getRandomItems(ordinaryAnime, 4);
-                heroItems = [...selectedTop, ...selectedOrdinary].sort(() => 0.5 - Math.random());
-                if (heroItems.length === 0) { wrapper.style.display = 'none'; return; }
-                if (Router.currentRoute !== 'main') { wrapper.style.display = 'none'; return; }
-                wrapper.style.display = 'block';
-                heroCurrentIndex = 0;
-                await loadHeroItemDetails(0);
-                renderHeroSlide(heroItems[0]);
-                buildHeroIndicators();
-                startHeroRotation();
-            } catch (err) {
-                console.warn('Hero banner error:', err);
+
+            // Паралельно завантажуємо обидва джерела — не чекаємо одне на одне
+            const [topResult, mainResult] = await Promise.allSettled([
+                fetchAnimeuaTop100(),
+                fetchAnimeuaMain(1)
+            ]);
+
+            const topAnime = topResult.status === 'fulfilled' ? (topResult.value || []) : [];
+            const ordinaryAnime = mainResult.status === 'fulfilled' ? (mainResult.value || []) : [];
+
+            const getRandomItems = (arr, n) => {
+                const validItems = arr.filter(a => a.images?.jpg?.large_image_url);
+                const shuffled = [...validItems].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, n);
+            };
+
+            const selectedTop = getRandomItems(topAnime, 4);
+            const selectedOrdinary = getRandomItems(ordinaryAnime, 4);
+            heroItems = [...selectedTop, ...selectedOrdinary].sort(() => 0.5 - Math.random());
+
+            if (heroItems.length === 0) {
+                console.warn('Hero: no items loaded');
                 wrapper.style.display = 'none';
+                return;
+            }
+            if (Router.currentRoute !== 'main') {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            wrapper.style.display = 'block';
+            heroCurrentIndex = 0;
+
+            // Показуємо перший слайд ОДРАЗУ з тим що є, не чекаємо деталей
+            renderHeroSlide(heroItems[0]);
+            buildHeroIndicators();
+            startHeroRotation();
+
+            // Деталі завантажуємо у фоні — оновимо слайд коли прийдуть
+            loadHeroItemDetails(0).then(() => {
+                if (heroCurrentIndex === 0) renderHeroSlide(heroItems[0]);
+            }).catch(() => {});
+
+            // Preload деталі наступного слайду у фоні
+            if (heroItems.length > 1) {
+                loadHeroItemDetails(1).catch(() => {});
             }
         }
 
@@ -5594,8 +6018,10 @@
             if (idx < 0 || idx >= heroItems.length) return;
             const item = heroItems[idx];
             if (item.detailsLoaded) return;
+            // Timeout 6с щоб не зависати якщо сайт відповідає повільно
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000));
             try {
-                const detail = await loadAnimeuaDetail(item.url);
+                const detail = await Promise.race([loadAnimeuaDetail(item.url), timeoutPromise]);
                 item.genres = detail.genres || [];
                 item.totalEpisodes = detail.totalEpisodes || 0;
                 item.synopsis = detail.synopsis || '';
@@ -5603,11 +6029,11 @@
                 item.detailsLoaded = true;
                 item.rating = (7 + Math.random() * 2.5).toFixed(1);
             } catch (e) {
-                console.warn('Failed to load details for hero item:', item.title, e);
-                item.genres = ['Аніме'];
-                item.totalEpisodes = 0;
-                item.synopsis = 'Опис відсутній. Натисніть «Детальніше», щоб перейти до перегляду.';
-                item.rating = (7 + Math.random() * 2.5).toFixed(1);
+                console.warn('Hero details fallback:', item.title, e.message);
+                item.genres = item.genres || ['Аніме'];
+                item.totalEpisodes = item.totalEpisodes || 0;
+                item.synopsis = item.synopsis || 'Натисніть «Дивитися», щоб перейти до перегляду.';
+                item.rating = item.rating || (7 + Math.random() * 2.5).toFixed(1);
                 item.detailsLoaded = true;
             }
         }
@@ -5619,12 +6045,11 @@
             const rawTitle = item.title || 'Без назви';
             const title = rawTitle.length > 38 ? rawTitle.substring(0, 38) + '…' : rawTitle;
             const genres = item.genres || ['Аніме'];
-            const rating = item.rating || '0.0';
+            const rating = item.rating || (7 + Math.random() * 2.5).toFixed(1);
             const year = item.year || '';
             const episodes = item.totalEpisodes || 0;
             const synopsis = item.synopsis || '';
 
-            // Build meta row (year • episodes)
             const metaParts = [];
             if (year) metaParts.push(year);
             if (episodes > 0) metaParts.push(episodes + ' еп.');
@@ -5632,7 +6057,6 @@
                 ? `<div class="hero-meta">${metaParts.join(' <span class="hero-meta-dot"></span> ')}</div>`
                 : '';
 
-            // Truncate synopsis
             const synopsisHtml = synopsis
                 ? `<div class="hero-slide-desc">${synopsis.substring(0, 220)}${synopsis.length > 220 ? '…' : ''}</div>`
                 : '';
@@ -5640,8 +6064,15 @@
             const slide = document.createElement('div');
             slide.className = 'hero-slide active';
             slide.dataset.url = item.url;
+
+            // Fallback poster — якщо зображення не завантажилось
+            const safePoster = poster || '';
+            const bgStyle = safePoster
+                ? `background-image: url('${safePoster}');`
+                : 'background: linear-gradient(135deg, #1a1a1a, #2d2d2d);';
+
             slide.innerHTML = `
-                <div class="hero-slide-bg" style="background-image: url('${poster}');"></div>
+                <div class="hero-slide-bg" id="heroBg_${Date.now()}" style="${bgStyle}"></div>
                 <div class="hero-slide-overlay"></div>
                 <div class="hero-slide-content">
                     <div class="hero-slide-title">${title}</div>
@@ -5661,8 +6092,24 @@
                     </div>
                 </div>
             `;
+
+            // Preload poster image — якщо не завантажиться, фон лишається градієнтом
+            if (safePoster) {
+                const img = new Image();
+                img.onload = () => {
+                    const bg = slide.querySelector('.hero-slide-bg');
+                    if (bg) bg.style.backgroundImage = `url('${safePoster}')`;
+                };
+                img.onerror = () => {
+                    const bg = slide.querySelector('.hero-slide-bg');
+                    if (bg) bg.style.background = 'linear-gradient(135deg, #1a1a1a, #2d2d2d)';
+                };
+                img.src = safePoster;
+            }
+
             container.innerHTML = '';
             container.appendChild(slide);
+
             slide.querySelector('.hero-slide-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (item.url) openPlayerPage(item.url);
@@ -5694,16 +6141,22 @@
         async function goToSlide(idx) {
             if (idx < 0 || idx >= heroItems.length) return;
             if (idx === heroCurrentIndex) return;
-            const container = document.getElementById('heroSlidesContainer');
-            if (!container) return;
-            const slides = container.querySelectorAll('.hero-slide');
-            if (slides.length === 0) return;
-            slides.forEach(s => s.classList.remove('active'));
             heroCurrentIndex = idx;
-            await loadHeroItemDetails(idx);
+            // Показуємо слайд одразу — не чекаємо деталей
             renderHeroSlide(heroItems[idx]);
             updateHeroIndicators();
             resetHeroTimer();
+            // Деталі завантажуємо у фоні — оновимо слайд коли прийдуть
+            if (!heroItems[idx].detailsLoaded) {
+                loadHeroItemDetails(idx).then(() => {
+                    if (heroCurrentIndex === idx) renderHeroSlide(heroItems[idx]);
+                }).catch(() => {});
+            }
+            // Preload наступного слайду
+            const nextIdx = (idx + 1) % heroItems.length;
+            if (!heroItems[nextIdx].detailsLoaded) {
+                loadHeroItemDetails(nextIdx).catch(() => {});
+            }
         }
 
         function nextSlide() {
