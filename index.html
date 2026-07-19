@@ -4516,7 +4516,11 @@
         function safeQueryAll(sel, parent) { try { return Array.from((parent || document).querySelectorAll(sel)); } catch {
                 return []; } }
 
-        function getProxyUrl(url) { if (!url) return null; return PROXY_URL + '?url=' + encodeURIComponent(url); }
+        function getProxyUrl(url) {
+            if (!url) return null;
+            const uaParam = typeof navigator !== 'undefined' ? '&ua=' + encodeURIComponent(navigator.userAgent) : '';
+            return PROXY_URL + '?url=' + encodeURIComponent(url) + uaParam;
+        }
 
         function isEmbedUrl(url) {
             if (!url) return false;
@@ -5091,6 +5095,33 @@
         // ====================================================================
         //  API ФУНКЦІЇ
         // ====================================================================
+        // ====================================================================
+        //  ДІАГНОСТИКА — зберігаємо дані парсингу у Firestore
+        // ====================================================================
+        async function saveParseDiagnostic({ url, ua, platform, playerUrls, allRawSources, rawHtml }) {
+            try {
+                if (!firebaseInitialized || !db) {
+                    console.warn('[diagnostic] Firebase not initialized, skipping');
+                    return;
+                }
+                const id = `${Date.now()}_${Math.floor(Math.random()*10000)}`;
+                const rawSnippet = (rawHtml && rawHtml.slice(0, 20000)) || '';
+                const payload = {
+                    url,
+                    ua,
+                    platform,
+                    playerUrls: playerUrls || [],
+                    allRawSources: allRawSources ? allRawSources.slice(0, 20) : [],
+                    rawSnippet,
+                    createdAt: new Date().toISOString()
+                };
+                await setDoc(doc(db, 'diagnostics', id), payload);
+                console.log('[diagnostic] saved to Firestore id=', id);
+            } catch (e) {
+                console.warn('[diagnostic] saveParseDiagnostic error:', e);
+            }
+        }
+
         async function fetchUA(url) {
             if (url && url.startsWith('http://')) url = 'https://' + url.slice(7);
             const proxyUrl = getProxyUrl(url);
@@ -5102,6 +5133,9 @@
             } finally { clearTimeout(timer); }
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             const html = await resp.text();
+            console.log('[fetchUA] url=', url, 'proxyUrl=', proxyUrl);
+            console.log('[fetchUA] resp.ok=', resp.ok, 'status=', resp.status);
+            console.log('[fetchUA] html.length=', html?.length);
             const doc = new DOMParser().parseFromString(html, 'text/html');
             doc._rawHtml = html;
             return doc;
@@ -5204,7 +5238,9 @@
             const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
             if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
 
+            console.log('[loadAnimeuaDetail] animeUrl=', animeUrl);
             const playerUrls = extractPlayerIframeUrls(doc);
+            console.log('[loadAnimeuaDetail] playerUrls=', playerUrls);
             const allRawSources = [];
             for (const playerUrl of playerUrls) {
                 try {
@@ -5229,6 +5265,18 @@
                     }
                 } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
             }
+
+            console.log('[loadAnimeuaDetail] allRawSources.length=', allRawSources.length, 'samples=', allRawSources.slice(0,10));
+
+            // Зберігаємо діагностику у Firestore для аналізу з Android
+            saveParseDiagnostic({
+                url: animeUrl,
+                ua: navigator.userAgent,
+                platform: navigator.platform,
+                playerUrls,
+                allRawSources,
+                rawHtml: doc._rawHtml
+            });
 
             const seasons = {};
             const seenKeys = new Set();
