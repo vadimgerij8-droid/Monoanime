@@ -5354,7 +5354,7 @@
                 this.options = options || {};
                 this.hls = null;
                 this.state = { playing: false, currentTime: 0, duration: 0, volume: 0.8, muted: false, fullscreen: false,
-                    loading: true, src: null, errorReport: null };
+                    loading: true, src: null };
                 this.videoRef = null;
                 this.containerRef = null;
                 this._init();
@@ -5382,49 +5382,7 @@
                     this.state.duration = v.duration || 0; });
                 v.addEventListener('waiting', () => { this.state.loading = true; });
                 v.addEventListener('canplay', () => { this.state.loading = false; });
-                v.addEventListener('error', (e) => {
-                    this.state.loading = false;
-                    // Збираємо детальний звіт про помилку
-                    const err = v.error;
-                    const codes = { 1:'MEDIA_ERR_ABORTED', 2:'MEDIA_ERR_NETWORK', 3:'MEDIA_ERR_DECODE', 4:'MEDIA_ERR_SRC_NOT_SUPPORTED' };
-                    const code = err ? err.code : 0;
-                    const codeName = codes[code] || 'UNKNOWN';
-                    const msg = err ? err.message : '';
-                    const ua = navigator.userAgent;
-                    const isAndroid = /android/i.test(ua);
-                    const hlsSupported = (typeof Hls !== 'undefined') ? Hls.isSupported() : false;
-                    const nativeHls = v.canPlayType('application/vnd.apple.mpegurl') !== '';
-                    const srcShort = (v.src || '').replace(/https?:\/\/[^/]+/, '').substring(0, 80);
-                    const report = [
-                        '📛 Помилка відтворення',
-                        `Код: ${code} — ${codeName}`,
-                        msg ? `Деталі: ${msg}` : null,
-                        `Платформа: ${isAndroid ? 'Android' : 'iOS/Desktop'}`,
-                        `hls.js: ${hlsSupported ? '✓' : '✗'}  Нативний HLS: ${nativeHls ? '✓' : '✗'}`,
-                        `URL: ...${srcShort}`
-                    ].filter(Boolean).join('\n');
-                    console.error('[Player Error]', report);
-                    // Показуємо overlay з помилкою поверх відео
-                    const existing = this.containerRef.querySelector('.video-error-report');
-                    if (existing) existing.remove();
-                    const overlay = document.createElement('div');
-                    overlay.className = 'video-error-report';
-                    overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:8px;z-index:20;border-radius:12px;font-size:13px;text-align:center;';
-                    overlay.innerHTML = \`
-                        <div style="font-size:28px;margin-bottom:4px">⚠️</div>
-                        <div style="font-size:15px;font-weight:700;color:#ff6b6b">Помилка відтворення</div>
-                        <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;width:100%;max-width:360px;font-family:monospace;font-size:12px;text-align:left;line-height:1.6">
-                            <b>Код:</b> ${code} — ${codeName}<br>
-                            ${msg ? \`<b>Деталі:</b> \${msg}<br>\` : ''}
-                            <b>Платформа:</b> \${isAndroid ? 'Android' : 'iOS/Desktop'}<br>
-                            <b>hls.js:</b> \${hlsSupported ? '✓ підтримується' : '✗ не завантажений'}<br>
-                            <b>Нативний HLS:</b> \${nativeHls ? '✓' : '✗'}<br>
-                            <b>URL:</b> ...\${srcShort}
-                        </div>
-                        <button onclick="this.closest('.video-error-report').remove()" style="margin-top:6px;padding:8px 20px;border-radius:20px;border:none;background:#ff6b6b;color:#fff;font-size:13px;cursor:pointer">Закрити</button>
-                    \`;
-                    this.containerRef.appendChild(overlay);
-                });
+                v.addEventListener('error', () => { this.state.loading = false; });
                 this.containerRef.addEventListener('click', e => { if (e.target.closest('.player-overlay-selectors'))
                         return;
                     this.togglePlay(); });
@@ -5472,32 +5430,7 @@
                         hls.loadSource(proxyUrl);
                         hls.attachMedia(v);
                         hls.on(Hls.Events.MANIFEST_PARSED, () => { this.state.loading = false; v.play().catch(()=>{}); });
-                        hls.on(Hls.Events.ERROR, (ev, data) => {
-                            if (data && data.fatal) {
-                                this.state.loading = false;
-                                console.error('[HLS.js Fatal]', data.type, data.details, data.response);
-                                // Показуємо overlay з деталями помилки hls.js
-                                const existing = this.containerRef.querySelector('.video-error-report');
-                                if (existing) existing.remove();
-                                const overlay = document.createElement('div');
-                                overlay.className = 'video-error-report';
-                                overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:8px;z-index:20;border-radius:12px;font-size:13px;text-align:center;';
-                                const httpCode = data.response ? data.response.code : '—';
-                                overlay.innerHTML = \`
-                                    <div style="font-size:28px;margin-bottom:4px">⚠️</div>
-                                    <div style="font-size:15px;font-weight:700;color:#ff6b6b">Помилка HLS</div>
-                                    <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;width:100%;max-width:360px;font-family:monospace;font-size:12px;text-align:left;line-height:1.6">
-                                        <b>Тип:</b> \${data.type}<br>
-                                        <b>Деталі:</b> \${data.details}<br>
-                                        <b>HTTP код:</b> \${httpCode}<br>
-                                        <b>Fatal:</b> \${data.fatal ? 'Так' : 'Ні'}
-                                    </div>
-                                    <button onclick="this.closest('.video-error-report').remove()" style="margin-top:6px;padding:8px 20px;border-radius:20px;border:none;background:#ff6b6b;color:#fff;font-size:13px;cursor:pointer">Закрити</button>
-                                \`;
-                                this.containerRef.appendChild(overlay);
-                                hls.destroy();
-                            }
-                        });
+                        hls.on(Hls.Events.ERROR, (ev, data) => { if (data && data.fatal) { this.state.loading = false; v.src = proxyUrl; } });
                     } else if (v.canPlayType('application/vnd.apple.mpegurl') || v.canPlayType('audio/mpegurl')) {
                         // Safari / iOS — нативний HLS
                         v.src = proxyUrl;
