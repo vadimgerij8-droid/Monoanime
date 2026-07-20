@@ -4487,7 +4487,7 @@
         body.community-active #ratingPageContainer { padding: 0 !important; }
 
         /* ═══════════════════════════════════════════════════════
-           RATING & COMMUNITY — Pro Black & White v3 (glassmorphism)
+           RATING & COMMUNITY — v4 XP System + Reactions
            ═══════════════════════════════════════════════════════ */
 
         #ratingPageContainer {
@@ -4533,8 +4533,6 @@
             font-family: inherit;
             min-height: 42px;
             letter-spacing: 0.01em;
-            position: relative;
-            overflow: hidden;
         }
         .rg-main-tab svg { width: 15px; height: 15px; flex-shrink: 0; }
         .rg-main-tab:hover { color: var(--text-secondary); }
@@ -4552,7 +4550,7 @@
         .rg-tab-panel { display: none; animation: fadeInUp 0.3s ease; }
         .rg-tab-panel.active { display: block; }
 
-        /* ══════════════ RATING PANEL ══════════════ */
+        /* ══════════════ RATING PANEL — XP SYSTEM ══════════════ */
 
         .rg-my-stats {
             margin: 1rem 1rem 0;
@@ -4573,42 +4571,97 @@
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
         }
-        .rg-stats-top {
+
+        /* XP Card */
+        .rg-xp-card {
             display: flex;
             align-items: center;
-            gap: 0.9rem;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
-        .rg-stats-avatar {
-            width: 52px; height: 52px;
+        .rg-level-badge {
+            width: 56px; height: 56px;
             border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid var(--border);
-            flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.25rem; font-weight: 700;
-            background: var(--tag-bg);
-            color: var(--text-secondary);
-            box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.08);
+            font-size: 1.4rem; font-weight: 800;
+            background: var(--accent);
+            color: var(--accent-text);
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.2);
+            position: relative;
+            transition: transform .3s;
         }
-        .rg-stats-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(40%) contrast(1.05); }
-        .rg-stats-name {
-            font-size: 16px; font-weight: 700;
+        .rg-level-badge::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 2px solid rgba(var(--accent-rgb), 0.15);
+            animation: pulseRing 2s ease-in-out infinite;
+        }
+        @keyframes pulseRing {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 0; }
+        }
+        .rg-xp-info { flex: 1; min-width: 0; }
+        .rg-xp-level-text {
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+        .rg-xp-title {
+            font-size: 16px; font-weight: 800;
             color: var(--text);
             letter-spacing: -0.3px;
+            margin-top: 1px;
         }
+        .rg-xp-bar-wrap {
+            margin-top: 6px;
+            height: 8px;
+            background: rgba(var(--accent-rgb), 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .rg-xp-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 8px;
+            transition: width 0.8s cubic-bezier(.2,.9,.2,1);
+            position: relative;
+        }
+        .rg-xp-bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: shimmerBar 2s infinite;
+        }
+        @keyframes shimmerBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .rg-xp-detail {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex; justify-content: space-between;
+        }
+
+        /* Rank badge */
         .rg-stats-rank-badge {
             display: inline-flex; align-items: center; gap: 0.25rem;
             padding: 3px 10px;
             border-radius: 20px;
             font-size: 10px; font-weight: 700;
-            color: #fff;
             margin-top: 5px;
             letter-spacing: 0.3px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+
         .rg-stats-grid {
             display: flex; gap: 8px;
+            margin-top: 0.8rem;
         }
         .rg-stat-cell {
             flex: 1;
@@ -4632,12 +4685,32 @@
             color: var(--text);
             letter-spacing: -0.5px;
         }
-        .rg-stat-val.gold { color: var(--text); }
         .rg-stat-label {
             font-size: 9px; font-weight: 600;
             text-transform: uppercase; letter-spacing: 1.2px;
             color: var(--text-muted); margin-top: 3px;
         }
+
+        /* Streak */
+        .rg-streak {
+            margin: 0.8rem 1rem 0;
+            display: flex; gap: 8px;
+        }
+        .rg-streak-item {
+            flex: 1;
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 10px 12px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            transition: all .3s;
+        }
+        .rg-streak-item:hover { border-color: var(--border-hover); }
+        .rg-streak-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .rg-streak-val { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1; }
+        .rg-streak-label { font-size: 9px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
 
         /* Achievements */
         .rg-achievements { margin: 1rem 1rem 0; }
@@ -4674,8 +4747,8 @@
             box-shadow: 0 2px 12px rgba(var(--accent-rgb), 0.06);
         }
         .rg-ach-item.earned:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.12);
         }
         .rg-ach-item.locked { opacity: 0.3; filter: grayscale(100%); }
         .rg-ach-icon { font-size: 1.35rem; line-height: 1; }
@@ -4716,8 +4789,29 @@
             box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.2);
         }
 
+        /* Period tabs (weekly / all-time) */
+        .rg-period-tabs {
+            display: flex; gap: 0.3rem;
+            padding: 0 1rem 0.3rem;
+        }
+        .rg-period-tab {
+            padding: 4px 10px;
+            font-size: 10px; font-weight: 700;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+        }
+        .rg-period-tab.active {
+            color: var(--text);
+            background: rgba(var(--accent-rgb), 0.08);
+        }
+
         .rg-lb-title {
-            padding: 0 1rem 0.5rem;
+            padding: 0.5rem 1rem 0.5rem;
             font-size: 11px; font-weight: 600;
             letter-spacing: 1.5px; text-transform: uppercase;
             color: var(--text-secondary);
@@ -4829,7 +4923,7 @@
         .rg-lb-empty svg { width: 40px; height: 40px; opacity: 0.15; }
         .rg-lb-empty p { font-size: 12.5px; max-width: 220px; line-height: 1.5; color: var(--text-muted); }
 
-        /* ══════════════ COMMUNITY CHAT ══════════════ */
+        /* ══════════════ COMMUNITY CHAT v2 ══════════════ */
 
         .com-chat-wrap {
             display: flex;
@@ -4879,13 +4973,14 @@
             border-radius: 20px;
         }
 
-        /* Message bubble — others */
+        /* Message bubble */
         .com-msg {
             display: flex;
             gap: 0.5rem;
             align-items: flex-end;
             max-width: 84%;
             animation: fadeInUp 0.2s ease;
+            position: relative;
         }
         .com-msg.mine {
             align-self: flex-end;
@@ -4926,6 +5021,7 @@
             border: 1px solid var(--border);
             position: relative;
             max-width: 100%;
+            transition: border-color .2s;
         }
         .com-msg.mine .com-msg-bubble {
             background: rgba(var(--accent-rgb), 0.1);
@@ -4934,7 +5030,7 @@
         }
         .com-msg:not(.mine) .com-msg-bubble { border-bottom-left-radius: 5px; }
 
-        /* type badge inside bubble */
+        /* type badge */
         .com-msg-type {
             display: inline-flex; align-items: center; gap: 4px;
             font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
@@ -4950,6 +5046,141 @@
             padding: 0 4px;
             align-self: flex-end;
         }
+
+        /* Reply preview in message */
+        .com-msg-reply {
+            border-left: 2px solid var(--border-hover);
+            padding: 4px 8px;
+            margin-bottom: 5px;
+            background: rgba(var(--accent-rgb), 0.03);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+        .com-msg-reply strong { color: var(--text-secondary); font-weight: 700; }
+
+        /* Reactions */
+        .com-reactions {
+            display: flex; gap: 3px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+            padding: 0 2px;
+        }
+        .com-react-btn {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 2px 7px;
+            font-size: 11px; font-weight: 700;
+            background: rgba(var(--accent-rgb), 0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all .2s;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+        .com-react-btn:hover {
+            background: rgba(var(--accent-rgb), 0.08);
+            border-color: var(--border-hover);
+        }
+        .com-react-btn.mine {
+            background: rgba(var(--accent-rgb), 0.12);
+            border-color: rgba(var(--accent-rgb), 0.3);
+            color: var(--text);
+        }
+
+        /* Reaction picker */
+        .com-react-picker {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            right: 0;
+            display: flex; gap: 3px;
+            background: var(--glass);
+            backdrop-filter: blur(28px) saturate(1.5);
+            -webkit-backdrop-filter: blur(28px) saturate(1.5);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 5px 6px;
+            box-shadow: var(--shadow-md);
+            z-index: 30;
+            animation: fadeInUp 0.15s ease;
+        }
+        .com-react-pick {
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            background: none; border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all .2s;
+            line-height: 1;
+        }
+        .com-react-pick:hover {
+            background: rgba(var(--accent-rgb), 0.1);
+            transform: scale(1.2);
+        }
+
+        /* Message actions */
+        .com-msg-actions {
+            position: absolute;
+            top: -8px;
+            opacity: 0;
+            transition: opacity .2s;
+            z-index: 5;
+            display: flex;
+            gap: 3px;
+        }
+        .com-msg.mine .com-msg-actions { right: 30px; }
+        .com-msg:not(.mine) .com-msg-actions { left: 30px; }
+        .com-msg:hover .com-msg-actions { opacity: 1; }
+
+        .com-action-btn {
+            width: 26px; height: 26px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all .2s;
+            font-size: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        .com-action-btn:hover {
+            color: var(--text);
+            border-color: var(--border-hover);
+            transform: scale(1.1);
+        }
+        .com-action-btn svg { width: 13px; height: 13px; }
+
+        /* Reply preview bar above input */
+        .com-reply-bar {
+            display: none;
+            align-items: center; gap: 0.5rem;
+            padding: 6px 12px;
+            background: rgba(var(--accent-rgb), 0.04);
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .com-reply-bar.active { display: flex; }
+        .com-reply-bar strong { color: var(--text-secondary); }
+        .com-reply-bar .com-reply-text {
+            flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .com-reply-close {
+            background: none; border: none;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 16px; padding: 2px 6px;
+            border-radius: 50%; transition: all .2s;
+        }
+        .com-reply-close:hover { background: rgba(var(--accent-rgb), 0.08); color: var(--text); }
 
         /* Input area */
         .com-input-wrap {
@@ -4991,7 +5222,6 @@
         }
         .com-input-box textarea::placeholder { color: var(--text-muted); }
 
-        /* Type selector inside input */
         .com-type-btn {
             flex-shrink: 0;
             width: 26px; height: 26px;
@@ -7317,6 +7547,33 @@
 
         // === Rating list ===
         let ratingLoaded = false;
+
+        // XP System: level = f(episodes + hours + bookmarks*5)
+        function calcXP(episodes, hours, bookmarks) {
+            return Math.floor(episodes * 10 + hours * 20 + bookmarks * 5);
+        }
+        function xpToLevel(xp) {
+            let level = 1;
+            let need = 100;
+            let cumulative = 0;
+            while (xp >= cumulative + need) {
+                cumulative += need;
+                level++;
+                need = level * 100;
+            }
+            return { level, current: xp - cumulative, need, cumulative, pct: Math.min(100, Math.round((xp - cumulative) / need * 100)) };
+        }
+        function getLevelTitle(level) {
+            if (level >= 30) return 'Аніме Бог';
+            if (level >= 25) return 'Легенда';
+            if (level >= 20) return 'Майстер';
+            if (level >= 15) return 'Експерт';
+            if (level >= 10) return 'Ветеран';
+            if (level >= 5)  return 'Досвідчений';
+            if (level >= 2)  return 'Початківець';
+            return 'Новачок';
+        }
+
         const ACHIEVEMENTS = [
             { id: 'first',  icon: '🎬', name: 'Перший перегляд', req: '1 серія',      need: 1,      field: 'episodes' },
             { id: 'ep10',   icon: '⚡', name: '10 серій',         req: '10 серій',     need: 10,     field: 'episodes' },
@@ -7329,6 +7586,8 @@
             { id: 'h100',   icon: '🏅', name: '100 годин',         req: '100 год',     need: 360000, field: 'watchTime' },
             { id: 'bm5',    icon: '🔖', name: '5 закладок',        req: '5 зак.',      need: 5,      field: 'bookmarks' },
             { id: 'bm20',   icon: '📚', name: '20 закладок',       req: '20 зак.',     need: 20,     field: 'bookmarks' },
+            { id: 'cm10',   icon: '💬', name: '10 повідомлень',    req: '10 пов.',     need: 10,     field: 'communityMsgs' },
+            { id: 'cm50',   icon: '🗣️', name: '50 повідомлень',    req: '50 пов.',     need: 50,     field: 'communityMsgs' },
         ];
 
         function getUserRankInfo(episodes, watchHours) {
@@ -7338,6 +7597,35 @@
             if (watchHours >= 20)  return { label: 'Досвідчений',    color: 'var(--text-secondary)' };
             if (watchHours >= 5)   return { label: 'Початківець',    color: 'var(--text-muted)' };
             return                        { label: 'Новачок',        color: 'var(--text-muted)' };
+        }
+
+        // Streak calculation from history
+        function calcStreak(history) {
+            if (!history || !history.length) return { current: 0, best: 0 };
+            const days = new Set();
+            history.forEach(h => {
+                if (h.watchedAt) {
+                    const d = new Date(h.watchedAt);
+                    days.add(d.toDateString());
+                }
+            });
+            let current = 0;
+            const today = new Date();
+            for (let i = 0; i < 365; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                if (days.has(d.toDateString())) current++;
+                else if (i > 0) break;
+            }
+            const sorted = [...days].map(d => new Date(d).getTime()).sort((a,b) => b - a);
+            let best = 0, tempStreak = 0, prev = null;
+            for (const ts of sorted) {
+                if (prev && (prev - ts) === 86400000) { tempStreak++; }
+                else { tempStreak = 1; }
+                if (tempStreak > best) best = tempStreak;
+                prev = ts;
+            }
+            return { current, best: Math.max(best, current) };
         }
 
         function initRatingPage() {
@@ -7359,11 +7647,17 @@
 
                 <div class="rg-tab-panel active" id="rgPanelRating">
                     <div id="rgMyStats"></div>
+                    <div id="rgStreak"></div>
                     <div id="rgAchievements"></div>
                     <div class="rg-sort-tabs" id="rgSortTabs">
-                        <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
+                        <button class="rg-sort-tab active" data-sort="xp">XP / Рівень</button>
+                        <button class="rg-sort-tab" data-sort="episodes">За серіями</button>
                         <button class="rg-sort-tab" data-sort="hours">За годинами</button>
                         <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
+                    </div>
+                    <div class="rg-period-tabs" id="rgPeriodTabs">
+                        <button class="rg-period-tab active" data-period="all">За весь час</button>
+                        <button class="rg-period-tab" data-period="week">Цього тижня</button>
                     </div>
                     <div class="rg-lb-title">Глобальний рейтинг</div>
                     <div id="rgLeaderboard" class="rg-lb-loader">
@@ -7412,14 +7706,25 @@
                 });
             });
 
+            wrap.querySelectorAll('.rg-period-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wrap.querySelectorAll('.rg-period-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentLbPeriod = btn.dataset.period;
+                    loadLeaderboard(currentLbSort);
+                });
+            });
+
             loadMyStats();
-            loadLeaderboard('episodes');
+            loadLeaderboard('xp');
         }
 
-        let currentLbSort = 'episodes';
+        let currentLbSort = 'xp';
+        let currentLbPeriod = 'all';
 
         function loadMyStats() {
             const statsEl = document.getElementById('rgMyStats');
+            const streakEl = document.getElementById('rgStreak');
             const achEl   = document.getElementById('rgAchievements');
             if (!statsEl || !achEl) return;
 
@@ -7429,33 +7734,77 @@
             const watchSec   = Storage.getWatchTime() || 0;
             const watchHours = Math.round(watchSec / 3600 * 10) / 10;
             const episodes   = history.length;
+            const xp         = calcXP(episodes, watchHours, bookmarks.length);
+            const levelInfo  = xpToLevel(xp);
+            const levelTitle = getLevelTitle(levelInfo.level);
             const rankInfo   = getUserRankInfo(episodes, watchHours);
-            const achStats   = { episodes, watchTime: watchSec, bookmarks: bookmarks.length };
+            const streak     = calcStreak(history);
+
+            let communityMsgs = 0;
+            try { communityMsgs = parseInt(localStorage.getItem('vakdab_community_count') || '0'); } catch {}
+
+            const achStats   = { episodes, watchTime: watchSec, bookmarks: bookmarks.length, communityMsgs };
             const earnedIds  = new Set(ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need).map(a => a.id));
 
-            const avHtml = profile.avatar
+            const avHtml = profile?.avatar
                 ? `<img src="${profile.avatar}" alt="">`
-                : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
+                : `<span>${(profile?.nickname || '?')[0].toUpperCase()}</span>`;
 
             statsEl.innerHTML = `
                 <div class="rg-my-stats">
-                    <div class="rg-stats-top">
-                        <div class="rg-stats-avatar">${avHtml}</div>
-                        <div>
-                            <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
-                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.label}</div>
+                    <div class="rg-xp-card">
+                        <div class="rg-level-badge">${levelInfo.level}</div>
+                        <div class="rg-xp-info">
+                            <div class="rg-xp-level-text">Рівень ${levelInfo.level} · ${levelTitle}</div>
+                            <div class="rg-xp-title">${profile?.nickname || 'Гість'}</div>
+                            <div class="rg-xp-bar-wrap">
+                                <div class="rg-xp-bar-fill" style="width:${levelInfo.pct}%"></div>
+                            </div>
+                            <div class="rg-xp-detail">
+                                <span>${levelInfo.current} / ${levelInfo.need} XP</span>
+                                <span>${xp} XP всього</span>
+                            </div>
                         </div>
                     </div>
+                    <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.label}</div>
                     <div class="rg-stats-grid">
                         <div class="rg-stat-cell"><div class="rg-stat-val">${episodes}</div><div class="rg-stat-label">Серій</div></div>
                         <div class="rg-stat-cell"><div class="rg-stat-val">${watchHours}</div><div class="rg-stat-label">Годин</div></div>
+                        <div class="rg-stat-cell"><div class="rg-stat-val">${bookmarks.length}</div><div class="rg-stat-label">Закладок</div></div>
                         <div class="rg-stat-cell"><div class="rg-stat-val">${earnedIds.size}</div><div class="rg-stat-label">Досягнень</div></div>
                     </div>
                 </div>`;
 
+            if (streakEl) {
+                streakEl.innerHTML = `
+                    <div class="rg-streak">
+                        <div class="rg-streak-item">
+                            <span class="rg-streak-icon">🔥</span>
+                            <div>
+                                <div class="rg-streak-val">${streak.current}</div>
+                                <div class="rg-streak-label">Днів підряд</div>
+                            </div>
+                        </div>
+                        <div class="rg-streak-item">
+                            <span class="rg-streak-icon">📈</span>
+                            <div>
+                                <div class="rg-streak-val">${streak.best}</div>
+                                <div class="rg-streak-label">Рекорд</div>
+                            </div>
+                        </div>
+                        <div class="rg-streak-item">
+                            <span class="rg-streak-icon">⭐</span>
+                            <div>
+                                <div class="rg-streak-val">${xp}</div>
+                                <div class="rg-streak-label">XP</div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
             achEl.innerHTML = `
                 <div class="rg-achievements">
-                    <div class="rg-section-label">Досягнення</div>
+                    <div class="rg-section-label">Досягнення (${earnedIds.size}/${ACHIEVEMENTS.length})</div>
                     <div class="rg-ach-scroll">
                         ${ACHIEVEMENTS.map(a => `
                             <div class="rg-ach-item ${earnedIds.has(a.id) ? 'earned' : 'locked'}" title="${a.req}">
@@ -7468,7 +7817,7 @@
                 </div>`;
         }
 
-        async function loadLeaderboard(sortBy = 'episodes') {
+        async function loadLeaderboard(sortBy = 'xp') {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
@@ -7476,30 +7825,47 @@
                 if (!firebaseInitialized || !db) throw new Error('no db');
                 const { collection, query, orderBy, limit, getDocs } =
                     await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
+                const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(100)));
                 let users = [];
+                const weekAgo = Date.now() - 7 * 86400000;
                 snap.forEach(d => {
                     const data = d.data();
+                    const history = Array.isArray(data.history) ? data.history : [];
+                    const bookmarks = Array.isArray(data.bookmarks) ? data.bookmarks : [];
+                    const watchSec = data.watchTime || 0;
+                    const hours = Math.round(watchSec / 3600 * 10) / 10;
+
+                    let weeklyEpisodes = 0;
+                    if (currentLbPeriod === 'week') {
+                        weeklyEpisodes = history.filter(h => {
+                            if (!h.watchedAt) return false;
+                            const ts = new Date(h.watchedAt).getTime();
+                            return ts >= weekAgo;
+                        }).length;
+                    }
+
                     users.push({
                         uid: d.id,
                         name: data.profile?.nickname || data.profile?.name || 'Аніматор',
                         avatar: data.profile?.avatar || '',
-                        episodes: Array.isArray(data.history) ? data.history.length : 0,
-                        hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
-                        bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0
+                        episodes: currentLbPeriod === 'week' ? weeklyEpisodes : history.length,
+                        hours: hours,
+                        bookmarks: bookmarks.length,
+                        xp: calcXP(currentLbPeriod === 'week' ? weeklyEpisodes : history.length, hours, bookmarks.length)
                     });
                 });
-                const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
+
+                const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : sortBy === 'episodes' ? 'episodes' : 'xp';
                 users.sort((a, b) => b[sf] - a[sf]);
-                users = users.slice(0, 20);
+                users = users.filter(u => u[sf] > 0).slice(0, 20);
 
                 if (!users.length) {
-                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
+                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>${currentLbPeriod === 'week' ? 'Немає активності цього тижня. Будь першим!' : 'Рейтинг з\\'явиться після реєстрації користувачів'}</p></div>`;
                     return;
                 }
 
                 const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
-                const units = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
+                const units = { xp: 'XP', episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
                 const unit  = units[sortBy] || '';
                 let html    = '';
 
@@ -7545,10 +7911,13 @@
         }
 
         // ─────────────────────────────────────────────────
-        //  Community Chat (Telegram-style)
+        //  Community Chat v2 (reactions + replies + delete)
         // ─────────────────────────────────────────────────
         let comUnsub = null;
         let comPostType = 'text';
+        let comReplyTo = null;
+        let comLastMessages = [];
+        const COM_REACTIONS = ['🔥', '❤️', '😂', '👍', '😮', '😢'];
 
         function initCommunity() {
             const panel = document.getElementById('rgPanelCommunity');
@@ -7557,9 +7926,9 @@
 
             const user    = Auth.isAuthenticated() ? Auth._user : null;
             const profile = getProfile();
-            const avHtml  = profile.avatar
+            const avHtml  = profile?.avatar
                 ? `<img src="${profile.avatar}" alt="">`
-                : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
+                : `<span>${(profile?.nickname || '?')[0].toUpperCase()}</span>`;
 
             panel.innerHTML = `
                 <div class="com-chat-wrap">
@@ -7571,6 +7940,11 @@
                     </div>
 
                     ${user ? `
+                    <div class="com-reply-bar" id="comReplyBar">
+                        <svg style="width:14px;height:14px;color:var(--text-muted);flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                        <div class="com-reply-text">Відповідь <strong id="comReplyName"></strong>: <span id="comReplyPreview"></span></div>
+                        <button class="com-reply-close" id="comReplyClose">✕</button>
+                    </div>
                     <div class="com-input-wrap">
                         <div class="com-type-menu hidden" id="comTypeMenu">
                             <button class="com-type-opt" data-type="text">
@@ -7600,7 +7974,7 @@
                     ` : `
                     <div class="com-login-wall">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
-                        <p>Увійдіть в акаунт, щоб бачити повідомлення та писати в спільноті</p>
+                        <p>Увійдіть в акаунт, щоб бачити повідомлення, ставити реакції та писати в спільноті</p>
                         <button onclick="Router.goTo('profile')">Увійти</button>
                     </div>
                     `}
@@ -7616,6 +7990,8 @@
             const sendBtn   = document.getElementById('comSendBtn');
             const typeToggle = document.getElementById('comTypeToggle');
             const typeMenu  = document.getElementById('comTypeMenu');
+            const replyBar  = document.getElementById('comReplyBar');
+            const replyClose = document.getElementById('comReplyClose');
 
             if (!inp || !sendBtn) return;
 
@@ -7646,6 +8022,14 @@
             }
 
             sendBtn.addEventListener('click', () => _sendMessage(user));
+
+            if (replyClose) {
+                replyClose.addEventListener('click', () => {
+                    comReplyTo = null;
+                    if (replyBar) replyBar.classList.remove('active');
+                    if (inp) inp.focus();
+                });
+            }
         }
 
         async function _sendMessage(user) {
@@ -7660,14 +8044,30 @@
                 const { addDoc, collection, serverTimestamp } =
                     await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const p = getProfile();
-                await addDoc(collection(db, 'community_posts'), {
+                const msgData = {
                     text,
                     type: comPostType || 'text',
                     uid: user.uid,
                     authorName: p.nickname || user.displayName || user.email?.split('@')[0] || 'Аніматор',
                     authorPhoto: p.avatar || user.photoURL || '',
-                    createdAt: serverTimestamp()
-                });
+                    createdAt: serverTimestamp(),
+                    reactions: {}
+                };
+                if (comReplyTo) {
+                    msgData.replyTo = comReplyTo.id;
+                    msgData.replyToText = comReplyTo.text;
+                    msgData.replyToName = comReplyTo.authorName;
+                    comReplyTo = null;
+                    const replyBar = document.getElementById('comReplyBar');
+                    if (replyBar) replyBar.classList.remove('active');
+                }
+                await addDoc(collection(db, 'community_posts'), msgData);
+
+                try {
+                    const count = parseInt(localStorage.getItem('vakdab_community_count') || '0') + 1;
+                    localStorage.setItem('vakdab_community_count', String(count));
+                } catch {}
+
                 inp.value = '';
                 inp.style.height = 'auto';
                 comPostType = 'text';
@@ -7680,6 +8080,87 @@
             }
         }
 
+        async function _toggleReaction(msgId, emoji, user) {
+            if (!firebaseInitialized || !db || !user) return;
+            try {
+                const { doc, updateDoc, getDoc } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                const ref = doc(db, 'community_posts', msgId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return;
+                const data = snap.data();
+                const reactions = data.reactions || {};
+                const key = emoji;
+                if (!reactions[key]) reactions[key] = [];
+                const idx = reactions[key].indexOf(user.uid);
+                if (idx >= 0) {
+                    reactions[key].splice(idx, 1);
+                    if (reactions[key].length === 0) delete reactions[key];
+                } else {
+                    reactions[key].push(user.uid);
+                }
+                await updateDoc(ref, { reactions });
+            } catch(e) {
+                console.warn('Reaction error:', e);
+            }
+        }
+
+        async function _deleteMessage(msgId, user) {
+            if (!firebaseInitialized || !db || !user) return;
+            try {
+                const { doc, deleteDoc } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                await deleteDoc(doc(db, 'community_posts', msgId));
+            } catch(e) {
+                showToast('Не вдалося видалити');
+            }
+        }
+
+        function _setReplyTo(msgId, text, authorName) {
+            comReplyTo = { id: msgId, text: (text || '').substring(0, 80), authorName };
+            const replyBar = document.getElementById('comReplyBar');
+            if (replyBar) {
+                replyBar.classList.add('active');
+                const nameEl = document.getElementById('comReplyName');
+                const previewEl = document.getElementById('comReplyPreview');
+                if (nameEl) nameEl.textContent = authorName;
+                if (previewEl) previewEl.textContent = comReplyTo.text;
+            }
+            const inp = document.getElementById('comInput');
+            if (inp) inp.focus();
+        }
+
+        function _showReactionPicker(btn, msgId, user) {
+            document.querySelectorAll('.com-react-picker').forEach(p => p.remove());
+
+            const picker = document.createElement('div');
+            picker.className = 'com-react-picker';
+            picker.innerHTML = COM_REACTIONS.map(e =>
+                `<button class="com-react-pick" data-emoji="${e}">${e}</button>`
+            ).join('');
+
+            const msgEl = btn.closest('.com-msg');
+            if (msgEl) {
+                msgEl.style.position = 'relative';
+                msgEl.appendChild(picker);
+            }
+
+            picker.querySelectorAll('.com-react-pick').forEach(p => {
+                p.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    _toggleReaction(msgId, p.dataset.emoji, user);
+                    picker.remove();
+                });
+            });
+
+            setTimeout(() => {
+                document.addEventListener('click', function close() {
+                    picker.remove();
+                    document.removeEventListener('click', close);
+                }, { once: true });
+            }, 50);
+        }
+
         function _subscribeToChat(currentUser) {
             const box = document.getElementById('comMessages');
             if (!box) return;
@@ -7688,13 +8169,14 @@
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
                 import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
-                    const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
+                    const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(100));
                     comUnsub = onSnapshot(q, snap => {
                         if (snap.empty) {
                             box.innerHTML = `<div class="com-feed-empty">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                 <p>Ще немає повідомлень. Напиши першим!</p>
                             </div>`;
+                            comLastMessages = [];
                             return;
                         }
 
@@ -7706,10 +8188,14 @@
 
                         let lastDate = null;
                         let html = '';
+                        comLastMessages = [];
+
                         snap.forEach(d => {
                             const m    = d.data();
+                            const msgId = d.id;
                             const date = m.createdAt?.toDate ? m.createdAt.toDate() : null;
                             const isMe = currentUser && m.uid === currentUser.uid;
+                            comLastMessages.push({ id: msgId, ...m });
 
                             if (date) {
                                 const dayStr = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
@@ -7727,13 +8213,45 @@
                                 ? `<div class="com-msg-type">${typeIcons[m.type] || ''}${typeLabels[m.type]}</div>`
                                 : '';
 
-                            html += `<div class="com-msg ${isMe ? 'mine' : ''}">
+                            let replyHtml = '';
+                            if (m.replyTo && m.replyToText) {
+                                replyHtml = `<div class="com-msg-reply"><strong>${m.replyToName || ''}</strong>: ${m.replyToText}</div>`;
+                            }
+
+                            let reactHtml = '';
+                            if (m.reactions && Object.keys(m.reactions).length > 0) {
+                                reactHtml = '<div class="com-reactions">';
+                                for (const [emoji, uids] of Object.entries(m.reactions)) {
+                                    if (uids.length === 0) continue;
+                                    const mine = currentUser && uids.includes(currentUser.uid);
+                                    reactHtml += `<button class="com-react-btn ${mine ? 'mine' : ''}" data-msg="${msgId}" data-emoji="${emoji}">${emoji} ${uids.length}</button>`;
+                                }
+                                reactHtml += '</div>';
+                            }
+
+                            const actionsHtml = `
+                                <div class="com-msg-actions">
+                                    <button class="com-action-btn com-act-reply" data-msgid="${msgId}" data-text="${(m.text || '').substring(0, 80).replace(/"/g, '&quot;')}" data-author="${(m.authorName || '').replace(/"/g, '&quot;')}" title="Відповісти">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                                    </button>
+                                    <button class="com-action-btn com-act-react" data-msgid="${msgId}" title="Реакція">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                                    </button>
+                                    ${isMe ? `<button class="com-action-btn com-act-delete" data-msgid="${msgId}" title="Видалити">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                                    </button>` : ''}
+                                </div>`;
+
+                            html += `<div class="com-msg ${isMe ? 'mine' : ''}" data-msgid="${msgId}">
                                 <div class="com-msg-avatar">${av}</div>
                                 <div class="com-msg-col">
                                     <div class="com-msg-name">${m.authorName || 'Аніматор'}</div>
                                     <div class="com-msg-bubble">
+                                        ${actionsHtml}
+                                        ${replyHtml}
                                         ${typeTag}
                                         <div class="com-msg-text">${m.text || ''}</div>
+                                        ${reactHtml}
                                     </div>
                                     <div class="com-msg-time">${timeStr}</div>
                                 </div>
@@ -7742,6 +8260,34 @@
 
                         const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
                         box.innerHTML = html;
+
+                        box.querySelectorAll('.com-act-reply').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                _setReplyTo(btn.dataset.msgid, btn.dataset.text, btn.dataset.author);
+                            });
+                        });
+                        box.querySelectorAll('.com-act-react').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                _showReactionPicker(btn, btn.dataset.msgid, currentUser);
+                            });
+                        });
+                        box.querySelectorAll('.com-act-delete').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                if (confirm('Видалити повідомлення?')) {
+                                    _deleteMessage(btn.dataset.msgid, currentUser);
+                                }
+                            });
+                        });
+                        box.querySelectorAll('.com-react-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                _toggleReaction(btn.dataset.msg, btn.dataset.emoji, currentUser);
+                            });
+                        });
+
                         if (wasAtBottom) box.scrollTop = box.scrollHeight;
 
                     }, () => {
@@ -10001,5 +10547,6 @@ function renderProfilePage() {
 
 </body>
 </html>
+
 
 
