@@ -1288,6 +1288,53 @@
             color: var(--text-muted);
         }
 
+        #ratingPageContainer {
+            display: none;
+            padding: 20px 16px 100px;
+            min-height: 60vh;
+            animation: fadeInUp 0.28s cubic-bezier(.2,.9,.2,1) both;
+        }
+        #ratingPageContainer.active {
+            display: block;
+        }
+        .rating-page-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 80px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .rating-page-empty .rating-empty-icon {
+            font-size: 56px;
+            opacity: 0.25;
+            line-height: 1;
+        }
+        .rating-page-empty h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: -0.02em;
+        }
+        .rating-page-empty p {
+            font-size: 14px;
+            max-width: 260px;
+            line-height: 1.6;
+        }
+        .rating-page-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .rating-page-header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
         #settingsPageContainer {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -4292,17 +4339,21 @@
             z-index: 1000;
             width: calc(100% - 32px);
             max-width: 420px;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.55);
             border-radius: 26px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 8px 10px;
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
             transition: transform 0.3s cubic-bezier(.2,.9,.2,1), opacity 0.3s;
+        }
+        .dark-mode .bottom-nav {
+            background: rgba(18, 18, 18, 0.72);
+            border-color: rgba(255,255,255,0.08);
         }
         .bottom-nav.hidden-nav {
             transform: translateX(-50%) translateY(120%);
@@ -4430,6 +4481,7 @@
         <div id="settingsPageContainer"></div>
         <div id="profilePageContainer"></div>
         <div id="genrePageContainer"></div>
+        <div id="ratingPageContainer"></div>
 
         <div class="pagination-row" id="paginationRow"></div>
 
@@ -6376,12 +6428,7 @@
             let html = '';
             html += `<div class="agnative-leftdock__case">`;
             html += `
-            <div class="agnative-leftdock__item selector" data-action="main" data-selector="true" tabindex="0">
-              <div class="menu__ico">${iconHomeSvg()}</div><div class="menu__text">Головна</div>
-            </div>
-            <div class="agnative-leftdock__item selector" data-action="profile" data-selector="true" tabindex="0">
-              <div class="menu__ico">${iconProfileSvg()}</div><div class="menu__text">Профіль</div>
-            </div>`;
+`;
             html += `</div><div class="agnative-leftdock__split"></div><div class="agnative-leftdock__case">`;
             try {
                 const genres = loadGenres();
@@ -6483,6 +6530,8 @@
                 document.getElementById('searchPageContainer').style.display = 'none';
                 document.getElementById('settingsPageContainer').classList.remove('active');
                 document.getElementById('settingsPageContainer').style.display = 'none';
+                document.getElementById('ratingPageContainer').classList.remove('active');
+                document.getElementById('ratingPageContainer').style.display = 'none';
 
                 const hero = document.getElementById('heroWrapper');
                 const actions = document.getElementById('actionsRow');
@@ -6526,6 +6575,8 @@
                     document.querySelector('.agnative-leftdock__item.selector[data-action="settings"]')?.classList.add(
                         'is-active');
                     this.showSettings();
+                } else if (route === 'rating') {
+                    this.showRating();
                 } else {
                     window.location.hash = 'main';
                 }
@@ -6601,6 +6652,23 @@
                 container.classList.add('active');
                 renderSettingsPage();
                 syncLeftdockActive();
+            },
+
+            showRating() {
+                const container = document.getElementById('ratingPageContainer');
+                if (!container) return;
+                container.style.display = 'block';
+                container.classList.add('active');
+                container.innerHTML = `
+                    <div class="rating-page-header">
+                        <h1>★ Рейтинг</h1>
+                    </div>
+                    <div class="rating-page-empty">
+                        <div class="rating-empty-icon">★</div>
+                        <h2>Скоро тут з'явиться рейтинг</h2>
+                        <p>Ми працюємо над цим розділом. Поки що він порожній — зайдіть пізніше.</p>
+                    </div>
+                `;
             },
 
             goTo(route, params) {
@@ -8667,7 +8735,7 @@ function renderProfilePage() {
                 Router.goTo('main');
             });
             document.getElementById('bnTop').addEventListener('click', () => {
-                showTop100();
+                Router.goTo('rating');
             });
             document.getElementById('bnProfile').addEventListener('click', () => {
                 Router.goTo('profile');
@@ -8682,8 +8750,7 @@ function renderProfilePage() {
                         item.classList.add('active');
                     }
                 });
-                // top100 активний коли route === 'main' і показано top100
-                // (визначається через showTop100 — додатково не потрібно)
+                // rating активний для route === 'rating'
             }
 
             // Підписатися на Router — патчимо goTo
@@ -8736,7 +8803,7 @@ function renderProfilePage() {
             </div>
         </button>
         <!-- Рейтинг -->
-        <button class="bn-item" id="bnTop" data-route="top100" title="Рейтинг" aria-label="Рейтинг">
+        <button class="bn-item" id="bnTop" data-route="rating" title="Рейтинг" aria-label="Рейтинг">
             <div class="bn-pill">
                 <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span class="bn-label">Рейтинг</span>
