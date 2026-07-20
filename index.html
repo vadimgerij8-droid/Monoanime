@@ -7013,6 +7013,38 @@
                 container.style.display = 'block';
                 container.classList.add('active');
                 renderGenresPage();
+            },
+
+            showSearch() {
+                const container = document.getElementById('searchPageContainer');
+                if (container) {
+                    container.style.display = 'block';
+                    container.classList.add('active');
+                }
+                renderSearchPage();
+            },
+
+            showSettings() {
+                const container = document.getElementById('settingsPageContainer');
+                if (container) {
+                    container.style.display = 'block';
+                    container.classList.add('active');
+                }
+                renderSettingsPage();
+            },
+
+            showRating() {
+                const container = document.getElementById('ratingPageContainer');
+                if (container) {
+                    container.style.display = 'block';
+                    container.classList.add('active');
+                }
+                loadRatingPage();
+            },
+
+            goTo(route, params = {}) {
+                const query = new URLSearchParams(params).toString();
+                window.location.hash = query ? route + '?' + query : route;
             }
         };
 
@@ -9506,12 +9538,7 @@ function renderProfilePage() {
                 // rating активний для route === 'rating'
             }
 
-            // Підписатися на Router — патчимо goTo
-            const _origGoTo = Router.goTo.bind(Router);
-            Router.goTo = function(route, params) {
-                _origGoTo(route, params);
-                updateBottomNav(route);
-            };
+            // Router.goTo використовує hashchange → updateBottomNav спрацює автоматично
 
             // Ховати nav коли відкритий плеєр
             const playerModal = document.getElementById('playerPageModal');
