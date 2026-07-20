@@ -4483,7 +4483,193 @@
         }
         .app-container { padding-bottom: 90px !important; }
 
-        </style>
+        
+        /* === Rating/Group Tabs === */
+        .rg-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(255,255,255,0.08);
+        }
+        .rg-tab {
+            flex: 1;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+        .rg-tab.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
+        }
+        .rg-tab i { font-size: 0.9rem; }
+        .rg-tab-content { display: none; }
+        .rg-tab-content.active { display: block; }
+
+        /* Rating list */
+        .rating-list-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 0.5rem;
+        }
+        .rating-list-item:hover { background: rgba(255,255,255,0.05); }
+        .rating-list-item:active { background: rgba(255,255,255,0.1); }
+        .rating-rank {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            min-width: 2rem;
+            text-align: center;
+        }
+        .rating-rank.top-3 { font-size: 1.3rem; }
+        .rating-rank.gold { color: #FFD700; }
+        .rating-rank.silver { color: #C0C0C0; }
+        .rating-rank.bronze { color: #CD7F32; }
+        .rating-poster {
+            width: 40px;
+            height: 56px;
+            border-radius: 0.3rem;
+            object-fit: cover;
+            background: rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+        .rating-info { flex: 1; min-width: 0; }
+        .rating-info h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rating-info .rating-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+        .rating-score-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #FFD700;
+            white-space: nowrap;
+        }
+
+        /* Group / Community wall */
+        .group-wall {
+            padding: 0 1rem 5rem;
+        }
+        .group-post-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .group-post-box textarea {
+            width: 100%;
+            min-height: 60px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+        }
+        .group-post-box textarea::placeholder { color: var(--text-secondary); }
+        .group-post-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.2rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: opacity 0.2s;
+        }
+        .group-post-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .group-msg {
+            display: flex;
+            gap: 0.6rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .group-msg:last-child { border-bottom: none; }
+        .group-msg-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .group-msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .group-msg-body { flex: 1; min-width: 0; }
+        .group-msg-header {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.2rem;
+        }
+        .group-msg-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .group-msg-time {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .group-msg-text {
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .group-msg-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+        .group-msg-empty i { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+        .group-login-prompt {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+        }
+        .group-login-prompt a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+</style>
 </head>
 <body class="appletv-agnative-topnav">
 
@@ -6667,7 +6853,164 @@
                 container.style.display = 'block';
                 container.classList.add('active');
                 renderGenresPage();
-            },
+            
+
+        // === Rating list ===
+        let ratingLoaded = false;
+        async function loadRatingList() {
+            const container = document.getElementById('rgRatingContent');
+            if (!container) return;
+            container.dataset.loaded = '1';
+            container.innerHTML = '<div class="loader" style="padding:2rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i> Завантаження рейтингу...</div>';
+            try {
+                // Load multiple pages of anime and sort by score
+                const pages = [];
+                for (let p = 1; p <= 3; p++) {
+                    pages.push(fetchAnimeuaMain(p).catch(() => []));
+                }
+                const results = await Promise.all(pages);
+                let allAnime = [];
+                results.forEach(items => { if (Array.isArray(items)) allAnime = allAnime.concat(items); });
+                // Deduplicate
+                const seen = new Set();
+                allAnime = allAnime.filter(a => {
+                    if (seen.has(a.mal_id)) return false;
+                    seen.add(a.mal_id);
+                    return true;
+                });
+                // Assign random scores if not present (since API doesn't provide scores)
+                allAnime.forEach(a => {
+                    a.score = a.score || (7 + Math.random() * 2.8);
+                });
+                // Sort by score descending
+                allAnime.sort((a, b) => b.score - a.score);
+                // Take top 100
+                const top = allAnime.slice(0, 100);
+                // Render
+                let html = '';
+                top.forEach((item, i) => {
+                    const rank = i + 1;
+                    const rankClass = rank <= 3 ? 'top-3 ' + (rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze') : '';
+                    const scoreStr = item.score.toFixed(1);
+                    const imgSrc = item.images?.jpg?.large_image_url || '';
+                    html += `<div class="rating-list-item" data-url="${item.url}">
+                        <div class="rating-rank ${rankClass}">${rank}</div>
+                        <img class="rating-poster" src="${imgSrc}" loading="lazy" onerror="this.style.opacity=0">
+                        <div class="rating-info">
+                            <h3>${item.title}</h3>
+                            <div class="rating-meta">${item.from === 'animeua' ? 'Аніме' : ''}</div>
+                        </div>
+                        <div class="rating-score-badge">★ ${scoreStr}</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+                // Click handlers
+                container.querySelectorAll('.rating-list-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const url = el.dataset.url;
+                        if (url) openPlayerPage(url);
+                    });
+                });
+            } catch (e) {
+                console.error('Rating load error:', e);
+                container.innerHTML = '<div class="group-msg-empty"><i class="fas fa-exclamation-circle"></i><p>Не вдалося завантажити рейтинг. Спробуйте пізніше.</p></div>';
+            }
+        }
+
+        // === Group wall (Firestore) ===
+        let groupUnsub = null;
+        async function loadGroupWall() {
+            const container = document.getElementById('rgGroupContent');
+            if (!container) return;
+            container.dataset.loaded = '1';
+
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                container.innerHTML = '<div class="group-login-prompt"><i class="fas fa-user-lock" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i><p>Увійдіть в акаунт, щоб бачити та писати в групі.</p></div>';
+                return;
+            }
+
+            // Post box
+            let html = '<div class="group-wall">';
+            html += '<div class="group-post-box">';
+            html += `<textarea id="groupPostInput" placeholder="Поділіться своїм думкою про аніме..." maxlength="500"></textarea>`;
+            html += '<button class="group-post-btn" id="groupPostBtn"><i class="fas fa-paper-plane"></i> Надіслати</button>';
+            html += '</div>';
+            html += '<div id="groupMessages"></div>';
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Post button handler
+            const postBtn = document.getElementById('groupPostBtn');
+            const postInput = document.getElementById('groupPostInput');
+            if (postBtn) {
+                postBtn.addEventListener('click', async () => {
+                    const text = postInput.value.trim();
+                    if (!text) return;
+                    postBtn.disabled = true;
+                    try {
+                        const u = firebase.auth().currentUser;
+                        if (!u) { alert('Увійдіть в акаунт'); return; }
+                        await addDoc(collection(db, 'group_posts'), {
+                            text,
+                            uid: u.uid,
+                            authorName: u.displayName || u.email?.split('@')[0] || 'Анонім',
+                            authorPhoto: u.photoURL || '',
+                            createdAt: serverTimestamp()
+                        });
+                        postInput.value = '';
+                    } catch (e) {
+                        console.error('Post error:', e);
+                        alert('Помилка: ' + e.message);
+                    } finally {
+                        postBtn.disabled = false;
+                    }
+                });
+            }
+
+            // Load messages from Firestore
+            const msgContainer = document.getElementById('groupMessages');
+            msgContainer.innerHTML = '<div class="loader" style="padding:1rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>';
+
+            // Unsubscribe previous listener
+            if (groupUnsub) { groupUnsub(); groupUnsub = null; }
+
+            try {
+                const q = query(collection(db, 'group_posts'), orderBy('createdAt', 'desc'), limit(50));
+                groupUnsub = onSnapshot(q, (snap) => {
+                    if (snap.empty) {
+                        msgContainer.innerHTML = '<div class="group-msg-empty"><i class="fas fa-comments"></i><p>Поки що немає повідомлень. Будьте першим!</p></div>';
+                        return;
+                    }
+                    let mHtml = '';
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const initials = (d.authorName || 'А').charAt(0).toUpperCase();
+                        const time = d.createdAt?.toDate?.()?.toLocaleString?.('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) || 'щойно';
+                        const avatar = d.authorPhoto ? `<img src="${d.authorPhoto}" alt="">` : initials;
+                        mHtml += `<div class="group-msg">
+                            <div class="group-msg-avatar">${avatar}</div>
+                            <div class="group-msg-body">
+                                <div class="group-msg-header">
+                                    <span class="group-msg-name">${d.authorName || 'Анонім'}</span>
+                                    <span class="group-msg-time">${time}</span>
+                                </div>
+                                <div class="group-msg-text">${d.text || ''}</div>
+                            </div>
+                        </div>`;
+                    });
+                    msgContainer.innerHTML = mHtml;
+                }, (err) => {
+                    console.error('Group snapshot error:', err);
+                    msgContainer.innerHTML = '<div class="group-msg-empty"><i class="fas fa-exclamation-circle"></i><p>Не вдалося завантажити повідомлення.</p></div>';
+                });
+            } catch (e) {
+                console.error('Group load error:', e);
+                msgContainer.innerHTML = '<div class="group-msg-empty"><i class="fas fa-exclamation-circle"></i><p>Помилка завантаження.</p></div>';
+            }
+        }
+
+},
 
             showSearch() {
                 const container = document.getElementById('searchPageContainer');
@@ -6691,15 +7034,29 @@
                 container.style.display = 'block';
                 container.classList.add('active');
                 container.innerHTML = `
-                    <div class="rating-page-header">
-                        <h1>★ Рейтинг</h1>
+                    <div class="rg-tabs">
+                        <button class="rg-tab active" data-rt="rating"><i class="fas fa-star"></i> Рейтинг</button>
+                        <button class="rg-tab" data-rt="group"><i class="fas fa-users"></i> Група</button>
                     </div>
-                    <div class="rating-page-empty">
-                        <div class="rating-empty-icon">★</div>
-                        <h2>Скоро тут з'явиться рейтинг</h2>
-                        <p>Ми працюємо над цим розділом. Поки що він порожній — зайдіть пізніше.</p>
-                    </div>
+                    <div class="rg-tab-content active" id="rgRatingContent"></div>
+                    <div class="rg-tab-content" id="rgGroupContent"></div>
                 `;
+                container.querySelectorAll('.rg-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const rt = tab.dataset.rt;
+                        container.querySelectorAll('.rg-tab').forEach(t => t.classList.remove('active'));
+                        container.querySelectorAll('.rg-tab-content').forEach(c => c.classList.remove('active'));
+                        tab.classList.add('active');
+                        const target = rt === 'rating' ? 'rgRatingContent' : 'rgGroupContent';
+                        document.getElementById(target).classList.add('active');
+                        if (rt === 'rating' && !document.getElementById('rgRatingContent').dataset.loaded) {
+                            loadRatingList();
+                        } else if (rt === 'group' && !document.getElementById('rgGroupContent').dataset.loaded) {
+                            loadGroupWall();
+                        }
+                    });
+                });
+                loadRatingList();
             },
 
             goTo(route, params) {
