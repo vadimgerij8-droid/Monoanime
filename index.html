@@ -2340,6 +2340,66 @@
             display: block;
         }
 
+        #genresPageContainer {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+            margin-top: 0.5rem;
+            width: 100%;
+            padding: 0 0.100rem;
+        }
+        #genresPageContainer.active {
+            display: block;
+        }
+        .genres-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 16px 0;
+        }
+        @media (min-width:480px) {
+            .genres-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width:768px) {
+            .genres-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .genre-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 12px;
+            border-radius: 16px;
+            background: var(--card-bg, rgba(255,255,255,0.06));
+            border: 1px solid var(--border, rgba(255,255,255,0.08));
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+            text-align: center;
+            gap: 8px;
+        }
+        .genre-card:active {
+            transform: scale(0.96);
+        }
+        .genre-card:hover {
+            background: var(--card-bg-hover, rgba(255,255,255,0.12));
+        }
+        .genre-card__icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3));
+            color: #fff;
+        }
+        .genre-card__name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text, #fff);
+        }
+
         .genre-page-header {
             display: flex;
             align-items: center;
@@ -4452,10 +4512,7 @@
             <div class="agnative-topnav-clock" id="agnativeTopnavClock">00:00</div>
         </header>
 
-        <div class="leftdock-overlay" id="leftdockOverlay"></div>
-        <aside class="agnative-leftdock" id="leftdock" aria-label="Головне меню">
-            <div class="agnative-leftdock__inner" id="leftdockInner"></div>
-        </aside>
+        
 
         <div class="hero-wrapper" id="heroWrapper">
             <div id="heroSlidesContainer"></div>
@@ -4479,6 +4536,7 @@
         <div id="settingsPageContainer"></div>
         <div id="profilePageContainer"></div>
         <div id="genrePageContainer"></div>
+        <div id="genresPageContainer"></div>
         <div id="ratingPageContainer"></div>
 
         <div class="pagination-row" id="paginationRow"></div>
@@ -6378,50 +6436,18 @@
         // ====================================================================
         //  ЛІВЕ МЕНЮ
         // ====================================================================
-        const leftdock = document.getElementById('leftdock');
-        const leftdockOverlay = document.getElementById('leftdockOverlay');
-        let leftdockOpen = false;
-        let leftdockHideTimer = 0;
+        const leftdock = null; // removed
+        const leftdockOverlay = null; // removed
+        
 
         function toggleLeftdock(force) {
-            const shouldOpen = force !== undefined ? force : !leftdockOpen;
-            if (shouldOpen) showLeftdock();
-            else hideLeftdock(true);
+            Router.goTo('genres');
         }
 
-        function showLeftdock() {
-            leftdockOpen = true;
-            leftdock.classList.add('is-visible');
-            leftdockOverlay.classList.add('open');
-            document.body.style.overflow = 'hidden';
-            if (leftdockHideTimer) { clearTimeout(leftdockHideTimer);
-                leftdockHideTimer = 0; }
-            syncLeftdockActive();
-            document.getElementById('bnMenu')?.classList.add('active');
-        }
+        function showLeftdock() {}
 
-        function hideLeftdock(immediate) {
-            if (immediate) {
-                if (leftdockHideTimer) { clearTimeout(leftdockHideTimer);
-                    leftdockHideTimer = 0; }
-                leftdock.classList.remove('is-visible');
-                leftdockOverlay.classList.remove('open');
-                document.body.style.overflow = '';
-                leftdockOpen = false;
-                document.getElementById('bnMenu')?.classList.remove('active');
-                return;
-            }
-            if (leftdockHideTimer) clearTimeout(leftdockHideTimer);
-            leftdockHideTimer = setTimeout(() => {
-                leftdock.classList.remove('is-visible');
-                leftdockOverlay.classList.remove('open');
-                document.body.style.overflow = '';
-                leftdockOpen = false;
-                document.getElementById('bnMenu')?.classList.remove('active');
-                leftdockHideTimer = 0;
-            }, 260);
-        }
-        leftdockOverlay.addEventListener('click', () => hideLeftdock(true));
+        function hideLeftdock() {}
+        /* leftdock removed */
 
         function iconCircleLetter(label) {
             const letter = (label || '?').trim().charAt(0).toUpperCase();
@@ -6488,27 +6514,7 @@
             }
         }
 
-        function syncLeftdockActive() {
-            const dock = document.getElementById('leftdock');
-            if (!dock) return;
-            const route = Router.currentRoute;
-            const params = Router.params;
-            dock.querySelectorAll('.agnative-leftdock__item.selector').forEach(btn => {
-                btn.classList.remove('is-active');
-                const action = btn.dataset.action;
-                if (!action) return;
-                if (action === 'profile' && route === 'profile') {
-                    btn.classList.add('is-active');
-                } else if (action === 'main' && (route === 'main' || route === 'search')) {
-                    btn.classList.add('is-active');
-                } else if (action.startsWith('genre-') && route === 'genre') {
-                    const slug = action.replace('genre-', '');
-                    if (slug === params.slug) btn.classList.add('is-active');
-                } else if (action === 'settings' && route === 'settings') {
-                    btn.classList.add('is-active');
-                }
-            });
-        }
+        function syncLeftdockActive() {}
 
         // ====================================================================
         //  РОУТЕР
@@ -6547,6 +6553,8 @@
                 document.getElementById('settingsPageContainer').style.display = 'none';
                 document.getElementById('ratingPageContainer').classList.remove('active');
                 document.getElementById('ratingPageContainer').style.display = 'none';
+                document.getElementById('genresPageContainer').classList.remove('active');
+                document.getElementById('genresPageContainer').style.display = 'none';
 
                 const hero = document.getElementById('heroWrapper');
                 const actions = document.getElementById('actionsRow');
@@ -6590,6 +6598,8 @@
                     document.querySelector('.agnative-leftdock__item.selector[data-action="settings"]')?.classList.add(
                         'is-active');
                     this.showSettings();
+                } else if (route === 'genres') {
+                    this.showGenres();
                 } else if (route === 'rating') {
                     this.showRating();
                 } else {
@@ -6650,7 +6660,13 @@
                 container.style.display = 'block';
                 container.classList.add('active');
                 renderGenrePage(slug, name);
-                syncLeftdockActive();
+            },
+
+            showGenres() {
+                const container = document.getElementById('genresPageContainer');
+                container.style.display = 'block';
+                container.classList.add('active');
+                renderGenresPage();
             },
 
             showSearch() {
@@ -7869,6 +7885,31 @@ function renderProfilePage() {
         // ====================================================================
         let genrePageState = { slug: '', name: '', page: 1, list: [] };
 
+        async function renderGenresPage() {
+            const container = document.getElementById('genresPageContainer');
+            if (!container) return;
+            const genres = loadGenres();
+            let html = '<div class="genre-page-header"><h2>Жанри</h2></div>';
+            html += '<div class="genres-grid">';
+            genres.forEach(g => {
+                const letter = g.name.charAt(0).toUpperCase();
+                html += `<div class="genre-card" data-slug="${g.slug}" data-name="${g.name}">
+                    <div class="genre-card__icon">${letter}</div>
+                    <div class="genre-card__name">${g.name}</div>
+                </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+            container.querySelectorAll('.genre-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const slug = card.dataset.slug;
+                    const name = card.dataset.name;
+                    Router.goTo('genre', { slug, name });
+                });
+            });
+        }
+
+
         async function renderGenrePage(slug, name) {
             const container = document.getElementById('genrePageContainer');
             if (!container) return;
@@ -8545,7 +8586,7 @@ function renderProfilePage() {
         //  ОБРОБНИКИ ПОДІЙ
         // ====================================================================
         document.getElementById('bnMenu')?.addEventListener('click', (e) => { e.stopPropagation();
-            toggleLeftdock(); });
+            Router.goTo('genres'); });
 
         document.getElementById('searchCircleBtn').addEventListener('click', () => {
             Router.goTo('search');
@@ -8633,8 +8674,7 @@ function renderProfilePage() {
                 ?.isContentEditable;
             if (e.key === 'Escape') {
                 closePlayerPage();
-                if (leftdockOpen) hideLeftdock(true);
-                if (document.getElementById('bottomSheetOverlay').classList.contains('open')) closeBottomSheet();
+                                if (document.getElementById('bottomSheetOverlay').classList.contains('open')) closeBottomSheet();
                 return;
             }
             if (isInput) return;
@@ -8688,7 +8728,7 @@ function renderProfilePage() {
         // ====================================================================
         async function init() {
             applyTheme(Storage.getTheme());
-            await buildLeftdock();
+            /* leftdock removed */
             startClock();
             updateBackToTop();
 
@@ -8874,7 +8914,7 @@ function renderProfilePage() {
             </div>
         </button>
         <!-- Меню -->
-        <button class="bn-item" id="bnMenu" title="Меню" aria-label="Меню">
+        <button class="bn-item" id="bnMenu" data-route="genres" title="Меню" aria-label="Меню">
             <div class="bn-pill">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 <span class="bn-label">Меню</span>
