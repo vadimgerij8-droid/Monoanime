@@ -4485,7 +4485,7 @@
 
         
         /* ═══════════════════════════════════════════════════════
-           RATING & COMMUNITY PAGE — повний редизайн
+           RATING & COMMUNITY — redesign v2 (profile-style)
            ═══════════════════════════════════════════════════════ */
 
         #ratingPageContainer {
@@ -4496,124 +4496,110 @@
         }
         #ratingPageContainer.active { display: block; }
 
-        /* ── Page Header ── */
-        .rg-page-header {
-            padding: 1.4rem 1rem 0.8rem;
-            background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
-        }
-        .rg-page-title {
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: var(--text);
-            letter-spacing: -0.04em;
-            line-height: 1;
-        }
-        .rg-page-title span { color: var(--accent); }
-        .rg-page-sub {
-            font-size: 0.8rem;
-            color: var(--text-muted, #888);
-            margin-top: 0.3rem;
-        }
-
-        /* ── Main Tabs ── */
+        /* ── Main Tabs (profile-style) ── */
         .rg-main-tabs {
             display: flex;
-            gap: 0.5rem;
-            padding: 0.8rem 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
+            gap: 4px;
+            padding: 0.9rem 1rem 0;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin: 0.8rem 1rem 0;
         }
         .rg-main-tab {
             flex: 1;
+            padding: 8px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all .25s ease;
+            border: none;
+            background: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
-            padding: 0.65rem 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            background: var(--tag-bg, rgba(255,255,255,0.06));
-            border: 1.5px solid transparent;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            gap: 5px;
+            font-family: inherit;
+            min-height: 40px;
             letter-spacing: 0.01em;
         }
-        .rg-main-tab svg { width:16px; height:16px; flex-shrink:0; }
+        .rg-main-tab svg { width: 14px; height: 14px; }
+        .rg-main-tab:hover { color: var(--text-secondary); }
         .rg-main-tab.active {
-            color: var(--accent-text, #fff);
-            background: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 4px 20px var(--accent-glow, rgba(139,92,246,.35));
+            background: rgba(var(--accent-rgb), 0.08);
+            color: var(--text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        .dark-mode .rg-main-tab { background: rgba(255,255,255,0.06); }
-        .dark-mode .rg-main-tab.active { background: var(--accent); }
+        .dark-mode .rg-main-tab.active { background: rgba(255,255,255,0.08); }
 
-        .rg-tab-panel { display: none; }
+        .rg-tab-panel { display: none; animation: fadeInUp 0.25s ease; }
         .rg-tab-panel.active { display: block; }
 
-        /* ══════════════ RATING TAB ══════════════ */
+        /* ══════════════ RATING PANEL ══════════════ */
 
-        /* My Stats Card */
         .rg-my-stats {
             margin: 1rem 1rem 0;
             background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.2rem 1.2rem 1rem;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            border-radius: var(--radius-lg);
+            padding: 1.1rem;
+            box-shadow: var(--shadow-sm);
         }
         .rg-stats-top {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.9rem;
+            margin-bottom: 0.9rem;
         }
         .rg-stats-avatar {
-            width: 52px; height: 52px;
+            width: 50px; height: 50px;
             border-radius: 50%;
             overflow: hidden;
-            border: 2.5px solid var(--accent);
+            border: 2px solid var(--border);
             flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; font-weight: 800;
-            background: var(--accent-dim, rgba(139,92,246,.15));
-            color: var(--accent);
+            font-size: 1.2rem; font-weight: 700;
+            background: var(--tag-bg);
+            color: var(--text-secondary);
         }
-        .rg-stats-avatar img { width:100%; height:100%; object-fit:cover; }
-        .rg-stats-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .rg-stats-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(60%) contrast(1.05); }
+        .rg-stats-name { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
         .rg-stats-rank-badge {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            padding: 0.2rem 0.6rem;
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 2px 8px;
             border-radius: 20px;
-            font-size: 0.72rem; font-weight: 700;
+            font-size: 10px; font-weight: 700;
             color: #fff;
-            margin-top: 0.3rem;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
         }
         .rg-stats-grid {
-            display: grid; grid-template-columns: repeat(3,1fr);
-            gap: 0.5rem;
+            display: flex; gap: 8px;
         }
         .rg-stat-cell {
-            background: var(--bg);
-            border-radius: 12px;
-            padding: 0.7rem 0.5rem;
-            text-align: center;
+            flex: 1;
+            background: rgba(var(--accent-rgb), 0.04);
             border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 8px;
+            text-align: center;
+            transition: all .25s;
         }
-        .rg-stat-val {
-            font-size: 1.3rem; font-weight: 900;
-            color: var(--text);
-            line-height: 1;
-        }
+        .rg-stat-cell:hover { background: rgba(var(--accent-rgb), 0.07); border-color: var(--border-hover); }
+        .rg-stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
         .rg-stat-val.gold { color: #F59E0B; }
         .rg-stat-label {
-            font-size: 0.65rem; color: var(--text-muted, #888);
-            margin-top: 0.3rem; line-height: 1.3;
+            font-size: 9px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin-top: 2px;
         }
 
         /* Achievements */
@@ -4621,13 +4607,13 @@
             margin: 1rem 1rem 0;
         }
         .rg-section-label {
-            font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.08em;
-            color: var(--text-muted, #888);
-            padding: 0 0 0.6rem;
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            padding: 0 2px 0.55rem;
         }
         .rg-ach-scroll {
-            display: flex; gap: 0.6rem;
+            display: flex; gap: 0.55rem;
             overflow-x: auto;
             padding-bottom: 0.4rem;
             scrollbar-width: none;
@@ -4637,367 +4623,361 @@
             flex-shrink: 0;
             display: flex; flex-direction: column; align-items: center;
             gap: 0.3rem;
-            padding: 0.7rem 0.8rem;
-            border-radius: 14px;
-            border: 1.5px solid var(--border);
+            padding: 0.65rem 0.7rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
             background: var(--surface);
-            min-width: 72px;
+            min-width: 68px;
             text-align: center;
             transition: all 0.2s;
+            backdrop-filter: blur(20px);
         }
         .rg-ach-item.earned {
-            border-color: var(--accent);
-            background: var(--accent-dim, rgba(139,92,246,.1));
-            box-shadow: 0 2px 12px var(--accent-glow, rgba(139,92,246,.2));
+            border-color: rgba(var(--accent-rgb), 0.4);
+            background: rgba(var(--accent-rgb), 0.06);
         }
-        .rg-ach-item.locked { opacity: 0.4; filter: grayscale(1); }
-        .rg-ach-icon { font-size: 1.4rem; }
-        .rg-ach-name { font-size: 0.65rem; font-weight: 700; color: var(--text); line-height: 1.2; }
-        .rg-ach-req { font-size: 0.6rem; color: var(--text-muted, #888); }
+        .rg-ach-item.locked { opacity: 0.35; }
+        .rg-ach-icon { font-size: 1.3rem; }
+        .rg-ach-name { font-size: 10px; font-weight: 700; color: var(--text); line-height: 1.2; }
+        .rg-ach-req { font-size: 9px; color: var(--text-muted); }
 
-        /* Leaderboard Sort Tabs */
+        /* Sort tabs */
         .rg-sort-tabs {
             display: flex; gap: 0.4rem;
-            padding: 1rem 1rem 0.6rem;
-            overflow-x: auto;
-            scrollbar-width: none;
+            padding: 1rem 1rem 0.5rem;
+            overflow-x: auto; scrollbar-width: none;
         }
         .rg-sort-tabs::-webkit-scrollbar { display: none; }
         .rg-sort-tab {
             flex-shrink: 0;
-            padding: 0.4rem 0.9rem;
-            font-size: 0.78rem; font-weight: 700;
-            color: var(--text-secondary);
-            background: var(--tag-bg, rgba(255,255,255,0.06));
-            border: 1.5px solid var(--border);
+            padding: 5px 12px;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: none;
+            border: 1px solid var(--border);
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.2s;
+            font-family: inherit;
             white-space: nowrap;
         }
         .rg-sort-tab.active {
-            color: var(--accent);
-            border-color: var(--accent);
-            background: var(--accent-dim, rgba(139,92,246,.12));
+            color: var(--text);
+            border-color: rgba(var(--accent-rgb), 0.5);
+            background: rgba(var(--accent-rgb), 0.06);
         }
 
-        /* Leaderboard Section Title */
         .rg-lb-title {
-            padding: 0 1rem 0.6rem;
-            font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.08em;
-            color: var(--text-muted, #888);
+            padding: 0 1rem 0.5rem;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--text-secondary);
         }
 
         /* Podium */
         .rg-podium {
             display: flex; align-items: flex-end; justify-content: center;
-            gap: 0.8rem;
-            padding: 1rem 1rem 0.5rem;
+            gap: 0.6rem; padding: 0.5rem 1rem 0.3rem;
         }
         .rg-podium-item {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 0.4rem; flex: 1; max-width: 110px;
+            flex: 1; max-width: 100px;
+            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
         }
-        .rg-podium-crown { font-size: 1.6rem; }
-        .rg-podium-item.p1 .rg-podium-crown { font-size: 2rem; }
+        .rg-podium-crown { font-size: 1.3rem; }
+        .rg-podium-item.p1 .rg-podium-crown { font-size: 1.7rem; }
         .rg-podium-avatar {
-            width: 54px; height: 54px; border-radius: 50%;
-            overflow: hidden; border: 3px solid var(--border);
+            width: 48px; height: 48px; border-radius: 50%;
+            overflow: hidden; border: 2px solid var(--border);
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; font-weight: 800;
-            background: var(--surface);
-            color: var(--accent);
+            font-size: 1.1rem; font-weight: 700;
+            background: var(--tag-bg); color: var(--text-secondary);
         }
-        .rg-podium-item.p1 .rg-podium-avatar {
-            width: 68px; height: 68px;
-            border-color: #F59E0B;
-            box-shadow: 0 0 20px rgba(245,158,11,.4);
-        }
+        .rg-podium-item.p1 .rg-podium-avatar { width: 62px; height: 62px; border-color: #F59E0B; }
         .rg-podium-item.p2 .rg-podium-avatar { border-color: #94A3B8; }
         .rg-podium-item.p3 .rg-podium-avatar { border-color: #B45309; }
-        .rg-podium-avatar img { width:100%; height:100%; object-fit:cover; }
+        .rg-podium-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(30%); }
         .rg-podium-name {
-            font-size: 0.72rem; font-weight: 700; color: var(--text);
-            text-align: center; max-width: 90px;
+            font-size: 10px; font-weight: 700; color: var(--text-secondary);
+            text-align: center; max-width: 88px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .rg-podium-score { font-size: 0.8rem; font-weight: 800; color: var(--accent); }
+        .rg-podium-score { font-size: 11px; font-weight: 800; color: var(--text); }
         .rg-podium-bar {
-            width: 100%; border-radius: 8px 8px 0 0;
-            background: var(--tag-bg, rgba(255,255,255,0.06));
-            border: 1px solid var(--border);
+            width: 100%; border-radius: 4px 4px 0 0;
+            background: var(--tag-bg); border: 1px solid var(--border); border-bottom: none;
         }
-        .rg-podium-item.p1 .rg-podium-bar { height: 50px; background: linear-gradient(180deg,rgba(245,158,11,.2),transparent); border-color: rgba(245,158,11,.3); }
-        .rg-podium-item.p2 .rg-podium-bar { height: 34px; }
-        .rg-podium-item.p3 .rg-podium-bar { height: 22px; }
+        .rg-podium-item.p1 .rg-podium-bar { height: 44px; }
+        .rg-podium-item.p2 .rg-podium-bar { height: 28px; }
+        .rg-podium-item.p3 .rg-podium-bar { height: 18px; }
 
         /* List */
-        .rg-lb-list { padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .rg-lb-list { padding: 0.4rem 1rem 0.5rem; display: flex; flex-direction: column; gap: 6px; }
         .rg-lb-item {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.75rem 0.9rem;
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 10px 12px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            transition: all 0.15s;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(20px);
+            transition: border-color .2s;
         }
-        .rg-lb-item.is-me {
-            border-color: var(--accent);
-            background: var(--accent-dim, rgba(139,92,246,.08));
-        }
+        .rg-lb-item.is-me { border-color: rgba(var(--accent-rgb), 0.4); background: rgba(var(--accent-rgb), 0.04); }
         .rg-lb-num {
-            width: 24px; font-size: 0.78rem; font-weight: 800;
-            color: var(--text-muted, #888); text-align: center; flex-shrink: 0;
+            width: 20px; font-size: 11px; font-weight: 700;
+            color: var(--text-muted); text-align: center; flex-shrink: 0;
         }
         .rg-lb-avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            overflow: hidden; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem; font-weight: 800;
-            background: var(--accent-dim, rgba(139,92,246,.15));
-            color: var(--accent);
-        }
-        .rg-lb-avatar img { width:100%; height:100%; object-fit:cover; }
-        .rg-lb-info { flex: 1; min-width: 0; }
-        .rg-lb-name {
-            font-size: 0.88rem; font-weight: 700; color: var(--text);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .rg-lb-rank { font-size: 0.7rem; font-weight: 600; margin-top: 0.1rem; }
-        .rg-lb-score {
-            font-size: 0.9rem; font-weight: 800; color: var(--text);
-            flex-shrink: 0; text-align: right;
-        }
-        .rg-lb-score .unit { font-size: 0.65rem; font-weight: 500; color: var(--text-muted,#888); margin-left: 2px; }
-
-        /* Leaderboard loading/empty */
-        .rg-lb-loader { padding: 2rem; text-align: center; color: var(--text-muted,#888); }
-        .rg-lb-empty {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 0.6rem; padding: 2.5rem 1rem;
-            color: var(--text-muted, #888); text-align: center;
-        }
-        .rg-lb-empty svg { width:40px; height:40px; opacity:0.25; }
-        .rg-lb-empty p { font-size: 0.85rem; max-width: 220px; line-height: 1.5; }
-
-        /* ══════════════ COMMUNITY TAB ══════════════ */
-
-        /* Hero */
-        .com-hero {
-            margin: 1rem 1rem 0;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim,#7c3aed) 100%);
-            border-radius: 20px;
-            padding: 1.3rem 1.4rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .com-hero::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            pointer-events: none;
-        }
-        .com-hero-title {
-            font-size: 1.2rem; font-weight: 900;
-            color: #fff; letter-spacing: -0.03em;
-        }
-        .com-hero-sub { font-size: 0.78rem; color: rgba(255,255,255,0.75); margin-top: 0.3rem; }
-        .com-hero-stats {
-            display: flex; gap: 1rem; margin-top: 0.9rem;
-        }
-        .com-hero-stat { display: flex; align-items: center; gap: 0.35rem; }
-        .com-hero-stat-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #4ade80;
-            box-shadow: 0 0 8px #4ade80;
-            animation: pulse-dot 2s infinite;
-        }
-        @keyframes pulse-dot {
-            0%,100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.7; }
-        }
-        .com-hero-stat-text { font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 600; }
-
-        /* Post Types (share buttons) */
-        .com-post-types {
-            display: flex; gap: 0.5rem;
-            padding: 0.8rem 1rem 0;
-            overflow-x: auto; scrollbar-width: none;
-        }
-        .com-post-types::-webkit-scrollbar { display: none; }
-        .com-post-type-btn {
-            flex-shrink: 0;
-            display: flex; align-items: center; gap: 0.4rem;
-            padding: 0.45rem 0.9rem;
-            font-size: 0.78rem; font-weight: 700;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            border-radius: 20px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .com-post-type-btn:hover,
-        .com-post-type-btn.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--accent-dim, rgba(139,92,246,.08));
-        }
-        .com-post-type-btn svg { width:14px; height:14px; }
-
-        /* Compose Box */
-        .com-compose {
-            margin: 0.8rem 1rem 0;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            border-radius: 18px;
-            padding: 1rem;
-            transition: border-color 0.2s;
-        }
-        .com-compose:focus-within { border-color: var(--accent); }
-        .com-compose-row { display: flex; gap: 0.7rem; align-items: flex-start; }
-        .com-compose-avatar {
             width: 36px; height: 36px; border-radius: 50%;
             overflow: hidden; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; font-weight: 800;
-            background: var(--accent-dim, rgba(139,92,246,.15));
-            color: var(--accent);
-            border: 2px solid var(--accent);
+            font-size: 0.9rem; font-weight: 700;
+            background: var(--tag-bg); color: var(--text-secondary);
         }
-        .com-compose-avatar img { width:100%; height:100%; object-fit:cover; }
-        .com-compose textarea {
-            flex: 1; background: transparent;
-            border: none; outline: none; resize: none;
-            color: var(--text); font-size: 0.9rem;
-            font-family: inherit; min-height: 60px; max-height: 140px;
-            line-height: 1.5;
+        .rg-lb-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(60%); }
+        .rg-lb-info { flex: 1; min-width: 0; }
+        .rg-lb-name {
+            font-size: 13px; font-weight: 700; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .com-compose textarea::placeholder { color: var(--text-muted,#888); }
-        .com-compose-footer {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-top: 0.7rem; padding-top: 0.7rem;
-            border-top: 1px solid var(--border);
-        }
-        .com-compose-counter { font-size: 0.72rem; color: var(--text-muted,#888); }
-        .com-compose-counter.warn { color: #EF4444; }
-        .com-send-btn {
-            display: flex; align-items: center; gap: 0.4rem;
-            padding: 0.5rem 1.1rem;
-            font-size: 0.82rem; font-weight: 700;
-            background: var(--accent); color: var(--accent-text,#fff);
-            border: none; border-radius: 20px; cursor: pointer;
-            transition: all 0.2s;
-        }
-        .com-send-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .com-send-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
-        .com-send-btn svg { width:14px; height:14px; }
+        .rg-lb-rank { font-size: 10px; font-weight: 600; margin-top: 1px; }
+        .rg-lb-score { font-size: 13px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+        .rg-lb-score .unit { font-size: 10px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
 
-        /* Login prompt */
-        .com-login-prompt {
-            margin: 1.5rem 1rem;
+        .rg-lb-loader { padding: 2rem; text-align: center; color: var(--text-muted); }
+        .rg-lb-empty {
             display: flex; flex-direction: column; align-items: center;
-            gap: 0.8rem; padding: 2rem;
-            background: var(--surface);
-            border: 1px dashed var(--border);
-            border-radius: 20px;
-            text-align: center;
+            gap: 0.6rem; padding: 2rem 1rem;
+            color: var(--text-muted); text-align: center;
         }
-        .com-login-prompt svg { width:40px; height:40px; color: var(--text-muted,#888); opacity:0.5; }
-        .com-login-prompt p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
-        .com-login-btn {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.6rem 1.5rem;
-            background: var(--accent); color: var(--accent-text,#fff);
-            border: none; border-radius: 20px;
-            font-size: 0.88rem; font-weight: 700; cursor: pointer;
+        .rg-lb-empty svg { width: 36px; height: 36px; opacity: 0.2; }
+        .rg-lb-empty p { font-size: 12px; max-width: 200px; line-height: 1.5; color: var(--text-muted); }
+
+        /* ══════════════ COMMUNITY CHAT ══════════════ */
+
+        .com-chat-wrap {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 200px);
+            min-height: 400px;
         }
 
-        /* Posts Feed */
-        .com-feed { padding: 1rem 1rem 0; display: flex; flex-direction: column; gap: 0.8rem; }
+        /* Messages area */
+        .com-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+        .com-messages::-webkit-scrollbar { width: 4px; }
+        .com-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-        .com-post {
+        /* Date separator */
+        .com-date-sep {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.4rem 0;
+        }
+        .com-date-sep::before, .com-date-sep::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+        .com-date-sep-text {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+            color: var(--text-muted); white-space: nowrap;
+            padding: 2px 8px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 1rem;
-            transition: border-color 0.2s;
-            animation: fadeInUp 0.2s ease both;
+            border-radius: 20px;
         }
-        .com-post.mine { border-color: rgba(139,92,246,.3); }
-        .com-post-head { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.7rem; }
-        .com-post-avatar {
-            width: 34px; height: 34px; border-radius: 50%;
+
+        /* Message bubble — others */
+        .com-msg {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+            max-width: 82%;
+            animation: fadeInUp 0.15s ease;
+        }
+        .com-msg.mine {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .com-msg-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
             overflow: hidden; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem; font-weight: 800;
-            background: var(--accent-dim, rgba(139,92,246,.15));
-            color: var(--accent);
+            font-size: 0.72rem; font-weight: 700;
+            background: var(--tag-bg); color: var(--text-secondary);
+            align-self: flex-end;
         }
-        .com-post-avatar img { width:100%; height:100%; object-fit:cover; }
-        .com-post-meta { flex: 1; min-width: 0; }
-        .com-post-name {
-            font-size: 0.82rem; font-weight: 700; color: var(--text);
-            display: flex; align-items: center; gap: 0.4rem;
+        .com-msg-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(60%); }
+        .com-msg.mine .com-msg-avatar { display: none; }
+
+        .com-msg-col { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .com-msg.mine .com-msg-col { align-items: flex-end; }
+
+        .com-msg-name {
+            font-size: 10px; font-weight: 700;
+            color: var(--text-secondary);
+            padding: 0 4px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .com-post-me-badge {
-            font-size: 0.6rem; padding: 0.1rem 0.4rem;
-            background: var(--accent); color: var(--accent-text,#fff);
-            border-radius: 10px; font-weight: 800;
+        .com-msg.mine .com-msg-name { display: none; }
+
+        .com-msg-bubble {
+            padding: 7px 11px;
+            border-radius: 16px;
+            font-size: 13px; line-height: 1.55;
+            word-break: break-word; color: var(--text);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            position: relative;
         }
-        .com-post-time { font-size: 0.7rem; color: var(--text-muted,#888); margin-top: 0.1rem; }
-        .com-post-text {
-            font-size: 0.88rem; color: var(--text);
-            line-height: 1.6; word-break: break-word;
+        .com-msg.mine .com-msg-bubble {
+            background: rgba(var(--accent-rgb), 0.12);
+            border-color: rgba(var(--accent-rgb), 0.25);
+            border-bottom-right-radius: 4px;
         }
-        .com-post-actions {
-            display: flex; align-items: center; gap: 0.8rem;
-            margin-top: 0.8rem; padding-top: 0.7rem;
+        .com-msg:not(.mine) .com-msg-bubble { border-bottom-left-radius: 4px; }
+
+        /* type badge inside bubble */
+        .com-msg-type {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+        .com-msg-type svg { width: 9px; height: 9px; }
+
+        .com-msg-text { }
+
+        .com-msg-time {
+            font-size: 9px; color: var(--text-muted);
+            padding: 0 4px;
+            align-self: flex-end;
+        }
+
+        /* Input area */
+        .com-input-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
             border-top: 1px solid var(--border);
+            background: var(--bg);
         }
-        .com-post-action {
-            display: flex; align-items: center; gap: 0.35rem;
-            font-size: 0.75rem; font-weight: 600;
-            color: var(--text-muted,#888);
+        .com-input-box {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            gap: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 10px 6px 14px;
+            transition: border-color .2s;
+            backdrop-filter: blur(20px);
+        }
+        .com-input-box:focus-within { border-color: rgba(var(--accent-rgb), 0.5); }
+        .com-input-box textarea {
+            flex: 1; background: transparent;
+            border: none; outline: none; resize: none;
+            color: var(--text); font-size: 13px;
+            font-family: inherit; min-height: 22px; max-height: 110px;
+            line-height: 1.5; padding: 2px 0;
+        }
+        .com-input-box textarea::placeholder { color: var(--text-muted); }
+
+        /* Type selector inside input */
+        .com-type-btn {
+            flex-shrink: 0;
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
             background: none; border: none; cursor: pointer;
-            padding: 0.25rem 0.5rem;
+            color: var(--text-muted); transition: color .2s;
+            align-self: flex-end; margin-bottom: 2px;
+        }
+        .com-type-btn:hover { color: var(--text-secondary); }
+        .com-type-btn svg { width: 14px; height: 14px; }
+        .com-type-btn.active { color: var(--accent-text); }
+
+        .com-send-btn {
+            flex-shrink: 0;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(var(--accent-rgb), 0.1);
+            border: 1px solid rgba(var(--accent-rgb), 0.3);
+            color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all .2s;
+        }
+        .com-send-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .com-send-btn:disabled { opacity: 0.4; cursor: default; }
+        .com-send-btn svg { width: 15px; height: 15px; }
+
+        /* Type menu popup */
+        .com-type-menu {
+            position: fixed; bottom: 110px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            display: flex; gap: 2px;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+            animation: fadeInUp 0.15s ease;
+        }
+        .com-type-menu.hidden { display: none; }
+        .com-type-opt {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
             border-radius: 8px;
-            transition: all 0.15s;
+            cursor: pointer;
+            border: none; background: none; font-family: inherit;
+            transition: background .15s;
+            white-space: nowrap;
         }
-        .com-post-action:hover { color: var(--accent); background: var(--accent-dim, rgba(139,92,246,.08)); }
-        .com-post-action.liked { color: #EF4444; }
-        .com-post-action.liked:hover { color: #EF4444; }
-        .com-post-action svg { width:14px; height:14px; }
+        .com-type-opt:hover { background: rgba(var(--accent-rgb), 0.06); color: var(--text); }
+        .com-type-opt svg { width: 13px; height: 13px; }
 
-        /* Achievement share card in post */
-        .com-ach-card {
-            display: inline-flex; align-items: center; gap: 0.6rem;
-            padding: 0.5rem 0.8rem;
-            background: linear-gradient(135deg, var(--accent-dim, rgba(139,92,246,.15)), transparent);
-            border: 1px solid var(--accent);
-            border-radius: 12px; margin-bottom: 0.5rem;
-        }
-        .com-ach-card-icon { font-size: 1.4rem; }
-        .com-ach-card-text { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
-
-        /* Feed loading / empty */
-        .com-feed-loader, .com-feed-empty {
-            padding: 2.5rem 1rem;
+        /* Login wall */
+        .com-login-wall {
             display: flex; flex-direction: column; align-items: center;
-            gap: 0.7rem; text-align: center; color: var(--text-muted,#888);
+            gap: 0.8rem; padding: 3rem 1.5rem;
+            text-align: center;
         }
-        .com-feed-empty svg { width:44px; height:44px; opacity:0.2; }
-        .com-feed-empty p { font-size: 0.85rem; max-width: 220px; line-height: 1.5; }
+        .com-login-wall svg { width: 36px; height: 36px; color: var(--text-muted); opacity: 0.4; }
+        .com-login-wall p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .com-login-wall button {
+            padding: 8px 20px;
+            background: rgba(var(--accent-rgb), 0.08);
+            border: 1px solid rgba(var(--accent-rgb), 0.3);
+            border-radius: 20px;
+            font-size: 13px; font-weight: 600;
+            color: var(--text-secondary); cursor: pointer;
+            font-family: inherit; transition: all .2s;
+        }
+        .com-login-wall button:hover { background: rgba(var(--accent-rgb), 0.14); color: var(--text); }
 
-        .rg-empty-state {
+        /* Feed empty */
+        .com-feed-empty {
             display: flex; flex-direction: column; align-items: center;
             gap: 0.6rem; padding: 2.5rem 1rem;
-            color: var(--text-muted, #888); text-align: center;
+            color: var(--text-muted); text-align: center;
         }
-        .rg-empty-state svg { width:40px; height:40px; opacity:0.25; }
-        .rg-empty-state p { font-size: 0.85rem; max-width: 220px; line-height: 1.5; }
+        .com-feed-empty svg { width: 36px; height: 36px; opacity: 0.18; }
+        .com-feed-empty p { font-size: 12px; max-width: 200px; line-height: 1.5; }
+
+        /* spin for loaders */
+        @keyframes spin { to { transform: rotate(360deg); } }
 
 </style>
 </head>
@@ -7226,32 +7206,31 @@
 
         // === Rating list ===
         let ratingLoaded = false;
-        // Досягнення
         const ACHIEVEMENTS = [
-            { id: 'first', icon: '🎬', name: 'Перший перегляд', req: '1 серія', need: 1, field: 'episodes' },
-            { id: 'ep10', icon: '🔟', name: '10 серій', req: '10 серій', need: 10, field: 'episodes' },
-            { id: 'ep50', icon: '⚡', name: '50 серій', req: '50 серій', need: 50, field: 'episodes' },
-            { id: 'ep100', icon: '💯', name: '100 серій', req: '100 серій', need: 100, field: 'episodes' },
-            { id: 'ep500', icon: '🔥', name: '500 серій', req: '500 серій', need: 500, field: 'episodes' },
-            { id: 'h1', icon: '⏰', name: '1 година', req: '1 год', need: 3600, field: 'watchTime' },
-            { id: 'h10', icon: '📺', name: '10 годин', req: '10 год', need: 36000, field: 'watchTime' },
-            { id: 'h50', icon: '🏅', name: '50 годин', req: '50 год', need: 180000, field: 'watchTime' },
-            { id: 'h100', icon: '👑', name: '100 годин', req: '100 год', need: 360000, field: 'watchTime' },
-            { id: 'bm5', icon: '🔖', name: '5 закладок', req: '5 закладок', need: 5, field: 'bookmarks' },
-            { id: 'bm20', icon: '📚', name: '20 закладок', req: '20 закладок', need: 20, field: 'bookmarks' },
+            { id: 'first',  icon: '🎬', name: 'Перший перегляд', req: '1 серія',      need: 1,      field: 'episodes' },
+            { id: 'ep10',   icon: '🔟', name: '10 серій',         req: '10 серій',     need: 10,     field: 'episodes' },
+            { id: 'ep50',   icon: '⚡', name: '50 серій',          req: '50 серій',    need: 50,     field: 'episodes' },
+            { id: 'ep100',  icon: '💯', name: '100 серій',         req: '100 серій',   need: 100,    field: 'episodes' },
+            { id: 'ep500',  icon: '🔥', name: '500 серій',         req: '500 серій',   need: 500,    field: 'episodes' },
+            { id: 'h1',     icon: '⏰', name: '1 година',           req: '1 год',       need: 3600,   field: 'watchTime' },
+            { id: 'h10',    icon: '📺', name: '10 годин',           req: '10 год',      need: 36000,  field: 'watchTime' },
+            { id: 'h50',    icon: '🏅', name: '50 годин',           req: '50 год',      need: 180000, field: 'watchTime' },
+            { id: 'h100',   icon: '👑', name: '100 годин',          req: '100 год',     need: 360000, field: 'watchTime' },
+            { id: 'bm5',    icon: '🔖', name: '5 закладок',         req: '5 зак.',      need: 5,      field: 'bookmarks' },
+            { id: 'bm20',   icon: '📚', name: '20 закладок',        req: '20 зак.',     need: 20,     field: 'bookmarks' },
         ];
 
         function getUserRankInfo(episodes, watchHours) {
-            if (watchHours >= 200) return { label: 'Легенда аніме', color: '#FF4500' };
-            if (watchHours >= 100) return { label: 'Майстер', color: '#8B5CF6' };
-            if (watchHours >= 50)  return { label: 'Ветеран', color: '#3B82F6' };
-            if (watchHours >= 20)  return { label: 'Досвідчений', color: '#10B981' };
-            if (watchHours >= 5)   return { label: 'Початківець', color: '#F59E0B' };
-            return { label: 'Новачок', color: '#6B7280' };
+            if (watchHours >= 200) return { label: 'Легенда аніме',  color: '#FF4500' };
+            if (watchHours >= 100) return { label: 'Майстер',        color: '#8B5CF6' };
+            if (watchHours >= 50)  return { label: 'Ветеран',        color: '#3B82F6' };
+            if (watchHours >= 20)  return { label: 'Досвідчений',    color: '#10B981' };
+            if (watchHours >= 5)   return { label: 'Початківець',    color: '#F59E0B' };
+            return                        { label: 'Новачок',        color: '#6B7280' };
         }
 
         // ─────────────────────────────────────────────────
-        //  RATING PAGE — ініціалізація структури
+        //  Ініціалізація структури сторінки
         // ─────────────────────────────────────────────────
         function initRatingPage() {
             const wrap = document.getElementById('ratingPageContainer');
@@ -7259,11 +7238,6 @@
             wrap.dataset.init = '1';
 
             wrap.innerHTML = `
-                <div class="rg-page-header">
-                    <div class="rg-page-title">VAKDAB <span>Спільнота</span></div>
-                    <div class="rg-page-sub">Рейтинг переглядачів та чат спільноти</div>
-                </div>
-
                 <div class="rg-main-tabs" id="rgMainTabs">
                     <button class="rg-main-tab active" data-panel="rating">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -7283,27 +7257,25 @@
                         <button class="rg-sort-tab" data-sort="hours">За годинами</button>
                         <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
                     </div>
-                    <div class="rg-lb-title">🌍 Глобальний рейтинг</div>
+                    <div class="rg-lb-title">Глобальний рейтинг</div>
                     <div id="rgLeaderboard" class="rg-lb-loader">
-                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+                        <svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
                     </div>
                 </div>
 
-                <div class="rg-tab-panel" id="rgPanelCommunity">
-                    <div id="rgCommunityContent"></div>
-                </div>
+                <div class="rg-tab-panel" id="rgPanelCommunity"></div>
             `;
 
-            // Таб світчер
+            // Таб-свіч
             wrap.querySelectorAll('.rg-main-tab').forEach(btn => {
                 btn.addEventListener('click', () => {
                     wrap.querySelectorAll('.rg-main-tab').forEach(b => b.classList.remove('active'));
                     wrap.querySelectorAll('.rg-tab-panel').forEach(p => p.classList.remove('active'));
                     btn.classList.add('active');
-                    const panel = wrap.querySelector(`#rgPanel${btn.dataset.panel.charAt(0).toUpperCase()+btn.dataset.panel.slice(1)}`);
+                    const id = 'rgPanel' + btn.dataset.panel.charAt(0).toUpperCase() + btn.dataset.panel.slice(1);
+                    const panel = document.getElementById(id);
                     if (panel) panel.classList.add('active');
-
-                    if (btn.dataset.panel === 'community') loadCommunity();
+                    if (btn.dataset.panel === 'community') initCommunity();
                     if (btn.dataset.panel === 'rating') { loadMyStats(); loadLeaderboard(currentLbSort); }
                 });
             });
@@ -7325,27 +7297,26 @@
         let currentLbSort = 'episodes';
 
         // ─────────────────────────────────────────────────
-        //  My Stats + Achievements
+        //  Моя статистика + досягнення
         // ─────────────────────────────────────────────────
         function loadMyStats() {
             const statsEl = document.getElementById('rgMyStats');
-            const achEl = document.getElementById('rgAchievements');
+            const achEl   = document.getElementById('rgAchievements');
             if (!statsEl || !achEl) return;
 
-            const profile = getProfile();
-            const history = Storage.getHistory() || [];
-            const bookmarks = Storage.getBookmarks() || [];
-            const watchTimeSec = Storage.getWatchTime() || 0;
-            const watchHours = Math.round(watchTimeSec / 3600 * 10) / 10;
-            const episodes = history.length;
-            const rankInfo = getUserRankInfo(episodes, watchHours);
-            const achStats = { episodes, watchTime: watchTimeSec, bookmarks: bookmarks.length };
-            const earnedAch = ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need);
-            const earnedIds = new Set(earnedAch.map(a => a.id));
+            const profile    = getProfile();
+            const history    = Storage.getHistory()   || [];
+            const bookmarks  = Storage.getBookmarks() || [];
+            const watchSec   = Storage.getWatchTime() || 0;
+            const watchHours = Math.round(watchSec / 3600 * 10) / 10;
+            const episodes   = history.length;
+            const rankInfo   = getUserRankInfo(episodes, watchHours);
+            const achStats   = { episodes, watchTime: watchSec, bookmarks: bookmarks.length };
+            const earnedIds  = new Set(ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need).map(a => a.id));
 
             const avHtml = profile.avatar
                 ? `<img src="${profile.avatar}" alt="">`
-                : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
+                : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
 
             statsEl.innerHTML = `
                 <div class="rg-my-stats">
@@ -7353,43 +7324,28 @@
                         <div class="rg-stats-avatar">${avHtml}</div>
                         <div>
                             <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
-                            <div class="rg-stats-rank-badge" style="background:linear-gradient(135deg,${rankInfo.color},${rankInfo.color}99);">
-                                👑 ${rankInfo.label}
-                            </div>
+                            <div class="rg-stats-rank-badge" style="background:linear-gradient(135deg,${rankInfo.color},${rankInfo.color}99);">${rankInfo.label}</div>
                         </div>
                     </div>
                     <div class="rg-stats-grid">
-                        <div class="rg-stat-cell">
-                            <div class="rg-stat-val">${episodes}</div>
-                            <div class="rg-stat-label">Серій переглянуто</div>
-                        </div>
-                        <div class="rg-stat-cell">
-                            <div class="rg-stat-val gold">${watchHours}</div>
-                            <div class="rg-stat-label">Годин переглянуто</div>
-                        </div>
-                        <div class="rg-stat-cell">
-                            <div class="rg-stat-val">${earnedAch.length}</div>
-                            <div class="rg-stat-label">Досягнень отримано</div>
-                        </div>
+                        <div class="rg-stat-cell"><div class="rg-stat-val">${episodes}</div><div class="rg-stat-label">Серій</div></div>
+                        <div class="rg-stat-cell"><div class="rg-stat-val gold">${watchHours}</div><div class="rg-stat-label">Годин</div></div>
+                        <div class="rg-stat-cell"><div class="rg-stat-val">${earnedIds.size}</div><div class="rg-stat-label">Досягнень</div></div>
                     </div>
-                </div>
-            `;
-
-            let achItemsHtml = ACHIEVEMENTS.map(a => {
-                const earned = earnedIds.has(a.id);
-                return `<div class="rg-ach-item ${earned ? 'earned' : 'locked'}" title="${a.req}">
-                    <span class="rg-ach-icon">${a.icon}</span>
-                    <div class="rg-ach-name">${a.name}</div>
-                    <div class="rg-ach-req">${a.req}</div>
                 </div>`;
-            }).join('');
 
             achEl.innerHTML = `
                 <div class="rg-achievements">
-                    <div class="rg-section-label">🏆 Досягнення</div>
-                    <div class="rg-ach-scroll">${achItemsHtml}</div>
-                </div>
-            `;
+                    <div class="rg-section-label">Досягнення</div>
+                    <div class="rg-ach-scroll">
+                        ${ACHIEVEMENTS.map(a => `
+                            <div class="rg-ach-item ${earnedIds.has(a.id) ? 'earned' : 'locked'}" title="${a.req}">
+                                <span class="rg-ach-icon">${a.icon}</span>
+                                <div class="rg-ach-name">${a.name}</div>
+                                <div class="rg-ach-req">${a.req}</div>
+                            </div>`).join('')}
+                    </div>
+                </div>`;
         }
 
         // ─────────────────────────────────────────────────
@@ -7398,327 +7354,290 @@
         async function loadLeaderboard(sortBy = 'episodes') {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
-            lb.innerHTML = `<div class="rg-lb-loader">
-                <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
-            </div>`;
-
+            lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
             try {
-                if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                if (!firebaseInitialized || !db) throw new Error('no db');
                 const { collection, query, orderBy, limit, getDocs } =
                     await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-
                 const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
                 let users = [];
                 snap.forEach(d => {
                     const data = d.data();
-                    const eps = Array.isArray(data.history) ? data.history.length : 0;
-                    const hrs = Math.round((data.watchTime || 0) / 3600 * 10) / 10;
-                    const bms = Array.isArray(data.bookmarks) ? data.bookmarks.length : 0;
                     users.push({
                         uid: d.id,
                         name: data.profile?.nickname || data.profile?.name || 'Аніматор',
                         avatar: data.profile?.avatar || '',
-                        episodes: eps, hours: hrs, bookmarks: bms
+                        episodes: Array.isArray(data.history) ? data.history.length : 0,
+                        hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
+                        bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0
                     });
                 });
-
-                const sortField = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
-                users.sort((a, b) => b[sortField] - a[sortField]);
+                const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
+                users.sort((a, b) => b[sf] - a[sf]);
                 users = users.slice(0, 20);
 
                 if (!users.length) {
-                    lb.innerHTML = `<div class="rg-lb-empty">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
-                        <p>Рейтинг з'явиться після того, як більше користувачів зареєструється</p>
-                    </div>`;
+                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
                     return;
                 }
 
                 const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
-                const unitMap = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
-                const unit = unitMap[sortBy] || '';
-                let html = '';
+                const units = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
+                const unit  = units[sortBy] || '';
+                let html    = '';
 
-                // Podium top-3
                 if (users.length >= 3) {
-                    const order = [users[1], users[0], users[2]];
-                    const cls = ['p2', 'p1', 'p3'];
+                    const order  = [users[1], users[0], users[2]];
+                    const cls    = ['p2', 'p1', 'p3'];
                     const crowns = ['🥈', '👑', '🥉'];
                     html += '<div class="rg-podium">';
                     order.forEach((u, i) => {
-                        const av = u.avatar
-                            ? `<img src="${u.avatar}" alt="">`
-                            : `<span>${u.name[0].toUpperCase()}</span>`;
+                        const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
                         html += `<div class="rg-podium-item ${cls[i]}">
                             <div class="rg-podium-crown">${crowns[i]}</div>
                             <div class="rg-podium-avatar">${av}</div>
                             <div class="rg-podium-name">${u.name}</div>
-                            <div class="rg-podium-score">${u[sortField]} ${unit}</div>
+                            <div class="rg-podium-score">${u[sf]} ${unit}</div>
                             <div class="rg-podium-bar"></div>
                         </div>`;
                     });
                     html += '</div>';
                 }
 
-                // List 4-20
                 html += '<div class="rg-lb-list">';
                 users.slice(3).forEach((u, i) => {
-                    const rank = i + 4;
                     const isMe = u.uid === myUid;
-                    const av = u.avatar
-                        ? `<img src="${u.avatar}" alt="">`
-                        : `<span>${u.name[0].toUpperCase()}</span>`;
-                    const ri = getUserRankInfo(u.episodes, u.hours);
+                    const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                    const ri   = getUserRankInfo(u.episodes, u.hours);
                     html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}">
-                        <div class="rg-lb-num">${rank}</div>
+                        <div class="rg-lb-num">${i + 4}</div>
                         <div class="rg-lb-avatar">${av}</div>
                         <div class="rg-lb-info">
-                            <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:.65rem;color:var(--accent)">● ти</span>' : ''}</div>
+                            <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent)">you</span>' : ''}</div>
                             <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
                         </div>
-                        <div class="rg-lb-score">${u[sortField]} <span class="unit">${unit}</span></div>
+                        <div class="rg-lb-score">${u[sf]} <span class="unit">${unit}</span></div>
                     </div>`;
                 });
                 html += '</div>';
-
                 lb.innerHTML = html;
             } catch(e) {
-                console.warn('Leaderboard error:', e);
-                lb.innerHTML = `<div class="rg-lb-empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
-                    <p>Глобальний рейтинг з'явиться після реєстрації користувачів</p>
-                </div>`;
+                console.warn('Leaderboard:', e);
+                lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
             }
         }
 
         // ─────────────────────────────────────────────────
-        //  Community Page
+        //  Community Chat (Telegram-style)
         // ─────────────────────────────────────────────────
         let comUnsub = null;
+        let comPostType = 'text';
 
-        async function loadCommunity() {
-            const el = document.getElementById('rgCommunityContent');
-            if (!el || el.dataset.loaded) return;
-            el.dataset.loaded = '1';
+        function initCommunity() {
+            const panel = document.getElementById('rgPanelCommunity');
+            if (!panel || panel.dataset.init) return;
+            panel.dataset.init = '1';
 
-            const user = Auth.isAuthenticated() ? Auth._user : null;
+            const user    = Auth.isAuthenticated() ? Auth._user : null;
             const profile = getProfile();
-            const avHtml = profile.avatar
+            const avHtml  = profile.avatar
                 ? `<img src="${profile.avatar}" alt="">`
-                : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
+                : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
 
-            el.innerHTML = `
-                <div class="com-hero">
-                    <div class="com-hero-title">Суспільне VAKDAB</div>
-                    <div class="com-hero-sub">Спілкуйся, ділись аніме та досягненнями</div>
-                    <div class="com-hero-stats">
-                        <div class="com-hero-stat">
-                            <div class="com-hero-stat-dot"></div>
-                            <div class="com-hero-stat-text">Спільнота активна</div>
+            panel.innerHTML = `
+                <div class="com-chat-wrap">
+                    <div class="com-messages" id="comMessages">
+                        <div class="com-feed-empty">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <p>Завантаження...</p>
                         </div>
                     </div>
-                </div>
 
-                ${user ? `
-                <div class="com-post-types">
-                    <button class="com-post-type-btn active" data-type="text">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Думка
-                    </button>
-                    <button class="com-post-type-btn" data-type="anime">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-                        Рекомендую аніме
-                    </button>
-                    <button class="com-post-type-btn" data-type="ach">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                        Досягнення
-                    </button>
-                </div>
-
-                <div class="com-compose" id="comCompose">
-                    <div class="com-compose-row">
-                        <div class="com-compose-avatar">${avHtml}</div>
-                        <textarea id="comInput" placeholder="Поділися думкою про аніме..." maxlength="500"></textarea>
-                    </div>
-                    <div class="com-compose-footer">
-                        <span class="com-compose-counter" id="comCounter">500</span>
-                        <button class="com-send-btn" id="comSendBtn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                            Надіслати
+                    ${user ? `
+                    <div class="com-type-menu hidden" id="comTypeMenu">
+                        <button class="com-type-opt" data-type="text">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Думка
+                        </button>
+                        <button class="com-type-opt" data-type="anime">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                            Аніме
+                        </button>
+                        <button class="com-type-opt" data-type="ach">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                            Досягнення
                         </button>
                     </div>
-                </div>
-                ` : `
-                <div class="com-login-prompt">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
-                    <p>Увійдіть в акаунт, щоб бачити та писати в спільноті</p>
-                    <button class="com-login-btn" onclick="Router.goTo('profile')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                        Увійти
-                    </button>
-                </div>
-                `}
-
-                <div class="com-feed" id="comFeed">
-                    <div class="com-feed-loader">
-                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+                    <div class="com-input-wrap">
+                        <div class="com-msg-avatar" style="flex-shrink:0;margin-bottom:2px;">${avHtml}</div>
+                        <div class="com-input-box">
+                            <button class="com-type-btn" id="comTypeToggle" title="Тип повідомлення">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            </button>
+                            <textarea id="comInput" placeholder="Написати в спільноті..." maxlength="500" rows="1"></textarea>
+                        </div>
+                        <button class="com-send-btn" id="comSendBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
                     </div>
+                    ` : `
+                    <div class="com-login-wall">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                        <p>Увійдіть в акаунт, щоб бачити повідомлення та писати в спільноті</p>
+                        <button onclick="Router.goTo('profile')">Увійти</button>
+                    </div>
+                    `}
                 </div>
             `;
 
-            // Post type switcher
-            let postType = 'text';
-            el.querySelectorAll('.com-post-type-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    el.querySelectorAll('.com-post-type-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    postType = btn.dataset.type;
-                    const inp = document.getElementById('comInput');
-                    if (!inp) return;
-                    const placeholders = {
-                        text: 'Поділися думкою про аніме...',
-                        anime: 'Яке аніме рекомендуєш? Напиши назву та чому...',
-                        ach: 'Розкажи про своє досягнення!'
-                    };
-                    inp.placeholder = placeholders[postType] || placeholders.text;
-                });
-            });
-
-            // Counter
-            const inp = document.getElementById('comInput');
-            const counter = document.getElementById('comCounter');
-            if (inp && counter) {
-                inp.addEventListener('input', () => {
-                    const left = 500 - inp.value.length;
-                    counter.textContent = left;
-                    counter.classList.toggle('warn', left < 50);
-                });
-            }
-
-            // Send
-            const sendBtn = document.getElementById('comSendBtn');
-            if (sendBtn && user) {
-                sendBtn.addEventListener('click', async () => {
-                    const text = inp?.value.trim();
-                    if (!text || text.length < 2) { showToast('Введіть повідомлення'); return; }
-                    sendBtn.disabled = true;
-                    sendBtn.innerHTML = '<svg style="width:14px;height:14px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>';
-                    try {
-                        if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
-                        const { addDoc, collection, serverTimestamp } =
-                            await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                        const p = getProfile();
-                        await addDoc(collection(db, 'community_posts'), {
-                            text,
-                            type: postType,
-                            uid: user.uid,
-                            authorName: p.nickname || user.displayName || user.email?.split('@')[0] || 'Аніматор',
-                            authorPhoto: p.avatar || user.photoURL || '',
-                            likes: 0,
-                            createdAt: serverTimestamp()
-                        });
-                        if (inp) { inp.value = ''; counter.textContent = '500'; counter.classList.remove('warn'); }
-                        showToast('✅ Опубліковано!');
-                    } catch(e) {
-                        showToast('Помилка: ' + e.message);
-                    } finally {
-                        sendBtn.disabled = false;
-                        sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Надіслати';
-                    }
-                });
-            }
-
-            // Subscribe to posts feed
-            subscribeToFeed(user);
+            if (user) _setupCompose(user);
+            _subscribeToChat(user);
         }
 
-        function subscribeToFeed(currentUser) {
-            const feed = document.getElementById('comFeed');
-            if (!feed) return;
+        function _setupCompose(user) {
+            const inp       = document.getElementById('comInput');
+            const sendBtn   = document.getElementById('comSendBtn');
+            const typeToggle = document.getElementById('comTypeToggle');
+            const typeMenu  = document.getElementById('comTypeMenu');
+
+            if (!inp || !sendBtn) return;
+
+            // Auto-resize textarea
+            inp.addEventListener('input', () => {
+                inp.style.height = 'auto';
+                inp.style.height = Math.min(inp.scrollHeight, 110) + 'px';
+            });
+
+            // Enter to send, Shift+Enter new line
+            inp.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); _sendMessage(user); }
+            });
+
+            // Type menu toggle
+            if (typeToggle && typeMenu) {
+                typeToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    typeMenu.classList.toggle('hidden');
+                });
+                typeMenu.querySelectorAll('.com-type-opt').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        comPostType = btn.dataset.type;
+                        typeMenu.classList.add('hidden');
+                        const labels = { text: 'Написати в спільноті...', anime: 'Яке аніме рекомендуєш?...', ach: 'Поділись досягненням...' };
+                        inp.placeholder = labels[comPostType] || labels.text;
+                        inp.focus();
+                    });
+                });
+                document.addEventListener('click', () => typeMenu?.classList.add('hidden'));
+            }
+
+            sendBtn.addEventListener('click', () => _sendMessage(user));
+        }
+
+        async function _sendMessage(user) {
+            const inp     = document.getElementById('comInput');
+            const sendBtn = document.getElementById('comSendBtn');
+            if (!inp) return;
+            const text = inp.value.trim();
+            if (!text || text.length < 1) return;
+            sendBtn.disabled = true;
+            try {
+                if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                const { addDoc, collection, serverTimestamp } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                const p = getProfile();
+                await addDoc(collection(db, 'community_posts'), {
+                    text,
+                    type: comPostType || 'text',
+                    uid: user.uid,
+                    authorName: p.nickname || user.displayName || user.email?.split('@')[0] || 'Аніматор',
+                    authorPhoto: p.avatar || user.photoURL || '',
+                    createdAt: serverTimestamp()
+                });
+                inp.value = '';
+                inp.style.height = 'auto';
+                comPostType = 'text';
+                const inp2 = document.getElementById('comInput');
+                if (inp2) inp2.placeholder = 'Написати в спільноті...';
+            } catch(e) {
+                showToast('Помилка: ' + e.message);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function _subscribeToChat(currentUser) {
+            const box = document.getElementById('comMessages');
+            if (!box) return;
             if (comUnsub) { comUnsub(); comUnsub = null; }
 
             try {
-                if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                if (!firebaseInitialized || !db) throw new Error('no db');
                 import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
-                    const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'desc'), limit(60));
-                    comUnsub = onSnapshot(q, (snap) => {
+                    const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
+                    comUnsub = onSnapshot(q, snap => {
                         if (snap.empty) {
-                            feed.innerHTML = `<div class="com-feed-empty">
+                            box.innerHTML = `<div class="com-feed-empty">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                <p>Ще немає публікацій. Напиши першим!</p>
+                                <p>Ще немає повідомлень. Напиши першим!</p>
                             </div>`;
                             return;
                         }
+
+                        const typeIcons = {
+                            anime: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:9px;height:9px"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+                            ach:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:9px;height:9px"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
+                        };
+                        const typeLabels = { anime: 'Рекомендація', ach: 'Досягнення' };
+
+                        let lastDate = null;
                         let html = '';
-                        const typeLabels = { anime: '📺 Рекомендація', ach: '🏆 Досягнення', text: '' };
                         snap.forEach(d => {
-                            const m = d.data();
-                            const time = m.createdAt?.toDate ? formatRelTime(m.createdAt.toDate()) : '';
+                            const m    = d.data();
+                            const date = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+                            const isMe = currentUser && m.uid === currentUser.uid;
+
+                            // Date separator
+                            if (date) {
+                                const dayStr = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
+                                if (dayStr !== lastDate) {
+                                    lastDate = dayStr;
+                                    html += `<div class="com-date-sep"><span class="com-date-sep-text">${dayStr}</span></div>`;
+                                }
+                            }
+
                             const av = m.authorPhoto
                                 ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
-                                : `<span>${(m.authorName||'?')[0].toUpperCase()}</span>`;
-                            const isMe = currentUser && m.uid === currentUser.uid;
+                                : `<span>${(m.authorName || '?')[0].toUpperCase()}</span>`;
+                            const timeStr = date ? date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '';
                             const typeTag = m.type && typeLabels[m.type]
-                                ? `<div class="com-ach-card"><span class="com-ach-card-icon">${m.type === 'ach' ? '🏆' : '📺'}</span><span class="com-ach-card-text">${typeLabels[m.type]}</span></div>`
+                                ? `<div class="com-msg-type">${typeIcons[m.type] || ''}${typeLabels[m.type]}</div>`
                                 : '';
-                            html += `<div class="com-post ${isMe ? 'mine' : ''}">
-                                <div class="com-post-head">
-                                    <div class="com-post-avatar">${av}</div>
-                                    <div class="com-post-meta">
-                                        <div class="com-post-name">
-                                            ${m.authorName || 'Аніматор'}
-                                            ${isMe ? '<span class="com-post-me-badge">ти</span>' : ''}
-                                        </div>
-                                        <div class="com-post-time">${time}</div>
+
+                            html += `<div class="com-msg ${isMe ? 'mine' : ''}">
+                                <div class="com-msg-avatar">${av}</div>
+                                <div class="com-msg-col">
+                                    <div class="com-msg-name">${m.authorName || 'Аніматор'}</div>
+                                    <div class="com-msg-bubble">
+                                        ${typeTag}
+                                        <div class="com-msg-text">${m.text || ''}</div>
                                     </div>
-                                </div>
-                                ${typeTag}
-                                <div class="com-post-text">${m.text || ''}</div>
-                                <div class="com-post-actions">
-                                    <button class="com-post-action" onclick="likePost('${d.id}', this)">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                                        ${m.likes || 0}
-                                    </button>
-                                    <button class="com-post-action" onclick="copyText('${encodeURIComponent(m.text||'')}')">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                        Копіювати
-                                    </button>
+                                    <div class="com-msg-time">${timeStr}</div>
                                 </div>
                             </div>`;
                         });
-                        feed.innerHTML = html;
+
+                        const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+                        box.innerHTML = html;
+                        if (wasAtBottom) box.scrollTop = box.scrollHeight;
+
                     }, () => {
-                        feed.innerHTML = `<div class="com-feed-empty">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
-                            <p>Не вдалося завантажити стрічку</p>
-                        </div>`;
+                        box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                     });
                 });
             } catch(e) {
-                console.warn('Community feed error:', e);
-                if (feed) feed.innerHTML = `<div class="com-feed-empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
-                    <p>Спільнота недоступна без підключення</p>
-                </div>`;
+                if (box) box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Спільнота недоступна без підключення</p></div>`;
             }
-        }
-
-        async function likePost(postId, btn) {
-            if (!Auth.isAuthenticated()) { showToast('Увійдіть для лайку'); return; }
-            try {
-                if (!firebaseInitialized || !db) return;
-                const { doc, increment, updateDoc } =
-                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                await updateDoc(doc(db, 'community_posts', postId), { likes: increment(1) });
-                btn.classList.add('liked');
-            } catch(e) { console.warn(e); }
-        }
-
-        function copyText(encoded) {
-            try {
-                navigator.clipboard.writeText(decodeURIComponent(encoded));
-                showToast('✅ Скопійовано!');
-            } catch(e) {}
         }
 
         async function loadRatingPage() { initRatingPage(); }
