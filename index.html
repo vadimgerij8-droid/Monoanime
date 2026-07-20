@@ -4484,344 +4484,520 @@
         .app-container { padding-bottom: 90px !important; }
 
         
-        /* === Rating/Group Tabs === */
-        /* ====== RATING & GROUP PAGE ====== */
-        .rg-header {
-            padding: 1.2rem 1rem 0;
-            margin-bottom: 0.5rem;
-        }
-        .rg-header-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -0.03em;
-        }
-        .rg-header-title span { color: var(--accent); }
+        /* ═══════════════════════════════════════════════════════
+           RATING & COMMUNITY PAGE — повний редизайн
+           ═══════════════════════════════════════════════════════ */
 
-        .rg-tabs {
+        #ratingPageContainer {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            animation: fadeInUp 0.28s cubic-bezier(.2,.9,.2,1) both;
+        }
+        #ratingPageContainer.active { display: block; }
+
+        /* ── Page Header ── */
+        .rg-page-header {
+            padding: 1.4rem 1rem 0.8rem;
+            background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+        }
+        .rg-page-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .rg-page-title span { color: var(--accent); }
+        .rg-page-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted, #888);
+            margin-top: 0.3rem;
+        }
+
+        /* ── Main Tabs ── */
+        .rg-main-tabs {
             display: flex;
             gap: 0.5rem;
             padding: 0.8rem 1rem;
-            margin-bottom: 0;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
         }
-        .rg-tab {
+        .rg-main-tab {
             flex: 1;
-            padding: 0.65rem 0.5rem;
-            text-align: center;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            background: var(--tag-bg);
-            border: 1.5px solid transparent;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.35rem;
+            gap: 0.4rem;
+            padding: 0.65rem 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: var(--tag-bg, rgba(255,255,255,0.06));
+            border: 1.5px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
             letter-spacing: 0.01em;
         }
-        .rg-tab.active {
-            color: var(--accent-text);
+        .rg-main-tab svg { width:16px; height:16px; flex-shrink:0; }
+        .rg-main-tab.active {
+            color: var(--accent-text, #fff);
             background: var(--accent);
             border-color: var(--accent);
-            box-shadow: 0 4px 16px var(--accent-glow);
+            box-shadow: 0 4px 20px var(--accent-glow, rgba(139,92,246,.35));
         }
-        .dark-mode .rg-tab { background: rgba(255,255,255,0.06); }
-        .dark-mode .rg-tab.active { background: var(--accent); }
-        .rg-tab i { font-size: 0.85rem; }
-        .rg-tab-content { display: none; }
-        .rg-tab-content.active { display: block; }
+        .dark-mode .rg-main-tab { background: rgba(255,255,255,0.06); }
+        .dark-mode .rg-main-tab.active { background: var(--accent); }
 
-        /* === USER STATS CARD === */
+        .rg-tab-panel { display: none; }
+        .rg-tab-panel.active { display: block; }
+
+        /* ══════════════ RATING TAB ══════════════ */
+
+        /* My Stats Card */
         .rg-my-stats {
-            margin: 0 1rem 1.2rem;
+            margin: 1rem 1rem 0;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 1.1rem 1.2rem;
-            box-shadow: var(--shadow-sm);
-            animation: fadeInUp 0.3s ease both;
+            border-radius: 20px;
+            padding: 1.2rem 1.2rem 1rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
         }
         .rg-stats-top {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
         .rg-stats-avatar {
-            width: 48px; height: 48px;
+            width: 52px; height: 52px;
             border-radius: 50%;
-            background: var(--accent);
-            color: var(--accent-text);
+            overflow: hidden;
+            border: 2.5px solid var(--accent);
+            flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.3rem; font-weight: 800;
-            flex-shrink: 0; overflow: hidden;
+            background: var(--accent-dim, rgba(139,92,246,.15));
+            color: var(--accent);
         }
         .rg-stats-avatar img { width:100%; height:100%; object-fit:cover; }
-        .rg-stats-name {
-            font-size: 1rem; font-weight: 700; color: var(--text);
-        }
+        .rg-stats-name { font-size: 1rem; font-weight: 700; color: var(--text); }
         .rg-stats-rank-badge {
             display: inline-flex; align-items: center; gap: 0.3rem;
-            background: linear-gradient(135deg, #FFD700, #FF8C00);
-            color: #000; font-size: 0.7rem; font-weight: 800;
-            padding: 0.15rem 0.5rem; border-radius: 20px; margin-top: 0.2rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700;
+            color: #fff;
+            margin-top: 0.3rem;
         }
         .rg-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.6rem;
+            display: grid; grid-template-columns: repeat(3,1fr);
+            gap: 0.5rem;
         }
         .rg-stat-cell {
-            background: var(--tag-bg);
-            border-radius: var(--radius-sm);
-            padding: 0.65rem 0.5rem;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 0.7rem 0.5rem;
             text-align: center;
+            border: 1px solid var(--border);
         }
-        .dark-mode .rg-stat-cell { background: rgba(255,255,255,0.05); }
         .rg-stat-val {
-            font-size: 1.2rem; font-weight: 800; color: var(--text);
+            font-size: 1.3rem; font-weight: 900;
+            color: var(--text);
             line-height: 1;
         }
-        .rg-stat-val.gold { color: #FFD700; }
+        .rg-stat-val.gold { color: #F59E0B; }
         .rg-stat-label {
-            font-size: 0.68rem; color: var(--text-muted);
-            margin-top: 0.2rem; line-height: 1.2;
+            font-size: 0.65rem; color: var(--text-muted, #888);
+            margin-top: 0.3rem; line-height: 1.3;
         }
 
-        /* === ACHIEVEMENTS === */
+        /* Achievements */
         .rg-achievements {
-            margin: 0 1rem 1.2rem;
+            margin: 1rem 1rem 0;
         }
-        .rg-section-title {
-            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+        .rg-section-label {
+            font-size: 0.72rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.08em;
-            margin-bottom: 0.6rem; padding: 0 0.2rem;
+            color: var(--text-muted, #888);
+            padding: 0 0 0.6rem;
         }
         .rg-ach-scroll {
-            display: flex; gap: 0.6rem; overflow-x: auto;
-            padding-bottom: 0.3rem; scrollbar-width: none;
+            display: flex; gap: 0.6rem;
+            overflow-x: auto;
+            padding-bottom: 0.4rem;
+            scrollbar-width: none;
         }
         .rg-ach-scroll::-webkit-scrollbar { display: none; }
         .rg-ach-item {
             flex-shrink: 0;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-md);
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.3rem;
             padding: 0.7rem 0.8rem;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            min-width: 72px;
             text-align: center;
-            min-width: 80px;
             transition: all 0.2s;
         }
         .rg-ach-item.earned {
-            border-color: #FFD700;
-            box-shadow: 0 0 12px rgba(255,215,0,0.25);
+            border-color: var(--accent);
+            background: var(--accent-dim, rgba(139,92,246,.1));
+            box-shadow: 0 2px 12px var(--accent-glow, rgba(139,92,246,.2));
         }
-        .rg-ach-item.locked { opacity: 0.4; }
-        .rg-ach-icon { font-size: 1.6rem; display: block; margin-bottom: 0.3rem; }
-        .rg-ach-name { font-size: 0.68rem; font-weight: 600; color: var(--text); line-height: 1.2; }
-        .rg-ach-req { font-size: 0.62rem; color: var(--text-muted); margin-top: 0.15rem; }
+        .rg-ach-item.locked { opacity: 0.4; filter: grayscale(1); }
+        .rg-ach-icon { font-size: 1.4rem; }
+        .rg-ach-name { font-size: 0.65rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+        .rg-ach-req { font-size: 0.6rem; color: var(--text-muted, #888); }
 
-        /* === TOP TABS === */
-        .rg-top-tabs {
+        /* Leaderboard Sort Tabs */
+        .rg-sort-tabs {
             display: flex; gap: 0.4rem;
-            padding: 0 1rem 0.7rem;
-            overflow-x: auto; scrollbar-width: none;
+            padding: 1rem 1rem 0.6rem;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
-        .rg-top-tabs::-webkit-scrollbar { display: none; }
-        .rg-top-tab {
+        .rg-sort-tabs::-webkit-scrollbar { display: none; }
+        .rg-sort-tab {
             flex-shrink: 0;
             padding: 0.4rem 0.9rem;
-            border-radius: 20px;
-            font-size: 0.78rem; font-weight: 600;
-            cursor: pointer;
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--text-secondary);
+            background: var(--tag-bg, rgba(255,255,255,0.06));
             border: 1.5px solid var(--border);
-            background: none; color: var(--text-muted);
+            border-radius: 20px;
+            cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
         }
-        .rg-top-tab.active {
-            background: var(--accent); color: var(--accent-text);
+        .rg-sort-tab.active {
+            color: var(--accent);
             border-color: var(--accent);
+            background: var(--accent-dim, rgba(139,92,246,.12));
         }
 
-        /* === LEADERBOARD === */
-        .rg-leaderboard { padding: 0 0 1rem; }
+        /* Leaderboard Section Title */
+        .rg-lb-title {
+            padding: 0 1rem 0.6rem;
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted, #888);
+        }
+
+        /* Podium */
         .rg-podium {
             display: flex; align-items: flex-end; justify-content: center;
-            gap: 0.6rem; padding: 1rem 1rem 1.5rem;
+            gap: 0.8rem;
+            padding: 1rem 1rem 0.5rem;
         }
         .rg-podium-item {
-            flex: 1; max-width: 110px;
             display: flex; flex-direction: column; align-items: center;
-            text-align: center;
+            gap: 0.4rem; flex: 1; max-width: 110px;
         }
+        .rg-podium-crown { font-size: 1.6rem; }
+        .rg-podium-item.p1 .rg-podium-crown { font-size: 2rem; }
         .rg-podium-avatar {
-            border-radius: 50%; object-fit: cover;
-            background: var(--tag-bg);
+            width: 54px; height: 54px; border-radius: 50%;
+            overflow: hidden; border: 3px solid var(--border);
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; color: var(--accent-text);
-            overflow: hidden; flex-shrink: 0;
-            border: 3px solid transparent;
+            font-size: 1.3rem; font-weight: 800;
+            background: var(--surface);
+            color: var(--accent);
         }
-        .rg-podium-item.p1 .rg-podium-avatar { width:64px; height:64px; font-size:1.4rem; border-color:#FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.4); }
-        .rg-podium-item.p2 .rg-podium-avatar { width:52px; height:52px; font-size:1.1rem; border-color:#C0C0C0; }
-        .rg-podium-item.p3 .rg-podium-avatar { width:48px; height:48px; font-size:1rem; border-color:#CD7F32; }
-        .rg-podium-crown { font-size: 1.4rem; margin-bottom: 0.2rem; }
+        .rg-podium-item.p1 .rg-podium-avatar {
+            width: 68px; height: 68px;
+            border-color: #F59E0B;
+            box-shadow: 0 0 20px rgba(245,158,11,.4);
+        }
+        .rg-podium-item.p2 .rg-podium-avatar { border-color: #94A3B8; }
+        .rg-podium-item.p3 .rg-podium-avatar { border-color: #B45309; }
+        .rg-podium-avatar img { width:100%; height:100%; object-fit:cover; }
         .rg-podium-name {
-            font-size: 0.78rem; font-weight: 700; color: var(--text);
-            margin-top: 0.4rem; max-width: 100%;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: 0.72rem; font-weight: 700; color: var(--text);
+            text-align: center; max-width: 90px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .rg-podium-score {
-            font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem;
+        .rg-podium-score { font-size: 0.8rem; font-weight: 800; color: var(--accent); }
+        .rg-podium-bar {
+            width: 100%; border-radius: 8px 8px 0 0;
+            background: var(--tag-bg, rgba(255,255,255,0.06));
+            border: 1px solid var(--border);
         }
-        .rg-podium-place {
-            width:100%; padding: 0.35rem;
-            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-            font-size: 0.75rem; font-weight: 800;
-            text-align: center; margin-top: 0.5rem;
-        }
-        .rg-podium-item.p1 .rg-podium-place { background: linear-gradient(135deg,#FFD700,#FF8C00); color:#000; }
-        .rg-podium-item.p2 .rg-podium-place { background: linear-gradient(135deg,#C0C0C0,#808080); color:#000; }
-        .rg-podium-item.p3 .rg-podium-place { background: linear-gradient(135deg,#CD7F32,#8B4513); color:#fff; }
+        .rg-podium-item.p1 .rg-podium-bar { height: 50px; background: linear-gradient(180deg,rgba(245,158,11,.2),transparent); border-color: rgba(245,158,11,.3); }
+        .rg-podium-item.p2 .rg-podium-bar { height: 34px; }
+        .rg-podium-item.p3 .rg-podium-bar { height: 22px; }
 
-        .rg-list { padding: 0 1rem; }
-        .rg-list-item {
-            display: flex; align-items: center; gap: 0.8rem;
-            padding: 0.65rem 0.8rem; margin-bottom: 0.4rem;
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            transition: all 0.18s; cursor: default;
+        /* List */
+        .rg-lb-list { padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .rg-lb-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 0.9rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            transition: all 0.15s;
         }
-        .rg-list-item.is-me {
+        .rg-lb-item.is-me {
             border-color: var(--accent);
-            background: var(--accent-light);
+            background: var(--accent-dim, rgba(139,92,246,.08));
         }
-        .rg-list-num {
-            font-size: 0.85rem; font-weight: 800;
-            color: var(--text-muted); min-width: 1.5rem; text-align: center;
+        .rg-lb-num {
+            width: 24px; font-size: 0.78rem; font-weight: 800;
+            color: var(--text-muted, #888); text-align: center; flex-shrink: 0;
         }
-        .rg-list-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: var(--accent); color: var(--accent-text);
+        .rg-lb-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            overflow: hidden; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem; font-weight: 800;
-            flex-shrink: 0; overflow: hidden;
+            font-size: 1rem; font-weight: 800;
+            background: var(--accent-dim, rgba(139,92,246,.15));
+            color: var(--accent);
         }
-        .rg-list-avatar img { width:100%; height:100%; object-fit:cover; }
-        .rg-list-info { flex: 1; min-width: 0; }
-        .rg-list-name { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .rg-list-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
-        .rg-list-score { font-size: 0.85rem; font-weight: 800; color: var(--text); white-space: nowrap; }
-        .rg-list-score .unit { font-size: 0.65rem; color: var(--text-muted); }
+        .rg-lb-avatar img { width:100%; height:100%; object-fit:cover; }
+        .rg-lb-info { flex: 1; min-width: 0; }
+        .rg-lb-name {
+            font-size: 0.88rem; font-weight: 700; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .rg-lb-rank { font-size: 0.7rem; font-weight: 600; margin-top: 0.1rem; }
+        .rg-lb-score {
+            font-size: 0.9rem; font-weight: 800; color: var(--text);
+            flex-shrink: 0; text-align: right;
+        }
+        .rg-lb-score .unit { font-size: 0.65rem; font-weight: 500; color: var(--text-muted,#888); margin-left: 2px; }
 
-        /* === GROUP PAGE === */
-        .rg-group-header {
-            margin: 0 1rem 1rem;
-            background: var(--accent-gradient);
-            border-radius: var(--radius-lg);
-            padding: 1.2rem;
-            position: relative; overflow: hidden;
+        /* Leaderboard loading/empty */
+        .rg-lb-loader { padding: 2rem; text-align: center; color: var(--text-muted,#888); }
+        .rg-lb-empty {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.6rem; padding: 2.5rem 1rem;
+            color: var(--text-muted, #888); text-align: center;
         }
-        .rg-group-header::before {
-            content: ''; position: absolute; inset: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-        .rg-group-title {
-            font-size: 1.2rem; font-weight: 800; color: #fff;
+        .rg-lb-empty svg { width:40px; height:40px; opacity:0.25; }
+        .rg-lb-empty p { font-size: 0.85rem; max-width: 220px; line-height: 1.5; }
+
+        /* ══════════════ COMMUNITY TAB ══════════════ */
+
+        /* Hero */
+        .com-hero {
+            margin: 1rem 1rem 0;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim,#7c3aed) 100%);
+            border-radius: 20px;
+            padding: 1.3rem 1.4rem;
             position: relative;
+            overflow: hidden;
         }
-        .rg-group-desc {
-            font-size: 0.82rem; color: rgba(255,255,255,0.75);
-            margin-top: 0.3rem; position: relative;
+        .com-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
         }
-        .rg-group-members {
-            display: flex; align-items: center; gap: 0.4rem;
-            margin-top: 0.7rem; position: relative;
+        .com-hero-title {
+            font-size: 1.2rem; font-weight: 900;
+            color: #fff; letter-spacing: -0.03em;
         }
-        .rg-group-member-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #4ade80; box-shadow: 0 0 6px #4ade80;
+        .com-hero-sub { font-size: 0.78rem; color: rgba(255,255,255,0.75); margin-top: 0.3rem; }
+        .com-hero-stats {
+            display: flex; gap: 1rem; margin-top: 0.9rem;
         }
-        .rg-group-members-text {
-            font-size: 0.75rem; color: rgba(255,255,255,0.8);
+        .com-hero-stat { display: flex; align-items: center; gap: 0.35rem; }
+        .com-hero-stat-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse-dot 2s infinite;
         }
+        @keyframes pulse-dot {
+            0%,100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.7; }
+        }
+        .com-hero-stat-text { font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 600; }
 
-        .group-wall { padding: 0 1rem 6rem; }
-        .group-post-box {
+        /* Post Types (share buttons) */
+        .com-post-types {
+            display: flex; gap: 0.5rem;
+            padding: 0.8rem 1rem 0;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .com-post-types::-webkit-scrollbar { display: none; }
+        .com-post-type-btn {
+            flex-shrink: 0;
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.78rem; font-weight: 700;
             background: var(--surface);
             border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0.9rem;
-            margin-bottom: 1rem;
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .com-post-type-btn:hover,
+        .com-post-type-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim, rgba(139,92,246,.08));
+        }
+        .com-post-type-btn svg { width:14px; height:14px; }
+
+        /* Compose Box */
+        .com-compose {
+            margin: 0.8rem 1rem 0;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            padding: 1rem;
             transition: border-color 0.2s;
         }
-        .group-post-box:focus-within { border-color: var(--accent); }
-        .group-post-box textarea {
-            width: 100%; min-height: 70px;
-            background: transparent; border: none;
-            color: var(--text); font-size: 0.9rem;
-            resize: none; outline: none;
-            font-family: inherit; line-height: 1.5;
-        }
-        .group-post-box textarea::placeholder { color: var(--text-muted); }
-        .group-post-footer {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-top: 0.5rem;
-        }
-        .group-post-chars { font-size: 0.72rem; color: var(--text-muted); }
-        .group-post-btn {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.5rem 1.1rem;
-            background: var(--accent); color: var(--accent-text);
-            border: none; border-radius: var(--radius-sm);
-            font-size: 0.82rem; font-weight: 700;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .group-post-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-        .group-post-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        .group-msg {
-            display: flex; gap: 0.65rem;
-            padding: 0.85rem 0;
-            border-bottom: 1px solid var(--border-light);
-            animation: fadeInUp 0.2s ease both;
-        }
-        .group-msg:last-child { border-bottom: none; }
-        .group-msg-avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: var(--accent); color: var(--accent-text);
+        .com-compose:focus-within { border-color: var(--accent); }
+        .com-compose-row { display: flex; gap: 0.7rem; align-items: flex-start; }
+        .com-compose-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            overflow: hidden; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 0.85rem;
-            flex-shrink: 0; overflow: hidden;
+            font-size: 0.9rem; font-weight: 800;
+            background: var(--accent-dim, rgba(139,92,246,.15));
+            color: var(--accent);
+            border: 2px solid var(--accent);
         }
-        .group-msg-avatar img { width:100%; height:100%; object-fit:cover; }
-        .group-msg-body { flex: 1; min-width: 0; }
-        .group-msg-header {
-            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;
+        .com-compose-avatar img { width:100%; height:100%; object-fit:cover; }
+        .com-compose textarea {
+            flex: 1; background: transparent;
+            border: none; outline: none; resize: none;
+            color: var(--text); font-size: 0.9rem;
+            font-family: inherit; min-height: 60px; max-height: 140px;
+            line-height: 1.5;
         }
-        .group-msg-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
-        .group-msg-time { font-size: 0.68rem; color: var(--text-muted); }
-        .group-msg-text {
-            font-size: 0.87rem; color: var(--text-secondary);
-            line-height: 1.5; word-break: break-word;
+        .com-compose textarea::placeholder { color: var(--text-muted,#888); }
+        .com-compose-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 0.7rem; padding-top: 0.7rem;
+            border-top: 1px solid var(--border);
         }
-        .group-msg-empty {
-            text-align: center; padding: 3rem 1rem; color: var(--text-muted);
+        .com-compose-counter { font-size: 0.72rem; color: var(--text-muted,#888); }
+        .com-compose-counter.warn { color: #EF4444; }
+        .com-send-btn {
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.82rem; font-weight: 700;
+            background: var(--accent); color: var(--accent-text,#fff);
+            border: none; border-radius: 20px; cursor: pointer;
+            transition: all 0.2s;
         }
-        .group-msg-empty i { font-size: 2.5rem; margin-bottom: 0.7rem; display: block; opacity: 0.4; }
-        .group-login-prompt {
-            text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);
+        .com-send-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .com-send-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+        .com-send-btn svg { width:14px; height:14px; }
+
+        /* Login prompt */
+        .com-login-prompt {
+            margin: 1.5rem 1rem;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.8rem; padding: 2rem;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 20px;
+            text-align: center;
         }
-        .group-login-prompt i { font-size: 2rem; display: block; margin-bottom: 0.7rem; opacity: 0.5; }
-        .group-login-btn {
+        .com-login-prompt svg { width:40px; height:40px; color: var(--text-muted,#888); opacity:0.5; }
+        .com-login-prompt p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+        .com-login-btn {
             display: inline-flex; align-items: center; gap: 0.4rem;
-            margin-top: 0.8rem; padding: 0.6rem 1.4rem;
-            background: var(--accent); color: var(--accent-text);
-            border: none; border-radius: var(--radius-sm);
+            padding: 0.6rem 1.5rem;
+            background: var(--accent); color: var(--accent-text,#fff);
+            border: none; border-radius: 20px;
             font-size: 0.88rem; font-weight: 700; cursor: pointer;
         }
+
+        /* Posts Feed */
+        .com-feed { padding: 1rem 1rem 0; display: flex; flex-direction: column; gap: 0.8rem; }
+
+        .com-post {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1rem;
+            transition: border-color 0.2s;
+            animation: fadeInUp 0.2s ease both;
+        }
+        .com-post.mine { border-color: rgba(139,92,246,.3); }
+        .com-post-head { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.7rem; }
+        .com-post-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            overflow: hidden; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 800;
+            background: var(--accent-dim, rgba(139,92,246,.15));
+            color: var(--accent);
+        }
+        .com-post-avatar img { width:100%; height:100%; object-fit:cover; }
+        .com-post-meta { flex: 1; min-width: 0; }
+        .com-post-name {
+            font-size: 0.82rem; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .com-post-me-badge {
+            font-size: 0.6rem; padding: 0.1rem 0.4rem;
+            background: var(--accent); color: var(--accent-text,#fff);
+            border-radius: 10px; font-weight: 800;
+        }
+        .com-post-time { font-size: 0.7rem; color: var(--text-muted,#888); margin-top: 0.1rem; }
+        .com-post-text {
+            font-size: 0.88rem; color: var(--text);
+            line-height: 1.6; word-break: break-word;
+        }
+        .com-post-actions {
+            display: flex; align-items: center; gap: 0.8rem;
+            margin-top: 0.8rem; padding-top: 0.7rem;
+            border-top: 1px solid var(--border);
+        }
+        .com-post-action {
+            display: flex; align-items: center; gap: 0.35rem;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--text-muted,#888);
+            background: none; border: none; cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .com-post-action:hover { color: var(--accent); background: var(--accent-dim, rgba(139,92,246,.08)); }
+        .com-post-action.liked { color: #EF4444; }
+        .com-post-action.liked:hover { color: #EF4444; }
+        .com-post-action svg { width:14px; height:14px; }
+
+        /* Achievement share card in post */
+        .com-ach-card {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 0.5rem 0.8rem;
+            background: linear-gradient(135deg, var(--accent-dim, rgba(139,92,246,.15)), transparent);
+            border: 1px solid var(--accent);
+            border-radius: 12px; margin-bottom: 0.5rem;
+        }
+        .com-ach-card-icon { font-size: 1.4rem; }
+        .com-ach-card-text { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
+
+        /* Feed loading / empty */
+        .com-feed-loader, .com-feed-empty {
+            padding: 2.5rem 1rem;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.7rem; text-align: center; color: var(--text-muted,#888);
+        }
+        .com-feed-empty svg { width:44px; height:44px; opacity:0.2; }
+        .com-feed-empty p { font-size: 0.85rem; max-width: 220px; line-height: 1.5; }
+
+        .rg-empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.6rem; padding: 2.5rem 1rem;
+            color: var(--text-muted, #888); text-align: center;
+        }
+        .rg-empty-state svg { width:40px; height:40px; opacity:0.25; }
+        .rg-empty-state p { font-size: 0.85rem; max-width: 220px; line-height: 1.5; }
 
 </style>
 </head>
@@ -7039,7 +7215,7 @@
                     container.style.display = 'block';
                     container.classList.add('active');
                 }
-                loadRatingPage();
+                initRatingPage();
             },
 
             goTo(route, params = {}) {
@@ -7074,12 +7250,88 @@
             return { label: 'Новачок', color: '#6B7280' };
         }
 
-        async function loadRatingPage() {
-            const container = document.getElementById('rgRatingContent');
-            if (!container) return;
-            container.dataset.loaded = '1';
+        // ─────────────────────────────────────────────────
+        //  RATING PAGE — ініціалізація структури
+        // ─────────────────────────────────────────────────
+        function initRatingPage() {
+            const wrap = document.getElementById('ratingPageContainer');
+            if (!wrap || wrap.dataset.init) return;
+            wrap.dataset.init = '1';
 
-            // --- Статистика поточного користувача ---
+            wrap.innerHTML = `
+                <div class="rg-page-header">
+                    <div class="rg-page-title">VAKDAB <span>Спільнота</span></div>
+                    <div class="rg-page-sub">Рейтинг переглядачів та чат спільноти</div>
+                </div>
+
+                <div class="rg-main-tabs" id="rgMainTabs">
+                    <button class="rg-main-tab active" data-panel="rating">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Рейтинг
+                    </button>
+                    <button class="rg-main-tab" data-panel="community">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Суспільне
+                    </button>
+                </div>
+
+                <div class="rg-tab-panel active" id="rgPanelRating">
+                    <div id="rgMyStats"></div>
+                    <div id="rgAchievements"></div>
+                    <div class="rg-sort-tabs" id="rgSortTabs">
+                        <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
+                        <button class="rg-sort-tab" data-sort="hours">За годинами</button>
+                        <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
+                    </div>
+                    <div class="rg-lb-title">🌍 Глобальний рейтинг</div>
+                    <div id="rgLeaderboard" class="rg-lb-loader">
+                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+                    </div>
+                </div>
+
+                <div class="rg-tab-panel" id="rgPanelCommunity">
+                    <div id="rgCommunityContent"></div>
+                </div>
+            `;
+
+            // Таб світчер
+            wrap.querySelectorAll('.rg-main-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wrap.querySelectorAll('.rg-main-tab').forEach(b => b.classList.remove('active'));
+                    wrap.querySelectorAll('.rg-tab-panel').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    const panel = wrap.querySelector(`#rgPanel${btn.dataset.panel.charAt(0).toUpperCase()+btn.dataset.panel.slice(1)}`);
+                    if (panel) panel.classList.add('active');
+
+                    if (btn.dataset.panel === 'community') loadCommunity();
+                    if (btn.dataset.panel === 'rating') { loadMyStats(); loadLeaderboard(currentLbSort); }
+                });
+            });
+
+            // Sort tabs
+            wrap.querySelectorAll('.rg-sort-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wrap.querySelectorAll('.rg-sort-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentLbSort = btn.dataset.sort;
+                    loadLeaderboard(currentLbSort);
+                });
+            });
+
+            loadMyStats();
+            loadLeaderboard('episodes');
+        }
+
+        let currentLbSort = 'episodes';
+
+        // ─────────────────────────────────────────────────
+        //  My Stats + Achievements
+        // ─────────────────────────────────────────────────
+        function loadMyStats() {
+            const statsEl = document.getElementById('rgMyStats');
+            const achEl = document.getElementById('rgAchievements');
+            if (!statsEl || !achEl) return;
+
             const profile = getProfile();
             const history = Storage.getHistory() || [];
             const bookmarks = Storage.getBookmarks() || [];
@@ -7087,20 +7339,18 @@
             const watchHours = Math.round(watchTimeSec / 3600 * 10) / 10;
             const episodes = history.length;
             const rankInfo = getUserRankInfo(episodes, watchHours);
-
             const achStats = { episodes, watchTime: watchTimeSec, bookmarks: bookmarks.length };
             const earnedAch = ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need);
             const earnedIds = new Set(earnedAch.map(a => a.id));
 
-            const avatarHtml = profile.avatar
+            const avHtml = profile.avatar
                 ? `<img src="${profile.avatar}" alt="">`
                 : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
 
-            // --- Рендеримо My Stats картку ---
-            let statsHtml = `
+            statsEl.innerHTML = `
                 <div class="rg-my-stats">
                     <div class="rg-stats-top">
-                        <div class="rg-stats-avatar">${avatarHtml}</div>
+                        <div class="rg-stats-avatar">${avHtml}</div>
                         <div>
                             <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
                             <div class="rg-stats-rank-badge" style="background:linear-gradient(135deg,${rankInfo.color},${rankInfo.color}99);">
@@ -7111,72 +7361,53 @@
                     <div class="rg-stats-grid">
                         <div class="rg-stat-cell">
                             <div class="rg-stat-val">${episodes}</div>
-                            <div class="rg-stat-label">Серій<br>переглянуто</div>
+                            <div class="rg-stat-label">Серій переглянуто</div>
                         </div>
                         <div class="rg-stat-cell">
                             <div class="rg-stat-val gold">${watchHours}</div>
-                            <div class="rg-stat-label">Годин<br>переглянуто</div>
+                            <div class="rg-stat-label">Годин переглянуто</div>
                         </div>
                         <div class="rg-stat-cell">
                             <div class="rg-stat-val">${earnedAch.length}</div>
-                            <div class="rg-stat-label">Досягнень<br>отримано</div>
+                            <div class="rg-stat-label">Досягнень отримано</div>
                         </div>
                     </div>
                 </div>
             `;
 
-            // --- Досягнення ---
-            let achHtml = `<div class="rg-achievements">
-                <div class="rg-section-title">🏆 Досягнення</div>
-                <div class="rg-ach-scroll">`;
-            ACHIEVEMENTS.forEach(a => {
+            let achItemsHtml = ACHIEVEMENTS.map(a => {
                 const earned = earnedIds.has(a.id);
-                achHtml += `<div class="rg-ach-item ${earned ? 'earned' : 'locked'}" title="${a.req}">
+                return `<div class="rg-ach-item ${earned ? 'earned' : 'locked'}" title="${a.req}">
                     <span class="rg-ach-icon">${a.icon}</span>
                     <div class="rg-ach-name">${a.name}</div>
                     <div class="rg-ach-req">${a.req}</div>
                 </div>`;
-            });
-            achHtml += `</div></div>`;
+            }).join('');
 
-            // --- Топ таби ---
-            const topTabsHtml = `
-                <div class="rg-top-tabs">
-                    <button class="rg-top-tab active" data-tt="episodes">За серіями</button>
-                    <button class="rg-top-tab" data-tt="hours">За годинами</button>
-                    <button class="rg-top-tab" data-tt="bookmarks">За закладками</button>
+            achEl.innerHTML = `
+                <div class="rg-achievements">
+                    <div class="rg-section-label">🏆 Досягнення</div>
+                    <div class="rg-ach-scroll">${achItemsHtml}</div>
                 </div>
             `;
-
-            // --- Leaderboard placeholder (Firestore) ---
-            const lbHtml = `<div class="rg-leaderboard" id="rgLeaderboard">
-                <div class="loader" style="padding:2rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>
-            </div>`;
-
-            container.innerHTML = statsHtml + achHtml + `<div class="rg-section-title" style="padding:0 1rem 0.5rem;">🌍 Глобальний рейтинг</div>` + topTabsHtml + lbHtml;
-
-            // Tab switching
-            container.querySelectorAll('.rg-top-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    container.querySelectorAll('.rg-top-tab').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    loadLeaderboard(btn.dataset.tt);
-                });
-            });
-
-            loadLeaderboard('episodes');
         }
 
-        async function loadLeaderboard(sortBy) {
+        // ─────────────────────────────────────────────────
+        //  Leaderboard
+        // ─────────────────────────────────────────────────
+        async function loadLeaderboard(sortBy = 'episodes') {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
-            lb.innerHTML = '<div class="loader" style="padding:1.5rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>';
+            lb.innerHTML = `<div class="rg-lb-loader">
+                <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+            </div>`;
+
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
-                const fieldMap = { episodes: 'history', hours: 'watchTime', bookmarks: 'bookmarks' };
-                const { collection: col, query: q, orderBy: ob, limit: lim, getDocs } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                const snap = await getDocs(q(col(db, 'users'), ob('watchTime', 'desc'), lim(50)));
+                const { collection, query, orderBy, limit, getDocs } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
 
+                const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
                 let users = [];
                 snap.forEach(d => {
                     const data = d.data();
@@ -7191,203 +7422,308 @@
                     });
                 });
 
-                // Сортуємо
                 const sortField = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
                 users.sort((a, b) => b[sortField] - a[sortField]);
                 users = users.slice(0, 20);
 
+                if (!users.length) {
+                    lb.innerHTML = `<div class="rg-lb-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                        <p>Рейтинг з'явиться після того, як більше користувачів зареєструється</p>
+                    </div>`;
+                    return;
+                }
+
                 const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
                 const unitMap = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
                 const unit = unitMap[sortBy] || '';
-
                 let html = '';
 
-                // Подіум топ 3
+                // Podium top-3
                 if (users.length >= 3) {
-                    const order = [users[1], users[0], users[2]]; // 2-1-3
-                    const classes = ['p2', 'p1', 'p3'];
+                    const order = [users[1], users[0], users[2]];
+                    const cls = ['p2', 'p1', 'p3'];
                     const crowns = ['🥈', '👑', '🥉'];
-                    const places = ['2', '1', '3'];
                     html += '<div class="rg-podium">';
                     order.forEach((u, i) => {
-                        const cls = classes[i];
-                        const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name[0].toUpperCase();
-                        const val = u[sortField];
-                        html += `<div class="rg-podium-item ${cls}">
+                        const av = u.avatar
+                            ? `<img src="${u.avatar}" alt="">`
+                            : `<span>${u.name[0].toUpperCase()}</span>`;
+                        html += `<div class="rg-podium-item ${cls[i]}">
                             <div class="rg-podium-crown">${crowns[i]}</div>
-                            <div class="rg-podium-avatar">${typeof av === 'string' && av.length > 1 ? av : `<span>${av}</span>`}</div>
+                            <div class="rg-podium-avatar">${av}</div>
                             <div class="rg-podium-name">${u.name}</div>
-                            <div class="rg-podium-score">${val} ${unit}</div>
-                            <div class="rg-podium-place"># ${places[i]}</div>
+                            <div class="rg-podium-score">${u[sortField]} ${unit}</div>
+                            <div class="rg-podium-bar"></div>
                         </div>`;
                     });
                     html += '</div>';
                 }
 
-                // Список 4-20
-                html += '<div class="rg-list">';
+                // List 4-20
+                html += '<div class="rg-lb-list">';
                 users.slice(3).forEach((u, i) => {
                     const rank = i + 4;
                     const isMe = u.uid === myUid;
-                    const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name[0].toUpperCase();
-                    const val = u[sortField];
-                    const rankInfo = getUserRankInfo(u.episodes, u.hours);
-                    html += `<div class="rg-list-item ${isMe ? 'is-me' : ''}">
-                        <div class="rg-list-num">${rank}</div>
-                        <div class="rg-list-avatar">${typeof av === 'string' && av.length > 1 ? av : `<span>${av}</span>`}</div>
-                        <div class="rg-list-info">
-                            <div class="rg-list-name">${u.name}${isMe ? ' <span style="color:var(--accent);font-size:0.7rem;">● ти</span>' : ''}</div>
-                            <div class="rg-list-sub" style="color:${rankInfo.color}">${rankInfo.label}</div>
+                    const av = u.avatar
+                        ? `<img src="${u.avatar}" alt="">`
+                        : `<span>${u.name[0].toUpperCase()}</span>`;
+                    const ri = getUserRankInfo(u.episodes, u.hours);
+                    html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}">
+                        <div class="rg-lb-num">${rank}</div>
+                        <div class="rg-lb-avatar">${av}</div>
+                        <div class="rg-lb-info">
+                            <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:.65rem;color:var(--accent)">● ти</span>' : ''}</div>
+                            <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
                         </div>
-                        <div class="rg-list-score">${val} <span class="unit">${unit}</span></div>
+                        <div class="rg-lb-score">${u[sortField]} <span class="unit">${unit}</span></div>
                     </div>`;
                 });
                 html += '</div>';
 
-                lb.innerHTML = html || '<div class="group-msg-empty"><i class="fas fa-ghost"></i><p>Поки нікого немає</p></div>';
+                lb.innerHTML = html;
             } catch(e) {
                 console.warn('Leaderboard error:', e);
-                // Показуємо заглушку якщо Firebase недоступний
-                lb.innerHTML = `<div class="group-msg-empty"><i class="fas fa-users" style="opacity:0.3"></i><p style="font-size:0.85rem;">Глобальний рейтинг з'явиться після того, як більше користувачів зареєструється</p></div>`;
+                lb.innerHTML = `<div class="rg-lb-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                    <p>Глобальний рейтинг з'явиться після реєстрації користувачів</p>
+                </div>`;
             }
         }
 
-        async function loadRatingList() { return loadRatingPage(); }
+        // ─────────────────────────────────────────────────
+        //  Community Page
+        // ─────────────────────────────────────────────────
+        let comUnsub = null;
 
-        // === Group wall (Firestore) ===
-        let groupUnsub = null;
-        async function loadGroupWall() {
-            const container = document.getElementById('rgGroupContent');
-            if (!container) return;
-            container.dataset.loaded = '1';
+        async function loadCommunity() {
+            const el = document.getElementById('rgCommunityContent');
+            if (!el || el.dataset.loaded) return;
+            el.dataset.loaded = '1';
 
             const user = Auth.isAuthenticated() ? Auth._user : null;
+            const profile = getProfile();
+            const avHtml = profile.avatar
+                ? `<img src="${profile.avatar}" alt="">`
+                : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
 
-            // Шапка групи
-            let headerHtml = `
-                <div class="rg-group-header">
-                    <div class="rg-group-title">💬 Спільнота VAKDAB</div>
-                    <div class="rg-group-desc">Обговорюйте аніме, діліться враженнями з іншими глядачами</div>
-                    <div class="rg-group-members">
-                        <div class="rg-group-member-dot"></div>
-                        <div class="rg-group-members-text">Спільнота активна</div>
+            el.innerHTML = `
+                <div class="com-hero">
+                    <div class="com-hero-title">Суспільне VAKDAB</div>
+                    <div class="com-hero-sub">Спілкуйся, ділись аніме та досягненнями</div>
+                    <div class="com-hero-stats">
+                        <div class="com-hero-stat">
+                            <div class="com-hero-stat-dot"></div>
+                            <div class="com-hero-stat-text">Спільнота активна</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${user ? `
+                <div class="com-post-types">
+                    <button class="com-post-type-btn active" data-type="text">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Думка
+                    </button>
+                    <button class="com-post-type-btn" data-type="anime">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                        Рекомендую аніме
+                    </button>
+                    <button class="com-post-type-btn" data-type="ach">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                        Досягнення
+                    </button>
+                </div>
+
+                <div class="com-compose" id="comCompose">
+                    <div class="com-compose-row">
+                        <div class="com-compose-avatar">${avHtml}</div>
+                        <textarea id="comInput" placeholder="Поділися думкою про аніме..." maxlength="500"></textarea>
+                    </div>
+                    <div class="com-compose-footer">
+                        <span class="com-compose-counter" id="comCounter">500</span>
+                        <button class="com-send-btn" id="comSendBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Надіслати
+                        </button>
+                    </div>
+                </div>
+                ` : `
+                <div class="com-login-prompt">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                    <p>Увійдіть в акаунт, щоб бачити та писати в спільноті</p>
+                    <button class="com-login-btn" onclick="Router.goTo('profile')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        Увійти
+                    </button>
+                </div>
+                `}
+
+                <div class="com-feed" id="comFeed">
+                    <div class="com-feed-loader">
+                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
                     </div>
                 </div>
             `;
 
-            if (!user) {
-                container.innerHTML = headerHtml + `
-                    <div class="group-login-prompt">
-                        <i class="fas fa-user-lock"></i>
-                        <p>Увійдіть в акаунт, щоб бачити та писати в спільноті</p>
-                        <button class="group-login-btn" onclick="Router.goTo('profile')">
-                            <i class="fas fa-sign-in-alt"></i> Увійти
-                        </button>
-                    </div>`;
-                return;
+            // Post type switcher
+            let postType = 'text';
+            el.querySelectorAll('.com-post-type-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    el.querySelectorAll('.com-post-type-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    postType = btn.dataset.type;
+                    const inp = document.getElementById('comInput');
+                    if (!inp) return;
+                    const placeholders = {
+                        text: 'Поділися думкою про аніме...',
+                        anime: 'Яке аніме рекомендуєш? Напиши назву та чому...',
+                        ach: 'Розкажи про своє досягнення!'
+                    };
+                    inp.placeholder = placeholders[postType] || placeholders.text;
+                });
+            });
+
+            // Counter
+            const inp = document.getElementById('comInput');
+            const counter = document.getElementById('comCounter');
+            if (inp && counter) {
+                inp.addEventListener('input', () => {
+                    const left = 500 - inp.value.length;
+                    counter.textContent = left;
+                    counter.classList.toggle('warn', left < 50);
+                });
             }
 
-            const profile = getProfile();
-            const avatarHtml = profile.avatar
-                ? `<img src="${profile.avatar}" alt="">`
-                : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
-
-            container.innerHTML = headerHtml + `<div class="group-wall">
-                <div class="group-post-box">
-                    <div style="display:flex;gap:0.6rem;align-items:flex-start;">
-                        <div class="group-msg-avatar" style="flex-shrink:0;">${avatarHtml}</div>
-                        <textarea id="groupPostInput" placeholder="Поділіться думкою про аніме..." maxlength="500" 
-                            oninput="document.getElementById('groupPostChars').textContent = 500 - this.value.length"></textarea>
-                    </div>
-                    <div class="group-post-footer">
-                        <span class="group-post-chars" id="groupPostChars">500</span>
-                        <button class="group-post-btn" id="groupPostBtn">
-                            <i class="fas fa-paper-plane"></i> Надіслати
-                        </button>
-                    </div>
-                </div>
-                <div id="groupMessages">
-                    <div class="loader" style="padding:1.5rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>
-                </div>
-            </div>`;
-
-            // Відправка повідомлення
-            const postBtn = document.getElementById('groupPostBtn');
-            const postInput = document.getElementById('groupPostInput');
-            if (postBtn) {
-                postBtn.addEventListener('click', async () => {
-                    const text = postInput.value.trim();
+            // Send
+            const sendBtn = document.getElementById('comSendBtn');
+            if (sendBtn && user) {
+                sendBtn.addEventListener('click', async () => {
+                    const text = inp?.value.trim();
                     if (!text || text.length < 2) { showToast('Введіть повідомлення'); return; }
-                    postBtn.disabled = true;
-                    postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+                    sendBtn.disabled = true;
+                    sendBtn.innerHTML = '<svg style="width:14px;height:14px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>';
                     try {
                         if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
-                        const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                        const currentUser = Auth._user;
+                        const { addDoc, collection, serverTimestamp } =
+                            await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                         const p = getProfile();
-                        await addDoc(collection(db, 'group_posts'), {
+                        await addDoc(collection(db, 'community_posts'), {
                             text,
-                            uid: currentUser.uid,
-                            authorName: p.nickname || currentUser.displayName || currentUser.email?.split('@')[0] || 'Аніматор',
-                            authorPhoto: p.avatar || currentUser.photoURL || '',
+                            type: postType,
+                            uid: user.uid,
+                            authorName: p.nickname || user.displayName || user.email?.split('@')[0] || 'Аніматор',
+                            authorPhoto: p.avatar || user.photoURL || '',
+                            likes: 0,
                             createdAt: serverTimestamp()
                         });
-                        postInput.value = '';
-                        document.getElementById('groupPostChars').textContent = '500';
-                        showToast('✅ Повідомлення надіслано!');
-                    } catch (e) {
+                        if (inp) { inp.value = ''; counter.textContent = '500'; counter.classList.remove('warn'); }
+                        showToast('✅ Опубліковано!');
+                    } catch(e) {
                         showToast('Помилка: ' + e.message);
                     } finally {
-                        postBtn.disabled = false;
-                        postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Надіслати';
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Надіслати';
                     }
                 });
             }
 
-            // Підписка на повідомлення
-            const msgContainer = document.getElementById('groupMessages');
-            if (groupUnsub) { groupUnsub(); groupUnsub = null; }
+            // Subscribe to posts feed
+            subscribeToFeed(user);
+        }
+
+        function subscribeToFeed(currentUser) {
+            const feed = document.getElementById('comFeed');
+            if (!feed) return;
+            if (comUnsub) { comUnsub(); comUnsub = null; }
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
-                const { collection, query, orderBy, limit, onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                const q = query(collection(db, 'group_posts'), orderBy('createdAt', 'desc'), limit(60));
-                groupUnsub = onSnapshot(q, (snap) => {
-                    if (snap.empty) {
-                        msgContainer.innerHTML = `<div class="group-msg-empty">
-                            <i class="fas fa-comment-dots"></i>
-                            <p>Ще немає повідомлень. Напиши першим!</p>
-                        </div>`;
-                        return;
-                    }
-                    let msgsHtml = '';
-                    snap.forEach(d => {
-                        const m = d.data();
-                        const time = m.createdAt?.toDate ? formatRelTime(m.createdAt.toDate()) : '';
-                        const av = m.authorPhoto
-                            ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
-                            : `<span>${(m.authorName||'?')[0].toUpperCase()}</span>`;
-                        const isMe = m.uid === Auth._user?.uid;
-                        msgsHtml += `<div class="group-msg">
-                            <div class="group-msg-avatar">${av}</div>
-                            <div class="group-msg-body">
-                                <div class="group-msg-header">
-                                    <span class="group-msg-name">${m.authorName || 'Аніматор'}${isMe ? ' <span style="font-size:0.65rem;color:var(--accent);">● ти</span>' : ''}</span>
-                                    <span class="group-msg-time">${time}</span>
+                import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
+                    const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'desc'), limit(60));
+                    comUnsub = onSnapshot(q, (snap) => {
+                        if (snap.empty) {
+                            feed.innerHTML = `<div class="com-feed-empty">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <p>Ще немає публікацій. Напиши першим!</p>
+                            </div>`;
+                            return;
+                        }
+                        let html = '';
+                        const typeLabels = { anime: '📺 Рекомендація', ach: '🏆 Досягнення', text: '' };
+                        snap.forEach(d => {
+                            const m = d.data();
+                            const time = m.createdAt?.toDate ? formatRelTime(m.createdAt.toDate()) : '';
+                            const av = m.authorPhoto
+                                ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
+                                : `<span>${(m.authorName||'?')[0].toUpperCase()}</span>`;
+                            const isMe = currentUser && m.uid === currentUser.uid;
+                            const typeTag = m.type && typeLabels[m.type]
+                                ? `<div class="com-ach-card"><span class="com-ach-card-icon">${m.type === 'ach' ? '🏆' : '📺'}</span><span class="com-ach-card-text">${typeLabels[m.type]}</span></div>`
+                                : '';
+                            html += `<div class="com-post ${isMe ? 'mine' : ''}">
+                                <div class="com-post-head">
+                                    <div class="com-post-avatar">${av}</div>
+                                    <div class="com-post-meta">
+                                        <div class="com-post-name">
+                                            ${m.authorName || 'Аніматор'}
+                                            ${isMe ? '<span class="com-post-me-badge">ти</span>' : ''}
+                                        </div>
+                                        <div class="com-post-time">${time}</div>
+                                    </div>
                                 </div>
-                                <div class="group-msg-text">${escapeHtml(m.text || '')}</div>
-                            </div>
+                                ${typeTag}
+                                <div class="com-post-text">${m.text || ''}</div>
+                                <div class="com-post-actions">
+                                    <button class="com-post-action" onclick="likePost('${d.id}', this)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                        ${m.likes || 0}
+                                    </button>
+                                    <button class="com-post-action" onclick="copyText('${encodeURIComponent(m.text||'')}')">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                        Копіювати
+                                    </button>
+                                </div>
+                            </div>`;
+                        });
+                        feed.innerHTML = html;
+                    }, () => {
+                        feed.innerHTML = `<div class="com-feed-empty">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
+                            <p>Не вдалося завантажити стрічку</p>
                         </div>`;
                     });
-                    msgContainer.innerHTML = msgsHtml;
-                }, (err) => {
-                    console.warn('Group snapshot error:', err);
-                    msgContainer.innerHTML = `<div class="group-msg-empty"><i class="fas fa-wifi"></i><p>Не вдалося завантажити повідомлення</p></div>`;
                 });
             } catch(e) {
-                msgContainer.innerHTML = `<div class="group-msg-empty"><i class="fas fa-wifi" style="opacity:0.3"></i><p>Спільнота недоступна без підключення</p></div>`;
+                console.warn('Community feed error:', e);
+                if (feed) feed.innerHTML = `<div class="com-feed-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
+                    <p>Спільнота недоступна без підключення</p>
+                </div>`;
             }
         }
+
+        async function likePost(postId, btn) {
+            if (!Auth.isAuthenticated()) { showToast('Увійдіть для лайку'); return; }
+            try {
+                if (!firebaseInitialized || !db) return;
+                const { doc, increment, updateDoc } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                await updateDoc(doc(db, 'community_posts', postId), { likes: increment(1) });
+                btn.classList.add('liked');
+            } catch(e) { console.warn(e); }
+        }
+
+        function copyText(encoded) {
+            try {
+                navigator.clipboard.writeText(decodeURIComponent(encoded));
+                showToast('✅ Скопійовано!');
+            } catch(e) {}
+        }
+
+        async function loadRatingPage() { initRatingPage(); }
+        async function loadRatingList() { initRatingPage(); }
+
 
         function formatRelTime(date) {
             if (!date) return '';
