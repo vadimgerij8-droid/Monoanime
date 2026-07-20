@@ -4662,8 +4662,8 @@
 
         function getProxyUrl(url) {
             if (!url) return null;
-            const uaParam = typeof navigator !== 'undefined' ? '&ua=' + encodeURIComponent(navigator.userAgent) : '';
-            return PROXY_URL + '?url=' + encodeURIComponent(url) + uaParam;
+            // Не передаємо ua= — робить URL задовгим і може обрізатися
+            return PROXY_URL + '?url=' + encodeURIComponent(url);
         }
 
         function isEmbedUrl(url) {
@@ -5266,14 +5266,20 @@
             }
         }
 
-        async function fetchUA(url, retries = 1) {
+        async function fetchUA(url, retries = 2) {
             if (url && url.startsWith('http://')) url = 'https://' + url.slice(7);
             const proxyUrl = getProxyUrl(url);
             const doFetch = async () => {
                 const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 12000);
+                // 20с timeout — достатньо для повільних з'єднань
+                const timer = setTimeout(() => controller.abort(), 20000);
                 try {
-                    const resp = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit', cache: 'no-cache', signal: controller.signal });
+                    const resp = await fetch(proxyUrl, {
+                        mode: 'cors',
+                        credentials: 'omit',
+                        cache: 'no-cache',
+                        signal: controller.signal
+                    });
                     clearTimeout(timer);
                     if (!resp.ok) throw new Error('HTTP ' + resp.status);
                     const html = await resp.text();
@@ -5282,14 +5288,19 @@
                     return doc;
                 } catch (e) {
                     clearTimeout(timer);
+                    // AbortError від таймауту — не показувати як "Fetch is aborted"
+                    if (e && e.name === 'AbortError') {
+                        throw new Error('Час очікування вичерпано. Перевірте з'єднання.');
+                    }
                     throw e;
                 }
             };
             try {
                 return await doFetch();
             } catch (e) {
-                if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 600));
+                // Retry тільки якщо не скасовано плеєром (playerPageAborted)
+                if (retries > 0 && !(e && e._playerAborted)) {
+                    await new Promise(r => setTimeout(r, 800));
                     return fetchUA(url, retries - 1);
                 }
                 throw e;
@@ -5397,29 +5408,35 @@
             const playerUrls = extractPlayerIframeUrls(doc);
             console.log('[loadAnimeuaDetail] playerUrls=', playerUrls);
             const allRawSources = [];
-            for (const playerUrl of playerUrls) {
-                try {
+            // Завантажуємо всі плеєр-сторінки паралельно — швидше і одна помилка не зупиняє решту
+            const playerFetchResults = await Promise.allSettled(
+                playerUrls.map(async (playerUrl) => {
                     let provider = 'Джерело';
                     if (playerUrl.includes('ashdi')) provider = 'AnimeUA';
                     else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
                     else if (playerUrl.includes('player')) provider = 'Player';
                     const playerHtml = await fetchUA(playerUrl);
-                    // Використовуємо сирий HTML для надійного парсингу scripts на Android
                     const text = playerHtml._rawHtml || playerHtml.body?.innerHTML || '';
-                    allRawSources.push(...extractSourcesFromText(text, provider));
-                    const nestedIframes = safeQueryAll('iframe', playerHtml);
-                    for (const nested of nestedIframes) {
-                        let nestedUrl = nested.getAttribute('src') || nested.getAttribute('data-src');
-                        if (nestedUrl && nestedUrl !== 'about:blank') {
-                            if (nestedUrl.startsWith('//')) nestedUrl = 'https:' + nestedUrl;
-                            if (!nestedUrl.startsWith('http')) nestedUrl = ANIMEUA_BASE + nestedUrl;
-                            const nestedHtml = await fetchUA(nestedUrl);
-                            allRawSources.push(...extractSourcesFromText(nestedHtml._rawHtml || nestedHtml.body?.innerHTML || '',
-                            provider));
-                        }
-                    }
-                } catch (e) { console.warn('Player fetch failed', playerUrl, e); }
-            }
+                    const sources = extractSourcesFromText(text, provider);
+                    // Вкладені iframe (якщо є)
+                    const nestedResults = await Promise.allSettled(
+                        safeQueryAll('iframe', playerHtml)
+                            .map(nested => nested.getAttribute('src') || nested.getAttribute('data-src'))
+                            .filter(u => u && u !== 'about:blank')
+                            .map(u => {
+                                if (u.startsWith('//')) u = 'https:' + u;
+                                if (!u.startsWith('http')) u = ANIMEUA_BASE + u;
+                                return fetchUA(u).then(h => extractSourcesFromText(h._rawHtml || h.body?.innerHTML || '', provider));
+                            })
+                    );
+                    nestedResults.forEach(r => { if (r.status === 'fulfilled') sources.push(...r.value); });
+                    return sources;
+                })
+            );
+            playerFetchResults.forEach(r => {
+                if (r.status === 'fulfilled') allRawSources.push(...r.value);
+                else console.warn('Player fetch failed:', r.reason?.message || r.reason);
+            });
 
             console.log('[loadAnimeuaDetail] allRawSources.length=', allRawSources.length, 'samples=', allRawSources.slice(0,10));
 
@@ -7928,6 +7945,7 @@ function renderProfilePage() {
         // ====================================================================
         let playerPageAnime = null;
         let playerPagePlayer = null;
+        let _playerLoadController = null; // AbortController для поточного завантаження плеєра
         let playerPageCurrentSeason = '1';
         let playerPageCurrentDub = '';
         let playerPageCurrentQuality = '720p';
@@ -7946,6 +7964,14 @@ function renderProfilePage() {
         async function openPlayerPage(url) {
             const modal = document.getElementById('playerPageModal');
             if (!modal) return;
+            // Скасувати попереднє завантаження якщо є
+            if (_playerLoadController) {
+                _playerLoadController.abort();
+                _playerLoadController = null;
+            }
+            _playerLoadController = new AbortController();
+            const _thisSignal = _playerLoadController.signal;
+
             if (playerPagePlayer) { playerPagePlayer.destroy();
                 playerPagePlayer = null; }
             playerPageAnime = null;
@@ -7969,6 +7995,8 @@ function renderProfilePage() {
             modal.querySelector('.modal-content').scrollTop = 0;
             try {
                 const anime = await loadAnimeuaDetail(url);
+                // Якщо плеєр вже закрили поки завантажувалось — не оновлювати DOM
+                if (_thisSignal.aborted || modal.style.display === 'none') return;
                 playerPageAnime = anime;
                 playerPageSources = anime.sources || ['Основне'];
                 playerPageCurrentSource = playerPageSources[0] || 'Основне';
@@ -8013,18 +8041,44 @@ function renderProfilePage() {
                 }
                 buildBottomSheetData();
             } catch (err) {
-                const isNotFound = err.message && err.message.includes('не знайдено');
-                document.getElementById('playerSynopsis').textContent = isNotFound
-                    ? 'Це аніме поки що недоступне на animeua.club.'
-                    : 'Помилка завантаження. Спробуйте пізніше.';
-                const icon = isNotFound ? 'fa-search' : 'fa-exclamation-circle';
-                const msg = isNotFound
-                    ? 'Аніме не знайдено на джерелі'
-                    : `Помилка: ${err.message}`;
+                // Якщо запит скасовано (юзер закрив плеєр або відкрив інше) — мовчки ігноруємо
+                if (_thisSignal.aborted || modal.style.display === 'none') return;
+                if (err && (err.name === 'AbortError' || err._playerAborted)) return;
+
+                const isNotFound = err.message && (err.message.includes('не знайдено') || err.message.includes('404'));
+                const isTimeout = err.message && err.message.includes('очікування');
+                const isNetwork = err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('502') || err.message.includes('503'));
+
+                let userMsg, icon;
+                if (isNotFound) {
+                    icon = 'fa-search';
+                    userMsg = 'Аніме не знайдено на джерелі';
+                    document.getElementById('playerSynopsis').textContent = 'Це аніме поки що недоступне.';
+                } else if (isTimeout) {
+                    icon = 'fa-clock';
+                    userMsg = 'Час очікування вичерпано. Перевірте з'єднання і спробуйте ще раз.';
+                    document.getElementById('playerSynopsis').textContent = userMsg;
+                } else if (isNetwork) {
+                    icon = 'fa-wifi';
+                    userMsg = 'Помилка мережі. Перевірте інтернет-з'єднання.';
+                    document.getElementById('playerSynopsis').textContent = userMsg;
+                } else {
+                    icon = 'fa-exclamation-circle';
+                    userMsg = 'Помилка завантаження. Спробуйте пізніше.';
+                    document.getElementById('playerSynopsis').textContent = userMsg;
+                }
+
                 document.getElementById('episodeViewGrid').innerHTML =
-                    `<div class="episode-empty"><i class="fas ${icon}"></i> ${msg}</div>`;
+                    `<div class="episode-empty">
+                        <i class="fas ${icon}" style="font-size:2rem;margin-bottom:12px;opacity:0.5;"></i>
+                        <div>${userMsg}</div>
+                        <button class="btn-outline" style="margin-top:16px;padding:8px 20px;border-radius:20px;cursor:pointer;" 
+                            onclick="openPlayerPage('${url.replace(/'/g, "\'")}')">
+                            <i class="fas fa-redo"></i> Спробувати знову
+                        </button>
+                    </div>`;
                 document.getElementById('episodePanel').classList.add('visible');
-                console.error('Player load error:', err);
+                console.error('Player load error:', err.message || err);
             }
         }
 
@@ -8230,6 +8284,11 @@ function renderProfilePage() {
         function closePlayerPage() {
             const modal = document.getElementById('playerPageModal');
             if (!modal) return;
+            // Скасувати активне завантаження — щоб catch не показував помилку
+            if (_playerLoadController) {
+                _playerLoadController.abort();
+                _playerLoadController = null;
+            }
             modal.style.display = 'none';
             document.body.style.overflow = '';
             if (playerPagePlayer) {
