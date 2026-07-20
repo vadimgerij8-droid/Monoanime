@@ -4485,190 +4485,344 @@
 
         
         /* === Rating/Group Tabs === */
+        /* ====== RATING & GROUP PAGE ====== */
+        .rg-header {
+            padding: 1.2rem 1rem 0;
+            margin-bottom: 0.5rem;
+        }
+        .rg-header-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.03em;
+        }
+        .rg-header-title span { color: var(--accent); }
+
         .rg-tabs {
             display: flex;
-            gap: 0;
-            padding: 0 1rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid rgba(255,255,255,0.08);
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0;
         }
         .rg-tab {
             flex: 1;
-            padding: 0.75rem 0.5rem;
+            padding: 0.65rem 0.5rem;
             text-align: center;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--tag-bg);
+            border: 1.5px solid transparent;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
+            letter-spacing: 0.01em;
         }
         .rg-tab.active {
-            color: var(--text-primary);
-            border-bottom-color: var(--accent);
+            color: var(--accent-text);
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px var(--accent-glow);
         }
-        .rg-tab i { font-size: 0.9rem; }
+        .dark-mode .rg-tab { background: rgba(255,255,255,0.06); }
+        .dark-mode .rg-tab.active { background: var(--accent); }
+        .rg-tab i { font-size: 0.85rem; }
         .rg-tab-content { display: none; }
         .rg-tab-content.active { display: block; }
 
-        /* Rating list */
-        .rating-list-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.6rem 1rem;
-            cursor: pointer;
-            transition: background 0.15s;
-            border-radius: 0.5rem;
-        }
-        .rating-list-item:hover { background: rgba(255,255,255,0.05); }
-        .rating-list-item:active { background: rgba(255,255,255,0.1); }
-        .rating-rank {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: var(--text-secondary);
-            min-width: 2rem;
-            text-align: center;
-        }
-        .rating-rank.top-3 { font-size: 1.3rem; }
-        .rating-rank.gold { color: #FFD700; }
-        .rating-rank.silver { color: #C0C0C0; }
-        .rating-rank.bronze { color: #CD7F32; }
-        .rating-poster {
-            width: 40px;
-            height: 56px;
-            border-radius: 0.3rem;
-            object-fit: cover;
-            background: rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-        .rating-info { flex: 1; min-width: 0; }
-        .rating-info h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .rating-info .rating-meta {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 0.15rem;
-        }
-        .rating-score-badge {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #FFD700;
-            white-space: nowrap;
-        }
-
-        /* Group / Community wall */
-        .group-wall {
-            padding: 0 1rem 5rem;
-        }
-        .group-post-box {
+        /* === USER STATS CARD === */
+        .rg-my-stats {
+            margin: 0 1rem 1.2rem;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 0.75rem;
+            border-radius: var(--radius-lg);
+            padding: 1.1rem 1.2rem;
+            box-shadow: var(--shadow-sm);
+            animation: fadeInUp 0.3s ease both;
+        }
+        .rg-stats-top {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
             margin-bottom: 1rem;
         }
-        .group-post-box textarea {
-            width: 100%;
-            min-height: 60px;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            resize: vertical;
-            outline: none;
-            font-family: inherit;
-        }
-        .group-post-box textarea::placeholder { color: var(--text-secondary); }
-        .group-post-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.5rem 1.2rem;
+        .rg-stats-avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
             background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 0.4rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 0.5rem;
-            transition: opacity 0.2s;
+            color: var(--accent-text);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: 800;
+            flex-shrink: 0; overflow: hidden;
         }
-        .group-post-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .group-msg {
-            display: flex;
+        .rg-stats-avatar img { width:100%; height:100%; object-fit:cover; }
+        .rg-stats-name {
+            font-size: 1rem; font-weight: 700; color: var(--text);
+        }
+        .rg-stats-rank-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: linear-gradient(135deg, #FFD700, #FF8C00);
+            color: #000; font-size: 0.7rem; font-weight: 800;
+            padding: 0.15rem 0.5rem; border-radius: 20px; margin-top: 0.2rem;
+        }
+        .rg-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 0.6rem;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
+        }
+        .rg-stat-cell {
+            background: var(--tag-bg);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 0.5rem;
+            text-align: center;
+        }
+        .dark-mode .rg-stat-cell { background: rgba(255,255,255,0.05); }
+        .rg-stat-val {
+            font-size: 1.2rem; font-weight: 800; color: var(--text);
+            line-height: 1;
+        }
+        .rg-stat-val.gold { color: #FFD700; }
+        .rg-stat-label {
+            font-size: 0.68rem; color: var(--text-muted);
+            margin-top: 0.2rem; line-height: 1.2;
+        }
+
+        /* === ACHIEVEMENTS === */
+        .rg-achievements {
+            margin: 0 1rem 1.2rem;
+        }
+        .rg-section-title {
+            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 0.6rem; padding: 0 0.2rem;
+        }
+        .rg-ach-scroll {
+            display: flex; gap: 0.6rem; overflow-x: auto;
+            padding-bottom: 0.3rem; scrollbar-width: none;
+        }
+        .rg-ach-scroll::-webkit-scrollbar { display: none; }
+        .rg-ach-item {
+            flex-shrink: 0;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.7rem 0.8rem;
+            text-align: center;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+        .rg-ach-item.earned {
+            border-color: #FFD700;
+            box-shadow: 0 0 12px rgba(255,215,0,0.25);
+        }
+        .rg-ach-item.locked { opacity: 0.4; }
+        .rg-ach-icon { font-size: 1.6rem; display: block; margin-bottom: 0.3rem; }
+        .rg-ach-name { font-size: 0.68rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+        .rg-ach-req { font-size: 0.62rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+        /* === TOP TABS === */
+        .rg-top-tabs {
+            display: flex; gap: 0.4rem;
+            padding: 0 1rem 0.7rem;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .rg-top-tabs::-webkit-scrollbar { display: none; }
+        .rg-top-tab {
+            flex-shrink: 0;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: none; color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .rg-top-tab.active {
+            background: var(--accent); color: var(--accent-text);
+            border-color: var(--accent);
+        }
+
+        /* === LEADERBOARD === */
+        .rg-leaderboard { padding: 0 0 1rem; }
+        .rg-podium {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 0.6rem; padding: 1rem 1rem 1.5rem;
+        }
+        .rg-podium-item {
+            flex: 1; max-width: 110px;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center;
+        }
+        .rg-podium-avatar {
+            border-radius: 50%; object-fit: cover;
+            background: var(--tag-bg);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--accent-text);
+            overflow: hidden; flex-shrink: 0;
+            border: 3px solid transparent;
+        }
+        .rg-podium-item.p1 .rg-podium-avatar { width:64px; height:64px; font-size:1.4rem; border-color:#FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+        .rg-podium-item.p2 .rg-podium-avatar { width:52px; height:52px; font-size:1.1rem; border-color:#C0C0C0; }
+        .rg-podium-item.p3 .rg-podium-avatar { width:48px; height:48px; font-size:1rem; border-color:#CD7F32; }
+        .rg-podium-crown { font-size: 1.4rem; margin-bottom: 0.2rem; }
+        .rg-podium-name {
+            font-size: 0.78rem; font-weight: 700; color: var(--text);
+            margin-top: 0.4rem; max-width: 100%;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .rg-podium-score {
+            font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem;
+        }
+        .rg-podium-place {
+            width:100%; padding: 0.35rem;
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+            font-size: 0.75rem; font-weight: 800;
+            text-align: center; margin-top: 0.5rem;
+        }
+        .rg-podium-item.p1 .rg-podium-place { background: linear-gradient(135deg,#FFD700,#FF8C00); color:#000; }
+        .rg-podium-item.p2 .rg-podium-place { background: linear-gradient(135deg,#C0C0C0,#808080); color:#000; }
+        .rg-podium-item.p3 .rg-podium-place { background: linear-gradient(135deg,#CD7F32,#8B4513); color:#fff; }
+
+        .rg-list { padding: 0 1rem; }
+        .rg-list-item {
+            display: flex; align-items: center; gap: 0.8rem;
+            padding: 0.65rem 0.8rem; margin-bottom: 0.4rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: all 0.18s; cursor: default;
+        }
+        .rg-list-item.is-me {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .rg-list-num {
+            font-size: 0.85rem; font-weight: 800;
+            color: var(--text-muted); min-width: 1.5rem; text-align: center;
+        }
+        .rg-list-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--accent); color: var(--accent-text);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 800;
+            flex-shrink: 0; overflow: hidden;
+        }
+        .rg-list-avatar img { width:100%; height:100%; object-fit:cover; }
+        .rg-list-info { flex: 1; min-width: 0; }
+        .rg-list-name { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .rg-list-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
+        .rg-list-score { font-size: 0.85rem; font-weight: 800; color: var(--text); white-space: nowrap; }
+        .rg-list-score .unit { font-size: 0.65rem; color: var(--text-muted); }
+
+        /* === GROUP PAGE === */
+        .rg-group-header {
+            margin: 0 1rem 1rem;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem;
+            position: relative; overflow: hidden;
+        }
+        .rg-group-header::before {
+            content: ''; position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .rg-group-title {
+            font-size: 1.2rem; font-weight: 800; color: #fff;
+            position: relative;
+        }
+        .rg-group-desc {
+            font-size: 0.82rem; color: rgba(255,255,255,0.75);
+            margin-top: 0.3rem; position: relative;
+        }
+        .rg-group-members {
+            display: flex; align-items: center; gap: 0.4rem;
+            margin-top: 0.7rem; position: relative;
+        }
+        .rg-group-member-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #4ade80; box-shadow: 0 0 6px #4ade80;
+        }
+        .rg-group-members-text {
+            font-size: 0.75rem; color: rgba(255,255,255,0.8);
+        }
+
+        .group-wall { padding: 0 1rem 6rem; }
+        .group-post-box {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.9rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+        .group-post-box:focus-within { border-color: var(--accent); }
+        .group-post-box textarea {
+            width: 100%; min-height: 70px;
+            background: transparent; border: none;
+            color: var(--text); font-size: 0.9rem;
+            resize: none; outline: none;
+            font-family: inherit; line-height: 1.5;
+        }
+        .group-post-box textarea::placeholder { color: var(--text-muted); }
+        .group-post-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        .group-post-chars { font-size: 0.72rem; color: var(--text-muted); }
+        .group-post-btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.5rem 1.1rem;
+            background: var(--accent); color: var(--accent-text);
+            border: none; border-radius: var(--radius-sm);
+            font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .group-post-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .group-post-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .group-msg {
+            display: flex; gap: 0.65rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid var(--border-light);
+            animation: fadeInUp 0.2s ease both;
         }
         .group-msg:last-child { border-bottom: none; }
         .group-msg-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--accent);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.85rem;
-            flex-shrink: 0;
-            overflow: hidden;
+            width: 38px; height: 38px; border-radius: 50%;
+            background: var(--accent); color: var(--accent-text);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem;
+            flex-shrink: 0; overflow: hidden;
         }
-        .group-msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .group-msg-avatar img { width:100%; height:100%; object-fit:cover; }
         .group-msg-body { flex: 1; min-width: 0; }
         .group-msg-header {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin-bottom: 0.2rem;
+            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;
         }
-        .group-msg-name {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .group-msg-time {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-        }
+        .group-msg-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+        .group-msg-time { font-size: 0.68rem; color: var(--text-muted); }
         .group-msg-text {
-            font-size: 0.88rem;
-            color: var(--text-primary);
-            line-height: 1.4;
-            word-break: break-word;
+            font-size: 0.87rem; color: var(--text-secondary);
+            line-height: 1.5; word-break: break-word;
         }
         .group-msg-empty {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
+            text-align: center; padding: 3rem 1rem; color: var(--text-muted);
         }
-        .group-msg-empty i { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+        .group-msg-empty i { font-size: 2.5rem; margin-bottom: 0.7rem; display: block; opacity: 0.4; }
         .group-login-prompt {
-            text-align: center;
-            padding: 2rem 1rem;
-            color: var(--text-secondary);
+            text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);
         }
-        .group-login-prompt a {
-            color: var(--accent);
-            font-weight: 600;
-            text-decoration: underline;
+        .group-login-prompt i { font-size: 2rem; display: block; margin-bottom: 0.7rem; opacity: 0.5; }
+        .group-login-btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            margin-top: 0.8rem; padding: 0.6rem 1.4rem;
+            background: var(--accent); color: var(--accent-text);
+            border: none; border-radius: var(--radius-sm);
+            font-size: 0.88rem; font-weight: 700; cursor: pointer;
         }
+
 </style>
 </head>
 <body class="appletv-agnative-topnav">
@@ -6863,65 +7017,209 @@
 
         // === Rating list ===
         let ratingLoaded = false;
-        async function loadRatingList() {
+        // Досягнення
+        const ACHIEVEMENTS = [
+            { id: 'first', icon: '🎬', name: 'Перший перегляд', req: '1 серія', need: 1, field: 'episodes' },
+            { id: 'ep10', icon: '🔟', name: '10 серій', req: '10 серій', need: 10, field: 'episodes' },
+            { id: 'ep50', icon: '⚡', name: '50 серій', req: '50 серій', need: 50, field: 'episodes' },
+            { id: 'ep100', icon: '💯', name: '100 серій', req: '100 серій', need: 100, field: 'episodes' },
+            { id: 'ep500', icon: '🔥', name: '500 серій', req: '500 серій', need: 500, field: 'episodes' },
+            { id: 'h1', icon: '⏰', name: '1 година', req: '1 год', need: 3600, field: 'watchTime' },
+            { id: 'h10', icon: '📺', name: '10 годин', req: '10 год', need: 36000, field: 'watchTime' },
+            { id: 'h50', icon: '🏅', name: '50 годин', req: '50 год', need: 180000, field: 'watchTime' },
+            { id: 'h100', icon: '👑', name: '100 годин', req: '100 год', need: 360000, field: 'watchTime' },
+            { id: 'bm5', icon: '🔖', name: '5 закладок', req: '5 закладок', need: 5, field: 'bookmarks' },
+            { id: 'bm20', icon: '📚', name: '20 закладок', req: '20 закладок', need: 20, field: 'bookmarks' },
+        ];
+
+        function getUserRankInfo(episodes, watchHours) {
+            if (watchHours >= 200) return { label: 'Легенда аніме', color: '#FF4500' };
+            if (watchHours >= 100) return { label: 'Майстер', color: '#8B5CF6' };
+            if (watchHours >= 50)  return { label: 'Ветеран', color: '#3B82F6' };
+            if (watchHours >= 20)  return { label: 'Досвідчений', color: '#10B981' };
+            if (watchHours >= 5)   return { label: 'Початківець', color: '#F59E0B' };
+            return { label: 'Новачок', color: '#6B7280' };
+        }
+
+        async function loadRatingPage() {
             const container = document.getElementById('rgRatingContent');
             if (!container) return;
             container.dataset.loaded = '1';
-            container.innerHTML = '<div class="loader" style="padding:2rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i> Завантаження рейтингу...</div>';
-            try {
-                // Load multiple pages of anime and sort by score
-                const pages = [];
-                for (let p = 1; p <= 3; p++) {
-                    pages.push(fetchAnimeuaMain(p).catch(() => []));
-                }
-                const results = await Promise.all(pages);
-                let allAnime = [];
-                results.forEach(items => { if (Array.isArray(items)) allAnime = allAnime.concat(items); });
-                // Deduplicate
-                const seen = new Set();
-                allAnime = allAnime.filter(a => {
-                    if (seen.has(a.mal_id)) return false;
-                    seen.add(a.mal_id);
-                    return true;
-                });
-                // Assign random scores if not present (since API doesn't provide scores)
-                allAnime.forEach(a => {
-                    a.score = a.score || (7 + Math.random() * 2.8);
-                });
-                // Sort by score descending
-                allAnime.sort((a, b) => b.score - a.score);
-                // Take top 100
-                const top = allAnime.slice(0, 100);
-                // Render
-                let html = '';
-                top.forEach((item, i) => {
-                    const rank = i + 1;
-                    const rankClass = rank <= 3 ? 'top-3 ' + (rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze') : '';
-                    const scoreStr = item.score.toFixed(1);
-                    const imgSrc = item.images?.jpg?.large_image_url || '';
-                    html += `<div class="rating-list-item" data-url="${item.url}">
-                        <div class="rating-rank ${rankClass}">${rank}</div>
-                        <img class="rating-poster" src="${imgSrc}" loading="lazy" onerror="this.style.opacity=0">
-                        <div class="rating-info">
-                            <h3>${item.title}</h3>
-                            <div class="rating-meta">${item.from === 'animeua' ? 'Аніме' : ''}</div>
+
+            // --- Статистика поточного користувача ---
+            const profile = getProfile();
+            const history = Storage.getHistory() || [];
+            const bookmarks = Storage.getBookmarks() || [];
+            const watchTimeSec = Storage.getWatchTime() || 0;
+            const watchHours = Math.round(watchTimeSec / 3600 * 10) / 10;
+            const episodes = history.length;
+            const rankInfo = getUserRankInfo(episodes, watchHours);
+
+            const achStats = { episodes, watchTime: watchTimeSec, bookmarks: bookmarks.length };
+            const earnedAch = ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need);
+            const earnedIds = new Set(earnedAch.map(a => a.id));
+
+            const avatarHtml = profile.avatar
+                ? `<img src="${profile.avatar}" alt="">`
+                : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
+
+            // --- Рендеримо My Stats картку ---
+            let statsHtml = `
+                <div class="rg-my-stats">
+                    <div class="rg-stats-top">
+                        <div class="rg-stats-avatar">${avatarHtml}</div>
+                        <div>
+                            <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
+                            <div class="rg-stats-rank-badge" style="background:linear-gradient(135deg,${rankInfo.color},${rankInfo.color}99);">
+                                👑 ${rankInfo.label}
+                            </div>
                         </div>
-                        <div class="rating-score-badge">★ ${scoreStr}</div>
-                    </div>`;
+                    </div>
+                    <div class="rg-stats-grid">
+                        <div class="rg-stat-cell">
+                            <div class="rg-stat-val">${episodes}</div>
+                            <div class="rg-stat-label">Серій<br>переглянуто</div>
+                        </div>
+                        <div class="rg-stat-cell">
+                            <div class="rg-stat-val gold">${watchHours}</div>
+                            <div class="rg-stat-label">Годин<br>переглянуто</div>
+                        </div>
+                        <div class="rg-stat-cell">
+                            <div class="rg-stat-val">${earnedAch.length}</div>
+                            <div class="rg-stat-label">Досягнень<br>отримано</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // --- Досягнення ---
+            let achHtml = `<div class="rg-achievements">
+                <div class="rg-section-title">🏆 Досягнення</div>
+                <div class="rg-ach-scroll">`;
+            ACHIEVEMENTS.forEach(a => {
+                const earned = earnedIds.has(a.id);
+                achHtml += `<div class="rg-ach-item ${earned ? 'earned' : 'locked'}" title="${a.req}">
+                    <span class="rg-ach-icon">${a.icon}</span>
+                    <div class="rg-ach-name">${a.name}</div>
+                    <div class="rg-ach-req">${a.req}</div>
+                </div>`;
+            });
+            achHtml += `</div></div>`;
+
+            // --- Топ таби ---
+            const topTabsHtml = `
+                <div class="rg-top-tabs">
+                    <button class="rg-top-tab active" data-tt="episodes">За серіями</button>
+                    <button class="rg-top-tab" data-tt="hours">За годинами</button>
+                    <button class="rg-top-tab" data-tt="bookmarks">За закладками</button>
+                </div>
+            `;
+
+            // --- Leaderboard placeholder (Firestore) ---
+            const lbHtml = `<div class="rg-leaderboard" id="rgLeaderboard">
+                <div class="loader" style="padding:2rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>
+            </div>`;
+
+            container.innerHTML = statsHtml + achHtml + `<div class="rg-section-title" style="padding:0 1rem 0.5rem;">🌍 Глобальний рейтинг</div>` + topTabsHtml + lbHtml;
+
+            // Tab switching
+            container.querySelectorAll('.rg-top-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.rg-top-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    loadLeaderboard(btn.dataset.tt);
                 });
-                container.innerHTML = html;
-                // Click handlers
-                container.querySelectorAll('.rating-list-item').forEach(el => {
-                    el.addEventListener('click', () => {
-                        const url = el.dataset.url;
-                        if (url) openPlayerPage(url);
+            });
+
+            loadLeaderboard('episodes');
+        }
+
+        async function loadLeaderboard(sortBy) {
+            const lb = document.getElementById('rgLeaderboard');
+            if (!lb) return;
+            lb.innerHTML = '<div class="loader" style="padding:1.5rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>';
+            try {
+                if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                const fieldMap = { episodes: 'history', hours: 'watchTime', bookmarks: 'bookmarks' };
+                const { collection: col, query: q, orderBy: ob, limit: lim, getDocs } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                const snap = await getDocs(q(col(db, 'users'), ob('watchTime', 'desc'), lim(50)));
+
+                let users = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    const eps = Array.isArray(data.history) ? data.history.length : 0;
+                    const hrs = Math.round((data.watchTime || 0) / 3600 * 10) / 10;
+                    const bms = Array.isArray(data.bookmarks) ? data.bookmarks.length : 0;
+                    users.push({
+                        uid: d.id,
+                        name: data.profile?.nickname || data.profile?.name || 'Аніматор',
+                        avatar: data.profile?.avatar || '',
+                        episodes: eps, hours: hrs, bookmarks: bms
                     });
                 });
-            } catch (e) {
-                console.error('Rating load error:', e);
-                container.innerHTML = '<div class="group-msg-empty"><i class="fas fa-exclamation-circle"></i><p>Не вдалося завантажити рейтинг. Спробуйте пізніше.</p></div>';
+
+                // Сортуємо
+                const sortField = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
+                users.sort((a, b) => b[sortField] - a[sortField]);
+                users = users.slice(0, 20);
+
+                const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
+                const unitMap = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
+                const unit = unitMap[sortBy] || '';
+
+                let html = '';
+
+                // Подіум топ 3
+                if (users.length >= 3) {
+                    const order = [users[1], users[0], users[2]]; // 2-1-3
+                    const classes = ['p2', 'p1', 'p3'];
+                    const crowns = ['🥈', '👑', '🥉'];
+                    const places = ['2', '1', '3'];
+                    html += '<div class="rg-podium">';
+                    order.forEach((u, i) => {
+                        const cls = classes[i];
+                        const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name[0].toUpperCase();
+                        const val = u[sortField];
+                        html += `<div class="rg-podium-item ${cls}">
+                            <div class="rg-podium-crown">${crowns[i]}</div>
+                            <div class="rg-podium-avatar">${typeof av === 'string' && av.length > 1 ? av : `<span>${av}</span>`}</div>
+                            <div class="rg-podium-name">${u.name}</div>
+                            <div class="rg-podium-score">${val} ${unit}</div>
+                            <div class="rg-podium-place"># ${places[i]}</div>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+
+                // Список 4-20
+                html += '<div class="rg-list">';
+                users.slice(3).forEach((u, i) => {
+                    const rank = i + 4;
+                    const isMe = u.uid === myUid;
+                    const av = u.avatar ? `<img src="${u.avatar}" alt="">` : u.name[0].toUpperCase();
+                    const val = u[sortField];
+                    const rankInfo = getUserRankInfo(u.episodes, u.hours);
+                    html += `<div class="rg-list-item ${isMe ? 'is-me' : ''}">
+                        <div class="rg-list-num">${rank}</div>
+                        <div class="rg-list-avatar">${typeof av === 'string' && av.length > 1 ? av : `<span>${av}</span>`}</div>
+                        <div class="rg-list-info">
+                            <div class="rg-list-name">${u.name}${isMe ? ' <span style="color:var(--accent);font-size:0.7rem;">● ти</span>' : ''}</div>
+                            <div class="rg-list-sub" style="color:${rankInfo.color}">${rankInfo.label}</div>
+                        </div>
+                        <div class="rg-list-score">${val} <span class="unit">${unit}</span></div>
+                    </div>`;
+                });
+                html += '</div>';
+
+                lb.innerHTML = html || '<div class="group-msg-empty"><i class="fas fa-ghost"></i><p>Поки нікого немає</p></div>';
+            } catch(e) {
+                console.warn('Leaderboard error:', e);
+                // Показуємо заглушку якщо Firebase недоступний
+                lb.innerHTML = `<div class="group-msg-empty"><i class="fas fa-users" style="opacity:0.3"></i><p style="font-size:0.85rem;">Глобальний рейтинг з'явиться після того, як більше користувачів зареєструється</p></div>`;
             }
         }
+
+        async function loadRatingList() { return loadRatingPage(); }
 
         // === Group wall (Firestore) ===
         let groupUnsub = null;
@@ -6930,154 +7228,148 @@
             if (!container) return;
             container.dataset.loaded = '1';
 
-            const user = firebase.auth().currentUser;
+            const user = Auth.isAuthenticated() ? Auth._user : null;
+
+            // Шапка групи
+            let headerHtml = `
+                <div class="rg-group-header">
+                    <div class="rg-group-title">💬 Спільнота VAKDAB</div>
+                    <div class="rg-group-desc">Обговорюйте аніме, діліться враженнями з іншими глядачами</div>
+                    <div class="rg-group-members">
+                        <div class="rg-group-member-dot"></div>
+                        <div class="rg-group-members-text">Спільнота активна</div>
+                    </div>
+                </div>
+            `;
+
             if (!user) {
-                container.innerHTML = '<div class="group-login-prompt"><i class="fas fa-user-lock" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i><p>Увійдіть в акаунт, щоб бачити та писати в групі.</p></div>';
+                container.innerHTML = headerHtml + `
+                    <div class="group-login-prompt">
+                        <i class="fas fa-user-lock"></i>
+                        <p>Увійдіть в акаунт, щоб бачити та писати в спільноті</p>
+                        <button class="group-login-btn" onclick="Router.goTo('profile')">
+                            <i class="fas fa-sign-in-alt"></i> Увійти
+                        </button>
+                    </div>`;
                 return;
             }
 
-            // Post box
-            let html = '<div class="group-wall">';
-            html += '<div class="group-post-box">';
-            html += `<textarea id="groupPostInput" placeholder="Поділіться своїм думкою про аніме..." maxlength="500"></textarea>`;
-            html += '<button class="group-post-btn" id="groupPostBtn"><i class="fas fa-paper-plane"></i> Надіслати</button>';
-            html += '</div>';
-            html += '<div id="groupMessages"></div>';
-            html += '</div>';
-            container.innerHTML = html;
+            const profile = getProfile();
+            const avatarHtml = profile.avatar
+                ? `<img src="${profile.avatar}" alt="">`
+                : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
 
-            // Post button handler
+            container.innerHTML = headerHtml + `<div class="group-wall">
+                <div class="group-post-box">
+                    <div style="display:flex;gap:0.6rem;align-items:flex-start;">
+                        <div class="group-msg-avatar" style="flex-shrink:0;">${avatarHtml}</div>
+                        <textarea id="groupPostInput" placeholder="Поділіться думкою про аніме..." maxlength="500" 
+                            oninput="document.getElementById('groupPostChars').textContent = 500 - this.value.length"></textarea>
+                    </div>
+                    <div class="group-post-footer">
+                        <span class="group-post-chars" id="groupPostChars">500</span>
+                        <button class="group-post-btn" id="groupPostBtn">
+                            <i class="fas fa-paper-plane"></i> Надіслати
+                        </button>
+                    </div>
+                </div>
+                <div id="groupMessages">
+                    <div class="loader" style="padding:1.5rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>
+                </div>
+            </div>`;
+
+            // Відправка повідомлення
             const postBtn = document.getElementById('groupPostBtn');
             const postInput = document.getElementById('groupPostInput');
             if (postBtn) {
                 postBtn.addEventListener('click', async () => {
                     const text = postInput.value.trim();
-                    if (!text) return;
+                    if (!text || text.length < 2) { showToast('Введіть повідомлення'); return; }
                     postBtn.disabled = true;
+                    postBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
                     try {
-                        const u = firebase.auth().currentUser;
-                        if (!u) { alert('Увійдіть в акаунт'); return; }
+                        if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                        const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                        const currentUser = Auth._user;
+                        const p = getProfile();
                         await addDoc(collection(db, 'group_posts'), {
                             text,
-                            uid: u.uid,
-                            authorName: u.displayName || u.email?.split('@')[0] || 'Анонім',
-                            authorPhoto: u.photoURL || '',
+                            uid: currentUser.uid,
+                            authorName: p.nickname || currentUser.displayName || currentUser.email?.split('@')[0] || 'Аніматор',
+                            authorPhoto: p.avatar || currentUser.photoURL || '',
                             createdAt: serverTimestamp()
                         });
                         postInput.value = '';
+                        document.getElementById('groupPostChars').textContent = '500';
+                        showToast('✅ Повідомлення надіслано!');
                     } catch (e) {
-                        console.error('Post error:', e);
-                        alert('Помилка: ' + e.message);
+                        showToast('Помилка: ' + e.message);
                     } finally {
                         postBtn.disabled = false;
+                        postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Надіслати';
                     }
                 });
             }
 
-            // Load messages from Firestore
+            // Підписка на повідомлення
             const msgContainer = document.getElementById('groupMessages');
-            msgContainer.innerHTML = '<div class="loader" style="padding:1rem;text-align:center;"><i class="fas fa-spinner fa-pulse"></i></div>';
-
-            // Unsubscribe previous listener
             if (groupUnsub) { groupUnsub(); groupUnsub = null; }
 
             try {
-                const q = query(collection(db, 'group_posts'), orderBy('createdAt', 'desc'), limit(50));
+                if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                const { collection, query, orderBy, limit, onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                const q = query(collection(db, 'group_posts'), orderBy('createdAt', 'desc'), limit(60));
                 groupUnsub = onSnapshot(q, (snap) => {
                     if (snap.empty) {
-                        msgContainer.innerHTML = '<div class="group-msg-empty"><i class="fas fa-comments"></i><p>Поки що немає повідомлень. Будьте першим!</p></div>';
+                        msgContainer.innerHTML = `<div class="group-msg-empty">
+                            <i class="fas fa-comment-dots"></i>
+                            <p>Ще немає повідомлень. Напиши першим!</p>
+                        </div>`;
                         return;
                     }
-                    let mHtml = '';
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        const initials = (d.authorName || 'А').charAt(0).toUpperCase();
-                        const time = d.createdAt?.toDate?.()?.toLocaleString?.('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) || 'щойно';
-                        const avatar = d.authorPhoto ? `<img src="${d.authorPhoto}" alt="">` : initials;
-                        mHtml += `<div class="group-msg">
-                            <div class="group-msg-avatar">${avatar}</div>
+                    let msgsHtml = '';
+                    snap.forEach(d => {
+                        const m = d.data();
+                        const time = m.createdAt?.toDate ? formatRelTime(m.createdAt.toDate()) : '';
+                        const av = m.authorPhoto
+                            ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
+                            : `<span>${(m.authorName||'?')[0].toUpperCase()}</span>`;
+                        const isMe = m.uid === Auth._user?.uid;
+                        msgsHtml += `<div class="group-msg">
+                            <div class="group-msg-avatar">${av}</div>
                             <div class="group-msg-body">
                                 <div class="group-msg-header">
-                                    <span class="group-msg-name">${d.authorName || 'Анонім'}</span>
+                                    <span class="group-msg-name">${m.authorName || 'Аніматор'}${isMe ? ' <span style="font-size:0.65rem;color:var(--accent);">● ти</span>' : ''}</span>
                                     <span class="group-msg-time">${time}</span>
                                 </div>
-                                <div class="group-msg-text">${d.text || ''}</div>
+                                <div class="group-msg-text">${escapeHtml(m.text || '')}</div>
                             </div>
                         </div>`;
                     });
-                    msgContainer.innerHTML = mHtml;
+                    msgContainer.innerHTML = msgsHtml;
                 }, (err) => {
-                    console.error('Group snapshot error:', err);
-                    msgContainer.innerHTML = '<div class="group-msg-empty"><i class="fas fa-exclamation-circle"></i><p>Не вдалося завантажити повідомлення.</p></div>';
+                    console.warn('Group snapshot error:', err);
+                    msgContainer.innerHTML = `<div class="group-msg-empty"><i class="fas fa-wifi"></i><p>Не вдалося завантажити повідомлення</p></div>`;
                 });
-            } catch (e) {
-                console.error('Group load error:', e);
-                msgContainer.innerHTML = '<div class="group-msg-empty"><i class="fas fa-exclamation-circle"></i><p>Помилка завантаження.</p></div>';
+            } catch(e) {
+                msgContainer.innerHTML = `<div class="group-msg-empty"><i class="fas fa-wifi" style="opacity:0.3"></i><p>Спільнота недоступна без підключення</p></div>`;
             }
         }
 
-},
+        function formatRelTime(date) {
+            if (!date) return '';
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            if (diff < 60) return 'щойно';
+            if (diff < 3600) return Math.floor(diff/60) + ' хв тому';
+            if (diff < 86400) return Math.floor(diff/3600) + ' год тому';
+            return Math.floor(diff/86400) + ' дн тому';
+        }
 
-            showSearch() {
-                const container = document.getElementById('searchPageContainer');
-                container.style.display = 'block';
-                container.classList.add('active');
-                renderSearchPage();
-                syncLeftdockActive();
-            },
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        }
 
-            showSettings() {
-                const container = document.getElementById('settingsPageContainer');
-                container.style.display = 'block';
-                container.classList.add('active');
-                renderSettingsPage();
-                syncLeftdockActive();
-            },
-
-            showRating() {
-                const container = document.getElementById('ratingPageContainer');
-                if (!container) return;
-                container.style.display = 'block';
-                container.classList.add('active');
-                container.innerHTML = `
-                    <div class="rg-tabs">
-                        <button class="rg-tab active" data-rt="rating"><i class="fas fa-star"></i> Рейтинг</button>
-                        <button class="rg-tab" data-rt="group"><i class="fas fa-users"></i> Група</button>
-                    </div>
-                    <div class="rg-tab-content active" id="rgRatingContent"></div>
-                    <div class="rg-tab-content" id="rgGroupContent"></div>
-                `;
-                container.querySelectorAll('.rg-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        const rt = tab.dataset.rt;
-                        container.querySelectorAll('.rg-tab').forEach(t => t.classList.remove('active'));
-                        container.querySelectorAll('.rg-tab-content').forEach(c => c.classList.remove('active'));
-                        tab.classList.add('active');
-                        const target = rt === 'rating' ? 'rgRatingContent' : 'rgGroupContent';
-                        document.getElementById(target).classList.add('active');
-                        if (rt === 'rating' && !document.getElementById('rgRatingContent').dataset.loaded) {
-                            loadRatingList();
-                        } else if (rt === 'group' && !document.getElementById('rgGroupContent').dataset.loaded) {
-                            loadGroupWall();
-                        }
-                    });
-                });
-                loadRatingList();
-            },
-
-            goTo(route, params) {
-                const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-                const newHash = route + qs;
-                if (window.location.hash === '#' + newHash) {
-                    // Хеш не змінився — hashchange не спрацює, викликаємо вручну
-                    this.currentRoute = route;
-                    this.params = params || {};
-                    this.navigate(route, params || {});
-                } else {
-                    window.location.hash = newHash;
-                }
-            }
-        };
 
         // ====================================================================
         //  ОСНОВНИЙ КОНТЕНТ
