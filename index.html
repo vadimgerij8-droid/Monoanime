@@ -1693,7 +1693,7 @@
             font-size: 13px;
             line-height: 1.6;
             color: var(--text-secondary);
-            max-width: 420px;
+            max-width: 460px;
             flex: 1;
         }
         @media (min-width:480px) {
@@ -4379,8 +4379,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 7px;
-            padding: 10px 14px;
+            gap: 6px;
+            padding: 8px 10px;
             border-radius: 50px;
             transition: background 0.22s cubic-bezier(.2,.9,.2,1), padding 0.22s cubic-bezier(.2,.9,.2,1), color 0.22s;
             color: var(--text-muted);
@@ -4431,9 +4431,7 @@
 
         <header class="header">
             <div class="header-left">
-                <button class="burger-btn" id="burgerBtn" aria-label="Відкрити меню" title="Меню (M)">
-                    <i class="fas fa-bars"></i>
-                </button>
+                
                 <div class="logo" id="logoHome" title="На головну">
                     <div class="logo-text">
                         <div class="logo-title-row">
@@ -5289,8 +5287,8 @@
                 } catch (e) {
                     clearTimeout(timer);
                     // AbortError від таймауту — не показувати як "Fetch is aborted"
-                    if (e && e.name === 'AbortError') {
-                        throw new Error('Час очікування вичерпано. Перевірте з'єднання.');
+                    if (e && (e.name === 'AbortError' || (e.message && (e.message.includes('aborted') || e.message.includes('Fetch is aborted'))))) {
+                        throw new Error('Час очікування вичерпано. Перевірте з\'єднання.');
                     }
                     throw e;
                 }
@@ -6399,7 +6397,7 @@
             if (leftdockHideTimer) { clearTimeout(leftdockHideTimer);
                 leftdockHideTimer = 0; }
             syncLeftdockActive();
-            document.getElementById('burgerBtn')?.classList.add('active');
+            document.getElementById('bnMenu')?.classList.add('active');
         }
 
         function hideLeftdock(immediate) {
@@ -6410,7 +6408,7 @@
                 leftdockOverlay.classList.remove('open');
                 document.body.style.overflow = '';
                 leftdockOpen = false;
-                document.getElementById('burgerBtn')?.classList.remove('active');
+                document.getElementById('bnMenu')?.classList.remove('active');
                 return;
             }
             if (leftdockHideTimer) clearTimeout(leftdockHideTimer);
@@ -6419,7 +6417,7 @@
                 leftdockOverlay.classList.remove('open');
                 document.body.style.overflow = '';
                 leftdockOpen = false;
-                document.getElementById('burgerBtn')?.classList.remove('active');
+                document.getElementById('bnMenu')?.classList.remove('active');
                 leftdockHideTimer = 0;
             }, 260);
         }
@@ -8043,11 +8041,11 @@ function renderProfilePage() {
             } catch (err) {
                 // Якщо запит скасовано (юзер закрив плеєр або відкрив інше) — мовчки ігноруємо
                 if (_thisSignal.aborted || modal.style.display === 'none') return;
-                if (err && (err.name === 'AbortError' || err._playerAborted)) return;
+                if (_thisSignal.aborted || (err && (err.name === 'AbortError' || err._playerAborted || (err.message && (err.message.includes('aborted') || err.message.includes('Fetch is aborted')))))) return;
 
                 const isNotFound = err.message && (err.message.includes('не знайдено') || err.message.includes('404'));
                 const isTimeout = err.message && err.message.includes('очікування');
-                const isNetwork = err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('502') || err.message.includes('503'));
+                const isNetwork = err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('502') || err.message.includes('503') || err.message.includes('aborted') || err.message.includes('Fetch is aborted'));
 
                 let userMsg, icon;
                 if (isNotFound) {
@@ -8056,11 +8054,11 @@ function renderProfilePage() {
                     document.getElementById('playerSynopsis').textContent = 'Це аніме поки що недоступне.';
                 } else if (isTimeout) {
                     icon = 'fa-clock';
-                    userMsg = 'Час очікування вичерпано. Перевірте з'єднання і спробуйте ще раз.';
+                    userMsg = 'Час очікування вичерпано. Перевірте з\'єднання і спробуйте ще раз.';
                     document.getElementById('playerSynopsis').textContent = userMsg;
                 } else if (isNetwork) {
                     icon = 'fa-wifi';
-                    userMsg = 'Помилка мережі. Перевірте інтернет-з'єднання.';
+                    userMsg = 'Помилка мережі або сервер не відповідає. Спробуйте пізніше.';
                     document.getElementById('playerSynopsis').textContent = userMsg;
                 } else {
                     icon = 'fa-exclamation-circle';
@@ -8546,7 +8544,7 @@ function renderProfilePage() {
         // ====================================================================
         //  ОБРОБНИКИ ПОДІЙ
         // ====================================================================
-        document.getElementById('burgerBtn').addEventListener('click', (e) => { e.stopPropagation();
+        document.getElementById('bnMenu')?.addEventListener('click', (e) => { e.stopPropagation();
             toggleLeftdock(); });
 
         document.getElementById('searchCircleBtn').addEventListener('click', () => {
@@ -8873,6 +8871,13 @@ function renderProfilePage() {
             <div class="bn-pill">
                 <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span class="bn-label">Профіль</span>
+            </div>
+        </button>
+        <!-- Меню -->
+        <button class="bn-item" id="bnMenu" title="Меню" aria-label="Меню">
+            <div class="bn-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                <span class="bn-label">Меню</span>
             </div>
         </button>
     </nav>
