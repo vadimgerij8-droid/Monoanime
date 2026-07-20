@@ -4280,7 +4280,99 @@
         .search-circle-btn i {
             color: #ffffff !important;
         }
-</style>
+
+        /* ====================================================================
+           BOTTOM NAV BAR
+           ==================================================================== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: calc(100% - 32px);
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            transition: transform 0.3s cubic-bezier(.2,.9,.2,1), opacity 0.3s;
+        }
+        .bottom-nav.hidden-nav {
+            transform: translateX(-50%) translateY(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .bn-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            position: relative;
+            transition: transform 0.15s;
+        }
+        .bn-item:active {
+            transform: scale(0.92);
+        }
+        .bn-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 14px;
+            border-radius: 50px;
+            transition: background 0.22s cubic-bezier(.2,.9,.2,1), padding 0.22s cubic-bezier(.2,.9,.2,1), color 0.22s;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+        .bn-item.active .bn-pill {
+            background: var(--text);
+            color: var(--bg);
+            padding: 10px 18px;
+        }
+        .bn-pill svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            transition: stroke 0.22s;
+        }
+        .bn-label {
+            font-size: 13.5px;
+            font-weight: 600;
+            display: none;
+        }
+        .bn-item.active .bn-label {
+            display: inline;
+        }
+        @media (min-width: 900px) {
+            .bottom-nav { display: none; }
+        }
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .bottom-nav {
+                bottom: calc(12px + env(safe-area-inset-bottom));
+            }
+        }
+        .app-container { padding-bottom: 90px !important; }
+
+        </style>
 </head>
 <body class="appletv-agnative-topnav">
 
@@ -8553,6 +8645,111 @@ function renderProfilePage() {
         window.Auth = Auth;
         window.Storage = Storage;
         window.showViewMode = showViewMode;
+    
+        // ====================================================================
+        //  BOTTOM NAV — логіка
+        // ====================================================================
+        (function initBottomNav() {
+            const nav = document.getElementById('bottomNav');
+            if (!nav) return;
+
+            // Кнопка назад
+            document.getElementById('bnBack').addEventListener('click', () => {
+                if (history.length > 1) {
+                    history.back();
+                } else {
+                    Router.goTo('main');
+                }
+            });
+
+            // Навігаційні кнопки
+            document.getElementById('bnHome').addEventListener('click', () => {
+                Router.goTo('main');
+            });
+            document.getElementById('bnTop').addEventListener('click', () => {
+                showTop100();
+            });
+            document.getElementById('bnProfile').addEventListener('click', () => {
+                Router.goTo('profile');
+            });
+
+            // Оновлення активного стану при зміні роуту
+            function updateBottomNav(route) {
+                const items = nav.querySelectorAll('.bn-item[data-route]');
+                items.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.route === route) {
+                        item.classList.add('active');
+                    }
+                });
+                // top100 активний коли route === 'main' і показано top100
+                // (визначається через showTop100 — додатково не потрібно)
+            }
+
+            // Підписатися на Router — патчимо goTo
+            const _origGoTo = Router.goTo.bind(Router);
+            Router.goTo = function(route, params) {
+                _origGoTo(route, params);
+                updateBottomNav(route);
+            };
+
+            // Ховати nav коли відкритий плеєр
+            const playerModal = document.getElementById('playerPageModal');
+            const _origOpenPlayer = window.openPlayerPage;
+            window.openPlayerPage = function(url) {
+                if (nav) nav.classList.add('hidden-nav');
+                return _origOpenPlayer(url);
+            };
+            const _origClosePlayer = window.closePlayerPage;
+            window.closePlayerPage = function() {
+                if (nav) nav.classList.remove('hidden-nav');
+                return _origClosePlayer();
+            };
+
+            // Також ховати/показувати при hashchange
+            window.addEventListener('hashchange', () => {
+                const hash = window.location.hash.slice(1) || 'main';
+                const route = hash.split('?')[0];
+                updateBottomNav(route);
+            });
+
+            // Початковий стан
+            updateBottomNav(Router.currentRoute || 'main');
+        })();
+
     </script>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="Навігація">
+        <!-- Назад -->
+        <button class="bn-item" id="bnBack" title="Назад" aria-label="Назад">
+            <div class="bn-pill">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                <span class="bn-label">Назад</span>
+            </div>
+        </button>
+        <!-- Головна -->
+        <button class="bn-item active" id="bnHome" data-route="main" title="Головна" aria-label="Головна">
+            <div class="bn-pill">
+                <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+                <span class="bn-label">Головна</span>
+            </div>
+        </button>
+        <!-- Рейтинг -->
+        <button class="bn-item" id="bnTop" data-route="top100" title="Рейтинг" aria-label="Рейтинг">
+            <div class="bn-pill">
+                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span class="bn-label">Рейтинг</span>
+            </div>
+        </button>
+        <!-- Профіль -->
+        <button class="bn-item" id="bnProfile" data-route="profile" title="Профіль" aria-label="Профіль">
+            <div class="bn-pill">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="bn-label">Профіль</span>
+            </div>
+        </button>
+    </nav>
+
 </body>
 </html>
