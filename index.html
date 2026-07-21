@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <!-- nocache:20260721082641  44 -->
-    <meta charset="UTF-8" />
+    <!-- nocache:20260721083250 set="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>VakDab • твій аніме каталог</title>
     <link rel="preconnect" href="https://monoanime.animegran8.workers.dev" />
@@ -7943,15 +7942,52 @@ const ACHIEVEMENTS = [
         async function loadLeaderboard(sortBy = 'xp') {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
-            lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
-            
+
+            // Показуємо спінер
+            lb.innerHTML = `<div style="display:flex;justify-content:center;padding:24px;"><svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
+
+            // Чекаємо поки Firebase ініціалізується (до 5 сек)
+            let waited = 0;
+            while ((!firebaseInitialized || !db || !Auth.isAuthenticated()) && waited < 5000) {
+                await new Promise(res => setTimeout(res, 300));
+                waited += 300;
+            }
+
+            const showFallback = (msg) => {
+                const profile = getProfile();
+                const xp = calcTotalXP();
+                const lv = getLevel(xp);
+                const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
+                lb.innerHTML = `
+                    <div class="rg-lb-list">
+                        <div class="rg-lb-item is-me" style="background:rgba(var(--accent-rgb),.06);">
+                            <div class="rg-lb-num" style="color:var(--accent);font-weight:800">#1</div>
+                            <div class="rg-lb-avatar">${av}</div>
+                            <div class="rg-lb-info">
+                                <div class="rg-lb-name">${profile.nickname||'Ти'} <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span></div>
+                                <div class="rg-lb-rank">Lv.${lv} · ${xp} XP</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px;">${msg}</p>`;
+            };
+
+            if (!firebaseInitialized || !db) {
+                showFallback('Firebase недоступний. Перевірте з\'єднання.');
+                return;
+            }
+
+            if (!Auth.isAuthenticated()) {
+                showFallback('Увійдіть щоб бачити глобальний рейтинг.');
+                return;
+            }
+
             try {
-                if (!firebaseInitialized || !db) throw new Error('no db');
                 // Без orderBy — не потребує Firestore composite index
                 const q = query(collection(db, 'users'), limit(200));
-                const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000));
+                const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 10000));
                 const snap = await Promise.race([getDocs(q), tp]);
-                
+
                 let users = [];
                 snap.forEach(d => {
                     const data = d.data();
@@ -7969,10 +8005,13 @@ const ACHIEVEMENTS = [
                 users.sort((a, b) => b.xp - a.xp);
 
                 if (!users.length) {
-                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
+                    showFallback('Рейтинг з\'явиться після того як користувачі переглянуть аніме.');
                     return;
                 }
 
+                renderLeaderboard(lb, users);
+
+                // Live updates
                 if (window._lbUnsub) { window._lbUnsub(); window._lbUnsub = null; }
                 window._lbUnsub = onSnapshot(q, (snap2) => {
                     let u = [];
@@ -7993,32 +8032,12 @@ const ACHIEVEMENTS = [
                     renderLeaderboard(lb, u);
                 }, (err) => console.warn('LB snapshot error:', err));
 
-                renderLeaderboard(lb, users);
             } catch(e) {
-                try {
-                    const profile = getProfile();
-                    const xp = calcTotalXP();
-                    const level = getLevel(xp);
-                    const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
-                    lb.innerHTML = `<div class="rg-lb-list">
-                        <div class="rg-lb-item is-me">
-                            <div class="rg-lb-num">1</div>
-                            <div class="rg-lb-avatar">${av}</div>
-                            <div class="rg-lb-info">
-                                <div class="rg-lb-name">${profile.nickname || 'Гість'} <span style="font-size:9px;font-weight:700;">YOU</span></div>
-                                <div class="rg-lb-rank">Lv.${level}</div>
-                            </div>
-                            <div class="rg-lb-score">${xp} <span class="unit">XP</span></div>
-                        </div>
-                    </div>
-                    <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
-                } catch(e2) {
-                    const _pr = getProfile(); const _xp = calcTotalXP(); const _lv = getLevel(_xp);
-                    const _av = _pr.avatar ? `<img src="${_pr.avatar}" alt="">` : `<span>${(_pr.nickname||"?")[0].toUpperCase()}</span>`;
-                    lb.innerHTML = `<div class="rg-lb-list"><div class="rg-lb-item rg-lb-me"><div class="rg-lb-rank" style="color:var(--accent)">#1</div><div class="rg-lb-avatar">${_av}</div><div class="rg-lb-info"><div class="rg-lb-name">${_pr.nickname||"Ти"}</div><div class="rg-lb-sub">${_xp} XP · Lv.${_lv}</div></div></div></div><p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Глобальний рейтинг недоступний офлайн</p>`;
-                }
+                console.warn('loadLeaderboard error:', e.message);
+                showFallback('Помилка: ' + e.message);
             }
         }
+
 
         function renderLeaderboard(lb, users) {
             const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
