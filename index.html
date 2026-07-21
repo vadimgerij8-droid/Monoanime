@@ -7670,14 +7670,12 @@ firebaseApp = initializeApp(FIREBASE_CONFIG);
             const level = getLevel(xp);
             try {
                 const userRef = doc(db, 'users', uid);
-                const profile = getProfile();
+                // syncUserXP оновлює ТІЛЬКИ xp, level та watchTime
+                // profile, history, bookmarks синхронізує syncUserData()
                 await setDoc(userRef, {
                     xp,
                     level,
-                    profile: { nickname: profile.nickname || 'Аніматор', avatar: profile.avatar || '' },
                     watchTime: Storage.getWatchTime() || 0,
-                    history: Storage.getHistory() || [],
-                    bookmarks: Storage.getBookmarks() || [],
                     lastXPUpdate: serverTimestamp()
                 }, { merge: true });
             } catch(e) { console.warn('XP sync failed:', e.message); }
@@ -9743,6 +9741,26 @@ async function _sendMessage(user, pendingMedia, onSent) {
                     textarea.blur(); }
                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { textarea.blur(); }
             });
+        }
+
+        // ====================================================================
+        //  CLOUDINARY UPLOAD (аватарки та банери)
+        // ====================================================================
+        async function uploadToCloudinary(file, width, height, quality) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            if (width && height) {
+                formData.append('transformation', 'w_' + width + ',h_' + height + ',c_fill,q_' + Math.round((quality || 0.8) * 100) + ',f_auto');
+            }
+            const resp = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', {
+                method: 'POST',
+                body: formData
+            });
+            if (!resp.ok) throw new Error('Cloudinary error: ' + resp.status);
+            const result = await resp.json();
+            if (!result.secure_url) throw new Error('No URL in Cloudinary response');
+            return result.secure_url;
         }
 
         document.getElementById('avatarFileInput').addEventListener('change', async function(e) {
