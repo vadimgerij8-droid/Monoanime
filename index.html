@@ -5512,7 +5512,8 @@
             query,
             orderBy,
             limit,
-            onSnapshot
+            onSnapshot,
+            getDocs
         } from "firebase/firestore";
 
         // ====================================================================
@@ -6179,7 +6180,7 @@
                     const resp = await fetch(proxyUrl, {
                         mode: 'cors',
                         credentials: 'omit',
-                        cache: 'no-cache',
+                        cache: 'force-cache',
                         signal: controller.signal
                     });
                     clearTimeout(timer);
@@ -7632,7 +7633,7 @@
                         const nav = document.getElementById('bottomNav');
                         if (nav) nav.classList.remove('hidden-nav');
                         loadMyStats();
-                        _renderDailyTasks();
+                        requestAnimationFrame(() => _renderDailyTasks());
                         loadLeaderboard(currentLbSort);
                     }
                 });
@@ -7648,8 +7649,8 @@
             });
 
             loadMyStats();
-            _renderDailyTasks();
-            loadLeaderboard('episodes');
+            requestAnimationFrame(() => _renderDailyTasks());
+            requestAnimationFrame(() => loadLeaderboard('episodes'));
         }
 
         // ═══════════════════════════════════════════════════════
@@ -7749,6 +7750,8 @@
         }
 
         let currentLbSort = 'episodes';
+        let _lbCache = { data: null, sort: null, ts: 0 };
+        const _LB_CACHE_TTL = 60000; // 1 хвилина кешу
 
         function loadMyStats() {
             const statsEl = document.getElementById('rgMyStats');
@@ -7800,14 +7803,68 @@
                 </div>`;
         }
 
+        function _renderLeaderboard(users, sortBy) {
+            const lb = document.getElementById('rgLeaderboard');
+            if (!lb) return;
+            const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
+            if (!users.length) {
+                lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
+                return;
+            }
+
+            const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
+            const units = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
+            const unit  = units[sortBy] || '';
+            let html    = '';
+
+            if (users.length >= 3) {
+                const order  = [users[1], users[0], users[2]];
+                const cls    = ['p2', 'p1', 'p3'];
+                const crowns = ['🥈', '👑', '🥉'];
+                html += '<div class="rg-podium">';
+                order.forEach((u, i) => {
+                    const av = u.avatar ? `<img src="${u.avatar}" alt="" loading="lazy">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                    html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
+                        <div class="rg-podium-crown">${crowns[i]}</div>
+                        <div class="rg-podium-avatar">${av}</div>
+                        <div class="rg-podium-name">${u.name}</div>
+                        <div class="rg-podium-score">${u[sf]} ${unit}</div>
+                        <div class="rg-podium-bar"></div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            html += '<div class="rg-lb-list">';
+            users.slice(3).forEach((u, i) => {
+                const isMe = u.uid === myUid;
+                const av   = u.avatar ? `<img src="${u.avatar}" alt="" loading="lazy">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                const ri   = getUserRankInfo(u.episodes, u.hours);
+                html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.03, 0.5)}s">
+                    <div class="rg-lb-num">${i + 4}</div>
+                    <div class="rg-lb-avatar">${av}</div>
+                    <div class="rg-lb-info">
+                        <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
+                        <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
+                    </div>
+                    <div class="rg-lb-score">${u[sf]} <span class="unit">${unit}</span></div>
+                </div>`;
+            });
+            html += '</div>';
+            lb.innerHTML = html;
+        }
+
         async function loadLeaderboard(sortBy = 'episodes') {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
+            // Cache: reuse if same sort and < 1 min old
+            if (_lbCache.data && _lbCache.sort === sortBy && Date.now() - _lbCache.ts < _LB_CACHE_TTL) {
+                _renderLeaderboard(_lbCache.data, sortBy);
+                return;
+            }
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                const { collection, query, orderBy, limit, getDocs } =
-                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
                 let users = [];
                 snap.forEach(d => {
@@ -7824,62 +7881,13 @@
                 const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
                 users.sort((a, b) => b[sf] - a[sf]);
                 users = users.slice(0, 20);
-
-                if (!users.length) {
-                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
-                    return;
-                }
-
-                const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
-                const units = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
-                const unit  = units[sortBy] || '';
-                let html    = '';
-
-                if (users.length >= 3) {
-                    const order  = [users[1], users[0], users[2]];
-                    const cls    = ['p2', 'p1', 'p3'];
-                    const crowns = ['🥈', '👑', '🥉'];
-                    html += '<div class="rg-podium">';
-                    order.forEach((u, i) => {
-                        const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
-                        html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
-                            <div class="rg-podium-crown">${crowns[i]}</div>
-                            <div class="rg-podium-avatar">${av}</div>
-                            <div class="rg-podium-name">${u.name}</div>
-                            <div class="rg-podium-score">${u[sf]} ${unit}</div>
-                            <div class="rg-podium-bar"></div>
-                        </div>`;
-                    });
-                    html += '</div>';
-                }
-
-                html += '<div class="rg-lb-list">';
-                users.slice(3).forEach((u, i) => {
-                    const isMe = u.uid === myUid;
-                    const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
-                    const ri   = getUserRankInfo(u.episodes, u.hours);
-                    html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.03, 0.5)}s">
-                        <div class="rg-lb-num">${i + 4}</div>
-                        <div class="rg-lb-avatar">${av}</div>
-                        <div class="rg-lb-info">
-                            <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
-                            <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
-                        </div>
-                        <div class="rg-lb-score">${u[sf]} <span class="unit">${unit}</span></div>
-                    </div>`;
-                });
-                html += '</div>';
-                lb.innerHTML = html;
+                _lbCache = { data: users, sort: sortBy, ts: Date.now() };
+                _renderLeaderboard(users, sortBy);
             } catch(e) {
-                console.warn('Leaderboard:', e);
-                lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
+                lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Не вдалося завантажити рейтинг</p></div>`;
             }
         }
 
-        // ─────────────────────────────────────────────────
-        //  Community Chat (Telegram-style)
-        // ─────────────────────────────────────────────────
-        let comUnsub = null;
         let comPostType = 'text';
 
         function initCommunity() {
@@ -8038,8 +8046,6 @@
             sendBtn.disabled = true;
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
-                const { addDoc, collection, serverTimestamp } =
-                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const p = getProfile();
                 const msgData = {
                     text,
@@ -8091,7 +8097,7 @@
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
+                {
                     const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
                     comUnsub = onSnapshot(q, snap => {
                         if (snap.empty) {
@@ -8167,7 +8173,7 @@
                     }, () => {
                         box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                     });
-                });
+                }
             } catch(e) {
                 if (box) box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Спільнота недоступна без підключення</p></div>`;
             }
