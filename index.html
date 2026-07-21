@@ -7866,7 +7866,26 @@ const ACHIEVEMENTS = [
 
             loadMyStats();
             _renderDailyTasks();
-            loadLeaderboard('xp'); startXPSync();
+            
+            // DIAG: check if loadLeaderboard is called
+            const _lbDiag = document.createElement('div');
+            _lbDiag.id = 'lbDiag';
+            _lbDiag.style.cssText = 'position:fixed;top:10px;left:10px;background:#1a1a2e;color:#0f0;padding:10px;font-size:11px;font-family:monospace;z-index:99999;border-radius:6px;border:1px solid #333;max-width:90vw;max-height:300px;overflow:auto;white-space:pre-wrap;';
+            _lbDiag.innerHTML = 'initRatingPage DONE\n';
+            _lbDiag.innerHTML += 'rgLeaderboard exists: ' + (!!document.getElementById('rgLeaderboard')) + '\n';
+            _lbDiag.innerHTML += 'firebaseInit: ' + firebaseInitialized + '\n';
+            _lbDiag.innerHTML += 'db: ' + (db ? 'Y' : 'N') + '\n';
+            _lbDiag.innerHTML += 'calling loadLeaderboard...\n';
+            document.body.appendChild(_lbDiag);
+            setTimeout(() => _lbDiag.remove(), 20000);
+            
+            try {
+                loadLeaderboard('xp');
+                _lbDiag.innerHTML += 'loadLeaderboard called OK\n';
+            } catch(e) {
+                _lbDiag.innerHTML += 'loadLeaderboard threw: ' + e.message + '\n';
+            }
+            startXPSync();
         }
 
         // ═══════════════════════════════════════════════════════
