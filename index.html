@@ -5627,6 +5627,16 @@
 
         function initFirebase() {
             try {
+                // Check if Firebase functions are available
+                if (typeof initializeApp !== 'function') {
+                    throw new Error('initializeApp is not a function (type: ' + typeof initializeApp + ')');
+                }
+                if (typeof getAuth !== 'function') {
+                    throw new Error('getAuth is not a function (type: ' + typeof getAuth + ')');
+                }
+                if (typeof getFirestore !== 'function') {
+                    throw new Error('getFirestore is not a function (type: ' + typeof getFirestore + ')');
+                }
                 firebaseApp = initializeApp(FIREBASE_CONFIG);
                 auth = getAuth(firebaseApp);
                 // browserLocalPersistence — сесія зберігається в браузері (localStorage)
@@ -5635,6 +5645,9 @@
                 firebaseInitialized = true;
                 console.log('Firebase initialized successfully');
                 window.__firebaseReady = true;
+                // Remove diagnostic banner if present
+                const banner = document.getElementById('firebase-diag');
+                if (banner) banner.remove();
                 startXPSync();
                 return true;
             } catch (e) {
@@ -5642,6 +5655,16 @@
                 window.__firebaseError = e.message;
                 window.__firebaseReady = false;
                 firebaseInitialized = false;
+                // Show visible diagnostic
+                const existing = document.getElementById('firebase-diag');
+                if (!existing) {
+                    const div = document.createElement('div');
+                    div.id = 'firebase-diag';
+                    div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff4444;color:#fff;padding:12px;font-family:monospace;font-size:14px;text-align:center;';
+                    div.textContent = 'Firebase Error: ' + e.message;
+                    document.body.appendChild(div);
+                    setTimeout(() => div.remove(), 10000);
+                }
                 // Retry after 1 second (imports might still be loading)
                 if (!window.__firebaseRetried) {
                     window.__firebaseRetried = true;
