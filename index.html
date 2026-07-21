@@ -7574,88 +7574,6 @@
             return                        { label: 'Новачок',        color: 'var(--text-muted)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' };
         }
 
-        function initRatingPage() {
-            const wrap = document.getElementById('ratingPageContainer');
-            if (!wrap || wrap.dataset.init) return;
-            wrap.dataset.init = '1';
-
-            wrap.innerHTML = `
-                <div class="rg-main-tabs" id="rgMainTabs">
-                    <button class="rg-main-tab active" data-panel="rating">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        Рейтинг
-                    </button>
-                    <button class="rg-main-tab" data-panel="community">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Суспільне
-                    </button>
-                </div>
-
-                <div class="rg-tab-panel active" id="rgPanelRating">
-                    <div id="rgMyStats"></div>
-                    <div id="rgDailyTasks"></div>
-                    <div id="rgAchievements"></div>
-                    <div class="rg-sort-tabs" id="rgSortTabs">
-                        <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
-                        <button class="rg-sort-tab" data-sort="hours">За годинами</button>
-                        <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
-                    </div>
-                    <div class="rg-lb-title">Глобальний рейтинг</div>
-                    <div id="rgLeaderboard" class="rg-lb-loader">
-                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
-                    </div>
-                </div>
-
-                <div class="rg-tab-panel" id="rgPanelCommunity"></div>
-            `;
-
-            wrap.querySelectorAll('.rg-main-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    wrap.querySelectorAll('.rg-main-tab').forEach(b => b.classList.remove('active'));
-                    wrap.querySelectorAll('.rg-tab-panel').forEach(p => p.classList.remove('active'));
-                    btn.classList.add('active');
-                    const id = 'rgPanel' + btn.dataset.panel.charAt(0).toUpperCase() + btn.dataset.panel.slice(1);
-                    const panel = document.getElementById(id);
-                    if (panel) panel.classList.add('active');
-
-                    if (btn.dataset.panel === 'community') {
-                        document.body.classList.add('community-active');
-                        const nav = document.getElementById('bottomNav');
-                        if (nav) nav.classList.add('hidden-nav');
-                        initCommunity();
-                        setTimeout(() => {
-                            const msgs = document.getElementById('comMessages');
-                            if (msgs) msgs.scrollTop = msgs.scrollHeight;
-                        }, 500);
-                    }
-                    if (btn.dataset.panel === 'rating') {
-                        document.body.classList.remove('community-active');
-                        const nav = document.getElementById('bottomNav');
-                        if (nav) nav.classList.remove('hidden-nav');
-                        loadMyStats();
-                        _renderDailyTasks();
-                        loadLeaderboard(currentLbSort);
-                    }
-                });
-            });
-
-            wrap.querySelectorAll('.rg-sort-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    wrap.querySelectorAll('.rg-sort-tab').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentLbSort = btn.dataset.sort;
-                    loadLeaderboard(currentLbSort);
-                });
-            });
-
-            loadMyStats();
-            _renderDailyTasks();
-            loadLeaderboard('episodes');
-        }
-
-        // ═══════════════════════════════════════════════════════
-        //  DAILY TASKS — random per day, auto-refresh
-        // ═══════════════════════════════════════════════════════
         const DAILY_TASK_POOL = [
             { id: 'watch1',  desc: 'Подивись 1 серію',          xp: 10,  check: (s) => s.episodesToday >= 1,  field: 'episodesToday', target: 1 },
             { id: 'watch3',  desc: 'Подивись 3 серії',          xp: 25,  check: (s) => s.episodesToday >= 3,  field: 'episodesToday', target: 3 },
@@ -7749,6 +7667,89 @@
             else localStorage.setItem('vakdab_daily_tasks', JSON.stringify(data));
         }
 
+
+        function initRatingPage() {
+            const wrap = document.getElementById('ratingPageContainer');
+            if (!wrap || wrap.dataset.init) return;
+            wrap.dataset.init = '1';
+
+            wrap.innerHTML = `
+                <div class="rg-main-tabs" id="rgMainTabs">
+                    <button class="rg-main-tab active" data-panel="rating">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Рейтинг
+                    </button>
+                    <button class="rg-main-tab" data-panel="community">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Суспільне
+                    </button>
+                </div>
+
+                <div class="rg-tab-panel active" id="rgPanelRating">
+                    <div id="rgMyStats"></div>
+                    <div id="rgDailyTasks"></div>
+                    <div id="rgAchievements"></div>
+                    <div class="rg-sort-tabs" id="rgSortTabs">
+                        <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
+                        <button class="rg-sort-tab" data-sort="hours">За годинами</button>
+                        <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
+                    </div>
+                    <div class="rg-lb-title">Глобальний рейтинг</div>
+                    <div id="rgLeaderboard" class="rg-lb-loader">
+                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+                    </div>
+                </div>
+
+                <div class="rg-tab-panel" id="rgPanelCommunity"></div>
+            `;
+
+            wrap.querySelectorAll('.rg-main-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wrap.querySelectorAll('.rg-main-tab').forEach(b => b.classList.remove('active'));
+                    wrap.querySelectorAll('.rg-tab-panel').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    const id = 'rgPanel' + btn.dataset.panel.charAt(0).toUpperCase() + btn.dataset.panel.slice(1);
+                    const panel = document.getElementById(id);
+                    if (panel) panel.classList.add('active');
+
+                    if (btn.dataset.panel === 'community') {
+                        document.body.classList.add('community-active');
+                        const nav = document.getElementById('bottomNav');
+                        if (nav) nav.classList.add('hidden-nav');
+                        initCommunity();
+                        setTimeout(() => {
+                            const msgs = document.getElementById('comMessages');
+                            if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                        }, 500);
+                    }
+                    if (btn.dataset.panel === 'rating') {
+                        document.body.classList.remove('community-active');
+                        const nav = document.getElementById('bottomNav');
+                        if (nav) nav.classList.remove('hidden-nav');
+                        loadMyStats();
+                        _renderDailyTasks();
+                        loadLeaderboard(currentLbSort);
+                    }
+                });
+            });
+
+            wrap.querySelectorAll('.rg-sort-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wrap.querySelectorAll('.rg-sort-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentLbSort = btn.dataset.sort;
+                    loadLeaderboard(currentLbSort);
+                });
+            });
+
+            loadMyStats();
+            _renderDailyTasks();
+            loadLeaderboard('episodes');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  DAILY TASKS — random per day, auto-refresh
+        // ═══════════════════════════════════════════════════════
         let currentLbSort = 'episodes';
 
         function loadMyStats() {
