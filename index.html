@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <!-- nocache:20260721081810x20260721081244 -->
+    <!-- nocache:20260721082641  44 -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>VakDab • твій аніме каталог</title>
@@ -7828,10 +7828,8 @@ const ACHIEVEMENTS = [
                     <div id="rgMyStats"></div>
                     <div id="rgDailyTasks"></div>
                     <div id="rgAchievements"></div>
-                    <div class="rg-lb-title">Глобальний рейтинг · XP</div>
-                    <div id="rgLeaderboard" class="rg-lb-loader">
-                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
-                    </div>
+                    <div class="rg-lb-title" style="margin-top:4px;">Глобальний рейтинг · XP</div>
+                    <div id="rgLeaderboard"><div style="display:flex;justify-content:center;padding:20px;"><svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div></div>
                 </div>
 
                 <div class="rg-tab-panel" id="rgPanelCommunity"></div>
@@ -7871,7 +7869,7 @@ const ACHIEVEMENTS = [
 
             loadMyStats();
             _renderDailyTasks();
-            
+            syncUserXP(); // одразу синхронізуємо XP в Firestore
             loadLeaderboard('xp'); startXPSync();
         }
 
@@ -7886,7 +7884,7 @@ const ACHIEVEMENTS = [
             if (!statsEl || !achEl) return;
 
             const profile    = getProfile();
-            const history    = Storage.getHistory()   || [];
+            const history    = Storage.getHistory() || JSON.parse(localStorage.getItem('vakdab_history') || '[]');
             const bookmarks  = Storage.getBookmarks() || [];
             const watchSec   = Storage.getWatchTime() || 0;
             const watchHours = Math.round(watchSec / 3600 * 10) / 10;
@@ -7949,7 +7947,8 @@ const ACHIEVEMENTS = [
             
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
+                // Без orderBy — не потребує Firestore composite index
+                const q = query(collection(db, 'users'), limit(200));
                 const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000));
                 const snap = await Promise.race([getDocs(q), tp]);
                 
