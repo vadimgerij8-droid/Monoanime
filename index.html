@@ -5671,7 +5671,11 @@ firebaseApp = initializeApp(FIREBASE_CONFIG);
 
             init() {
                 if (!firebaseInitialized) {
-                    console.warn('Firebase not available, auth disabled');
+                    console.warn('Firebase not ready, retrying auth init...');
+                    if (!this._initRetry) {
+                        this._initRetry = true;
+                        setTimeout(() => this.init(), 1500);
+                    }
                     return;
                 }
                 if (this._initialized) return;
@@ -7867,25 +7871,7 @@ const ACHIEVEMENTS = [
             loadMyStats();
             _renderDailyTasks();
             
-            // DIAG: check if loadLeaderboard is called
-            const _lbDiag = document.createElement('div');
-            _lbDiag.id = 'lbDiag';
-            _lbDiag.style.cssText = 'position:fixed;top:10px;left:10px;background:#1a1a2e;color:#0f0;padding:10px;font-size:11px;font-family:monospace;z-index:99999;border-radius:6px;border:1px solid #333;max-width:90vw;max-height:300px;overflow:auto;white-space:pre-wrap;';
-            _lbDiag.innerHTML = 'initRatingPage DONE\n';
-            _lbDiag.innerHTML += 'rgLeaderboard exists: ' + (!!document.getElementById('rgLeaderboard')) + '\n';
-            _lbDiag.innerHTML += 'firebaseInit: ' + firebaseInitialized + '\n';
-            _lbDiag.innerHTML += 'db: ' + (db ? 'Y' : 'N') + '\n';
-            _lbDiag.innerHTML += 'calling loadLeaderboard...\n';
-            document.body.appendChild(_lbDiag);
-            setTimeout(() => _lbDiag.remove(), 20000);
-            
-            try {
-                loadLeaderboard('xp');
-                _lbDiag.innerHTML += 'loadLeaderboard called OK\n';
-            } catch(e) {
-                _lbDiag.innerHTML += 'loadLeaderboard threw: ' + e.message + '\n';
-            }
-            startXPSync();
+            loadLeaderboard('xp'); startXPSync();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -7922,14 +7908,12 @@ const ACHIEVEMENTS = [
                         <div class="rg-stats-avatar">${avHtml}</div>
                         <div>
                             <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
-                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">Lv.${xpProg.level} · ${rankInfo.icon || ''}${rankInfo.label}</div>
+                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.icon || ''} ${rankInfo.label}</div>
                         </div>
                         <div class="rg-stats-xp">
-                            <div class="rg-stats-xp-val">${totalXP} XP</div>
                             <div class="rg-stats-xp-bar">
                                 <div class="rg-stats-xp-fill" style="width:${xpProg.pct}%"></div>
                             </div>
-                            <div class="rg-stats-xp-label">${xpProg.into} / ${xpProg.needed} до Lv.${xpProg.level + 1}</div>
                         </div>
                     </div>
                     <div class="rg-stats-grid">
@@ -7962,21 +7946,11 @@ const ACHIEVEMENTS = [
             if (!lb) return;
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
             
-            const _diag = document.createElement('div');
-            _diag.style.cssText = 'position:fixed;bottom:50px;left:10px;right:10px;background:#1a1a2e;color:#0f0;padding:8px;font-size:10px;font-family:monospace;z-index:9999;border-radius:6px;border:1px solid #333;max-height:200px;overflow:auto;white-space:pre-wrap;';
-            document.body.appendChild(_diag);
-            const _log = (msg) => { _diag.innerHTML += msg + '\n'; };
-            setTimeout(() => _diag.remove(), 15000);
-            
             try {
-                _log('LB start. fbInit=' + firebaseInitialized + ' db=' + (db ? 'Y' : 'N'));
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                _log('LB: building query...');
                 const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
-                _log('LB: calling getDocs...');
                 const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 3000));
                 const snap = await Promise.race([getDocs(q), tp]);
-                _log('LB: getDocs OK! docs=' + snap.size);
                 
                 let users = [];
                 snap.forEach(d => {
@@ -7995,7 +7969,6 @@ const ACHIEVEMENTS = [
                 users.sort((a, b) => b.xp - a.xp);
 
                 if (!users.length) {
-                    _log('LB: no users, showing empty');
                     lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
                     return;
                 }
@@ -8022,7 +7995,6 @@ const ACHIEVEMENTS = [
 
                 renderLeaderboard(lb, users);
             } catch(e) {
-                _log('LB ERR: ' + (e.message || e));
                 try {
                     const profile = getProfile();
                     const xp = calcTotalXP();
@@ -8041,7 +8013,6 @@ const ACHIEVEMENTS = [
                     </div>
                     <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
                 } catch(e2) {
-                    _log('LB FALLBACK ERR: ' + (e2.message || e2));
                     lb.innerHTML = `<div class="rg-lb-empty"><p>Рейтинг тимчасово недоступний</p></div>`;
                 }
             }
