@@ -8921,7 +8921,7 @@
                 ${renderBookmarksPanel(stats.bookmarksList)}
               </div>
               <div class="profile-panel" id="profilePanel-achievements">
-                ${renderAchievementsPanel(stats.achievementsList, stats.totalWatchTime)}
+                ${renderAchievementsPanel(stats.achievementsList, stats.totalWatchTime, stats.uniqueAnime)}
               </div>
             </div>
           `;
@@ -9241,7 +9241,7 @@
             return html;
         }
 
-        function renderAchievementsPanel(achievements, totalWatchTime) {
+        function renderAchievementsPanel(achievements, totalWatchTime, uniqueCount) {
             const hours = Math.floor(totalWatchTime / 3600);
             const minutes = Math.floor((totalWatchTime % 3600) / 60);
             const unlockedCount = achievements.filter(a => a.unlocked).length;
