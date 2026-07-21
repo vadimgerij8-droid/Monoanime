@@ -7949,7 +7949,7 @@ const ACHIEVEMENTS = [
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
                 const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
-                const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 3000));
+                const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000));
                 const snap = await Promise.race([getDocs(q), tp]);
                 
                 let users = [];
@@ -8013,7 +8013,9 @@ const ACHIEVEMENTS = [
                     </div>
                     <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
                 } catch(e2) {
-                    lb.innerHTML = `<div class="rg-lb-empty"><p>Рейтинг тимчасово недоступний</p></div>`;
+                    const _pr = getProfile(); const _xp = calcTotalXP(); const _lv = getLevel(_xp);
+                    const _av = _pr.avatar ? `<img src="${_pr.avatar}" alt="">` : `<span>${(_pr.nickname||"?")[0].toUpperCase()}</span>`;
+                    lb.innerHTML = `<div class="rg-lb-list"><div class="rg-lb-item rg-lb-me"><div class="rg-lb-rank" style="color:var(--accent)">#1</div><div class="rg-lb-avatar">${_av}</div><div class="rg-lb-info"><div class="rg-lb-name">${_pr.nickname||"Ти"}</div><div class="rg-lb-sub">${_xp} XP · Lv.${_lv}</div></div></div></div><p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Глобальний рейтинг недоступний офлайн</p>`;
                 }
             }
         }
@@ -9251,10 +9253,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                     <div class="label">XP</div>
                   </div>
                   <div class="profile-stat-pill">
-                    <div class="num">Lv.${getLevel(calcTotalXP())}</div>
-                    <div class="label">Рівень</div>
-                  </div>
-                  <div class="profile-stat-pill">
                     <div class="num">${stats.viewed}</div>
                     <div class="label">Переглянуто</div>
                   </div>
@@ -9268,13 +9266,7 @@ async function _sendMessage(user, pendingMedia, onSent) {
                   </div>
                 </div>
                 <div style="margin:8px 0 0;padding:0 4px;">
-                  <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);margin-bottom:2px;">
-                    <span>Lv.${getLevel(calcTotalXP())}</span>
-                    <span>${getXPProgress(calcTotalXP()).into}/${getXPProgress(calcTotalXP()).needed} XP</span>
-                  </div>
-                  <div style="height:4px;background:rgba(128,128,128,0.15);border-radius:2px;overflow:hidden;">
-                    <div style="height:100%;width:${getXPProgress(calcTotalXP()).pct}%;background:var(--accent);border-radius:2px;transition:width .5s;"></div>
-                  </div>
+                  
                 </div>
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
                   <button class="btn-outline" id="profileLogoutBtn" onclick="Auth.handleExit()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
