@@ -4673,7 +4673,162 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.1);
         }
-        .rg-ach-item.locked { opacity: 0.3; filter: grayscale(100%); }
+        
+        /* ── Profile achievement progress bars ── */
+        .profile-ach-progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin: 0 0 0.8rem 0;
+            overflow: hidden;
+        }
+        .profile-ach-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width .5s ease;
+        }
+        .profile-ach-progress-mini {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .profile-ach-progress-fill-mini {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width .4s ease;
+        }
+        .profile-ach-badge.unlocked {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-radius: 50%;
+            width: 26px; height: 26px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800;
+        }
+        .profile-ach-badge.locked {
+            font-size: 10px; font-weight: 700;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .profile-ach-icon.locked-icon { opacity: 0.35; }
+
+        /* ── Daily Tasks ── */
+        .rg-daily-section {
+            margin: 0.8rem 1rem 0;
+            background: var(--glass);
+            backdrop-filter: blur(28px) saturate(1.5);
+            -webkit-backdrop-filter: blur(28px) saturate(1.5);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.1rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        .rg-daily-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
+        }
+        .rg-daily-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 0.9rem;
+        }
+        .rg-daily-title {
+            font-size: 14px; font-weight: 700;
+            color: var(--text); letter-spacing: -0.2px;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .rg-daily-title svg { width: 16px; height: 16px; }
+        .rg-daily-reset {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .rg-daily-reset svg { width: 11px; height: 11px; }
+        .rg-daily-list {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .rg-daily-item {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 10px 12px;
+            background: rgba(var(--accent-rgb), 0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: all .3s cubic-bezier(.2,.9,.2,1);
+        }
+        .rg-daily-item.done {
+            opacity: 0.5;
+            background: rgba(var(--accent-rgb), 0.06);
+            border-color: rgba(var(--accent-rgb), 0.2);
+        }
+        .rg-daily-item.done .rg-daily-name { text-decoration: line-through; }
+        .rg-daily-check {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all .3s;
+        }
+        .rg-daily-item.done .rg-daily-check {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--accent-text);
+        }
+        .rg-daily-check svg { width: 12px; height: 12px; opacity: 0; transition: opacity .2s; }
+        .rg-daily-item.done .rg-daily-check svg { opacity: 1; }
+        .rg-daily-info { flex: 1; min-width: 0; }
+        .rg-daily-name {
+            font-size: 12.5px; font-weight: 700; color: var(--text);
+        }
+        .rg-daily-desc {
+            font-size: 10px; color: var(--text-muted); margin-top: 2px;
+        }
+        .rg-daily-reward {
+            font-size: 11px; font-weight: 700; color: var(--text-secondary);
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 3px;
+        }
+        .rg-daily-reward svg { width: 12px; height: 12px; }
+        .rg-daily-progress {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .rg-daily-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width .4s ease;
+        }
+        .rg-daily-xp {
+            margin-top: 0.8rem;
+            padding: 8px 12px;
+            background: rgba(var(--accent-rgb), 0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .rg-daily-xp-label {
+            font-size: 11px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .rg-daily-xp-value {
+            font-size: 15px; font-weight: 800; color: var(--text);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .rg-daily-xp-value svg { width: 14px; height: 14px; }
+
+.rg-ach-item.locked { opacity: 0.3; filter: grayscale(100%); }
         .rg-ach-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
         .rg-ach-icon svg { width: 24px; height: 24px; }
         .rg-ach-name {
@@ -5845,6 +6000,11 @@
         //  СХОВИЩЕ
         // ====================================================================
         const Storage = {
+        getDailyTasks() { try { return JSON.parse(localStorage.getItem('vakdab_daily_tasks')); } catch { return null; } },
+        setDailyTasks(d) { localStorage.setItem('vakdab_daily_tasks', JSON.stringify(d)); },
+        getDailyStats() { try { return JSON.parse(localStorage.getItem('vakdab_daily_stats')); } catch { return null; } },
+        setDailyStats(d) { localStorage.setItem('vakdab_daily_stats', JSON.stringify(d)); },
+
             _syncTimer: null,
             _debounceSync() {
                 if (this._syncTimer) clearTimeout(this._syncTimer);
@@ -7432,6 +7592,7 @@
 
                 <div class="rg-tab-panel active" id="rgPanelRating">
                     <div id="rgMyStats"></div>
+                    <div id="rgDailyTasks"></div>
                     <div id="rgAchievements"></div>
                     <div class="rg-sort-tabs" id="rgSortTabs">
                         <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
@@ -7471,6 +7632,7 @@
                         const nav = document.getElementById('bottomNav');
                         if (nav) nav.classList.remove('hidden-nav');
                         loadMyStats();
+                        _renderDailyTasks();
                         loadLeaderboard(currentLbSort);
                     }
                 });
@@ -7486,7 +7648,104 @@
             });
 
             loadMyStats();
+            _renderDailyTasks();
             loadLeaderboard('episodes');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  DAILY TASKS — random per day, auto-refresh
+        // ═══════════════════════════════════════════════════════
+        const DAILY_TASK_POOL = [
+            { id: 'watch1',  desc: 'Подивись 1 серію',          xp: 10,  check: (s) => s.episodesToday >= 1,  field: 'episodesToday', target: 1 },
+            { id: 'watch3',  desc: 'Подивись 3 серії',          xp: 25,  check: (s) => s.episodesToday >= 3,  field: 'episodesToday', target: 3 },
+            { id: 'watch5',  desc: 'Подивись 5 серій',          xp: 50,  check: (s) => s.episodesToday >= 5,  field: 'episodesToday', target: 5 },
+            { id: 'bm1',     desc: 'Додай 1 закладку',          xp: 15,  check: (s) => s.bookmarksAdded >= 1,  field: 'bookmarksAdded', target: 1 },
+            { id: 'bm3',     desc: 'Додай 3 закладки',          xp: 40,  check: (s) => s.bookmarksAdded >= 3,  field: 'bookmarksAdded', target: 3 },
+            { id: 'uniq1',   desc: 'Спробуй нове аніме',        xp: 20,  check: (s) => s.uniqueToday >= 1,  field: 'uniqueToday', target: 1 },
+            { id: 'uniq3',   desc: 'Спробуй 3 нових тайтли',   xp: 45,  check: (s) => s.uniqueToday >= 3,  field: 'uniqueToday', target: 3 },
+            { id: 'chat1',   desc: 'Напиши в спільноті',        xp: 15,  check: (s) => s.postsToday >= 1,  field: 'postsToday', target: 1 },
+            { id: 'chat3',   desc: 'Напиши 3 повідомлення',    xp: 30,  check: (s) => s.postsToday >= 3,  field: 'postsToday', target: 3 },
+            { id: 'wt30m',   desc: '30 хв перегляду',          xp: 15,  check: (s) => s.minutesToday >= 30, field: 'minutesToday', target: 30 },
+            { id: 'wt1h',    desc: '1 година перегляду',        xp: 30,  check: (s) => s.minutesToday >= 60, field: 'minutesToday', target: 60 },
+            { id: 'wt2h',    desc: '2 години перегляду',        xp: 60,  check: (s) => s.minutesToday >= 120, field: 'minutesToday', target: 120 },
+        ];
+
+        function _getTodayKey() {
+            const d = new Date();
+            return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+        }
+
+        function _getDailyTasks() {
+            const today = _getTodayKey();
+            const stored = Storage.getDailyTasks ? Storage.getDailyTasks() : null;
+            if (stored && stored.date === today) return stored;
+
+            // Generate 5 random tasks for today
+            const pool = [...DAILY_TASK_POOL];
+            const tasks = [];
+            for (let i = 0; i < 5 && pool.length > 0; i++) {
+                const idx = Math.floor(Math.random() * pool.length);
+                tasks.push(pool[idx]);
+                pool.splice(idx, 1);
+            }
+            const data = { date: today, tasks, completed: {}, xp: 0 };
+            if (Storage.setDailyTasks) Storage.setDailyTasks(data);
+            else localStorage.setItem('vakdab_daily_tasks', JSON.stringify(data));
+            return data;
+        }
+
+        function _getDailyStats() {
+            const today = _getTodayKey();
+            const stored = Storage.getDailyStats ? Storage.getDailyStats() : null;
+            if (stored && stored.date === today) return stored;
+
+            const data = { date: today, episodesToday: 0, bookmarksAdded: 0, uniqueToday: 0, postsToday: 0, minutesToday: 0 };
+            if (Storage.setDailyStats) Storage.setDailyStats(data);
+            else localStorage.setItem('vakdab_daily_stats', JSON.stringify(data));
+            return data;
+        }
+
+        function _trackDailyEvent(type, value = 1) {
+            const stats = _getDailyStats();
+            if (stats[type] !== undefined) stats[type] += value;
+            if (Storage.setDailyStats) Storage.setDailyStats(stats);
+            else localStorage.setItem('vakdab_daily_stats', JSON.stringify(stats));
+        }
+
+        function _renderDailyTasks() {
+            const container = document.getElementById('rgDailyTasks');
+            if (!container) return;
+            const data = _getDailyTasks();
+            const stats = _getDailyStats();
+            let totalXp = 0;
+            let html = '<div class="rg-daily-section"><div class="rg-daily-header"><div class="rg-daily-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Щоденні завдання</div><div class="rg-daily-reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Оновлення о 00:00</div></div><div class="rg-daily-list">';
+
+            data.tasks.forEach((t, i) => {
+                const done = t.check(stats);
+                if (done && !data.completed[t.id]) {
+                    data.completed[t.id] = true;
+                    data.xp += t.xp;
+                }
+                if (data.completed[t.id]) totalXp += t.xp;
+                const current = stats[t.field] || 0;
+                const progress = done ? 100 : Math.min(Math.round(current / t.target * 100), 100);
+                const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+                html += `<div class="rg-daily-item ${done?'done':''}">
+                    <div class="rg-daily-check">${checkSvg}</div>
+                    <div class="rg-daily-info">
+                        <div class="rg-daily-name">${t.desc}</div>
+                        <div class="rg-daily-desc">${current} / ${t.target}</div>
+                        <div class="rg-daily-progress"><div class="rg-daily-progress-fill" style="width:${progress}%"></div></div>
+                    </div>
+                    <div class="rg-daily-reward"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>+${t.xp}</div>
+                </div>`;
+            });
+
+            html += `</div><div class="rg-daily-xp"><div class="rg-daily-xp-label">Зароблено XP</div><div class="rg-daily-xp-value"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${totalXp}</div></div></div>`;
+            container.innerHTML = html;
+
+            if (Storage.setDailyTasks) Storage.setDailyTasks(data);
+            else localStorage.setItem('vakdab_daily_tasks', JSON.stringify(data));
         }
 
         let currentLbSort = 'episodes';
@@ -7811,6 +8070,7 @@
                 }
 
                 await addDoc(collection(db, 'community_posts'), msgData);
+                    _trackDailyEvent('postsToday', 1);
                 inp.value = '';
                 inp.style.height = 'auto';
                 comPostType = 'text';
@@ -8393,129 +8653,162 @@
 
         function getAchievements(history, bookmarks, uniqueCount, totalEpisodes, totalWatchTime) {
             const hours = totalWatchTime / 3600;
-            return [{
-                id: 'first_hours',
-                name: 'Перші 100 годин',
-                description: 'Загальний час перегляду: ' + Math.floor(hours) + ' годин',
-                unlocked: hours >= 100,
-                progress: Math.min(Math.floor(hours / 100 * 100), 100),
-                icon: 'clock'
-            }, {
-                id: 'marathon',
-                name: 'Марафонець',
-                description: 'Переглянуто 10 серій за один день',
-                unlocked: totalEpisodes >= 10,
-                progress: Math.min(Math.floor(totalEpisodes / 10 * 100), 100),
-                icon: 'bolt'
-            }, {
-                id: 'collector',
-                name: 'Колекціонер',
-                description: bookmarks.length + ' закладок у збережених',
-                unlocked: bookmarks.length >= 50,
-                progress: Math.min(Math.floor(bookmarks.length / 50 * 100), 100),
-                icon: 'bookmark'
-            }, {
-                id: 'first_50',
-                name: 'Перші 50 тайтлів',
-                description: 'Переглянуто ' + uniqueCount + ' з 50 тайтлів',
-                unlocked: uniqueCount >= 50,
-                progress: Math.min(Math.floor(uniqueCount / 50 * 100), 100),
-                icon: 'list'
-            }, {
-                id: 'social',
-                name: 'Соціальний глядач',
-                description: 'Поділились 25 тайтлами',
-                unlocked: uniqueCount >= 25,
-                progress: Math.min(Math.floor(uniqueCount / 25 * 100), 100),
-                icon: 'users'
-            }, {
-                id: 'full_day',
-                name: 'Ціла доба в аніме',
-                description: 'Загальний час: ' + Math.floor(hours) + ' год · потрібно 24 год',
-                unlocked: hours >= 24,
-                progress: Math.min(Math.floor(hours / 24 * 100), 100),
-                icon: 'star'
-            }, {
-                id: 'enthusiast',
-                name: 'Ентузіаст',
-                description: 'Переглянути 100 різних тайтлів',
-                unlocked: uniqueCount >= 100,
-                progress: Math.min(Math.floor(uniqueCount / 100 * 100), 100),
-                icon: 'fire'
-            }];
-        }
+            const watchMinutes = Math.floor(totalWatchTime / 60);
+            const days = Math.floor(totalWatchTime / 86400);
+            const socialPosts = (window._communityPostsCount || 0);
 
-        
-        // Стиснення зображення перед збереженням (щоб Firestore не падав)
-        // Upload image to Cloudinary, return URL
-        async function uploadToCloudinary(file, maxW, maxH, quality) {
-            // Compress image locally, returns a Blob
-            const compressedBlob = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, hh = img.height;
-                        if (w > maxW) { hh = hh * (maxW / w); w = maxW; }
-                        if (hh > maxH) { w = w * (maxH / hh); hh = maxH; }
-                        canvas.width = Math.round(w);
-                        canvas.height = Math.round(hh);
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        // toBlob is async and returns Blob, not dataURL
-                        canvas.toBlob(blob => {
-                            if (blob) resolve(blob);
-                            else reject(new Error('Canvas toBlob failed'));
-                        }, 'image/jpeg', quality);
-                    };
-                    img.onerror = () => reject(new Error('Image load failed'));
-                    img.src = ev.target.result;
-                };
-                reader.onerror = () => reject(new Error('FileReader failed'));
-                reader.readAsDataURL(file);
-            });
+            // 100 achievements — progressive difficulty
+            const defs = [
+                // ── Series milestones (1-20) ──
+                { id: 'ep_1',      name: 'Перший крок',          desc: 'Подивись 1 серію',              field: 'episodes', need: 1,     icon: 'play' },
+                { id: 'ep_3',      name: 'Спробував',           desc: '3 серії',                       field: 'episodes', need: 3,     icon: 'play' },
+                { id: 'ep_5',      name: 'Намагаюсь',           desc: '5 серій',                       field: 'episodes', need: 5,     icon: 'play' },
+                { id: 'ep_10',     name: 'Десяточка',           desc: '10 серій',                      field: 'episodes', need: 10,    icon: 'play' },
+                { id: 'ep_15',     name: 'Вхід в ритм',         desc: '15 серій',                      field: 'episodes', need: 15,    icon: 'play' },
+                { id: 'ep_20',     name: 'Двадцяточка',         desc: '20 серій',                      field: 'episodes', need: 20,    icon: 'play' },
+                { id: 'ep_25',     name: 'Серійний глядач',    desc: '25 серій',                      field: 'episodes', need: 25,    icon: 'play' },
+                { id: 'ep_30',     name: 'Тридцяточка',        desc: '30 серій',                      field: 'episodes', need: 30,    icon: 'play' },
+                { id: 'ep_40',     name: 'Сороковичок',        desc: '40 серій',                      field: 'episodes', need: 40,    icon: 'play' },
+                { id: 'ep_50',     name: 'Півсотні',           desc: '50 серій',                      field: 'episodes', need: 50,    icon: 'play' },
+                { id: 'ep_60',     name: 'Шістдесят',          desc: '60 серій',                      field: 'episodes', need: 60,    icon: 'play' },
+                { id: 'ep_75',     name: 'Сімдесят п\'ять',   desc: '75 серій',                      field: 'episodes', need: 75,    icon: 'play' },
+                { id: 'ep_100',    name: 'Сотка серій',        desc: '100 серій',                     field: 'episodes', need: 100,   icon: 'play' },
+                { id: 'ep_125',    name: '125 серій',           desc: '125 серій',                     field: 'episodes', need: 125,   icon: 'play' },
+                { id: 'ep_150',    name: 'Сто п\'ятдесят',    desc: '150 серій',                     field: 'episodes', need: 150,   icon: 'play' },
+                { id: 'ep_175',    name: '175 серій',           desc: '175 серій',                     field: 'episodes', need: 175,   icon: 'play' },
+                { id: 'ep_200',    name: 'Двісті',              desc: '200 серій',                     field: 'episodes', need: 200,   icon: 'play' },
+                { id: 'ep_250',    name: '250 серій',           desc: '250 серій',                     field: 'episodes', need: 250,   icon: 'play' },
+                { id: 'ep_300',    name: 'Триста',             desc: '300 серій',                      field: 'episodes', need: 300,   icon: 'play' },
+                { id: 'ep_500',    name: 'П\'ятсот серій',     desc: '500 серій',                     field: 'episodes', need: 500,   icon: 'play' },
 
-            // Upload Blob to Cloudinary
-            const formData = new FormData();
-            formData.append('file', compressedBlob, 'upload.jpg');
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-            const resp = await fetch(uploadUrl, { method: 'POST', body: formData, mode: 'cors', credentials: 'omit' });
-            if (!resp.ok) {
-                const errText = await resp.text().catch(() => '');
-                throw new Error('Cloudinary upload failed: ' + resp.status + ' ' + errText.substring(0,100));
-            }
-            const data = await resp.json();
-            if (!data.secure_url) throw new Error('Cloudinary: no secure_url in response');
-            console.log('[Cloudinary] Upload OK:', data.secure_url.substring(0, 60));
-            return data.secure_url;
-        }
+                // ── Watch time milestones (21-40) ──
+                { id: 'wt_1m',     name: 'Перша хвилина',      desc: '1 хв перегляду',               field: 'watchMinutes', need: 1,     icon: 'clock' },
+                { id: 'wt_10m',    name: '10 хвилин',           desc: '10 хв',                        field: 'watchMinutes', need: 10,    icon: 'clock' },
+                { id: 'wt_30m',    name: 'Пів години',          desc: '30 хв',                         field: 'watchMinutes', need: 30,    icon: 'clock' },
+                { id: 'wt_1h',     name: 'Перша година',      desc: '1 год',                        field: 'hours', need: 1,        icon: 'clock' },
+                { id: 'wt_2h',     name: '2 години',           desc: '2 год',                         field: 'hours', need: 2,        icon: 'clock' },
+                { id: 'wt_3h',     name: '3 години',           desc: '3 год',                         field: 'hours', need: 3,        icon: 'clock' },
+                { id: 'wt_5h',     name: 'П\'ять годин',       desc: '5 год',                        field: 'hours', need: 5,        icon: 'clock' },
+                { id: 'wt_10h',    name: 'Десять годин',        desc: '10 год',                       field: 'hours', need: 10,       icon: 'clock' },
+                { id: 'wt_15h',    name: '15 годин',           desc: '15 год',                       field: 'hours', need: 15,       icon: 'clock' },
+                { id: 'wt_20h',    name: 'Цілий день',         desc: '20 год',                       field: 'hours', need: 20,       icon: 'clock' },
+                { id: 'wt_25h',    name: '25 годин',           desc: '25 год',                       field: 'hours', need: 25,       icon: 'clock' },
+                { id: 'wt_30h',    name: '30 годин',           desc: '30 год',                       field: 'hours', need: 30,       icon: 'clock' },
+                { id: 'wt_40h',    name: '40 годин',           desc: '40 год',                       field: 'hours', need: 40,       icon: 'clock' },
+                { id: 'wt_50h',    name: '50 годин',           desc: '50 год',                       field: 'hours', need: 50,       icon: 'clock' },
+                { id: 'wt_60h',    name: '60 годин',           desc: '60 год',                       field: 'hours', need: 60,       icon: 'clock' },
+                { id: 'wt_75h',    name: '75 годин',           desc: '75 год',                       field: 'hours', need: 75,       icon: 'clock' },
+                { id: 'wt_100h',   name: '100 годин',          desc: '100 год',                      field: 'hours', need: 100,      icon: 'clock' },
+                { id: 'wt_125h',   name: '125 годин',          desc: '125 год',                      field: 'hours', need: 125,      icon: 'clock' },
+                { id: 'wt_150h',   name: '150 годин',          desc: '150 год',                      field: 'hours', need: 150,      icon: 'clock' },
+                { id: 'wt_200h',   name: '200 годин',          desc: '200 год',                      field: 'hours', need: 200,      icon: 'clock' },
 
-        function compressImage(file, maxW, maxH, quality, callback) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, hh = img.height;
-                    if (w > maxW) { hh = hh * (maxW / w); w = maxW; }
-                    if (hh > maxH) { w = w * (maxH / hh); hh = maxH; }
-                    canvas.width = Math.round(w);
-                    canvas.height = Math.round(hh);
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    let result = canvas.toDataURL('image/jpeg', quality);
-                    if (result.length > 500000) result = canvas.toDataURL('image/jpeg', 0.4);
-                    if (result.length > 500000) result = canvas.toDataURL('image/jpeg', 0.2);
-                    callback(result);
-                };
-                img.src = ev.target.result;
+                // ── Unique anime titles (41-60) ──
+                { id: 'uq_1',      name: 'Перше аніме',        desc: '1 тайтл',                      field: 'unique', need: 1,       icon: 'list' },
+                { id: 'uq_3',      name: 'Спроба різноманіття', desc: '3 тайтли',                     field: 'unique', need: 3,       icon: 'list' },
+                { id: 'uq_5',      name: 'П\'ятірка тайтлів',  desc: '5 тайтлів',                   field: 'unique', need: 5,       icon: 'list' },
+                { id: 'uq_10',     name: 'Десять тайтлів',     desc: '10 тайтлів',                   field: 'unique', need: 10,      icon: 'list' },
+                { id: 'uq_15',     name: '15 тайтлів',          desc: '15 тайтлів',                  field: 'unique', need: 15,      icon: 'list' },
+                { id: 'uq_20',     name: '20 тайтлів',          desc: '20 тайтлів',                  field: 'unique', need: 20,      icon: 'list' },
+                { id: 'uq_25',     name: 'Соціальний глядач',  desc: '25 тайтлів',                   field: 'unique', need: 25,      icon: 'list' },
+                { id: 'uq_30',     name: '30 тайтлів',          desc: '30 тайтлів',                  field: 'unique', need: 30,      icon: 'list' },
+                { id: 'uq_40',     name: '40 тайтлів',          desc: '40 тайтлів',                  field: 'unique', need: 40,      icon: 'list' },
+                { id: 'uq_50',     name: 'Колекціонер',        desc: '50 тайтлів',                   field: 'unique', need: 50,      icon: 'list' },
+                { id: 'uq_60',     name: '60 тайтлів',          desc: '60 тайтлів',                  field: 'unique', need: 60,      icon: 'list' },
+                { id: 'uq_75',     name: '75 тайтлів',          desc: '75 тайтлів',                  field: 'unique', need: 75,      icon: 'list' },
+                { id: 'uq_100',    name: 'Ентузіаст',          desc: '100 тайтлів',                  field: 'unique', need: 100,     icon: 'list' },
+                { id: 'uq_125',    name: '125 тайтлів',         desc: '125 тайтлів',                  field: 'unique', need: 125,     icon: 'list' },
+                { id: 'uq_150',    name: '150 тайтлів',         desc: '150 тайтлів',                  field: 'unique', need: 150,     icon: 'list' },
+                { id: 'uq_175',    name: '175 тайтлів',         desc: '175 тайтлів',                  field: 'unique', need: 175,     icon: 'list' },
+                { id: 'uq_200',    name: '200 тайтлів',         desc: '200 тайтлів',                  field: 'unique', need: 200,     icon: 'list' },
+                { id: 'uq_250',    name: 'Бібліотекар',        desc: '250 тайтлів',                  field: 'unique', need: 250,     icon: 'list' },
+                { id: 'uq_300',    name: '300 тайтлів',         desc: '300 тайтлів',                  field: 'unique', need: 300,     icon: 'list' },
+                { id: 'uq_500',    name: 'Енциклопедист',      desc: '500 тайтлів',                  field: 'unique', need: 500,     icon: 'list' },
+
+                // ── Bookmarks (61-75) ──
+                { id: 'bm_1',      name: 'Перша закладка',     desc: '1 закладка',                   field: 'bookmarks', need: 1,     icon: 'bookmark' },
+                { id: 'bm_3',      name: '3 закладки',          desc: '3 закладки',                  field: 'bookmarks', need: 3,     icon: 'bookmark' },
+                { id: 'bm_5',      name: 'П\'ять закладок',   desc: '5 закладок',                   field: 'bookmarks', need: 5,     icon: 'bookmark' },
+                { id: 'bm_10',     name: '10 закладок',         desc: '10 закладок',                 field: 'bookmarks', need: 10,    icon: 'bookmark' },
+                { id: 'bm_15',     name: '15 закладок',         desc: '15 закладок',                 field: 'bookmarks', need: 15,    icon: 'bookmark' },
+                { id: 'bm_20',     name: '20 закладок',         desc: '20 закладок',                 field: 'bookmarks', need: 20,    icon: 'bookmark' },
+                { id: 'bm_25',     name: '25 закладок',         desc: '25 закладок',                 field: 'bookmarks', need: 25,    icon: 'bookmark' },
+                { id: 'bm_30',     name: '30 закладок',         desc: '30 закладок',                 field: 'bookmarks', need: 30,    icon: 'bookmark' },
+                { id: 'bm_40',     name: '40 закладок',         desc: '40 закладок',                 field: 'bookmarks', need: 40,    icon: 'bookmark' },
+                { id: 'bm_50',     name: 'Колекція',           desc: '50 закладок',                  field: 'bookmarks', need: 50,    icon: 'bookmark' },
+                { id: 'bm_75',     name: '75 закладок',         desc: '75 закладок',                 field: 'bookmarks', need: 75,    icon: 'bookmark' },
+                { id: 'bm_100',    name: '100 закладок',        desc: '100 закладок',                 field: 'bookmarks', need: 100,   icon: 'bookmark' },
+                { id: 'bm_125',    name: '125 закладок',        desc: '125 закладок',                 field: 'bookmarks', need: 125,   icon: 'bookmark' },
+                { id: 'bm_150',    name: '150 закладок',        desc: '150 закладок',                 field: 'bookmarks', need: 150,   icon: 'bookmark' },
+                { id: 'bm_200',    name: 'Архіваріус',          desc: '200 закладок',                 field: 'bookmarks', need: 200,   icon: 'bookmark' },
+
+                // ── Days watched (76-85) ──
+                { id: 'd_1',       name: 'Перший день',        desc: '1 день перегляду',            field: 'days', need: 1,       icon: 'star' },
+                { id: 'd_3',       name: '3 дні',              desc: '3 дні',                        field: 'days', need: 3,       icon: 'star' },
+                { id: 'd_7',       name: 'Тиждень',            desc: '7 днів',                       field: 'days', need: 7,       icon: 'star' },
+                { id: 'd_14',      name: 'Два тижні',         desc: '14 днів',                      field: 'days', need: 14,      icon: 'star' },
+                { id: 'd_21',      name: 'Три тижні',         desc: '21 день',                      field: 'days', need: 21,      icon: 'star' },
+                { id: 'd_30',      name: 'Місяць',            desc: '30 днів',                      field: 'days', need: 30,      icon: 'star' },
+                { id: 'd_50',      name: '50 днів',            desc: '50 днів',                      field: 'days', need: 50,      icon: 'star' },
+                { id: 'd_60',      name: 'Два місяці',        desc: '60 днів',                      field: 'days', need: 60,      icon: 'star' },
+                { id: 'd_90',      name: 'Три місяці',        desc: '90 днів',                      field: 'days', need: 90,      icon: 'star' },
+                { id: 'd_100',     name: 'Сотка днів',        desc: '100 днів',                     field: 'days', need: 100,     icon: 'star' },
+
+                // ── Social & special (86-100) ──
+                { id: 'soc_1',     name: 'Перший пост',       desc: 'Напиши в спільноті',          field: 'socialPosts', need: 1,     icon: 'users' },
+                { id: 'soc_3',     name: 'Три поста',         desc: '3 повідомлення',              field: 'socialPosts', need: 3,     icon: 'users' },
+                { id: 'soc_5',     name: 'П\'ять постів',    desc: '5 повідомлень',               field: 'socialPosts', need: 5,     icon: 'users' },
+                { id: 'soc_10',    name: 'Активний юзер',     desc: '10 повідомлень',              field: 'socialPosts', need: 10,    icon: 'users' },
+                { id: 'soc_25',    name: 'Болтун',           desc: '25 повідомлень',              field: 'socialPosts', need: 25,    icon: 'users' },
+                { id: 'soc_50',    name: 'Зірка спільноти',  desc: '50 повідомлень',              field: 'socialPosts', need: 50,    icon: 'users' },
+                { id: 'soc_100',   name: 'Легенда чату',     desc: '100 повідомлень',             field: 'socialPosts', need: 100,   icon: 'users' },
+
+                { id: 'sp_marathon',  name: 'Марафонець',       desc: '10 серій за день',           field: 'episodes', need: 10,      icon: 'bolt' },
+                { id: 'sp_halfday',   name: 'Пів доби аніме',   desc: '12 год перегляду',           field: 'hours', need: 12,        icon: 'bolt' },
+                { id: 'sp_fullday',   name: 'Ціла доба',        desc: '24 год перегляду',           field: 'hours', need: 24,        icon: 'bolt' },
+                { id: 'sp fullday',   name: 'Ціла доба',        desc: '24 год перегляду',           field: 'hours', need: 24,        icon: 'bolt' },
+                { id: 'sp_binge',     name: 'Бінджер',          desc: '50 год перегляду',           field: 'hours', need: 50,        icon: 'bolt' },
+                { id: 'sp_completionist', name: 'Перфекціоніст', desc: '200 серій',                field: 'episodes', need: 200,     icon: 'bolt' },
+                { id: 'sp_collector_100', name: 'Шукач',     desc: '100 закладок',                field: 'bookmarks', need: 100,   icon: 'bolt' },
+                { id: 'sp_explorer',  name: 'Дослідник',        desc: '150 тайтлів',                field: 'unique', need: 150,      icon: 'bolt' },
+                { id: 'sp_master',    name: 'Майстер аніме',    desc: '100 год + 100 серій',        field: 'master', need: 100,      icon: 'bolt' },
+            ];
+
+            const stats = {
+                episodes: totalEpisodes,
+                hours: hours,
+                watchMinutes: watchMinutes,
+                unique: uniqueCount,
+                bookmarks: bookmarks.length,
+                days: days,
+                socialPosts: socialPosts,
             };
-            reader.readAsDataURL(file);
+
+            return defs.map(d => {
+                let current, unlocked, progress;
+                if (d.field === 'master') {
+                    current = Math.min(stats.episodes, stats.hours);
+                    unlocked = stats.episodes >= 100 && stats.hours >= 100;
+                    progress = unlocked ? 100 : Math.min(Math.round(current / 100 * 100), 100);
+                } else {
+                    current = stats[d.field] || 0;
+                    unlocked = current >= d.need;
+                    progress = unlocked ? 100 : Math.min(Math.round(current / d.need * 100), 100);
+                }
+                return {
+                    id: d.id,
+                    name: d.name,
+                    description: d.desc,
+                    unlocked,
+                    progress,
+                    icon: d.icon,
+                    current: Math.round(current),
+                    need: d.need,
+                };
+            });
         }
 
-function renderProfilePage() {
+        function renderProfilePage() {
             const container = document.getElementById('profilePageContainer');
             if (!container) return;
             if (!Auth.isAuthenticated() && !Auth.isGuest()) {
@@ -8926,41 +9219,50 @@ function renderProfilePage() {
         function renderAchievementsPanel(achievements, totalWatchTime) {
             const hours = Math.floor(totalWatchTime / 3600);
             const minutes = Math.floor((totalWatchTime % 3600) / 60);
+            const unlockedCount = achievements.filter(a => a.unlocked).length;
+
+            const iconMap = {
+                clock:   'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
+                play:    'M5 3l14 9-14 9V3z',
+                bookmark:'M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21V5z',
+                list:    'M4 6h16M4 12h16M4 18h16',
+                users:   'M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4z',
+                star:    'M11.04 2.6a1 1 0 0 1 1.92 0l1.7 5.18a1 1 0 0 0 .95.69h5.47a1 1 0 0 1 .59 1.8l-4.43 3.22a1 1 0 0 0-.36 1.12l1.7 5.18a1 1 0 0 1-1.54 1.12l-4.42-3.22a1 1 0 0 0-1.18 0l-4.42 3.22a1 1 0 0 1-1.54-1.12l1.7-5.18a1 1 0 0 0-.36-1.12L3.3 10.27a1 1 0 0 1 .59-1.8h5.47a1 1 0 0 0 .95-.69l1.7-5.18z',
+                bolt:    'M13 10V3L4 14h7v7l9-11h-7z',
+                fire:    'M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.5-7s2.5 5 2.5 5c2 0 4-1 4-1a8 8 0 0 1-1.343 10.657z',
+            };
+
             let html = `
             <div class="profile-watch-card">
               <div class="profile-wt-label">Загальний час перегляду аніме</div>
               <div class="profile-wt-value">${hours}<span class="profile-wt-unit">год</span> ${minutes}<span class="profile-wt-unit">хв</span></div>
-              <div class="profile-wt-sub">≈ ${Math.round(totalWatchTime/3600*10)/10} годин · ${Storage.getHistory().length} серій</div>
+              <div class="profile-wt-sub">${Storage.getHistory().length} серій · ${uniqueCount} тайтлів</div>
             </div>
             <div class="profile-panel-header">
               <span class="profile-panel-title">Досягнення</span>
-              <span class="profile-panel-count">${achievements.filter(a=>a.unlocked).length} / ${achievements.length}</span>
+              <span class="profile-panel-count">${unlockedCount} / ${achievements.length}</span>
+            </div>
+            <div class="profile-ach-progress-bar">
+              <div class="profile-ach-progress-fill" style="width:${Math.round(unlockedCount/achievements.length*100)}%"></div>
             </div>
             <div class="profile-achievement-list">
           `;
             achievements.forEach(a => {
+                const d = iconMap[a.icon] || iconMap.clock;
                 const unlocked = a.unlocked;
                 const progress = a.progress || 0;
-                const iconMap = {
-                    clock: 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
-                    bolt: 'M13 10V3L4 14h7v7l9-11h-7z',
-                    bookmark: 'M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21V5z',
-                    list: 'M4 6h16M4 12h16M4 18h16',
-                    users: 'M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4z',
-                    star: 'M11.04 2.6a1 1 0 0 1 1.92 0l1.7 5.18a1 1 0 0 0 .95.69h5.47a1 1 0 0 1 .59 1.8l-4.43 3.22a1 1 0 0 0-.36 1.12l1.7 5.18a1 1 0 0 1-1.54 1.12l-4.42-3.22a1 1 0 0 0-1.18 0l-4.42 3.22a1 1 0 0 1-1.54-1.12l1.7-5.18a1 1 0 0 0-.36-1.12L3.3 10.27a1 1 0 0 1 .59-1.8h5.47a1 1 0 0 0 .95-.69l1.7-5.18z',
-                    fire: 'M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.5-7s2.5 5 2.5 5c2 0 4-1 4-1a8 8 0 0 1-1.343 10.657z'
-                };
-                const d = iconMap[a.icon] || 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z';
+                const curText = a.current !== undefined && a.need !== undefined ? `${a.current}/${a.need}` : (unlocked ? '✓' : Math.round(progress)+'%');
                 html += `
               <div class="profile-achievement ${unlocked?'':'locked'}">
-                <div class="profile-ach-icon">
+                <div class="profile-ach-icon ${unlocked?'':'locked-icon'}">
                   <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>
                 </div>
                 <div class="profile-ach-info">
                   <div class="profile-ach-name">${a.name}</div>
                   <div class="profile-ach-value">${a.description}</div>
+                  ${unlocked ? '' : `<div class="profile-ach-progress-mini"><div class="profile-ach-progress-fill-mini" style="width:${progress}%"></div></div>`}
                 </div>
-                <div class="profile-ach-badge">${unlocked ? 'Виконано' : (progress < 100 ? Math.round(progress)+'%' : 'Заблоковано')}</div>
+                <div class="profile-ach-badge ${unlocked?'unlocked':'locked'}">${unlocked ? '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" style=\"width:14px;height:14px\"><polyline points=\"20 6 9 17 4 12\"/></svg>' : curText}</div>
               </div>
             `;
             });
@@ -8968,9 +9270,6 @@ function renderProfilePage() {
             return html;
         }
 
-        // ====================================================================
-        //  РЕДАГУВАННЯ ПРОФІЛЮ
-        // ====================================================================
         function profileEditNick() {
             const nickEl = document.getElementById('profileNickText');
             if (!nickEl) return;
@@ -9495,6 +9794,7 @@ function renderProfilePage() {
                             history[idx].progress = Math.min(progress, 100);
                             history[idx].duration = Math.floor(video.currentTime);
                             Storage.setHistory(history);
+        _trackDailyEvent('episodesToday', 1); _trackDailyEvent('minutesToday', 0.5);
                         } else {
                             const entry = {
                                 animeId: playerPageAnime.mal_id || playerPageAnime.url.hashCode(),
@@ -9510,6 +9810,7 @@ function renderProfilePage() {
                             history.unshift(entry);
                             if (history.length > 200) history.length = 200;
                             Storage.setHistory(history);
+        _trackDailyEvent('episodesToday', 1); _trackDailyEvent('minutesToday', 0.5);
                         }
                         showToast(`Серія ${ep} збережена в історію`);
                         video.removeEventListener('timeupdate', onTimeUpdate);
@@ -9567,6 +9868,7 @@ function renderProfilePage() {
             if (idx >= 0) {
                 bookmarks.splice(idx, 1);
                 Storage.setBookmarks(bookmarks);
+        _trackDailyEvent('bookmarksAdded', 1);
                 showToast('Видалено з закладок');
                 updateBookmarkButton(url);
                 if (Router.currentRoute === 'profile') renderProfilePage();
@@ -9584,6 +9886,7 @@ function renderProfilePage() {
                 addedAt: Date.now()
             });
             Storage.setBookmarks(bookmarks);
+        _trackDailyEvent('bookmarksAdded', 1);
             showToast('Додано до закладок');
             updateBookmarkButton(url);
             if (Router.currentRoute === 'profile') renderProfilePage();
