@@ -5512,8 +5512,7 @@
             query,
             orderBy,
             limit,
-            onSnapshot,
-            getDocs
+            onSnapshot
         } from "firebase/firestore";
 
         // ====================================================================
@@ -7807,6 +7806,8 @@
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
+                const { collection, query, orderBy, limit, getDocs } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
                 let users = [];
                 snap.forEach(d => {
@@ -8037,6 +8038,8 @@
             sendBtn.disabled = true;
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                const { addDoc, collection, serverTimestamp } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const p = getProfile();
                 const msgData = {
                     text,
@@ -8088,7 +8091,7 @@
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                {
+                import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
                     const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
                     comUnsub = onSnapshot(q, snap => {
                         if (snap.empty) {
@@ -8164,7 +8167,7 @@
                     }, () => {
                         box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                     });
-                }
+                });
             } catch(e) {
                 if (box) box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Спільнота недоступна без підключення</p></div>`;
             }
