@@ -5625,19 +5625,33 @@
         let db = null;
         let firebaseInitialized = false;
 
-        try {
-            firebaseApp = initializeApp(FIREBASE_CONFIG);
-            auth = getAuth(firebaseApp);
-            // browserLocalPersistence — сесія зберігається в браузері (localStorage)
-            setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
-            db = getFirestore(firebaseApp);
-            firebaseInitialized = true;
-            console.log('Firebase initialized');
-            startXPSync();
-        } catch (e) {
-            console.warn('Firebase init error:', e.message);
-            firebaseInitialized = false;
+        function initFirebase() {
+            try {
+                firebaseApp = initializeApp(FIREBASE_CONFIG);
+                auth = getAuth(firebaseApp);
+                // browserLocalPersistence — сесія зберігається в браузері (localStorage)
+                setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
+                db = getFirestore(firebaseApp);
+                firebaseInitialized = true;
+                console.log('Firebase initialized successfully');
+                window.__firebaseReady = true;
+                startXPSync();
+                return true;
+            } catch (e) {
+                console.error('Firebase init error:', e.message, e.stack);
+                window.__firebaseError = e.message;
+                window.__firebaseReady = false;
+                firebaseInitialized = false;
+                // Retry after 1 second (imports might still be loading)
+                if (!window.__firebaseRetried) {
+                    window.__firebaseRetried = true;
+                    console.log('Retrying Firebase init in 1s...');
+                    setTimeout(initFirebase, 1000);
+                }
+                return false;
+            }
         }
+        initFirebase();
 
         // ====================================================================
         //  СИСТЕМА АВТОРИЗАЦІЇ
