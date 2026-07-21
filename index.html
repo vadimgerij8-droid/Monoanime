@@ -7944,16 +7944,15 @@ const ACHIEVEMENTS = [
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                // Use onSnapshot for auto-update
-                if (window._lbUnsub) { window._lbUnsub(); window._lbUnsub = null; }
-                const _lbPromise = new Promise((resolve, reject) => {
-                    const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
-                    window._lbUnsub = onSnapshot(q, (snap) => {
-                        resolve(snap);
-                    }, (err) => reject(err));
-                    setTimeout(() => reject(new Error('timeout')), 3000);
-                });
-                const snap = await _lbPromise;
+                
+                // Use getDocs with timeout for initial load
+                const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('timeout')), 3000)
+                );
+                
+                const snap = await Promise.race([getDocs(q), timeoutPromise]);
+                
                 let users = [];
                 snap.forEach(d => {
                     const data = d.data();
@@ -7968,18 +7967,65 @@ const ACHIEVEMENTS = [
                         level: data.level || 1
                     });
                 });
-                // Always sort by XP
                 users.sort((a, b) => b.xp - a.xp);
 
                 if (!users.length) {
-                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
+                    lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з\'явиться після реєстрації користувачів</p></div>`;
                     return;
                 }
 
-                const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
-                let html = '';
+                // Set up onSnapshot for auto-update (after initial load)
+                if (window._lbUnsub) { window._lbUnsub(); window._lbUnsub = null; }
+                window._lbUnsub = onSnapshot(q, (snap2) => {
+                    let u = [];
+                    snap2.forEach(d => {
+                        const data = d.data();
+                        u.push({
+                            uid: d.id,
+                            name: data.profile?.nickname || data.profile?.name || 'Аніматор',
+                            avatar: data.profile?.avatar || '',
+                            episodes: Array.isArray(data.history) ? data.history.length : 0,
+                            hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
+                            bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0,
+                            xp: data.xp || 0,
+                            level: data.level || 1
+                        });
+                    });
+                    u.sort((a, b) => b.xp - a.xp);
+                    renderLeaderboard(lb, u);
+                }, (err) => console.warn('LB snapshot error:', err));
 
-                if (users.length >= 3) {
+                renderLeaderboard(lb, users);
+            } catch(e) {
+                console.warn('Leaderboard error:', e.message || e);
+                try {
+                    const profile = getProfile();
+                    const xp = calcTotalXP();
+                    const level = getLevel(xp);
+                    const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
+                    lb.innerHTML = `<div class="rg-lb-list">
+                        <div class="rg-lb-item is-me">
+                            <div class="rg-lb-num">1</div>
+                            <div class="rg-lb-avatar">${av}</div>
+                            <div class="rg-lb-info">
+                                <div class="rg-lb-name">${profile.nickname || 'Гість'} <span style="font-size:9px;font-weight:700;">YOU</span></div>
+                                <div class="rg-lb-rank">Lv.${level}</div>
+                            </div>
+                            <div class="rg-lb-score">${xp} <span class="unit">XP</span></div>
+                        </div>
+                    </div>
+                    <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
+                } catch(e2) {
+                    console.error('Leaderboard fallback error:', e2);
+                    lb.innerHTML = `<div class="rg-lb-empty"><p>Рейтинг тимчасово недоступний</p></div>`;
+                }
+            }
+        }
+
+        function renderLeaderboard(lb, users) {
+            const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
+            let html = '';
+            if (users.length >= 3) {
                     const order  = [users[1], users[0], users[2]];
                     const cls    = ['p2', 'p1', 'p3'];
                     const crowns = ['🥈', '👑', '🥉'];
@@ -7996,7 +8042,6 @@ const ACHIEVEMENTS = [
                     });
                     html += '</div>';
                 }
-
                 html += '<div class="rg-lb-list">';
                 users.slice(3).forEach((u, i) => {
                     const isMe = u.uid === myUid;
@@ -8014,25 +8059,6 @@ const ACHIEVEMENTS = [
                 });
                 html += '</div>';
                 lb.innerHTML = html;
-            } catch(e) {
-                console.warn('Leaderboard:', e.message || e);
-                const profile = getProfile();
-                const xp = calcTotalXP();
-                const level = getLevel(xp);
-                const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
-                lb.innerHTML = `<div class="rg-lb-list">
-                    <div class="rg-lb-item is-me">
-                        <div class="rg-lb-num">1</div>
-                        <div class="rg-lb-avatar">${av}</div>
-                        <div class="rg-lb-info">
-                            <div class="rg-lb-name">${profile.nickname || 'Гість'} <span style="font-size:9px;font-weight:700;">YOU</span></div>
-                            <div class="rg-lb-rank">Lv.${level}</div>
-                        </div>
-                        <div class="rg-lb-score">${xp} <span class="unit">XP</span></div>
-                    </div>
-                </div>
-                <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
-            }
         }
         
 
