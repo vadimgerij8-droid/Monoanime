@@ -5512,7 +5512,8 @@
             query,
             orderBy,
             limit,
-            onSnapshot
+            onSnapshot,
+            getDocs
         } from "firebase/firestore";
 
         // ====================================================================
@@ -7806,9 +7807,10 @@
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                const { collection, query, orderBy, limit, getDocs } =
-                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
+                // Timeout wrapper — don't hang forever if Firestore is slow/down
+                const _lbPromise = getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
+                const _timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000));
+                const snap = await Promise.race([_lbPromise, _timeout]);
                 let users = [];
                 snap.forEach(d => {
                     const data = d.data();
@@ -7871,8 +7873,32 @@
                 html += '</div>';
                 lb.innerHTML = html;
             } catch(e) {
-                console.warn('Leaderboard:', e);
-                lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
+                console.warn('Leaderboard:', e.message || e);
+                // Fallback: show local user stats as single entry
+                const profile   = getProfile();
+                const history   = Storage.getHistory()   || [];
+                const bookmarks = Storage.getBookmarks() || [];
+                const watchSec  = Storage.getWatchTime() || 0;
+                const hours     = Math.round(watchSec / 3600 * 10) / 10;
+                const episodes  = history.length;
+                const ri        = getUserRankInfo(episodes, hours);
+                const sf        = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
+                const val       = sf === 'hours' ? hours : sf === 'bookmarks' ? bookmarks.length : episodes;
+                const units     = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
+                const unit      = units[sortBy] || '';
+                const av        = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
+                lb.innerHTML = `<div class="rg-lb-list">
+                    <div class="rg-lb-item is-me">
+                        <div class="rg-lb-num">1</div>
+                        <div class="rg-lb-avatar">${av}</div>
+                        <div class="rg-lb-info">
+                            <div class="rg-lb-name">${profile.nickname || 'Гість'} <span style="font-size:9px;font-weight:700;">YOU</span></div>
+                            <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
+                        </div>
+                        <div class="rg-lb-score">${val} <span class="unit">${unit}</span></div>
+                    </div>
+                </div>
+                <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
             }
         }
 
@@ -8038,8 +8064,6 @@
             sendBtn.disabled = true;
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
-                const { addDoc, collection, serverTimestamp } =
-                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const p = getProfile();
                 const msgData = {
                     text,
@@ -8091,7 +8115,7 @@
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
+                {
                     const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
                     comUnsub = onSnapshot(q, snap => {
                         if (snap.empty) {
@@ -8167,7 +8191,7 @@
                     }, () => {
                         box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                     });
-                });
+                }
             } catch(e) {
                 if (box) box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Спільнота недоступна без підключення</p></div>`;
             }
