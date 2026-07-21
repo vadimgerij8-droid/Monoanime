@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <!-- nocache:20260721081810x20260721081244 -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>VakDab • твій аніме каталог</title>
@@ -4674,162 +4673,7 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.1);
         }
-        
-        /* ── Profile achievement progress bars ── */
-        .profile-ach-progress-bar {
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            margin: 0 0 0.8rem 0;
-            overflow: hidden;
-        }
-        .profile-ach-progress-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 3px;
-            transition: width .5s ease;
-        }
-        .profile-ach-progress-mini {
-            height: 3px;
-            background: var(--border);
-            border-radius: 2px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        .profile-ach-progress-fill-mini {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 2px;
-            transition: width .4s ease;
-        }
-        .profile-ach-badge.unlocked {
-            background: var(--accent);
-            color: var(--accent-text);
-            border-radius: 50%;
-            width: 26px; height: 26px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 800;
-        }
-        .profile-ach-badge.locked {
-            font-size: 10px; font-weight: 700;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        .profile-ach-icon.locked-icon { opacity: 0.35; }
-
-        /* ── Daily Tasks ── */
-        .rg-daily-section {
-            margin: 0.8rem 1rem 0;
-            background: var(--glass);
-            backdrop-filter: blur(28px) saturate(1.5);
-            -webkit-backdrop-filter: blur(28px) saturate(1.5);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 1.1rem;
-            box-shadow: var(--shadow-sm);
-            position: relative;
-            overflow: hidden;
-        }
-        .rg-daily-section::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
-        }
-        .rg-daily-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 0.9rem;
-        }
-        .rg-daily-title {
-            font-size: 14px; font-weight: 700;
-            color: var(--text); letter-spacing: -0.2px;
-            display: flex; align-items: center; gap: 7px;
-        }
-        .rg-daily-title svg { width: 16px; height: 16px; }
-        .rg-daily-reset {
-            font-size: 10px; font-weight: 600;
-            color: var(--text-muted);
-            display: flex; align-items: center; gap: 4px;
-        }
-        .rg-daily-reset svg { width: 11px; height: 11px; }
-        .rg-daily-list {
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        .rg-daily-item {
-            display: flex; align-items: center; gap: 0.7rem;
-            padding: 10px 12px;
-            background: rgba(var(--accent-rgb), 0.03);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            transition: all .3s cubic-bezier(.2,.9,.2,1);
-        }
-        .rg-daily-item.done {
-            opacity: 0.5;
-            background: rgba(var(--accent-rgb), 0.06);
-            border-color: rgba(var(--accent-rgb), 0.2);
-        }
-        .rg-daily-item.done .rg-daily-name { text-decoration: line-through; }
-        .rg-daily-check {
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            transition: all .3s;
-        }
-        .rg-daily-item.done .rg-daily-check {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: var(--accent-text);
-        }
-        .rg-daily-check svg { width: 12px; height: 12px; opacity: 0; transition: opacity .2s; }
-        .rg-daily-item.done .rg-daily-check svg { opacity: 1; }
-        .rg-daily-info { flex: 1; min-width: 0; }
-        .rg-daily-name {
-            font-size: 12.5px; font-weight: 700; color: var(--text);
-        }
-        .rg-daily-desc {
-            font-size: 10px; color: var(--text-muted); margin-top: 2px;
-        }
-        .rg-daily-reward {
-            font-size: 11px; font-weight: 700; color: var(--text-secondary);
-            white-space: nowrap;
-            display: flex; align-items: center; gap: 3px;
-        }
-        .rg-daily-reward svg { width: 12px; height: 12px; }
-        .rg-daily-progress {
-            height: 3px;
-            background: var(--border);
-            border-radius: 2px;
-            margin-top: 6px;
-            overflow: hidden;
-        }
-        .rg-daily-progress-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 2px;
-            transition: width .4s ease;
-        }
-        .rg-daily-xp {
-            margin-top: 0.8rem;
-            padding: 8px 12px;
-            background: rgba(var(--accent-rgb), 0.03);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .rg-daily-xp-label {
-            font-size: 11px; font-weight: 600; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.8px;
-        }
-        .rg-daily-xp-value {
-            font-size: 15px; font-weight: 800; color: var(--text);
-            display: flex; align-items: center; gap: 4px;
-        }
-        .rg-daily-xp-value svg { width: 14px; height: 14px; }
-
-.rg-ach-item.locked { opacity: 0.3; filter: grayscale(100%); }
+        .rg-ach-item.locked { opacity: 0.3; filter: grayscale(100%); }
         .rg-ach-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
         .rg-ach-icon svg { width: 24px; height: 24px; }
         .rg-ach-name {
@@ -5319,51 +5163,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } } }
 
-
-        /* XP bar in stats */
-        .rg-stats-xp { margin-left: auto; text-align: right; min-width: 120px; }
-        .rg-stats-xp-val { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
-        .rg-stats-xp-bar { height: 4px; background: rgba(128,128,128,0.2); border-radius: 2px; overflow: hidden; margin: 4px 0; }
-        .rg-stats-xp-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s; }
-        .rg-stats-xp-label { font-size: 9px; color: var(--text-muted); }
-        
-        /* Community sub-tabs */
-        .com-sub-tabs { display: flex; gap: 4px; padding: 8px 12px; overflow-x: auto; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
-        .com-sub-tab { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border: none; background: transparent; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-        .com-sub-tab svg { width: 14px; height: 14px; }
-        .com-sub-tab.active { background: var(--accent); color: var(--accent-text); }
-        .com-sub-tab:hover:not(.active) { background: rgba(128,128,128,0.1); }
-        
-        /* Message actions */
-        .com-msg-actions { display: inline-flex; gap: 4px; margin-left: 8px; opacity: 0.6; }
-        .com-msg-actions button { background: none; border: none; padding: 2px; cursor: pointer; color: var(--text-muted); display: flex; }
-        .com-msg-actions svg { width: 12px; height: 12px; }
-        .com-msg-actions button:hover { opacity: 1; color: var(--accent); }
-        
-        /* Anime card in chat */
-        .com-anime-card { display: flex; gap: 8px; padding: 8px; border-radius: 8px; background: rgba(128,128,128,0.1); margin: 6px 0; cursor: pointer; transition: background 0.2s; }
-        .com-anime-card:hover { background: rgba(128,128,128,0.2); }
-        .com-anime-poster { width: 50px; height: 70px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
-        .com-anime-info { flex: 1; min-width: 0; }
-        .com-anime-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
-        .com-anime-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; }
-        
-        /* Achievement card in chat */
-        .com-ach-card { display: flex; gap: 8px; padding: 8px; border-radius: 8px; background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.15); margin: 6px 0; }
-        .com-ach-icon { font-size: 1.5rem; }
-        .com-ach-info { flex: 1; }
-        .com-ach-name { font-weight: 600; font-size: 0.85rem; }
-        .com-ach-desc { font-size: 0.75rem; color: var(--text-muted); }
-        .com-ach-xp { font-size: 0.7rem; color: var(--accent); font-weight: 600; margin-top: 2px; }
-        
-        /* Daily tasks 10 items */
-        .rg-daily-list { max-height: none; }
-
-
-        .profile-ach-xp { font-size: 0.65rem; color: var(--accent); font-weight: 600; margin-top: 1px; }
-        .profile-ach-share { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem; opacity: 0.6; transition: all 0.2s; flex-shrink: 0; }
-        .profile-ach-share:hover { opacity: 1; background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-
 </style>
 </head>
 <body class="appletv-agnative-topnav">
@@ -5558,11 +5357,7 @@
             query,
             orderBy,
             limit,
-            onSnapshot,
-            getDocs,
-            updateDoc,
-            deleteDoc,
-            where
+            onSnapshot
         } from "firebase/firestore";
 
         // ====================================================================
@@ -5626,37 +5421,18 @@
         let db = null;
         let firebaseInitialized = false;
 
-        function initFirebase() {
-            try {
-firebaseApp = initializeApp(FIREBASE_CONFIG);
-                auth = getAuth(firebaseApp);
-                // browserLocalPersistence — сесія зберігається в браузері (localStorage)
-                setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
-                db = getFirestore(firebaseApp);
-                firebaseInitialized = true;
-                console.log('Firebase initialized successfully');
-                window.__firebaseReady = true;
-                // Remove diagnostic banner if present
-                const banner = document.getElementById('firebase-diag');
-                if (banner) banner.remove();
-                startXPSync();
-                return true;
-            } catch (e) {
-                console.error('Firebase init error:', e.message, e.stack);
-                window.__firebaseError = e.message;
-                window.__firebaseReady = false;
-                firebaseInitialized = false;
-                // Silent retry, no visible banner
-                // Retry after 1 second (imports might still be loading)
-                if (!window.__firebaseRetried) {
-                    window.__firebaseRetried = true;
-                    console.log('Retrying Firebase init in 1s...');
-                    setTimeout(initFirebase, 1000);
-                }
-                return false;
-            }
+        try {
+            firebaseApp = initializeApp(FIREBASE_CONFIG);
+            auth = getAuth(firebaseApp);
+            // browserLocalPersistence — сесія зберігається в браузері (localStorage)
+            setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
+            db = getFirestore(firebaseApp);
+            firebaseInitialized = true;
+            console.log('Firebase initialized');
+        } catch (e) {
+            console.warn('Firebase init error:', e.message);
+            firebaseInitialized = false;
         }
-        initFirebase();
 
         // ====================================================================
         //  СИСТЕМА АВТОРИЗАЦІЇ
@@ -5672,11 +5448,7 @@ firebaseApp = initializeApp(FIREBASE_CONFIG);
 
             init() {
                 if (!firebaseInitialized) {
-                    console.warn('Firebase not ready, retrying auth init...');
-                    if (!this._initRetry) {
-                        this._initRetry = true;
-                        setTimeout(() => this.init(), 1500);
-                    }
+                    console.warn('Firebase not available, auth disabled');
                     return;
                 }
                 if (this._initialized) return;
@@ -5695,7 +5467,6 @@ firebaseApp = initializeApp(FIREBASE_CONFIG);
                     this._authResolved = true;
                     this._notifyListeners();
                     if (user) {
-                        syncUserXP();
                         // РЕНДЕРИМО ПРОФІЛЬ ОДРАЗУ з поточними localStorage даними
                         // — не чекаємо _loadUserData (який може висіти на Firestore)
                         if (Router.currentRoute === 'profile') {
@@ -6074,11 +5845,6 @@ firebaseApp = initializeApp(FIREBASE_CONFIG);
         //  СХОВИЩЕ
         // ====================================================================
         const Storage = {
-        getDailyTasks() { try { return JSON.parse(localStorage.getItem('vakdab_daily_tasks')); } catch { return null; } },
-        setDailyTasks(d) { localStorage.setItem('vakdab_daily_tasks', JSON.stringify(d)); },
-        getDailyStats() { try { return JSON.parse(localStorage.getItem('vakdab_daily_stats')); } catch { return null; } },
-        setDailyStats(d) { localStorage.setItem('vakdab_daily_stats', JSON.stringify(d)); },
-
             _syncTimer: null,
             _debounceSync() {
                 if (this._syncTimer) clearTimeout(this._syncTimer);
@@ -7624,71 +7390,7 @@ firebaseApp = initializeApp(FIREBASE_CONFIG);
 
         // === Rating list ===
         let ratingLoaded = false;
-        
-        // ====================================================================
-        //  XP SYSTEM — Global XP, Levels, Leaderboard
-        // ====================================================================
-        function calcTotalXP() {
-            const stats = getProfileStats();
-            const dailyData = (Storage.getDailyTasks ? Storage.getDailyTasks() : null);
-            let xp = 0;
-            // XP from achievements
-            stats.achievementsList.forEach(a => { if (a.unlocked) xp += a.xp || 50; });
-            // XP from daily tasks
-            if (dailyData && dailyData.xp) xp += dailyData.xp;
-            // XP from watching (1 XP per episode, 1 XP per 10 minutes)
-            xp += stats.viewed * 5;
-            xp += Math.floor(stats.totalWatchTime / 600) * 2;
-            xp += stats.bookmarks * 3;
-            xp += (window._communityPostsCount || 0) * 10;
-            return Math.floor(xp);
-        }
-
-        function getLevel(xp) {
-            // Level = sqrt(xp/50) + 1, so level 10 = 4050 XP, level 20 = ~19000 XP
-            return Math.floor(Math.sqrt(xp / 50)) + 1;
-        }
-
-        function getXPForLevel(level) {
-            return Math.pow(level - 1, 2) * 50;
-        }
-
-        function getXPProgress(xp) {
-            const level = getLevel(xp);
-            const currentLevelXP = getXPForLevel(level);
-            const nextLevelXP = getXPForLevel(level + 1);
-            const into = xp - currentLevelXP;
-            const needed = nextLevelXP - currentLevelXP;
-            return { level, into, needed, pct: Math.min(100, Math.round(into / needed * 100)) };
-        }
-
-        async function syncUserXP() {
-            if (!firebaseInitialized || !db) return;
-            if (!Auth.isAuthenticated()) return;
-            const uid = Auth._user.uid;
-            const xp = calcTotalXP();
-            const level = getLevel(xp);
-            try {
-                const userRef = doc(db, 'users', uid);
-                // syncUserXP оновлює ТІЛЬКИ xp, level та watchTime
-                // profile, history, bookmarks синхронізує syncUserData()
-                await setDoc(userRef, {
-                    xp,
-                    level,
-                    watchTime: Storage.getWatchTime() || 0,
-                    lastXPUpdate: serverTimestamp()
-                }, { merge: true });
-            } catch(e) { console.warn('XP sync failed:', e.message); }
-        }
-
-        // Auto-sync XP periodically
-        let _xpSyncTimer = null;
-        function startXPSync() {
-            if (_xpSyncTimer) clearInterval(_xpSyncTimer);
-            _xpSyncTimer = setInterval(() => { syncUserXP(); }, 30000);
-        }
-
-const ACHIEVEMENTS = [
+        const ACHIEVEMENTS = [
             { id: 'first',  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>', name: 'Перший перегляд', req: '1 серія',      need: 1,      field: 'episodes' },
             { id: 'ep10',   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', name: '10 серій',         req: '10 серій',     need: 10,     field: 'episodes' },
             { id: 'ep50',   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>', name: '50 серій',          req: '50 серій',    need: 50,     field: 'episodes' },
@@ -7711,100 +7413,6 @@ const ACHIEVEMENTS = [
             return                        { label: 'Новачок',        color: 'var(--text-muted)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' };
         }
 
-        const DAILY_TASK_POOL = [
-            { id: 'watch1',  desc: 'Подивись 1 серію',          xp: 10,  check: (s) => s.episodesToday >= 1,  field: 'episodesToday', target: 1 },
-            { id: 'watch3',  desc: 'Подивись 3 серії',          xp: 25,  check: (s) => s.episodesToday >= 3,  field: 'episodesToday', target: 3 },
-            { id: 'watch5',  desc: 'Подивись 5 серій',          xp: 50,  check: (s) => s.episodesToday >= 5,  field: 'episodesToday', target: 5 },
-            { id: 'bm1',     desc: 'Додай 1 закладку',          xp: 15,  check: (s) => s.bookmarksAdded >= 1,  field: 'bookmarksAdded', target: 1 },
-            { id: 'bm3',     desc: 'Додай 3 закладки',          xp: 40,  check: (s) => s.bookmarksAdded >= 3,  field: 'bookmarksAdded', target: 3 },
-            { id: 'uniq1',   desc: 'Спробуй нове аніме',        xp: 20,  check: (s) => s.uniqueToday >= 1,  field: 'uniqueToday', target: 1 },
-            { id: 'uniq3',   desc: 'Спробуй 3 нових тайтли',   xp: 45,  check: (s) => s.uniqueToday >= 3,  field: 'uniqueToday', target: 3 },
-            { id: 'chat1',   desc: 'Напиши в спільноті',        xp: 15,  check: (s) => s.postsToday >= 1,  field: 'postsToday', target: 1 },
-            { id: 'chat3',   desc: 'Напиши 3 повідомлення',    xp: 30,  check: (s) => s.postsToday >= 3,  field: 'postsToday', target: 3 },
-            { id: 'wt30m',   desc: '30 хв перегляду',          xp: 15,  check: (s) => s.minutesToday >= 30, field: 'minutesToday', target: 30 },
-            { id: 'wt1h',    desc: '1 година перегляду',        xp: 30,  check: (s) => s.minutesToday >= 60, field: 'minutesToday', target: 60 },
-            { id: 'wt2h',    desc: '2 години перегляду',        xp: 60,  check: (s) => s.minutesToday >= 120, field: 'minutesToday', target: 120 },
-        ];
-
-        function _getTodayKey() {
-            const d = new Date();
-            return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
-        }
-
-        function _getDailyTasks() {
-            const today = _getTodayKey();
-            const stored = Storage.getDailyTasks ? Storage.getDailyTasks() : null;
-            if (stored && stored.date === today) return stored;
-
-            // Generate 5 random tasks for today
-            const pool = [...DAILY_TASK_POOL];
-            const tasks = [];
-            for (let i = 0; i < 10 && pool.length > 0; i++) {
-                const idx = Math.floor(Math.random() * pool.length);
-                tasks.push(pool[idx]);
-                pool.splice(idx, 1);
-            }
-            const data = { date: today, tasks, completed: {}, xp: 0 };
-            if (Storage.setDailyTasks) Storage.setDailyTasks(data);
-            else localStorage.setItem('vakdab_daily_tasks', JSON.stringify(data));
-            return data;
-        }
-
-        function _getDailyStats() {
-            const today = _getTodayKey();
-            const stored = Storage.getDailyStats ? Storage.getDailyStats() : null;
-            if (stored && stored.date === today) return stored;
-
-            const data = { date: today, episodesToday: 0, bookmarksAdded: 0, uniqueToday: 0, postsToday: 0, minutesToday: 0 };
-            if (Storage.setDailyStats) Storage.setDailyStats(data);
-            else localStorage.setItem('vakdab_daily_stats', JSON.stringify(data));
-            return data;
-        }
-
-        function _trackDailyEvent(type, value = 1) {
-            const stats = _getDailyStats();
-            if (stats[type] !== undefined) stats[type] += value;
-            if (Storage.setDailyStats) Storage.setDailyStats(stats);
-            else localStorage.setItem('vakdab_daily_stats', JSON.stringify(stats));
-        }
-
-        function _renderDailyTasks() {
-            const container = document.getElementById('rgDailyTasks');
-            if (!container) return;
-            const data = _getDailyTasks();
-            const stats = _getDailyStats();
-            let totalXp = 0;
-            let html = '<div class="rg-daily-section"><div class="rg-daily-header"><div class="rg-daily-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Щоденні завдання</div><div class="rg-daily-reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Оновлення о 00:00</div></div><div class="rg-daily-list">';
-
-            data.tasks.forEach((t, i) => {
-                const done = t.check(stats);
-                if (done && !data.completed[t.id]) {
-                    data.completed[t.id] = true;
-                    data.xp += t.xp;
-                }
-                if (data.completed[t.id]) totalXp += t.xp;
-                const current = stats[t.field] || 0;
-                const progress = done ? 100 : Math.min(Math.round(current / t.target * 100), 100);
-                const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
-                html += `<div class="rg-daily-item ${done?'done':''}">
-                    <div class="rg-daily-check">${checkSvg}</div>
-                    <div class="rg-daily-info">
-                        <div class="rg-daily-name">${t.desc}</div>
-                        <div class="rg-daily-desc">${current} / ${t.target}</div>
-                        <div class="rg-daily-progress"><div class="rg-daily-progress-fill" style="width:${progress}%"></div></div>
-                    </div>
-                    <div class="rg-daily-reward"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>+${t.xp}</div>
-                </div>`;
-            });
-
-            html += `</div><div class="rg-daily-xp"><div class="rg-daily-xp-label">Зароблено XP</div><div class="rg-daily-xp-value"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${totalXp}</div></div></div>`;
-            container.innerHTML = html;
-
-            if (Storage.setDailyTasks) Storage.setDailyTasks(data);
-            else localStorage.setItem('vakdab_daily_tasks', JSON.stringify(data));
-        }
-
-
         function initRatingPage() {
             const wrap = document.getElementById('ratingPageContainer');
             if (!wrap || wrap.dataset.init) return;
@@ -7824,9 +7432,13 @@ const ACHIEVEMENTS = [
 
                 <div class="rg-tab-panel active" id="rgPanelRating">
                     <div id="rgMyStats"></div>
-                    <div id="rgDailyTasks"></div>
                     <div id="rgAchievements"></div>
-                    <div class="rg-lb-title">Глобальний рейтинг · XP</div>
+                    <div class="rg-sort-tabs" id="rgSortTabs">
+                        <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
+                        <button class="rg-sort-tab" data-sort="hours">За годинами</button>
+                        <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
+                    </div>
+                    <div class="rg-lb-title">Глобальний рейтинг</div>
                     <div id="rgLeaderboard" class="rg-lb-loader">
                         <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
                     </div>
@@ -7859,24 +7471,25 @@ const ACHIEVEMENTS = [
                         const nav = document.getElementById('bottomNav');
                         if (nav) nav.classList.remove('hidden-nav');
                         loadMyStats();
-                        _renderDailyTasks();
-                        loadLeaderboard('xp');
+                        loadLeaderboard(currentLbSort);
                     }
                 });
             });
 
-            // Sort tabs removed — leaderboard is now XP-only
+            wrap.querySelectorAll('.rg-sort-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wrap.querySelectorAll('.rg-sort-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentLbSort = btn.dataset.sort;
+                    loadLeaderboard(currentLbSort);
+                });
+            });
 
             loadMyStats();
-            _renderDailyTasks();
-            
-            loadLeaderboard('xp'); startXPSync();
+            loadLeaderboard('episodes');
         }
 
-        // ═══════════════════════════════════════════════════════
-        //  DAILY TASKS — random per day, auto-refresh
-        // ═══════════════════════════════════════════════════════
-        let currentLbSort = 'xp';
+        let currentLbSort = 'episodes';
 
         function loadMyStats() {
             const statsEl = document.getElementById('rgMyStats');
@@ -7892,10 +7505,6 @@ const ACHIEVEMENTS = [
             const rankInfo   = getUserRankInfo(episodes, watchHours);
             const achStats   = { episodes, watchTime: watchSec, bookmarks: bookmarks.length };
             const earnedIds  = new Set(ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need).map(a => a.id));
-            
-            // XP and Level
-            const totalXP = calcTotalXP();
-            const xpProg  = getXPProgress(totalXP);
 
             const avHtml = profile.avatar
                 ? `<img src="${profile.avatar}" alt="">`
@@ -7907,12 +7516,7 @@ const ACHIEVEMENTS = [
                         <div class="rg-stats-avatar">${avHtml}</div>
                         <div>
                             <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
-                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.icon || ''} ${rankInfo.label}</div>
-                        </div>
-                        <div class="rg-stats-xp">
-                            <div class="rg-stats-xp-bar">
-                                <div class="rg-stats-xp-fill" style="width:${xpProg.pct}%"></div>
-                            </div>
+                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.icon || ''}${rankInfo.label}</div>
                         </div>
                     </div>
                     <div class="rg-stats-grid">
@@ -7935,22 +7539,17 @@ const ACHIEVEMENTS = [
                         `).join('')}
                     </div>
                 </div>`;
-            
-            // Sync XP to Firestore
-            syncUserXP();
         }
 
-        async function loadLeaderboard(sortBy = 'xp') {
+        async function loadLeaderboard(sortBy = 'episodes') {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
             lb.innerHTML = `<div class="rg-lb-loader"><svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
-            
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
-                const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000));
-                const snap = await Promise.race([getDocs(q), tp]);
-                
+                const { collection, query, orderBy, limit, getDocs } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
                 let users = [];
                 snap.forEach(d => {
                     const data = d.data();
@@ -7960,104 +7559,63 @@ const ACHIEVEMENTS = [
                         avatar: data.profile?.avatar || '',
                         episodes: Array.isArray(data.history) ? data.history.length : 0,
                         hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
-                        bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0,
-                        xp: data.xp || 0,
-                        level: data.level || 1
+                        bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0
                     });
                 });
-                users.sort((a, b) => b.xp - a.xp);
+                const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
+                users.sort((a, b) => b[sf] - a[sf]);
+                users = users.slice(0, 20);
 
                 if (!users.length) {
                     lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
                     return;
                 }
 
-                if (window._lbUnsub) { window._lbUnsub(); window._lbUnsub = null; }
-                window._lbUnsub = onSnapshot(q, (snap2) => {
-                    let u = [];
-                    snap2.forEach(d => {
-                        const data = d.data();
-                        u.push({
-                            uid: d.id,
-                            name: data.profile?.nickname || data.profile?.name || 'Аніматор',
-                            avatar: data.profile?.avatar || '',
-                            episodes: Array.isArray(data.history) ? data.history.length : 0,
-                            hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
-                            bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0,
-                            xp: data.xp || 0,
-                            level: data.level || 1
-                        });
+                const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
+                const units = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
+                const unit  = units[sortBy] || '';
+                let html    = '';
+
+                if (users.length >= 3) {
+                    const order  = [users[1], users[0], users[2]];
+                    const cls    = ['p2', 'p1', 'p3'];
+                    const crowns = ['🥈', '👑', '🥉'];
+                    html += '<div class="rg-podium">';
+                    order.forEach((u, i) => {
+                        const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                        html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
+                            <div class="rg-podium-crown">${crowns[i]}</div>
+                            <div class="rg-podium-avatar">${av}</div>
+                            <div class="rg-podium-name">${u.name}</div>
+                            <div class="rg-podium-score">${u[sf]} ${unit}</div>
+                            <div class="rg-podium-bar"></div>
+                        </div>`;
                     });
-                    u.sort((a, b) => b.xp - a.xp);
-                    renderLeaderboard(lb, u);
-                }, (err) => console.warn('LB snapshot error:', err));
-
-                renderLeaderboard(lb, users);
-            } catch(e) {
-                try {
-                    const profile = getProfile();
-                    const xp = calcTotalXP();
-                    const level = getLevel(xp);
-                    const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
-                    lb.innerHTML = `<div class="rg-lb-list">
-                        <div class="rg-lb-item is-me">
-                            <div class="rg-lb-num">1</div>
-                            <div class="rg-lb-avatar">${av}</div>
-                            <div class="rg-lb-info">
-                                <div class="rg-lb-name">${profile.nickname || 'Гість'} <span style="font-size:9px;font-weight:700;">YOU</span></div>
-                                <div class="rg-lb-rank">Lv.${level}</div>
-                            </div>
-                            <div class="rg-lb-score">${xp} <span class="unit">XP</span></div>
-                        </div>
-                    </div>
-                    <div style="text-align:center;padding:12px;font-size:11px;color:var(--muted);">Підключіться для глобального рейтингу</div>`;
-                } catch(e2) {
-                    const _pr = getProfile(); const _xp = calcTotalXP(); const _lv = getLevel(_xp);
-                    const _av = _pr.avatar ? `<img src="${_pr.avatar}" alt="">` : `<span>${(_pr.nickname||"?")[0].toUpperCase()}</span>`;
-                    lb.innerHTML = `<div class="rg-lb-list"><div class="rg-lb-item rg-lb-me"><div class="rg-lb-rank" style="color:var(--accent)">#1</div><div class="rg-lb-avatar">${_av}</div><div class="rg-lb-info"><div class="rg-lb-name">${_pr.nickname||"Ти"}</div><div class="rg-lb-sub">${_xp} XP · Lv.${_lv}</div></div></div></div><p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Глобальний рейтинг недоступний офлайн</p>`;
+                    html += '</div>';
                 }
-            }
-        }
 
-        function renderLeaderboard(lb, users) {
-            const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
-            let html = '';
-            if (users.length >= 3) {
-                const order  = [users[1], users[0], users[2]];
-                const cls    = ['p2', 'p1', 'p3'];
-                const crowns = ['🥈', '👑', '🥉'];
-                html += '<div class="rg-podium">';
-                order.forEach((u, i) => {
-                    const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
-                    html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
-                        <div class="rg-podium-crown">${crowns[i]}</div>
-                        <div class="rg-podium-avatar">${av}</div>
-                        <div class="rg-podium-name">${u.name}</div>
-                        <div class="rg-podium-score">${u.xp} XP</div>
-                        <div class="rg-podium-bar"></div>
+                html += '<div class="rg-lb-list">';
+                users.slice(3).forEach((u, i) => {
+                    const isMe = u.uid === myUid;
+                    const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                    const ri   = getUserRankInfo(u.episodes, u.hours);
+                    html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.03, 0.5)}s">
+                        <div class="rg-lb-num">${i + 4}</div>
+                        <div class="rg-lb-avatar">${av}</div>
+                        <div class="rg-lb-info">
+                            <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
+                            <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
+                        </div>
+                        <div class="rg-lb-score">${u[sf]} <span class="unit">${unit}</span></div>
                     </div>`;
                 });
                 html += '</div>';
+                lb.innerHTML = html;
+            } catch(e) {
+                console.warn('Leaderboard:', e);
+                lb.innerHTML = `<div class="rg-lb-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p></div>`;
             }
-            html += '<div class="rg-lb-list">';
-            users.slice(3).forEach((u, i) => {
-                const isMe = u.uid === myUid;
-                const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
-                const ri   = getUserRankInfo(u.episodes, u.hours);
-                html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.03, 0.5)}s">
-                    <div class="rg-lb-num">${i + 4}</div>
-                    <div class="rg-lb-avatar">${av}</div>
-                    <div class="rg-lb-info">
-                        <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
-                        <div class="rg-lb-rank" style="color:${ri.color}">Lv.${u.level} · ${ri.label}</div>
-                    </div>
-                    <div class="rg-lb-score">${u.xp} <span class="unit">XP</span></div>
-                </div>`;
-            });
-            html += '</div>';
-            lb.innerHTML = html;
         }
-        
 
         // ─────────────────────────────────────────────────
         //  Community Chat (Telegram-style)
@@ -8078,25 +7636,6 @@ const ACHIEVEMENTS = [
 
             panel.innerHTML = `
                 <div class="com-chat-wrap">
-                    <div class="com-sub-tabs" id="comSubTabs">
-                        <button class="com-sub-tab active" data-filter="all">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Усе
-                        </button>
-                        <button class="com-sub-tab" data-filter="text">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Думка
-                        </button>
-                        <button class="com-sub-tab" data-filter="anime">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-                            Рекомендація
-                        </button>
-                        <button class="com-sub-tab" data-filter="ach">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                            Досягнення
-                        </button>
-                    </div>
-
                     <div class="com-messages" id="comMessages">
                         <div class="com-feed-empty">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -8127,104 +7666,27 @@ const ACHIEVEMENTS = [
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                             </button>
                             <button class="com-type-btn" id="comTypeToggle" title="Тип повідомлення">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                <span id="comTypeLabel">Думка</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                             </button>
-                            <textarea class="com-input" id="comInput" placeholder="Написати в спільноті..." rows="1"></textarea>
-                            <button class="com-send-btn" id="comSendBtn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                            </button>
+                            <textarea id="comInput" placeholder="Написати в спільноті..." maxlength="500" rows="1"></textarea>
                         </div>
-                        <div class="com-pending-media" id="comPendingMedia"></div>
+                        <button class="com-send-btn" id="comSendBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
                     </div>
+                    <div class="com-media-preview" id="comMediaPreview"></div>
                     ` : `
-                    <div class="com-login-prompt">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                        <p>Увійдіть в акаунт, щоб писати в спільноті</p>
+                    <div class="com-login-wall">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                        <p>Увійдіть в акаунт, щоб бачити повідомлення та писати в спільноті</p>
+                        <button onclick="Router.goTo('profile')">Увійти</button>
                     </div>
                     `}
                 </div>
             `;
 
-            // Tab filter logic
-            let currentFilter = 'all';
-            panel.querySelectorAll('.com-sub-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    panel.querySelectorAll('.com-sub-tab').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentFilter = btn.dataset.filter;
-                    window._comFilter = currentFilter;
-                    _refreshChat();
-                });
-            });
-            window._comFilter = 'all';
-
-            // Type toggle
-            const typeToggle = document.getElementById('comTypeToggle');
-            const typeMenu   = document.getElementById('comTypeMenu');
-            if (typeToggle && typeMenu) {
-                typeToggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    typeMenu.classList.toggle('hidden');
-                });
-                document.addEventListener('click', () => typeMenu.classList.add('hidden'), { once: true });
-                typeMenu.querySelectorAll('.com-type-opt').forEach(opt => {
-                    opt.addEventListener('click', () => {
-                        comPostType = opt.dataset.type;
-                        typeMenu.classList.add('hidden');
-                        const labels = { text: 'Думка', anime: 'Рекомендація', ach: 'Досягнення' };
-                        const lbl = document.getElementById('comTypeLabel');
-                        if (lbl) lbl.textContent = labels[comPostType] || 'Думка';
-                        const inp = document.getElementById('comInput');
-                        if (inp) {
-                            inp.placeholder = comPostType === 'anime' ? 'Назва аніме або коментар...' :
-                                             comPostType === 'ach'   ? 'Опиши своє досягнення...' : 'Написати в спільноті...';
-                        }
-                    });
-                });
-            }
-
-            // Attach media
-            const attachBtn = document.getElementById('comAttachBtn');
-            const mediaInput = document.getElementById('comMediaInput');
-            if (attachBtn && mediaInput) {
-                attachBtn.addEventListener('click', () => mediaInput.click());
-                let pendingMedia = [];
-                mediaInput.addEventListener('change', () => {
-                    pendingMedia = Array.from(mediaInput.files);
-                    const preview = document.getElementById('comPendingMedia');
-                    if (preview) {
-                        preview.innerHTML = pendingMedia.map((f, i) => {
-                            const url = URL.createObjectURL(f);
-                            if (f.type.startsWith('video/')) return `<div class="com-pm-item" onclick="this.remove();pendingMedia.splice(${i},1)"><video src="${url}" muted></video><span>×</span></div>`;
-                            return `<div class="com-pm-item" onclick="this.remove();pendingMedia.splice(${i},1)"><img src="${url}"><span>×</span></div>`;
-                        }).join('');
-                    }
-                });
-            }
-
-            // Send
-            const sendBtn = document.getElementById('comSendBtn');
-            const inp = document.getElementById('comInput');
-            if (sendBtn && inp) {
-                sendBtn.addEventListener('click', () => {
-                    _sendMessage(user, window._pendingMedia || []);
-                });
-                inp.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        _sendMessage(user, window._pendingMedia || []);
-                    }
-                });
-                inp.addEventListener('input', () => {
-                    inp.style.height = 'auto';
-                    inp.style.height = Math.min(inp.scrollHeight, 100) + 'px';
-                });
-            }
-
-            // Subscribe to chat
-            if (user) _subscribeToChat(user);
-            else _subscribeToChat(null);
+            if (user) _setupCompose(user);
+            _subscribeToChat(user);
         }
 
         function _setupCompose(user) {
@@ -8308,39 +7770,7 @@ const ACHIEVEMENTS = [
             });
         }
 
-        
-        // Share anime to community
-        function shareAnimeToCommunity(animeData) {
-            window._shareAnimeData = animeData;
-            comPostType = 'anime';
-            // Navigate to community tab
-            const ratingBtn = document.querySelector('.rg-main-tab[data-panel="community"]');
-            if (ratingBtn) ratingBtn.click();
-            const inp = document.getElementById('comInput');
-            if (inp) {
-                inp.placeholder = 'Додай коментар до рекомендації...';
-                inp.focus();
-            }
-            const lbl = document.getElementById('comTypeLabel');
-            if (lbl) lbl.textContent = 'Рекомендація';
-        }
-
-        // Share achievement to community
-        function shareAchievementToCommunity(achData) {
-            window._shareAchData = achData;
-            comPostType = 'ach';
-            const ratingBtn = document.querySelector('.rg-main-tab[data-panel="community"]');
-            if (ratingBtn) ratingBtn.click();
-            const inp = document.getElementById('comInput');
-            if (inp) {
-                inp.placeholder = 'Опиши своє досягнення...';
-                inp.focus();
-            }
-            const lbl = document.getElementById('comTypeLabel');
-            if (lbl) lbl.textContent = 'Досягнення';
-        }
-
-async function _sendMessage(user, pendingMedia, onSent) {
+        async function _sendMessage(user, pendingMedia, onSent) {
             const inp     = document.getElementById('comInput');
             const sendBtn = document.getElementById('comSendBtn');
             if (!inp) return;
@@ -8349,6 +7779,8 @@ async function _sendMessage(user, pendingMedia, onSent) {
             sendBtn.disabled = true;
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
+                const { addDoc, collection, serverTimestamp } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
                 const p = getProfile();
                 const msgData = {
                     text,
@@ -8359,16 +7791,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                     watermark: (p.nickname || user.displayName || user.email?.split('@')[0] || 'VakDab'),
                     createdAt: serverTimestamp()
                 };
-                // Add anime data if sharing anime
-                if (comPostType === 'anime' && window._shareAnimeData) {
-                    msgData.animeData = window._shareAnimeData;
-                    window._shareAnimeData = null;
-                }
-                // Add achievement data if sharing achievement
-                if (comPostType === 'ach' && window._shareAchData) {
-                    msgData.achData = window._shareAchData;
-                    window._shareAchData = null;
-                }
 
                 if (pendingMedia && pendingMedia.length > 0) {
                     msgData.media = [];
@@ -8389,7 +7811,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                 }
 
                 await addDoc(collection(db, 'community_posts'), msgData);
-                    _trackDailyEvent('postsToday', 1);
                 inp.value = '';
                 inp.style.height = 'auto';
                 comPostType = 'text';
@@ -8410,160 +7831,86 @@ async function _sendMessage(user, pendingMedia, onSent) {
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
-                const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(200));
-                
-                window._allMessages = [];
-                
-                comUnsub = onSnapshot(q, snap => {
-                    window._allMessages = [];
-                    snap.forEach(d => {
-                        const m = d.data();
-                        m._id = d.id;
-                        m._date = m.createdAt?.toDate ? m.createdAt.toDate() : null;
-                        window._allMessages.push(m);
+                import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
+                    const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
+                    comUnsub = onSnapshot(q, snap => {
+                        if (snap.empty) {
+                            box.innerHTML = `<div class="com-feed-empty">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <p>Ще немає повідомлень. Напиши першим!</p>
+                            </div>`;
+                            return;
+                        }
+
+                        const typeIcons = {
+                            anime: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+                            ach:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
+                        };
+                        const typeLabels = { anime: 'Рекомендація', ach: 'Досягнення' };
+
+                        let lastDate = null;
+                        let html = '';
+                        snap.forEach(d => {
+                            const m    = d.data();
+                            const date = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+                            const isMe = currentUser && m.uid === currentUser.uid;
+
+                            if (date) {
+                                const dayStr = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
+                                if (dayStr !== lastDate) {
+                                    lastDate = dayStr;
+                                    html += `<div class="com-date-sep"><span class="com-date-sep-text">${dayStr}</span></div>`;
+                                }
+                            }
+
+                            const av = m.authorPhoto
+                                ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
+                                : `<span>${(m.authorName || '?')[0].toUpperCase()}</span>`;
+                            const timeStr = date ? date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '';
+                            const typeTag = m.type && typeLabels[m.type]
+                                ? `<div class="com-msg-type">${typeIcons[m.type] || ''}${typeLabels[m.type]}</div>`
+                                : '';
+
+                            let mediaHtml = '';
+                            if (m.media && Array.isArray(m.media) && m.media.length > 0) {
+                                mediaHtml = m.media.map(md => {
+                                    if (md.type === 'video') {
+                                        return `<div class="com-msg-media"><video src="${md.url}" controls playsinline></video></div>`;
+                                    }
+                                    return `<div class="com-msg-media"><img src="${md.url}" alt="" loading="lazy"></div>`;
+                                }).join('');
+                            }
+
+                            const watermark = m.watermark
+                                ? `<div class="com-msg-watermark">${escapeHtml(m.watermark)}</div>`
+                                : '';
+
+                            html += `<div class="com-msg ${isMe ? 'mine' : ''}">
+                                <div class="com-msg-avatar">${av}</div>
+                                <div class="com-msg-col">
+                                    <div class="com-msg-name">${m.authorName || 'Аніматор'}</div>
+                                    <div class="com-msg-bubble">
+                                        ${typeTag}
+                                        ${mediaHtml}
+                                        <div class="com-msg-text">${escapeHtml(m.text || '')}</div>
+                                    </div>
+                                    ${watermark}
+                                    <div class="com-msg-time">${timeStr}</div>
+                                </div>
+                            </div>`;
+                        });
+
+                        const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+                        box.innerHTML = html;
+                        if (wasAtBottom) box.scrollTop = box.scrollHeight;
+
+                    }, () => {
+                        box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                     });
-                    _refreshChat();
-                }, () => {
-                    box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                 });
             } catch(e) {
                 if (box) box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Спільнота недоступна без підключення</p></div>`;
             }
-        }
-
-        function _refreshChat() {
-            const box = document.getElementById('comMessages');
-            if (!box) return;
-            const messages = window._allMessages || [];
-            const filter = window._comFilter || 'all';
-            const currentUser = Auth.isAuthenticated() ? Auth._user : null;
-            
-            const filtered = filter === 'all' ? messages : messages.filter(m => (m.type || 'text') === filter);
-            
-            if (!filtered.length) {
-                const emptyMsgs = {
-                    all: 'Ще немає повідомлень. Напиши першим!',
-                    text: 'Поки що немає думок. Поділись своєю!',
-                    anime: 'Немає рекомендацій. Поділись улюбленим аніме!',
-                    ach: 'Немає досягнень. Поділись своїм!'
-                };
-                box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>${emptyMsgs[filter] || 'Порожньо'}</p></div>`;
-                return;
-            }
-
-            const typeIcons = {
-                anime: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
-                ach:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
-            };
-            const typeLabels = { anime: 'Рекомендація', ach: 'Досягнення', text: 'Думка' };
-
-            let lastDate = null;
-            let html = '';
-            filtered.forEach(m => {
-                const date = m._date;
-                const isMe = currentUser && m.uid === currentUser.uid;
-
-                if (date) {
-                    const dayStr = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
-                    if (dayStr !== lastDate) {
-                        lastDate = dayStr;
-                        html += `<div class="com-date-sep"><span class="com-date-sep-text">${dayStr}</span></div>`;
-                    }
-                }
-
-                const av = m.authorPhoto
-                    ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
-                    : `<span>${(m.authorName || '?')[0].toUpperCase()}</span>`;
-                const timeStr = date ? date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '';
-                const typeTag = m.type && typeLabels[m.type]
-                    ? `<div class="com-msg-type">${typeIcons[m.type] || ''}${typeLabels[m.type]}</div>`
-                    : '';
-
-                let mediaHtml = '';
-                if (m.media && Array.isArray(m.media) && m.media.length > 0) {
-                    mediaHtml = m.media.map(md => {
-                        if (md.type === 'video') return `<div class="com-msg-media"><video src="${md.url}" controls playsinline></video></div>`;
-                        return `<div class="com-msg-media"><img src="${md.url}" alt="" loading="lazy"></div>`;
-                    }).join('');
-                }
-
-                // Anime card
-                let animeCardHtml = '';
-                if (m.type === 'anime' && m.animeData) {
-                    animeCardHtml = `<div class="com-anime-card" onclick="Router.navigate('${escapeHtml(m.animeData.url || '')}')">
-                        ${m.animeData.poster ? `<img src="${m.animeData.poster}" class="com-anime-poster" loading="lazy">` : ''}
-                        <div class="com-anime-info">
-                            <div class="com-anime-title">${escapeHtml(m.animeData.title || '')}</div>
-                            ${m.animeData.desc ? `<div class="com-anime-desc">${escapeHtml(m.animeData.desc.substring(0, 120))}${m.animeData.desc.length > 120 ? '...' : ''}</div>` : ''}
-                        </div>
-                    </div>`;
-                }
-
-                // Achievement card
-                let achCardHtml = '';
-                if (m.type === 'ach' && m.achData) {
-                    achCardHtml = `<div class="com-ach-card">
-                        <div class="com-ach-icon">🏆</div>
-                        <div class="com-ach-info">
-                            <div class="com-ach-name">${escapeHtml(m.achData.name || '')}</div>
-                            <div class="com-ach-desc">${escapeHtml(m.achData.desc || '')}</div>
-                            ${m.achData.xp ? `<div class="com-ach-xp">+${m.achData.xp} XP</div>` : ''}
-                        </div>
-                    </div>`;
-                }
-
-                const watermark = m.watermark ? `<div class="com-msg-watermark">${escapeHtml(m.watermark)}</div>` : '';
-                
-                // Action buttons for own messages
-                let actionsHtml = '';
-                if (isMe) {
-                    actionsHtml = `<div class="com-msg-actions">
-                        <button onclick="_editMessage('${m._id}')" title="Редагувати"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
-                        <button onclick="_deleteMessage('${m._id}')" title="Видалити"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-                    </div>`;
-                }
-
-                html += `<div class="com-msg ${isMe ? 'mine' : ''}" data-id="${m._id}">
-                    <div class="com-msg-avatar">${av}</div>
-                    <div class="com-msg-col">
-                        <div class="com-msg-name">${m.authorName || 'Аніматор'}</div>
-                        <div class="com-msg-bubble">
-                            ${typeTag}
-                            ${mediaHtml}
-                            ${animeCardHtml}
-                            ${achCardHtml}
-                            <div class="com-msg-text">${escapeHtml(m.text || '')}</div>
-                        </div>
-                        ${watermark}
-                        <div class="com-msg-time">${timeStr} ${actionsHtml}</div>
-                    </div>
-                </div>`;
-            });
-
-            const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
-            box.innerHTML = html;
-            if (wasAtBottom) box.scrollTop = box.scrollHeight;
-        }
-
-        async function _deleteMessage(msgId) {
-            if (!confirm('Видалити повідомлення?')) return;
-            try {
-                if (!firebaseInitialized || !db) throw new Error('no db');
-                await deleteDoc(doc(db, 'community_posts', msgId));
-                showToast('Повідомлення видалено');
-            } catch(e) { showToast('Помилка: ' + e.message); }
-        }
-
-        async function _editMessage(msgId) {
-            const msg = (window._allMessages || []).find(m => m._id === msgId);
-            if (!msg) return;
-            const newText = prompt('Редагувати повідомлення:', msg.text || '');
-            if (newText === null || newText === msg.text) return;
-            try {
-                if (!firebaseInitialized || !db) throw new Error('no db');
-                await updateDoc(doc(db, 'community_posts', msgId), { text: newText.trim() });
-                showToast('Повідомлення оновлено');
-            } catch(e) { showToast('Помилка: ' + e.message); }
         }
 
         async function loadRatingPage() { initRatingPage(); }
@@ -9046,163 +8393,129 @@ async function _sendMessage(user, pendingMedia, onSent) {
 
         function getAchievements(history, bookmarks, uniqueCount, totalEpisodes, totalWatchTime) {
             const hours = totalWatchTime / 3600;
-            const watchMinutes = Math.floor(totalWatchTime / 60);
-            const days = Math.floor(totalWatchTime / 86400);
-            const socialPosts = (window._communityPostsCount || 0);
-
-            // 100 achievements — progressive difficulty
-            const defs = [
-                // ── Series milestones (1-20) ──
-                { id: 'ep_1',      name: 'Перший крок',          desc: 'Подивись 1 серію',              field: 'episodes', need: 1,     icon: 'play' , xp: 10 },
-                { id: 'ep_3',      name: 'Спробував',           desc: '3 серії',                       field: 'episodes', need: 3,     icon: 'play' , xp: 15 },
-                { id: 'ep_5',      name: 'Намагаюсь',           desc: '5 серій',                       field: 'episodes', need: 5,     icon: 'play' , xp: 25 },
-                { id: 'ep_10',     name: 'Десяточка',           desc: '10 серій',                      field: 'episodes', need: 10,    icon: 'play' , xp: 50 },
-                { id: 'ep_15',     name: 'Вхід в ритм',         desc: '15 серій',                      field: 'episodes', need: 15,    icon: 'play' , xp: 75 },
-                { id: 'ep_20',     name: 'Двадцяточка',         desc: '20 серій',                      field: 'episodes', need: 20,    icon: 'play' , xp: 100 },
-                { id: 'ep_25',     name: 'Серійний глядач',    desc: '25 серій',                      field: 'episodes', need: 25,    icon: 'play' , xp: 125 },
-                { id: 'ep_30',     name: 'Тридцяточка',        desc: '30 серій',                      field: 'episodes', need: 30,    icon: 'play' , xp: 150 },
-                { id: 'ep_40',     name: 'Сороковичок',        desc: '40 серій',                      field: 'episodes', need: 40,    icon: 'play' , xp: 200 },
-                { id: 'ep_50',     name: 'Півсотні',           desc: '50 серій',                      field: 'episodes', need: 50,    icon: 'play' , xp: 250 },
-                { id: 'ep_60',     name: 'Шістдесят',          desc: '60 серій',                      field: 'episodes', need: 60,    icon: 'play' , xp: 300 },
-                { id: 'ep_75',     name: 'Сімдесят п\'ять',   desc: '75 серій',                      field: 'episodes', need: 75,    icon: 'play' , xp: 375 },
-                { id: 'ep_100',    name: 'Сотка серій',        desc: '100 серій',                     field: 'episodes', need: 100,   icon: 'play' , xp: 500 },
-                { id: 'ep_125',    name: '125 серій',           desc: '125 серій',                     field: 'episodes', need: 125,   icon: 'play' , xp: 500 },
-                { id: 'ep_150',    name: 'Сто п\'ятдесят',    desc: '150 серій',                     field: 'episodes', need: 150,   icon: 'play' , xp: 500 },
-                { id: 'ep_175',    name: '175 серій',           desc: '175 серій',                     field: 'episodes', need: 175,   icon: 'play' , xp: 500 },
-                { id: 'ep_200',    name: 'Двісті',              desc: '200 серій',                     field: 'episodes', need: 200,   icon: 'play' , xp: 500 },
-                { id: 'ep_250',    name: '250 серій',           desc: '250 серій',                     field: 'episodes', need: 250,   icon: 'play' , xp: 500 },
-                { id: 'ep_300',    name: 'Триста',             desc: '300 серій',                      field: 'episodes', need: 300,   icon: 'play' , xp: 500 },
-                { id: 'ep_500',    name: 'П\'ятсот серій',     desc: '500 серій',                     field: 'episodes', need: 500,   icon: 'play' , xp: 500 },
-
-                // ── Watch time milestones (21-40) ──
-                { id: 'wt_1m',     name: 'Перша хвилина',      desc: '1 хв перегляду',               field: 'watchMinutes', need: 1,     icon: 'clock' , xp: 10 },
-                { id: 'wt_10m',    name: '10 хвилин',           desc: '10 хв',                        field: 'watchMinutes', need: 10,    icon: 'clock' , xp: 20 },
-                { id: 'wt_30m',    name: 'Пів години',          desc: '30 хв',                         field: 'watchMinutes', need: 30,    icon: 'clock' , xp: 60 },
-                { id: 'wt_1h',     name: 'Перша година',      desc: '1 год',                        field: 'hours', need: 1,        icon: 'clock' , xp: 20 },
-                { id: 'wt_2h',     name: '2 години',           desc: '2 год',                         field: 'hours', need: 2,        icon: 'clock' , xp: 40 },
-                { id: 'wt_3h',     name: '3 години',           desc: '3 год',                         field: 'hours', need: 3,        icon: 'clock' , xp: 60 },
-                { id: 'wt_5h',     name: 'П\'ять годин',       desc: '5 год',                        field: 'hours', need: 5,        icon: 'clock' , xp: 100 },
-                { id: 'wt_10h',    name: 'Десять годин',        desc: '10 год',                       field: 'hours', need: 10,       icon: 'clock' , xp: 200 },
-                { id: 'wt_15h',    name: '15 годин',           desc: '15 год',                       field: 'hours', need: 15,       icon: 'clock' , xp: 300 },
-                { id: 'wt_20h',    name: 'Цілий день',         desc: '20 год',                       field: 'hours', need: 20,       icon: 'clock' , xp: 400 },
-                { id: 'wt_25h',    name: '25 годин',           desc: '25 год',                       field: 'hours', need: 25,       icon: 'clock' , xp: 500 },
-                { id: 'wt_30h',    name: '30 годин',           desc: '30 год',                       field: 'hours', need: 30,       icon: 'clock' , xp: 500 },
-                { id: 'wt_40h',    name: '40 годин',           desc: '40 год',                       field: 'hours', need: 40,       icon: 'clock' , xp: 500 },
-                { id: 'wt_50h',    name: '50 годин',           desc: '50 год',                       field: 'hours', need: 50,       icon: 'clock' , xp: 500 },
-                { id: 'wt_60h',    name: '60 годин',           desc: '60 год',                       field: 'hours', need: 60,       icon: 'clock' , xp: 500 },
-                { id: 'wt_75h',    name: '75 годин',           desc: '75 год',                       field: 'hours', need: 75,       icon: 'clock' , xp: 500 },
-                { id: 'wt_100h',   name: '100 годин',          desc: '100 год',                      field: 'hours', need: 100,      icon: 'clock' , xp: 500 },
-                { id: 'wt_125h',   name: '125 годин',          desc: '125 год',                      field: 'hours', need: 125,      icon: 'clock' , xp: 500 },
-                { id: 'wt_150h',   name: '150 годин',          desc: '150 год',                      field: 'hours', need: 150,      icon: 'clock' , xp: 500 },
-                { id: 'wt_200h',   name: '200 годин',          desc: '200 год',                      field: 'hours', need: 200,      icon: 'clock' , xp: 500 },
-
-                // ── Unique anime titles (41-60) ──
-                { id: 'uq_1',      name: 'Перше аніме',        desc: '1 тайтл',                      field: 'unique', need: 1,       icon: 'list' , xp: 50 },
-                { id: 'uq_3',      name: 'Спроба різноманіття', desc: '3 тайтли',                     field: 'unique', need: 3,       icon: 'list' , xp: 50 },
-                { id: 'uq_5',      name: 'П\'ятірка тайтлів',  desc: '5 тайтлів',                   field: 'unique', need: 5,       icon: 'list' , xp: 50 },
-                { id: 'uq_10',     name: 'Десять тайтлів',     desc: '10 тайтлів',                   field: 'unique', need: 10,      icon: 'list' , xp: 50 },
-                { id: 'uq_15',     name: '15 тайтлів',          desc: '15 тайтлів',                  field: 'unique', need: 15,      icon: 'list' , xp: 50 },
-                { id: 'uq_20',     name: '20 тайтлів',          desc: '20 тайтлів',                  field: 'unique', need: 20,      icon: 'list' , xp: 50 },
-                { id: 'uq_25',     name: 'Соціальний глядач',  desc: '25 тайтлів',                   field: 'unique', need: 25,      icon: 'list' , xp: 50 },
-                { id: 'uq_30',     name: '30 тайтлів',          desc: '30 тайтлів',                  field: 'unique', need: 30,      icon: 'list' , xp: 50 },
-                { id: 'uq_40',     name: '40 тайтлів',          desc: '40 тайтлів',                  field: 'unique', need: 40,      icon: 'list' , xp: 50 },
-                { id: 'uq_50',     name: 'Колекціонер',        desc: '50 тайтлів',                   field: 'unique', need: 50,      icon: 'list' , xp: 50 },
-                { id: 'uq_60',     name: '60 тайтлів',          desc: '60 тайтлів',                  field: 'unique', need: 60,      icon: 'list' , xp: 50 },
-                { id: 'uq_75',     name: '75 тайтлів',          desc: '75 тайтлів',                  field: 'unique', need: 75,      icon: 'list' , xp: 50 },
-                { id: 'uq_100',    name: 'Ентузіаст',          desc: '100 тайтлів',                  field: 'unique', need: 100,     icon: 'list' , xp: 50 },
-                { id: 'uq_125',    name: '125 тайтлів',         desc: '125 тайтлів',                  field: 'unique', need: 125,     icon: 'list' , xp: 50 },
-                { id: 'uq_150',    name: '150 тайтлів',         desc: '150 тайтлів',                  field: 'unique', need: 150,     icon: 'list' , xp: 50 },
-                { id: 'uq_175',    name: '175 тайтлів',         desc: '175 тайтлів',                  field: 'unique', need: 175,     icon: 'list' , xp: 50 },
-                { id: 'uq_200',    name: '200 тайтлів',         desc: '200 тайтлів',                  field: 'unique', need: 200,     icon: 'list' , xp: 50 },
-                { id: 'uq_250',    name: 'Бібліотекар',        desc: '250 тайтлів',                  field: 'unique', need: 250,     icon: 'list' , xp: 50 },
-                { id: 'uq_300',    name: '300 тайтлів',         desc: '300 тайтлів',                  field: 'unique', need: 300,     icon: 'list' , xp: 50 },
-                { id: 'uq_500',    name: 'Енциклопедист',      desc: '500 тайтлів',                  field: 'unique', need: 500,     icon: 'list' , xp: 50 },
-
-                // ── Bookmarks (61-75) ──
-                { id: 'bm_1',      name: 'Перша закладка',     desc: '1 закладка',                   field: 'bookmarks', need: 1,     icon: 'bookmark' , xp: 10 },
-                { id: 'bm_3',      name: '3 закладки',          desc: '3 закладки',                  field: 'bookmarks', need: 3,     icon: 'bookmark' , xp: 24 },
-                { id: 'bm_5',      name: 'П\'ять закладок',   desc: '5 закладок',                   field: 'bookmarks', need: 5,     icon: 'bookmark' , xp: 40 },
-                { id: 'bm_10',     name: '10 закладок',         desc: '10 закладок',                 field: 'bookmarks', need: 10,    icon: 'bookmark' , xp: 80 },
-                { id: 'bm_15',     name: '15 закладок',         desc: '15 закладок',                 field: 'bookmarks', need: 15,    icon: 'bookmark' , xp: 120 },
-                { id: 'bm_20',     name: '20 закладок',         desc: '20 закладок',                 field: 'bookmarks', need: 20,    icon: 'bookmark' , xp: 160 },
-                { id: 'bm_25',     name: '25 закладок',         desc: '25 закладок',                 field: 'bookmarks', need: 25,    icon: 'bookmark' , xp: 200 },
-                { id: 'bm_30',     name: '30 закладок',         desc: '30 закладок',                 field: 'bookmarks', need: 30,    icon: 'bookmark' , xp: 240 },
-                { id: 'bm_40',     name: '40 закладок',         desc: '40 закладок',                 field: 'bookmarks', need: 40,    icon: 'bookmark' , xp: 320 },
-                { id: 'bm_50',     name: 'Колекція',           desc: '50 закладок',                  field: 'bookmarks', need: 50,    icon: 'bookmark' , xp: 400 },
-                { id: 'bm_75',     name: '75 закладок',         desc: '75 закладок',                 field: 'bookmarks', need: 75,    icon: 'bookmark' , xp: 500 },
-                { id: 'bm_100',    name: '100 закладок',        desc: '100 закладок',                 field: 'bookmarks', need: 100,   icon: 'bookmark' , xp: 500 },
-                { id: 'bm_125',    name: '125 закладок',        desc: '125 закладок',                 field: 'bookmarks', need: 125,   icon: 'bookmark' , xp: 500 },
-                { id: 'bm_150',    name: '150 закладок',        desc: '150 закладок',                 field: 'bookmarks', need: 150,   icon: 'bookmark' , xp: 500 },
-                { id: 'bm_200',    name: 'Архіваріус',          desc: '200 закладок',                 field: 'bookmarks', need: 200,   icon: 'bookmark' , xp: 500 },
-
-                // ── Days watched (76-85) ──
-                { id: 'd_1',       name: 'Перший день',        desc: '1 день перегляду',            field: 'days', need: 1,       icon: 'star' , xp: 30 },
-                { id: 'd_3',       name: '3 дні',              desc: '3 дні',                        field: 'days', need: 3,       icon: 'star' , xp: 90 },
-                { id: 'd_7',       name: 'Тиждень',            desc: '7 днів',                       field: 'days', need: 7,       icon: 'star' , xp: 210 },
-                { id: 'd_14',      name: 'Два тижні',         desc: '14 днів',                      field: 'days', need: 14,      icon: 'star' , xp: 420 },
-                { id: 'd_21',      name: 'Три тижні',         desc: '21 день',                      field: 'days', need: 21,      icon: 'star' , xp: 500 },
-                { id: 'd_30',      name: 'Місяць',            desc: '30 днів',                      field: 'days', need: 30,      icon: 'star' , xp: 500 },
-                { id: 'd_50',      name: '50 днів',            desc: '50 днів',                      field: 'days', need: 50,      icon: 'star' , xp: 500 },
-                { id: 'd_60',      name: 'Два місяці',        desc: '60 днів',                      field: 'days', need: 60,      icon: 'star' , xp: 500 },
-                { id: 'd_90',      name: 'Три місяці',        desc: '90 днів',                      field: 'days', need: 90,      icon: 'star' , xp: 500 },
-                { id: 'd_100',     name: 'Сотка днів',        desc: '100 днів',                     field: 'days', need: 100,     icon: 'star' , xp: 500 },
-
-                // ── Social & special (86-100) ──
-                { id: 'soc_1',     name: 'Перший пост',       desc: 'Напиши в спільноті',          field: 'socialPosts', need: 1,     icon: 'users' , xp: 15 },
-                { id: 'soc_3',     name: 'Три поста',         desc: '3 повідомлення',              field: 'socialPosts', need: 3,     icon: 'users' , xp: 45 },
-                { id: 'soc_5',     name: 'П\'ять постів',    desc: '5 повідомлень',               field: 'socialPosts', need: 5,     icon: 'users' , xp: 75 },
-                { id: 'soc_10',    name: 'Активний юзер',     desc: '10 повідомлень',              field: 'socialPosts', need: 10,    icon: 'users' , xp: 150 },
-                { id: 'soc_25',    name: 'Болтун',           desc: '25 повідомлень',              field: 'socialPosts', need: 25,    icon: 'users' , xp: 375 },
-                { id: 'soc_50',    name: 'Зірка спільноти',  desc: '50 повідомлень',              field: 'socialPosts', need: 50,    icon: 'users' , xp: 500 },
-                { id: 'soc_100',   name: 'Легенда чату',     desc: '100 повідомлень',             field: 'socialPosts', need: 100,   icon: 'users' , xp: 500 },
-
-                { id: 'sp_marathon',  name: 'Марафонець',       desc: '10 серій за день',           field: 'episodes', need: 10,      icon: 'bolt' , xp: 50 },
-                { id: 'sp_halfday',   name: 'Пів доби аніме',   desc: '12 год перегляду',           field: 'hours', need: 12,        icon: 'bolt' , xp: 240 },
-                { id: 'sp_fullday',   name: 'Ціла доба',        desc: '24 год перегляду',           field: 'hours', need: 24,        icon: 'bolt' , xp: 480 },
-                { id: 'sp fullday',   name: 'Ціла доба',        desc: '24 год перегляду',           field: 'hours', need: 24,        icon: 'bolt' , xp: 480 },
-                { id: 'sp_binge',     name: 'Бінджер',          desc: '50 год перегляду',           field: 'hours', need: 50,        icon: 'bolt' , xp: 500 },
-                { id: 'sp_completionist', name: 'Перфекціоніст', desc: '200 серій',                field: 'episodes', need: 200,     icon: 'bolt' , xp: 500 },
-                { id: 'sp_collector_100', name: 'Шукач',     desc: '100 закладок',                field: 'bookmarks', need: 100,   icon: 'bolt' , xp: 500 },
-                { id: 'sp_explorer',  name: 'Дослідник',        desc: '150 тайтлів',                field: 'unique', need: 150,      icon: 'bolt' , xp: 50 },
-                { id: 'sp_master',    name: 'Майстер аніме',    desc: '100 год + 100 серій',        field: 'master', need: 100,      icon: 'bolt' , xp: 50 },
-            ];
-
-            const stats = {
-                episodes: totalEpisodes,
-                hours: hours,
-                watchMinutes: watchMinutes,
-                unique: uniqueCount,
-                bookmarks: bookmarks.length,
-                days: days,
-                socialPosts: socialPosts,
-            };
-
-            return defs.map(d => {
-                let current, unlocked, progress;
-                if (d.field === 'master') {
-                    current = Math.min(stats.episodes, stats.hours);
-                    unlocked = stats.episodes >= 100 && stats.hours >= 100;
-                    progress = unlocked ? 100 : Math.min(Math.round(current / 100 * 100), 100);
-                } else {
-                    current = stats[d.field] || 0;
-                    unlocked = current >= d.need;
-                    progress = unlocked ? 100 : Math.min(Math.round(current / d.need * 100), 100);
-                }
-                return {
-                    id: d.id,
-                    name: d.name,
-                    description: d.desc,
-                    unlocked,
-                    progress,
-                    icon: d.icon,
-                    current: Math.round(current),
-                    need: d.need,
-                    xp: d.xp || 50,
-                };
-            });
+            return [{
+                id: 'first_hours',
+                name: 'Перші 100 годин',
+                description: 'Загальний час перегляду: ' + Math.floor(hours) + ' годин',
+                unlocked: hours >= 100,
+                progress: Math.min(Math.floor(hours / 100 * 100), 100),
+                icon: 'clock'
+            }, {
+                id: 'marathon',
+                name: 'Марафонець',
+                description: 'Переглянуто 10 серій за один день',
+                unlocked: totalEpisodes >= 10,
+                progress: Math.min(Math.floor(totalEpisodes / 10 * 100), 100),
+                icon: 'bolt'
+            }, {
+                id: 'collector',
+                name: 'Колекціонер',
+                description: bookmarks.length + ' закладок у збережених',
+                unlocked: bookmarks.length >= 50,
+                progress: Math.min(Math.floor(bookmarks.length / 50 * 100), 100),
+                icon: 'bookmark'
+            }, {
+                id: 'first_50',
+                name: 'Перші 50 тайтлів',
+                description: 'Переглянуто ' + uniqueCount + ' з 50 тайтлів',
+                unlocked: uniqueCount >= 50,
+                progress: Math.min(Math.floor(uniqueCount / 50 * 100), 100),
+                icon: 'list'
+            }, {
+                id: 'social',
+                name: 'Соціальний глядач',
+                description: 'Поділились 25 тайтлами',
+                unlocked: uniqueCount >= 25,
+                progress: Math.min(Math.floor(uniqueCount / 25 * 100), 100),
+                icon: 'users'
+            }, {
+                id: 'full_day',
+                name: 'Ціла доба в аніме',
+                description: 'Загальний час: ' + Math.floor(hours) + ' год · потрібно 24 год',
+                unlocked: hours >= 24,
+                progress: Math.min(Math.floor(hours / 24 * 100), 100),
+                icon: 'star'
+            }, {
+                id: 'enthusiast',
+                name: 'Ентузіаст',
+                description: 'Переглянути 100 різних тайтлів',
+                unlocked: uniqueCount >= 100,
+                progress: Math.min(Math.floor(uniqueCount / 100 * 100), 100),
+                icon: 'fire'
+            }];
         }
 
-        function renderProfilePage() {
+        
+        // Стиснення зображення перед збереженням (щоб Firestore не падав)
+        // Upload image to Cloudinary, return URL
+        async function uploadToCloudinary(file, maxW, maxH, quality) {
+            // Compress image locally, returns a Blob
+            const compressedBlob = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, hh = img.height;
+                        if (w > maxW) { hh = hh * (maxW / w); w = maxW; }
+                        if (hh > maxH) { w = w * (maxH / hh); hh = maxH; }
+                        canvas.width = Math.round(w);
+                        canvas.height = Math.round(hh);
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        // toBlob is async and returns Blob, not dataURL
+                        canvas.toBlob(blob => {
+                            if (blob) resolve(blob);
+                            else reject(new Error('Canvas toBlob failed'));
+                        }, 'image/jpeg', quality);
+                    };
+                    img.onerror = () => reject(new Error('Image load failed'));
+                    img.src = ev.target.result;
+                };
+                reader.onerror = () => reject(new Error('FileReader failed'));
+                reader.readAsDataURL(file);
+            });
+
+            // Upload Blob to Cloudinary
+            const formData = new FormData();
+            formData.append('file', compressedBlob, 'upload.jpg');
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const resp = await fetch(uploadUrl, { method: 'POST', body: formData, mode: 'cors', credentials: 'omit' });
+            if (!resp.ok) {
+                const errText = await resp.text().catch(() => '');
+                throw new Error('Cloudinary upload failed: ' + resp.status + ' ' + errText.substring(0,100));
+            }
+            const data = await resp.json();
+            if (!data.secure_url) throw new Error('Cloudinary: no secure_url in response');
+            console.log('[Cloudinary] Upload OK:', data.secure_url.substring(0, 60));
+            return data.secure_url;
+        }
+
+        function compressImage(file, maxW, maxH, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, hh = img.height;
+                    if (w > maxW) { hh = hh * (maxW / w); w = maxW; }
+                    if (hh > maxH) { w = w * (maxH / hh); hh = maxH; }
+                    canvas.width = Math.round(w);
+                    canvas.height = Math.round(hh);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    let result = canvas.toDataURL('image/jpeg', quality);
+                    if (result.length > 500000) result = canvas.toDataURL('image/jpeg', 0.4);
+                    if (result.length > 500000) result = canvas.toDataURL('image/jpeg', 0.2);
+                    callback(result);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+function renderProfilePage() {
             const container = document.getElementById('profilePageContainer');
             if (!container) return;
             if (!Auth.isAuthenticated() && !Auth.isGuest()) {
@@ -9290,7 +8603,7 @@ async function _sendMessage(user, pendingMedia, onSent) {
                 ${renderBookmarksPanel(stats.bookmarksList)}
               </div>
               <div class="profile-panel" id="profilePanel-achievements">
-                ${renderAchievementsPanel(stats.achievementsList, stats.totalWatchTime, stats.uniqueAnime)}
+                ${renderAchievementsPanel(stats.achievementsList, stats.totalWatchTime)}
               </div>
             </div>
           `;
@@ -9610,54 +8923,44 @@ async function _sendMessage(user, pendingMedia, onSent) {
             return html;
         }
 
-        function renderAchievementsPanel(achievements, totalWatchTime, uniqueCount) {
+        function renderAchievementsPanel(achievements, totalWatchTime) {
             const hours = Math.floor(totalWatchTime / 3600);
             const minutes = Math.floor((totalWatchTime % 3600) / 60);
-            const unlockedCount = achievements.filter(a => a.unlocked).length;
-
-            const iconMap = {
-                clock:   'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
-                play:    'M5 3l14 9-14 9V3z',
-                bookmark:'M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21V5z',
-                list:    'M4 6h16M4 12h16M4 18h16',
-                users:   'M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4z',
-                star:    'M11.04 2.6a1 1 0 0 1 1.92 0l1.7 5.18a1 1 0 0 0 .95.69h5.47a1 1 0 0 1 .59 1.8l-4.43 3.22a1 1 0 0 0-.36 1.12l1.7 5.18a1 1 0 0 1-1.54 1.12l-4.42-3.22a1 1 0 0 0-1.18 0l-4.42 3.22a1 1 0 0 1-1.54-1.12l1.7-5.18a1 1 0 0 0-.36-1.12L3.3 10.27a1 1 0 0 1 .59-1.8h5.47a1 1 0 0 0 .95-.69l1.7-5.18z',
-                bolt:    'M13 10V3L4 14h7v7l9-11h-7z',
-                fire:    'M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.5-7s2.5 5 2.5 5c2 0 4-1 4-1a8 8 0 0 1-1.343 10.657z',
-            };
-
             let html = `
             <div class="profile-watch-card">
               <div class="profile-wt-label">Загальний час перегляду аніме</div>
               <div class="profile-wt-value">${hours}<span class="profile-wt-unit">год</span> ${minutes}<span class="profile-wt-unit">хв</span></div>
-              <div class="profile-wt-sub">${Storage.getHistory().length} серій · ${uniqueCount} тайтлів</div>
+              <div class="profile-wt-sub">≈ ${Math.round(totalWatchTime/3600*10)/10} годин · ${Storage.getHistory().length} серій</div>
             </div>
             <div class="profile-panel-header">
               <span class="profile-panel-title">Досягнення</span>
-              <span class="profile-panel-count">${unlockedCount} / ${achievements.length}</span>
-            </div>
-            <div class="profile-ach-progress-bar">
-              <div class="profile-ach-progress-fill" style="width:${Math.round(unlockedCount/achievements.length*100)}%"></div>
+              <span class="profile-panel-count">${achievements.filter(a=>a.unlocked).length} / ${achievements.length}</span>
             </div>
             <div class="profile-achievement-list">
           `;
             achievements.forEach(a => {
-                const d = iconMap[a.icon] || iconMap.clock;
                 const unlocked = a.unlocked;
                 const progress = a.progress || 0;
-                const curText = a.current !== undefined && a.need !== undefined ? `${a.current}/${a.need}` : (unlocked ? '✓' : Math.round(progress)+'%');
+                const iconMap = {
+                    clock: 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
+                    bolt: 'M13 10V3L4 14h7v7l9-11h-7z',
+                    bookmark: 'M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21V5z',
+                    list: 'M4 6h16M4 12h16M4 18h16',
+                    users: 'M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4z',
+                    star: 'M11.04 2.6a1 1 0 0 1 1.92 0l1.7 5.18a1 1 0 0 0 .95.69h5.47a1 1 0 0 1 .59 1.8l-4.43 3.22a1 1 0 0 0-.36 1.12l1.7 5.18a1 1 0 0 1-1.54 1.12l-4.42-3.22a1 1 0 0 0-1.18 0l-4.42 3.22a1 1 0 0 1-1.54-1.12l1.7-5.18a1 1 0 0 0-.36-1.12L3.3 10.27a1 1 0 0 1 .59-1.8h5.47a1 1 0 0 0 .95-.69l1.7-5.18z',
+                    fire: 'M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.5-7s2.5 5 2.5 5c2 0 4-1 4-1a8 8 0 0 1-1.343 10.657z'
+                };
+                const d = iconMap[a.icon] || 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z';
                 html += `
               <div class="profile-achievement ${unlocked?'':'locked'}">
-                <div class="profile-ach-icon ${unlocked?'':'locked-icon'}">
+                <div class="profile-ach-icon">
                   <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>
                 </div>
                 <div class="profile-ach-info">
                   <div class="profile-ach-name">${a.name}</div>
                   <div class="profile-ach-value">${a.description}</div>
-                  <div class="profile-ach-xp">${a.xp || 50} XP</div>
-                  ${unlocked ? '' : `<div class="profile-ach-progress-mini"><div class="profile-ach-progress-fill-mini" style="width:${progress}%"></div></div>`}
                 </div>
-                ${unlocked ? `<button class="profile-ach-share" onclick="shareAchievementToCommunity({name:'${a.name.replace(/'/g, "\\'")}',desc:'${a.description.replace(/'/g, "\\'")}',xp:${a.xp || 50}})" title="Поділитись">⚡</button>` : `<div class="profile-ach-badge ${unlocked?'unlocked':'locked'}">${curText}</div>`}
+                <div class="profile-ach-badge">${unlocked ? 'Виконано' : (progress < 100 ? Math.round(progress)+'%' : 'Заблоковано')}</div>
               </div>
             `;
             });
@@ -9665,6 +8968,9 @@ async function _sendMessage(user, pendingMedia, onSent) {
             return html;
         }
 
+        // ====================================================================
+        //  РЕДАГУВАННЯ ПРОФІЛЮ
+        // ====================================================================
         function profileEditNick() {
             const nickEl = document.getElementById('profileNickText');
             if (!nickEl) return;
@@ -9741,26 +9047,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                     textarea.blur(); }
                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { textarea.blur(); }
             });
-        }
-
-        // ====================================================================
-        //  CLOUDINARY UPLOAD (аватарки та банери)
-        // ====================================================================
-        async function uploadToCloudinary(file, width, height, quality) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            if (width && height) {
-                formData.append('transformation', 'w_' + width + ',h_' + height + ',c_fill,q_' + Math.round((quality || 0.8) * 100) + ',f_auto');
-            }
-            const resp = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', {
-                method: 'POST',
-                body: formData
-            });
-            if (!resp.ok) throw new Error('Cloudinary error: ' + resp.status);
-            const result = await resp.json();
-            if (!result.secure_url) throw new Error('No URL in Cloudinary response');
-            return result.secure_url;
         }
 
         document.getElementById('avatarFileInput').addEventListener('change', async function(e) {
@@ -10209,7 +9495,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                             history[idx].progress = Math.min(progress, 100);
                             history[idx].duration = Math.floor(video.currentTime);
                             Storage.setHistory(history);
-        _trackDailyEvent('episodesToday', 1); _trackDailyEvent('minutesToday', 0.5);
                         } else {
                             const entry = {
                                 animeId: playerPageAnime.mal_id || playerPageAnime.url.hashCode(),
@@ -10225,7 +9510,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                             history.unshift(entry);
                             if (history.length > 200) history.length = 200;
                             Storage.setHistory(history);
-        _trackDailyEvent('episodesToday', 1); _trackDailyEvent('minutesToday', 0.5);
                         }
                         showToast(`Серія ${ep} збережена в історію`);
                         video.removeEventListener('timeupdate', onTimeUpdate);
@@ -10283,7 +9567,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
             if (idx >= 0) {
                 bookmarks.splice(idx, 1);
                 Storage.setBookmarks(bookmarks);
-        _trackDailyEvent('bookmarksAdded', 1);
                 showToast('Видалено з закладок');
                 updateBookmarkButton(url);
                 if (Router.currentRoute === 'profile') renderProfilePage();
@@ -10301,7 +9584,6 @@ async function _sendMessage(user, pendingMedia, onSent) {
                 addedAt: Date.now()
             });
             Storage.setBookmarks(bookmarks);
-        _trackDailyEvent('bookmarksAdded', 1);
             showToast('Додано до закладок');
             updateBookmarkButton(url);
             if (Router.currentRoute === 'profile') renderProfilePage();
