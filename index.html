@@ -5796,6 +5796,8 @@
                 console.log('[Sync] profile avatar:', cleanProfile.avatar ? cleanProfile.avatar.substring(0,50) : 'EMPTY');
                 console.log('[Sync] profile banner:', cleanProfile.banner ? cleanProfile.banner.substring(0,50) : 'EMPTY');
                 // Спроба 1: повні дані
+                const _xp = calcTotalXP();
+                const _lv = getLevel(_xp);
                 try {
                     await setDoc(docRef, {
                         profile: cleanProfile,
@@ -5803,6 +5805,8 @@
                         bookmarks: cleanBookmarks,
                         likes: likes,
                         watchTime: watchTime,
+                        xp: _xp,
+                        level: _lv,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
                     console.log('[Firestore] Sync OK (full)');
@@ -5818,6 +5822,8 @@
                         bookmarks: cleanBookmarks,
                         likes: likes,
                         watchTime: watchTime,
+                        xp: _xp,
+                        level: _lv,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
                     console.log('[Firestore] Sync OK (trimmed history)');
@@ -5831,6 +5837,8 @@
                     await setDoc(docRef, {
                         profile: cleanProfile,
                         watchTime: watchTime,
+                        xp: _xp,
+                        level: _lv,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
                     console.log('[Firestore] Sync OK (profile only)');
@@ -7391,6 +7399,46 @@
 
         // === Rating list ===
         let ratingLoaded = false;
+
+        // ====================================================================
+        //  XP / LEVEL SYSTEM
+        // ====================================================================
+        function _getDailyXPBonus() {
+            try { return parseInt(localStorage.getItem('vakdab_daily_xp_total') || '0', 10) || 0; }
+            catch { return 0; }
+        }
+        function _addDailyXPBonus(amount) {
+            const cur = _getDailyXPBonus();
+            const next = cur + amount;
+            try { localStorage.setItem('vakdab_daily_xp_total', String(next)); } catch {}
+            return next;
+        }
+        function calcTotalXP() {
+            const history   = Storage.getHistory()   || [];
+            const bookmarks = Storage.getBookmarks() || [];
+            const watchSec  = Storage.getWatchTime() || 0;
+            const watchHours = watchSec / 3600;
+            const episodes  = history.length;
+            const achStats  = { episodes, watchTime: watchSec, bookmarks: bookmarks.length };
+            const earnedCount = ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need).length;
+            const baseXP = Math.floor(episodes * 30 + watchHours * 15 + bookmarks.length * 10 + earnedCount * 100);
+            return baseXP + _getDailyXPBonus();
+        }
+        function getLevel(xp) {
+            return Math.floor(Math.sqrt(xp / 50)) + 1;
+        }
+        function getXPForLevel(level) {
+            return Math.pow(level - 1, 2) * 50;
+        }
+        function getXPProgress(xp) {
+            const level = getLevel(xp);
+            const currentLevelXP = getXPForLevel(level);
+            const nextLevelXP = getXPForLevel(level + 1);
+            const into = xp - currentLevelXP;
+            const needed = nextLevelXP - currentLevelXP;
+            return { level, pct: needed > 0 ? Math.min(100, Math.round(into / needed * 100)) : 100, into, needed };
+        }
+
         const ACHIEVEMENTS = [
             { id: 'first',  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>', name: 'Перший перегляд', req: '1 серія',      need: 1,      field: 'episodes' },
             { id: 'ep10',   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', name: '10 серій',         req: '10 серій',     need: 10,     field: 'episodes' },
@@ -7433,15 +7481,11 @@
 
                 <div class="rg-tab-panel active" id="rgPanelRating">
                     <div id="rgMyStats"></div>
+                    <div id="rgDailyTasks"></div>
                     <div id="rgAchievements"></div>
-                    <div class="rg-sort-tabs" id="rgSortTabs">
-                        <button class="rg-sort-tab active" data-sort="episodes">За серіями</button>
-                        <button class="rg-sort-tab" data-sort="hours">За годинами</button>
-                        <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
-                    </div>
-                    <div class="rg-lb-title">Глобальний рейтинг</div>
+                    <div class="rg-lb-title">Глобальний рейтинг · XP</div>
                     <div id="rgLeaderboard">
-                        <svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+                        <div style="display:flex;justify-content:center;padding:24px;"><svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>
                     </div>
                 </div>
 
@@ -7472,25 +7516,16 @@
                         const nav = document.getElementById('bottomNav');
                         if (nav) nav.classList.remove('hidden-nav');
                         loadMyStats();
-                        loadLeaderboard(currentLbSort);
+                        _renderDailyTasks();
+                        loadLeaderboard();
                     }
                 });
             });
 
-            wrap.querySelectorAll('.rg-sort-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    wrap.querySelectorAll('.rg-sort-tab').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentLbSort = btn.dataset.sort;
-                    loadLeaderboard(currentLbSort);
-                });
-            });
-
             loadMyStats();
-            loadLeaderboard('episodes');
+            _renderDailyTasks();
+            loadLeaderboard();
         }
-
-        let currentLbSort = 'episodes';
 
         function loadMyStats() {
             const statsEl = document.getElementById('rgMyStats');
@@ -7506,6 +7541,8 @@
             const rankInfo   = getUserRankInfo(episodes, watchHours);
             const achStats   = { episodes, watchTime: watchSec, bookmarks: bookmarks.length };
             const earnedIds  = new Set(ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need).map(a => a.id));
+            const totalXP    = calcTotalXP();
+            const xpProg     = getXPProgress(totalXP);
 
             const avHtml = profile.avatar
                 ? `<img src="${profile.avatar}" alt="">`
@@ -7517,7 +7554,15 @@
                         <div class="rg-stats-avatar">${avHtml}</div>
                         <div>
                             <div class="rg-stats-name">${profile.nickname || 'Гість'}</div>
-                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.icon || ''}${rankInfo.label}</div>
+                            <div class="rg-stats-rank-badge" style="background:var(--accent);color:var(--accent-text);">${rankInfo.icon || ''}${rankInfo.label} · Lv.${xpProg.level}</div>
+                        </div>
+                    </div>
+                    <div class="rg-xp-bar-wrap" style="margin:10px 0 4px;">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;">
+                            <span>${totalXP} XP</span><span>Lv.${xpProg.level + 1} за ${xpProg.needed - xpProg.into} XP</span>
+                        </div>
+                        <div style="height:6px;border-radius:3px;background:var(--border,rgba(128,128,128,.2));overflow:hidden;">
+                            <div style="height:100%;width:${xpProg.pct}%;background:var(--accent);border-radius:3px;transition:width .3s;"></div>
                         </div>
                     </div>
                     <div class="rg-stats-grid">
@@ -7542,84 +7587,136 @@
                 </div>`;
         }
 
-        async function loadLeaderboard(sortBy = 'episodes') {
+        async function loadLeaderboard() {
             const lb = document.getElementById('rgLeaderboard');
             if (!lb) return;
-            lb.className = 'rg-lb-loader';
-            lb.innerHTML = `<svg style="width:24px;height:24px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>`;
-            try {
-                if (!firebaseInitialized || !db) throw new Error('no db');
-                const { collection, query, orderBy, limit, getDocs } =
-                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-                const snap = await getDocs(query(collection(db, 'users'), orderBy('watchTime', 'desc'), limit(50)));
-                let users = [];
-                snap.forEach(d => {
-                    const data = d.data();
-                    users.push({
-                        uid: d.id,
-                        name: data.profile?.nickname || data.profile?.name || 'Аніматор',
-                        avatar: data.profile?.avatar || '',
-                        episodes: Array.isArray(data.history) ? data.history.length : 0,
-                        hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
-                        bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0
-                    });
-                });
-                const sf = sortBy === 'hours' ? 'hours' : sortBy === 'bookmarks' ? 'bookmarks' : 'episodes';
-                users.sort((a, b) => b[sf] - a[sf]);
-                users = users.slice(0, 20);
 
+            const spinner = `<div style="display:flex;justify-content:center;padding:24px;"><svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
+            lb.className = '';
+            lb.innerHTML = spinner;
+
+            const showFallback = (msg) => {
+                const profile = getProfile();
+                const xp = calcTotalXP();
+                const lv = getLevel(xp);
+                const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
+                lb.innerHTML = `
+                    <div class="rg-lb-list">
+                        <div class="rg-lb-item is-me">
+                            <div class="rg-lb-num" style="color:var(--accent);font-weight:800;">#1</div>
+                            <div class="rg-lb-avatar">${av}</div>
+                            <div class="rg-lb-info">
+                                <div class="rg-lb-name">${profile.nickname||'Ти'} <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span></div>
+                                <div class="rg-lb-rank">Lv.${lv}</div>
+                            </div>
+                            <div class="rg-lb-score">${xp} <span class="unit">XP</span></div>
+                        </div>
+                    </div>
+                    <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px;">${msg}</p>`;
+            };
+
+            // Чекаємо ініціалізацію Firebase + авторизацію (до 6 сек), не блокуючи інший код
+            let waited = 0;
+            while ((!firebaseInitialized || !db) && waited < 6000) {
+                await new Promise(res => setTimeout(res, 250));
+                waited += 250;
+            }
+
+            if (!firebaseInitialized || !db) {
+                showFallback('Firebase недоступний. Перевірте з\'єднання.');
+                return;
+            }
+            if (!Auth.isAuthenticated()) {
+                showFallback('Увійдіть, щоб побачити глобальний рейтинг.');
+                return;
+            }
+
+            try {
+                const { collection, query, limit, getDocs, onSnapshot } =
+                    await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                // Без orderBy — не потребує Firestore composite index. Сортуємо на клієнті.
+                const q = query(collection(db, 'users'), limit(500));
+                const tp = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 10000));
+                const snap = await Promise.race([getDocs(q), tp]);
+
+                const mapUsers = (snapshot) => {
+                    let arr = [];
+                    snapshot.forEach(d => {
+                        const data = d.data();
+                        arr.push({
+                            uid: d.id,
+                            name: data.profile?.nickname || data.profile?.name || 'Аніматор',
+                            avatar: data.profile?.avatar || '',
+                            episodes: Array.isArray(data.history) ? data.history.length : 0,
+                            hours: Math.round((data.watchTime || 0) / 3600 * 10) / 10,
+                            bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks.length : 0,
+                            xp: data.xp || 0,
+                            level: data.level || getLevel(data.xp || 0)
+                        });
+                    });
+                    arr.sort((a, b) => b.xp - a.xp);
+                    return arr;
+                };
+
+                let users = mapUsers(snap);
                 if (!users.length) {
-                    lb.className = 'rg-lb-empty';
-                    lb.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p>`;
+                    showFallback('Рейтинг з\'явиться після реєстрації користувачів.');
                     return;
                 }
+                renderLeaderboard(lb, users);
 
-                const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
-                const units = { episodes: 'сер.', hours: 'год', bookmarks: 'зак.' };
-                const unit  = units[sortBy] || '';
-                let html    = '';
+                if (window._lbUnsub) { window._lbUnsub(); window._lbUnsub = null; }
+                window._lbUnsub = onSnapshot(q, (snap2) => {
+                    const u = mapUsers(snap2);
+                    if (u.length) renderLeaderboard(lb, u);
+                }, (err) => console.warn('LB snapshot error:', err));
 
-                if (users.length >= 3) {
-                    const order  = [users[1], users[0], users[2]];
-                    const cls    = ['p2', 'p1', 'p3'];
-                    const crowns = ['🥈', '👑', '🥉'];
-                    html += '<div class="rg-podium">';
-                    order.forEach((u, i) => {
-                        const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
-                        html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
-                            <div class="rg-podium-crown">${crowns[i]}</div>
-                            <div class="rg-podium-avatar">${av}</div>
-                            <div class="rg-podium-name">${u.name}</div>
-                            <div class="rg-podium-score">${u[sf]} ${unit}</div>
-                            <div class="rg-podium-bar"></div>
-                        </div>`;
-                    });
-                    html += '</div>';
-                }
+            } catch(e) {
+                console.warn('loadLeaderboard error:', e.message);
+                showFallback('Помилка завантаження: ' + e.message);
+            }
+        }
 
-                html += '<div class="rg-lb-list">';
-                users.slice(3).forEach((u, i) => {
-                    const isMe = u.uid === myUid;
-                    const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
-                    const ri   = getUserRankInfo(u.episodes, u.hours);
-                    html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.03, 0.5)}s">
-                        <div class="rg-lb-num">${i + 4}</div>
-                        <div class="rg-lb-avatar">${av}</div>
-                        <div class="rg-lb-info">
-                            <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
-                            <div class="rg-lb-rank" style="color:${ri.color}">${ri.label}</div>
-                        </div>
-                        <div class="rg-lb-score">${u[sf]} <span class="unit">${unit}</span></div>
+        function renderLeaderboard(lb, users) {
+            const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
+            let html = '';
+
+            if (users.length >= 3) {
+                const order  = [users[1], users[0], users[2]];
+                const cls    = ['p2', 'p1', 'p3'];
+                const crowns = ['\ud83e\udd48', '\ud83d\udc51', '\ud83e\udd49'];
+                html += '<div class="rg-podium">';
+                order.forEach((u, i) => {
+                    const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                    html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
+                        <div class="rg-podium-crown">${crowns[i]}</div>
+                        <div class="rg-podium-avatar">${av}</div>
+                        <div class="rg-podium-name">${u.name}</div>
+                        <div class="rg-podium-score">${u.xp} XP</div>
+                        <div class="rg-podium-bar"></div>
                     </div>`;
                 });
                 html += '</div>';
-                lb.className = 'rg-lb-content';
-                lb.innerHTML = html;
-            } catch(e) {
-                console.warn('Leaderboard:', e);
-                lb.className = 'rg-lb-empty';
-                    lb.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg><p>Рейтинг з'явиться після реєстрації користувачів</p>`;
             }
+
+            html += '<div class="rg-lb-list">';
+            users.slice(3).forEach((u, i) => {
+                const isMe = u.uid === myUid;
+                const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                const ri   = getUserRankInfo(u.episodes, u.hours);
+                html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.02, 0.4)}s">
+                    <div class="rg-lb-num">${i + 4}</div>
+                    <div class="rg-lb-avatar">${av}</div>
+                    <div class="rg-lb-info">
+                        <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
+                        <div class="rg-lb-rank" style="color:${ri.color}">Lv.${u.level} · ${ri.label}</div>
+                    </div>
+                    <div class="rg-lb-score">${u.xp} <span class="unit">XP</span></div>
+                </div>`;
+            });
+            html += '</div>';
+            lb.className = '';
+            lb.innerHTML = html;
         }
 
         // ─────────────────────────────────────────────────
