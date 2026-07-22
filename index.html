@@ -7751,7 +7751,13 @@
                     <div id="rgMyStats"></div>
                     <div id="rgDailyTasks"></div>
                     <div id="rgAchievements"></div>
-                    <div class="rg-lb-title">Глобальний рейтинг · XP</div>
+                    <div class="rg-lb-title">Глобальний рейтинг</div>
+                    <div class="rg-sort-tabs" id="rgSortTabs">
+                        <button class="rg-sort-tab active" data-sort="xp">За XP</button>
+                        <button class="rg-sort-tab" data-sort="episodes">За серіями</button>
+                        <button class="rg-sort-tab" data-sort="hours">За годинами</button>
+                        <button class="rg-sort-tab" data-sort="bookmarks">За закладками</button>
+                    </div>
                     <div id="rgLeaderboard">
                         <div style="display:flex;justify-content:center;padding:24px;"><svg style="width:22px;height:22px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>
                     </div>
@@ -7787,6 +7793,17 @@
                         _renderDailyTasks();
                         loadLeaderboard();
                     }
+                });
+            });
+
+            wrap.querySelectorAll('.rg-sort-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.classList.contains('active')) return;
+                    wrap.querySelectorAll('.rg-sort-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    _lbSortKey = btn.dataset.sort;
+                    const lb = document.getElementById('rgLeaderboard');
+                    if (lb && _lbUsersCache.length) renderLeaderboard(lb, _lbUsersCache, _lbSortKey);
                 });
             });
 
@@ -7855,6 +7872,16 @@
                     </div>
                 </div>`;
         }
+
+        let _lbSortKey = 'xp';
+        let _lbUsersCache = [];
+
+        const LB_SORT_CONFIG = {
+            xp:        { unit: 'XP',    getVal: u => u.xp },
+            episodes:  { unit: 'сер.',  getVal: u => u.episodes },
+            hours:     { unit: 'год.',  getVal: u => u.hours },
+            bookmarks: { unit: 'зак.',  getVal: u => u.bookmarks }
+        };
 
         async function loadLeaderboard() {
             const lb = document.getElementById('rgLeaderboard');
@@ -7938,7 +7965,6 @@
                             level: data.level || getLevel(data.xp || 0)
                         });
                     });
-                    arr.sort((a, b) => b.xp - a.xp);
                     return arr;
                 };
 
@@ -7947,12 +7973,16 @@
                     showFallback('Рейтинг з\'явиться після реєстрації користувачів.');
                     return;
                 }
-                renderLeaderboard(lb, users);
+                _lbUsersCache = users;
+                renderLeaderboard(lb, users, _lbSortKey);
 
                 if (window._lbUnsub) { window._lbUnsub(); window._lbUnsub = null; }
                 window._lbUnsub = onSnapshot(q, (snap2) => {
                     const u = mapUsers(snap2);
-                    if (u.length) renderLeaderboard(lb, u);
+                    if (u.length) {
+                        _lbUsersCache = u;
+                        renderLeaderboard(lb, u, _lbSortKey);
+                    }
                 }, (err) => console.warn('LB snapshot error:', err));
 
             } catch(e) {
@@ -7961,12 +7991,16 @@
             }
         }
 
-        function renderLeaderboard(lb, users) {
+        function renderLeaderboard(lb, users, sortKey) {
+            sortKey = sortKey || _lbSortKey || 'xp';
+            const cfg = LB_SORT_CONFIG[sortKey] || LB_SORT_CONFIG.xp;
+            const sorted = [...users].sort((a, b) => cfg.getVal(b) - cfg.getVal(a));
+
             const myUid = Auth.isAuthenticated() ? Auth._user?.uid : null;
             let html = '';
 
-            if (users.length >= 3) {
-                const order  = [users[1], users[0], users[2]];
+            if (sorted.length >= 3) {
+                const order  = [sorted[1], sorted[0], sorted[2]];
                 const cls    = ['p2', 'p1', 'p3'];
                 const crowns = ['\ud83e\udd48', '\ud83d\udc51', '\ud83e\udd49'];
                 html += '<div class="rg-podium">';
@@ -7976,7 +8010,7 @@
                         <div class="rg-podium-crown">${crowns[i]}</div>
                         <div class="rg-podium-avatar">${av}</div>
                         <div class="rg-podium-name">${u.name}</div>
-                        <div class="rg-podium-score">${u.xp} XP</div>
+                        <div class="rg-podium-score">${cfg.getVal(u)} ${cfg.unit}</div>
                         <div class="rg-podium-bar"></div>
                     </div>`;
                 });
@@ -7984,7 +8018,7 @@
             }
 
             html += '<div class="rg-lb-list">';
-            users.slice(3).forEach((u, i) => {
+            sorted.slice(3).forEach((u, i) => {
                 const isMe = u.uid === myUid;
                 const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
                 const ri   = getUserRankInfo(u.episodes, u.hours);
@@ -7995,7 +8029,7 @@
                         <div class="rg-lb-name">${u.name}${isMe ? ' <span style="font-size:9px;color:var(--accent);font-weight:700;">YOU</span>' : ''}</div>
                         <div class="rg-lb-rank" style="color:${ri.color}">Lv.${u.level} · ${ri.label}</div>
                     </div>
-                    <div class="rg-lb-score">${u.xp} <span class="unit">XP</span></div>
+                    <div class="rg-lb-score">${cfg.getVal(u)} <span class="unit">${cfg.unit}</span></div>
                 </div>`;
             });
             html += '</div>';
