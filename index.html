@@ -5147,6 +5147,166 @@
         .com-type-opt:hover { background: rgba(var(--accent-rgb), 0.06); color: var(--text); }
         .com-type-opt svg { width: 15px; height: 15px; }
 
+        /* Filter tabs: Думка / Рекомендація / Досягнення */
+        .com-filter-tabs {
+            display: flex; gap: 0.4rem;
+            padding: 0.7rem 0.9rem 0.6rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .com-filter-tabs::-webkit-scrollbar { display: none; }
+        .com-filter-tab {
+            flex-shrink: 0;
+            padding: 7px 16px;
+            font-size: 11.5px; font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--text-muted);
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all .3s cubic-bezier(.2,.9,.2,1);
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .com-filter-tab:hover { border-color: var(--border-hover); color: var(--text-secondary); }
+        .com-filter-tab.active {
+            color: var(--accent-text);
+            border-color: var(--accent);
+            background: var(--accent);
+            box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.2);
+        }
+
+        /* Message action buttons (edit/delete) */
+        .com-msg-actions { display: flex; gap: 4px; margin: 2px 4px 0; }
+        .com-msg.mine .com-msg-actions { justify-content: flex-end; }
+        .com-msg-action-btn {
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); opacity: 0.6;
+            transition: all .2s; padding: 0; border-radius: 50%;
+        }
+        .com-msg-action-btn:hover { opacity: 1; color: var(--text-secondary); background: rgba(var(--accent-rgb), 0.08); }
+        .com-msg-action-btn svg { width: 12px; height: 12px; }
+        .com-msg-edited-tag { font-size: 8.5px; color: var(--text-muted); opacity: 0.6; margin-left: 4px; }
+
+        /* Inline edit box */
+        .com-msg-edit-box { display: flex; flex-direction: column; gap: 6px; min-width: 180px; }
+        .com-msg-edit-box textarea {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 7px 10px; color: var(--text);
+            font-size: 13px; font-family: inherit; resize: none; min-height: 40px;
+            outline: none; width: 100%;
+        }
+        .com-msg-edit-box textarea:focus { border-color: rgba(var(--accent-rgb), 0.4); }
+        .com-msg-edit-actions { display: flex; gap: 6px; justify-content: flex-end; }
+        .com-msg-edit-actions button {
+            font-size: 11px; font-weight: 700; padding: 5px 12px;
+            border-radius: 14px; border: 1px solid var(--border); cursor: pointer;
+            font-family: inherit; background: var(--glass); color: var(--text-secondary);
+        }
+        .com-msg-edit-save { background: var(--accent) !important; color: var(--accent-text) !important; border-color: var(--accent) !important; }
+
+        /* Compose extra panel (anime / achievement picker) */
+        .com-compose-extra:empty { display: none; }
+        .com-compose-extra { padding: 0 0.9rem 0.5rem; }
+
+        .com-anime-search input, .com-ach-picker input {
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 8px 14px; color: var(--text);
+            font-size: 13px; font-family: inherit; outline: none; margin-bottom: 6px;
+            box-sizing: border-box;
+        }
+        .com-anime-results {
+            display: flex; flex-direction: column; gap: 4px;
+            max-height: 180px; overflow-y: auto; margin-bottom: 4px;
+        }
+        .com-anime-result-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 8px; border-radius: 10px; cursor: pointer;
+            background: var(--glass); border: 1px solid var(--border);
+            transition: all .2s;
+        }
+        .com-anime-result-item:hover { border-color: var(--border-hover); background: rgba(var(--accent-rgb), 0.06); }
+        .com-anime-result-item img { width: 30px; height: 42px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+        .com-anime-result-item span { font-size: 12.5px; font-weight: 600; color: var(--text); }
+
+        .com-anime-selected, .com-ach-selected {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; margin-bottom: 6px;
+            border-radius: 14px; background: rgba(var(--accent-rgb), 0.06);
+            border: 1px solid rgba(var(--accent-rgb), 0.2);
+        }
+        .com-anime-selected img { width: 38px; height: 54px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .com-anime-selected-info, .com-ach-selected-info { flex: 1; min-width: 0; }
+        .com-anime-selected-title, .com-ach-selected-name { font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .com-anime-selected-desc, .com-ach-selected-req {
+            font-size: 11px; color: var(--text-muted); margin-top: 2px;
+            overflow: hidden; text-overflow: ellipsis;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .com-anime-clear, .com-ach-clear {
+            flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+            background: none; border: 1px solid var(--border); cursor: pointer;
+            color: var(--text-muted); font-size: 14px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .com-ach-selected-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; }
+        .com-ach-selected-icon svg { width: 22px; height: 22px; }
+
+        .com-ach-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+            gap: 6px; max-height: 180px; overflow-y: auto; margin-bottom: 4px;
+        }
+        .com-ach-opt {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 8px 4px; border-radius: 12px; cursor: pointer;
+            background: var(--glass); border: 1px solid var(--border);
+            font-family: inherit; transition: all .2s;
+        }
+        .com-ach-opt:hover { border-color: rgba(var(--accent-rgb), 0.4); background: rgba(var(--accent-rgb), 0.06); }
+        .com-ach-opt-icon { width: 20px; height: 20px; color: var(--accent); }
+        .com-ach-opt-icon svg { width: 18px; height: 18px; }
+        .com-ach-opt-name { font-size: 9.5px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.2; }
+        .com-ach-empty { font-size: 12px; color: var(--text-muted); padding: 10px 0; text-align: center; }
+
+        /* Rich anime card inside a chat message */
+        .com-anime-card {
+            display: flex; gap: 9px;
+            margin: 6px 0 2px; padding: 8px;
+            border-radius: 14px; cursor: pointer;
+            background: rgba(var(--accent-rgb), 0.05);
+            border: 1px solid rgba(var(--accent-rgb), 0.15);
+            transition: all .2s; max-width: 260px;
+        }
+        .com-anime-card:hover { background: rgba(var(--accent-rgb), 0.1); border-color: rgba(var(--accent-rgb), 0.3); }
+        .com-anime-card img { width: 48px; height: 68px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .com-anime-card-info { min-width: 0; }
+        .com-anime-card-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+        .com-anime-card-desc {
+            font-size: 11px; color: var(--text-muted); line-height: 1.4;
+            overflow: hidden; text-overflow: ellipsis;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+        }
+        .com-anime-card-cta { font-size: 10px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+        /* Rich achievement card inside a chat message */
+        .com-ach-card {
+            display: flex; align-items: center; gap: 10px;
+            margin: 6px 0 2px; padding: 9px 12px;
+            border-radius: 14px;
+            background: rgba(var(--accent-rgb), 0.05);
+            border: 1px solid rgba(var(--accent-rgb), 0.15);
+        }
+        .com-ach-card-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; }
+        .com-ach-card-icon svg { width: 26px; height: 26px; }
+        .com-ach-card-name { font-size: 13px; font-weight: 800; color: var(--text); }
+        .com-ach-card-req { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+
         /* Login wall */
         .com-login-wall {
             display: flex; flex-direction: column; align-items: center;
@@ -5368,6 +5528,8 @@
             doc,
             getDoc,
             setDoc,
+            deleteDoc,
+            updateDoc,
             serverTimestamp,
             addDoc,
             collection,
@@ -8042,6 +8204,20 @@
         // ─────────────────────────────────────────────────
         let comUnsub = null;
         let comPostType = 'text';
+        let comFilterType = 'text';
+        let editingMsgId = null;
+        let _comMsgsCache = [];
+
+        function getMyEarnedAchievements() {
+            const history   = Storage.getHistory()   || [];
+            const bookmarks = Storage.getBookmarks() || [];
+            const watchSec  = Storage.getWatchTime() || 0;
+            const episodes  = history.length;
+            const totalXP   = calcTotalXP();
+            const xpLvl     = getLevel(totalXP);
+            const achStats  = { episodes, watchTime: watchSec, bookmarks: bookmarks.length, xp: totalXP, level: xpLvl, posts: DailyStats.getTotalPosts(), ratings: DailyStats.getTotalRatings() };
+            return ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need);
+        }
 
         function initCommunity() {
             const panel = document.getElementById('rgPanelCommunity');
@@ -8056,6 +8232,11 @@
 
             panel.innerHTML = `
                 <div class="com-chat-wrap">
+                    <div class="com-filter-tabs" id="comFilterTabs">
+                        <button class="com-filter-tab active" data-type="text">Думка</button>
+                        <button class="com-filter-tab" data-type="anime">Рекомендація</button>
+                        <button class="com-filter-tab" data-type="ach">Досягнення</button>
+                    </div>
                     <div class="com-messages" id="comMessages">
                         <div class="com-feed-empty">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -8064,6 +8245,7 @@
                     </div>
 
                     ${user ? `
+                    <div class="com-compose-extra" id="comComposeExtra"></div>
                     <div class="com-input-wrap">
                         <div class="com-type-menu hidden" id="comTypeMenu">
                             <button class="com-type-opt" data-type="text">
@@ -8105,6 +8287,16 @@
                 </div>
             `;
 
+            panel.querySelectorAll('.com-filter-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.classList.contains('active')) return;
+                    panel.querySelectorAll('.com-filter-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    comFilterType = btn.dataset.type;
+                    _renderComMessages(user);
+                });
+            });
+
             if (user) _setupCompose(user);
             _subscribeToChat(user);
         }
@@ -8117,10 +8309,117 @@
             const attachBtn  = document.getElementById('comAttachBtn');
             const mediaInput = document.getElementById('comMediaInput');
             const mediaPreview = document.getElementById('comMediaPreview');
+            const extraBox   = document.getElementById('comComposeExtra');
 
             if (!inp || !sendBtn) return;
 
             let pendingMedia = [];
+            let pendingAnime = null;
+            let pendingAchievement = null;
+            let animeSearchTimer = null;
+
+            function refreshExtra() {
+                if (!extraBox) return;
+                if (comPostType === 'anime') {
+                    if (pendingAnime) {
+                        extraBox.innerHTML = `
+                            <div class="com-anime-selected">
+                                <img src="${pendingAnime.poster || ''}" alt="" onerror="this.style.display='none'">
+                                <div class="com-anime-selected-info">
+                                    <div class="com-anime-selected-title">${escapeHtml(pendingAnime.title)}</div>
+                                    <div class="com-anime-selected-desc">${escapeHtml(pendingAnime.synopsis || 'Опис відсутній')}</div>
+                                </div>
+                                <button class="com-anime-clear" id="comAnimeClear" title="Прибрати">&times;</button>
+                            </div>`;
+                        document.getElementById('comAnimeClear')?.addEventListener('click', () => {
+                            pendingAnime = null;
+                            refreshExtra();
+                        });
+                    } else {
+                        extraBox.innerHTML = `
+                            <div class="com-anime-search">
+                                <input type="text" id="comAnimeSearchInput" placeholder="Введи назву аніме, щоб знайти і поділитись...">
+                                <div class="com-anime-results" id="comAnimeResults"></div>
+                            </div>`;
+                        const searchInp = document.getElementById('comAnimeSearchInput');
+                        const resultsBox = document.getElementById('comAnimeResults');
+                        searchInp?.addEventListener('input', () => {
+                            clearTimeout(animeSearchTimer);
+                            const q = searchInp.value.trim();
+                            if (q.length < 2) { resultsBox.innerHTML = ''; return; }
+                            animeSearchTimer = setTimeout(async () => {
+                                resultsBox.innerHTML = `<div style="display:flex;justify-content:center;padding:10px;"><svg style="width:16px;height:16px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
+                                try {
+                                    const list = await searchAnimeua(q, 1);
+                                    if (!list || !list.length) {
+                                        resultsBox.innerHTML = `<p style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:6px 0;">Нічого не знайдено</p>`;
+                                        return;
+                                    }
+                                    resultsBox.innerHTML = list.slice(0, 6).map((item, i) => `
+                                        <div class="com-anime-result-item" data-idx="${i}">
+                                            <img src="${item.images?.jpg?.large_image_url || ''}" alt="" onerror="this.style.display='none'">
+                                            <span>${escapeHtml(item.title || 'Без назви')}</span>
+                                        </div>`).join('');
+                                    resultsBox.querySelectorAll('.com-anime-result-item').forEach((el, i) => {
+                                        el.addEventListener('click', async () => {
+                                            const item = list[i];
+                                            resultsBox.innerHTML = `<div style="display:flex;justify-content:center;padding:10px;"><svg style="width:16px;height:16px;animation:spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".2"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></div>`;
+                                            let synopsis = '', poster = item.images?.jpg?.large_image_url || '';
+                                            try {
+                                                const detail = await loadAnimeuaDetail(item.url);
+                                                synopsis = (detail.synopsis || '').trim();
+                                                poster = detail.images?.jpg?.large_image_url || poster;
+                                            } catch (e) { console.warn('Не вдалося завантажити опис аніме:', e.message); }
+                                            pendingAnime = { title: item.title, url: item.url, poster, synopsis: synopsis.slice(0, 300) };
+                                            refreshExtra();
+                                        });
+                                    });
+                                } catch (e) {
+                                    resultsBox.innerHTML = `<p style="font-size:11.5px;color:var(--text-muted);text-align:center;padding:6px 0;">Помилка пошуку</p>`;
+                                }
+                            }, 400);
+                        });
+                    }
+                } else if (comPostType === 'ach') {
+                    if (pendingAchievement) {
+                        extraBox.innerHTML = `
+                            <div class="com-ach-selected">
+                                <span class="com-ach-selected-icon">${pendingAchievement.icon}</span>
+                                <div class="com-ach-selected-info">
+                                    <div class="com-ach-selected-name">${escapeHtml(pendingAchievement.name)}</div>
+                                    <div class="com-ach-selected-req">${escapeHtml(pendingAchievement.req)}</div>
+                                </div>
+                                <button class="com-ach-clear" id="comAchClear" title="Прибрати">&times;</button>
+                            </div>`;
+                        document.getElementById('comAchClear')?.addEventListener('click', () => {
+                            pendingAchievement = null;
+                            refreshExtra();
+                        });
+                    } else {
+                        const myEarned = getMyEarnedAchievements();
+                        extraBox.innerHTML = `
+                            <div class="com-ach-picker">
+                                <div class="com-ach-grid" id="comAchGrid">
+                                    ${myEarned.length ? myEarned.map(a => `
+                                        <button class="com-ach-opt" type="button" data-id="${a.id}">
+                                            <span class="com-ach-opt-icon">${a.icon}</span>
+                                            <span class="com-ach-opt-name">${escapeHtml(a.name)}</span>
+                                        </button>`).join('') : `<p class="com-ach-empty">У тебе поки немає досягнень для поширення</p>`}
+                                </div>
+                            </div>`;
+                        extraBox.querySelectorAll('.com-ach-opt').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                const a = myEarned.find(x => x.id === btn.dataset.id);
+                                if (!a) return;
+                                pendingAchievement = { id: a.id, name: a.name, req: a.req, icon: a.icon };
+                                refreshExtra();
+                            });
+                        });
+                    }
+                } else {
+                    extraBox.innerHTML = '';
+                }
+            }
 
             inp.addEventListener('input', () => {
                 inp.style.height = 'auto';
@@ -8128,7 +8427,16 @@
             });
 
             inp.addEventListener('keydown', e => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); _sendMessage(user, pendingMedia); }
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    _sendMessage(user, { media: pendingMedia, anime: pendingAnime, achievement: pendingAchievement }, () => {
+                        pendingMedia.length = 0;
+                        pendingAnime = null;
+                        pendingAchievement = null;
+                        _renderMediaPreview(pendingMedia, mediaPreview);
+                        refreshExtra();
+                    });
+                }
             });
 
             if (typeToggle && typeMenu) {
@@ -8139,9 +8447,12 @@
                 typeMenu.querySelectorAll('.com-type-opt').forEach(btn => {
                     btn.addEventListener('click', () => {
                         comPostType = btn.dataset.type;
+                        pendingAnime = null;
+                        pendingAchievement = null;
                         typeMenu.classList.add('hidden');
-                        const labels = { text: 'Написати в спільноті...', anime: 'Яке аніме рекомендуєш?...', ach: 'Поділись досягненням...' };
+                        const labels = { text: 'Написати в спільноті...', anime: 'Короткий коментар до рекомендації (необов\'язково)...', ach: 'Короткий коментар (необов\'язково)...' };
                         inp.placeholder = labels[comPostType] || labels.text;
+                        refreshExtra();
                         inp.focus();
                     });
                 });
@@ -8161,10 +8472,15 @@
                 });
             }
 
-            sendBtn.addEventListener('click', () => _sendMessage(user, pendingMedia, () => {
+            sendBtn.addEventListener('click', () => _sendMessage(user, { media: pendingMedia, anime: pendingAnime, achievement: pendingAchievement }, () => {
                 pendingMedia.length = 0;
+                pendingAnime = null;
+                pendingAchievement = null;
                 _renderMediaPreview(pendingMedia, mediaPreview);
+                refreshExtra();
             }));
+
+            refreshExtra();
         }
 
         function _renderMediaPreview(media, container) {
@@ -8190,12 +8506,19 @@
             });
         }
 
-        async function _sendMessage(user, pendingMedia, onSent) {
+        async function _sendMessage(user, extra, onSent) {
             const inp     = document.getElementById('comInput');
             const sendBtn = document.getElementById('comSendBtn');
             if (!inp) return;
+            extra = extra || {};
+            const pendingMedia = extra.media || [];
+            const pendingAnime = comPostType === 'anime' ? extra.anime : null;
+            const pendingAchievement = comPostType === 'ach' ? extra.achievement : null;
             const text = inp.value.trim();
-            if (!text || text.length < 1) return;
+
+            const hasSomethingToSend = !!text || pendingMedia.length > 0 || !!pendingAnime || !!pendingAchievement;
+            if (!hasSomethingToSend) return;
+
             sendBtn.disabled = true;
             try {
                 if (!firebaseInitialized || !db) throw new Error('Firebase недоступний');
@@ -8211,6 +8534,23 @@
                     watermark: (p.nickname || user.displayName || user.email?.split('@')[0] || 'VakDab'),
                     createdAt: serverTimestamp()
                 };
+
+                if (pendingAnime) {
+                    msgData.animeData = {
+                        title: pendingAnime.title || '',
+                        url: pendingAnime.url || '',
+                        poster: pendingAnime.poster || '',
+                        synopsis: (pendingAnime.synopsis || '').slice(0, 300)
+                    };
+                }
+                if (pendingAchievement) {
+                    msgData.achData = {
+                        id: pendingAchievement.id || '',
+                        name: pendingAchievement.name || '',
+                        req: pendingAchievement.req || '',
+                        icon: pendingAchievement.icon || ''
+                    };
+                }
 
                 if (pendingMedia && pendingMedia.length > 0) {
                     msgData.media = [];
@@ -8246,86 +8586,194 @@
             }
         }
 
+        const COM_TYPE_ICONS = {
+            anime: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+            ach:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
+        };
+        const COM_TYPE_LABELS = { anime: 'Рекомендація', ach: 'Досягнення' };
+
+        function _renderComMessages(currentUser) {
+            const box = document.getElementById('comMessages');
+            if (!box) return;
+            const filtered = _comMsgsCache.filter(m => (m.type || 'text') === comFilterType);
+
+            if (!filtered.length) {
+                const emptyLabels = { text: 'Ще немає думок. Напиши першим!', anime: 'Ще немає рекомендацій. Поділись улюбленим аніме!', ach: 'Ще немає досягнень у стрічці. Поділись своїм!' };
+                box.innerHTML = `<div class="com-feed-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <p>${emptyLabels[comFilterType] || emptyLabels.text}</p>
+                </div>`;
+                return;
+            }
+
+            let lastDate = null;
+            let html = '';
+            filtered.forEach(m => {
+                const date = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+                const isMe = currentUser && m.uid === currentUser.uid;
+
+                if (date) {
+                    const dayStr = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
+                    if (dayStr !== lastDate) {
+                        lastDate = dayStr;
+                        html += `<div class="com-date-sep"><span class="com-date-sep-text">${dayStr}</span></div>`;
+                    }
+                }
+
+                const av = m.authorPhoto
+                    ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
+                    : `<span>${(m.authorName || '?')[0].toUpperCase()}</span>`;
+                const timeStr = date ? date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '';
+                const typeTag = m.type && COM_TYPE_LABELS[m.type]
+                    ? `<div class="com-msg-type">${COM_TYPE_ICONS[m.type] || ''}${COM_TYPE_LABELS[m.type]}</div>`
+                    : '';
+
+                let mediaHtml = '';
+                if (m.media && Array.isArray(m.media) && m.media.length > 0) {
+                    mediaHtml = m.media.map(md => {
+                        if (md.type === 'video') {
+                            return `<div class="com-msg-media"><video src="${md.url}" controls playsinline></video></div>`;
+                        }
+                        return `<div class="com-msg-media"><img src="${md.url}" alt="" loading="lazy"></div>`;
+                    }).join('');
+                }
+
+                let animeCardHtml = '';
+                if (m.animeData && m.animeData.title) {
+                    const ad = m.animeData;
+                    animeCardHtml = `<div class="com-anime-card" data-url="${escapeHtml(ad.url || '')}">
+                        <img src="${ad.poster || ''}" alt="" onerror="this.style.display='none'">
+                        <div class="com-anime-card-info">
+                            <div class="com-anime-card-title">${escapeHtml(ad.title)}</div>
+                            ${ad.synopsis ? `<div class="com-anime-card-desc">${escapeHtml(ad.synopsis)}</div>` : ''}
+                            <div class="com-anime-card-cta">Дізнатись більше →</div>
+                        </div>
+                    </div>`;
+                }
+
+                let achCardHtml = '';
+                if (m.achData && m.achData.name) {
+                    const ad = m.achData;
+                    achCardHtml = `<div class="com-ach-card">
+                        <span class="com-ach-card-icon">${ad.icon || ''}</span>
+                        <div>
+                            <div class="com-ach-card-name">${escapeHtml(ad.name)}</div>
+                            <div class="com-ach-card-req">${escapeHtml(ad.req || '')}</div>
+                        </div>
+                    </div>`;
+                }
+
+                const watermark = m.watermark
+                    ? `<div class="com-msg-watermark">${escapeHtml(m.watermark)}</div>`
+                    : '';
+
+                const editedTag = m.edited ? `<span class="com-msg-edited-tag">змінено</span>` : '';
+
+                let bodyHtml;
+                if (editingMsgId === m.id) {
+                    bodyHtml = `<div class="com-msg-edit-box">
+                        <textarea class="com-msg-edit-input">${escapeHtml(m.text || '')}</textarea>
+                        <div class="com-msg-edit-actions">
+                            <button type="button" class="com-msg-edit-cancel">Скасувати</button>
+                            <button type="button" class="com-msg-edit-save">Зберегти</button>
+                        </div>
+                    </div>`;
+                } else {
+                    bodyHtml = `${typeTag}${mediaHtml}${animeCardHtml}${achCardHtml}${m.text ? `<div class="com-msg-text">${escapeHtml(m.text)}</div>` : ''}`;
+                }
+
+                const actionsHtml = (isMe && editingMsgId !== m.id) ? `
+                    <div class="com-msg-actions">
+                        <button type="button" class="com-msg-action-btn com-msg-edit-btn" title="Редагувати">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                        </button>
+                        <button type="button" class="com-msg-action-btn com-msg-delete-btn" title="Видалити">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>` : '';
+
+                html += `<div class="com-msg ${isMe ? 'mine' : ''}" data-id="${m.id}">
+                    <div class="com-msg-avatar">${av}</div>
+                    <div class="com-msg-col">
+                        <div class="com-msg-name">${m.authorName || 'Аніматор'}</div>
+                        <div class="com-msg-bubble">
+                            ${bodyHtml}
+                        </div>
+                        ${actionsHtml}
+                        ${watermark}
+                        <div class="com-msg-time">${timeStr}${editedTag}</div>
+                    </div>
+                </div>`;
+            });
+
+            const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+            box.innerHTML = html;
+            if (wasAtBottom) box.scrollTop = box.scrollHeight;
+
+            box.querySelectorAll('.com-anime-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const url = card.dataset.url;
+                    if (url) openPlayerPage(url);
+                });
+            });
+        }
+
         function _subscribeToChat(currentUser) {
             const box = document.getElementById('comMessages');
             if (!box) return;
             if (comUnsub) { comUnsub(); comUnsub = null; }
+
+            if (!box.dataset.actionsBound) {
+                box.dataset.actionsBound = '1';
+                box.addEventListener('click', async (e) => {
+                    const msgEl = e.target.closest('.com-msg');
+                    if (!msgEl) return;
+                    const id = msgEl.dataset.id;
+
+                    if (e.target.closest('.com-msg-delete-btn')) {
+                        if (!confirm('Видалити це повідомлення?')) return;
+                        try {
+                            await deleteDoc(doc(db, 'community_posts', id));
+                        } catch (err) { showToast('Помилка видалення: ' + err.message); }
+                        return;
+                    }
+
+                    if (e.target.closest('.com-msg-edit-btn')) {
+                        editingMsgId = id;
+                        _renderComMessages(currentUser);
+                        const ta = box.querySelector(`.com-msg[data-id="${id}"] .com-msg-edit-input`);
+                        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+                        return;
+                    }
+
+                    if (e.target.closest('.com-msg-edit-cancel')) {
+                        editingMsgId = null;
+                        _renderComMessages(currentUser);
+                        return;
+                    }
+
+                    if (e.target.closest('.com-msg-edit-save')) {
+                        const ta = msgEl.querySelector('.com-msg-edit-input');
+                        const newText = ta ? ta.value.trim() : '';
+                        if (!newText) { showToast('Повідомлення не може бути порожнім'); return; }
+                        try {
+                            await updateDoc(doc(db, 'community_posts', id), {
+                                text: newText, edited: true, editedAt: serverTimestamp()
+                            });
+                            editingMsgId = null;
+                        } catch (err) { showToast('Помилка редагування: ' + err.message); }
+                        return;
+                    }
+                });
+            }
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
                 import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js').then(({ collection, query, orderBy, limit, onSnapshot }) => {
                     const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'asc'), limit(80));
                     comUnsub = onSnapshot(q, snap => {
-                        if (snap.empty) {
-                            box.innerHTML = `<div class="com-feed-empty">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                <p>Ще немає повідомлень. Напиши першим!</p>
-                            </div>`;
-                            return;
-                        }
-
-                        const typeIcons = {
-                            anime: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
-                            ach:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
-                        };
-                        const typeLabels = { anime: 'Рекомендація', ach: 'Досягнення' };
-
-                        let lastDate = null;
-                        let html = '';
-                        snap.forEach(d => {
-                            const m    = d.data();
-                            const date = m.createdAt?.toDate ? m.createdAt.toDate() : null;
-                            const isMe = currentUser && m.uid === currentUser.uid;
-
-                            if (date) {
-                                const dayStr = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
-                                if (dayStr !== lastDate) {
-                                    lastDate = dayStr;
-                                    html += `<div class="com-date-sep"><span class="com-date-sep-text">${dayStr}</span></div>`;
-                                }
-                            }
-
-                            const av = m.authorPhoto
-                                ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
-                                : `<span>${(m.authorName || '?')[0].toUpperCase()}</span>`;
-                            const timeStr = date ? date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '';
-                            const typeTag = m.type && typeLabels[m.type]
-                                ? `<div class="com-msg-type">${typeIcons[m.type] || ''}${typeLabels[m.type]}</div>`
-                                : '';
-
-                            let mediaHtml = '';
-                            if (m.media && Array.isArray(m.media) && m.media.length > 0) {
-                                mediaHtml = m.media.map(md => {
-                                    if (md.type === 'video') {
-                                        return `<div class="com-msg-media"><video src="${md.url}" controls playsinline></video></div>`;
-                                    }
-                                    return `<div class="com-msg-media"><img src="${md.url}" alt="" loading="lazy"></div>`;
-                                }).join('');
-                            }
-
-                            const watermark = m.watermark
-                                ? `<div class="com-msg-watermark">${escapeHtml(m.watermark)}</div>`
-                                : '';
-
-                            html += `<div class="com-msg ${isMe ? 'mine' : ''}">
-                                <div class="com-msg-avatar">${av}</div>
-                                <div class="com-msg-col">
-                                    <div class="com-msg-name">${m.authorName || 'Аніматор'}</div>
-                                    <div class="com-msg-bubble">
-                                        ${typeTag}
-                                        ${mediaHtml}
-                                        <div class="com-msg-text">${escapeHtml(m.text || '')}</div>
-                                    </div>
-                                    ${watermark}
-                                    <div class="com-msg-time">${timeStr}</div>
-                                </div>
-                            </div>`;
-                        });
-
-                        const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
-                        box.innerHTML = html;
-                        if (wasAtBottom) box.scrollTop = box.scrollHeight;
-
+                        _comMsgsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        _renderComMessages(currentUser);
                     }, () => {
                         box.innerHTML = `<div class="com-feed-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg><p>Не вдалося завантажити чат</p></div>`;
                     });
