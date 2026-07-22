@@ -5479,7 +5479,7 @@
                     if (user && this._user && this._user.uid !== user.uid) {
                         this._welcomeShown = false;
                     }
-                    if (user) this._isGuest = false;
+                    if (user && !user.isAnonymous) this._isGuest = false;
                     this._user = user;
                     this._authResolved = true;
                     this._notifyListeners();
@@ -7884,7 +7884,7 @@
                     <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px;">${msg}</p>`;
             };
 
-            // Чекаємо ініціалізацію Firebase + авторизацію (до 6 сек), не блокуючи інший код
+            // Чекаємо ініціалізацію Firebase (до 6 сек), не блокуючи інший код
             let waited = 0;
             while ((!firebaseInitialized || !db) && waited < 6000) {
                 await new Promise(res => setTimeout(res, 250));
@@ -7895,7 +7895,16 @@
                 showFallback('Firebase недоступний. Перевірте з\'єднання.');
                 return;
             }
-            // Гостям намагаємось видати анонімний Firebase-сеанс, щоб рейтинг був доступний без входу
+            // КРИТИЧНО: чекаємо поки Firebase РЕАЛЬНО визначить сесію (_authResolved),
+            // інакше вже залогінений через Google юзер на мить виглядає як "не автентифікований"
+            // (onAuthStateChanged ще не встиг відпрацювати) і потрапляє у гостьову гілку нижче.
+            waited = 0;
+            while (!Auth._authResolved && waited < 4000) {
+                await new Promise(res => setTimeout(res, 150));
+                waited += 150;
+            }
+            // Гостям (справді неавторизованим) намагаємось видати анонімний Firebase-сеанс,
+            // щоб рейтинг був доступний без входу
             if (!Auth.isAuthenticated()) {
                 try {
                     await signInAnonymously(auth);
