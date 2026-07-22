@@ -5307,6 +5307,137 @@
         .com-ach-card-name { font-size: 13px; font-weight: 800; color: var(--text); }
         .com-ach-card-req { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
 
+        /* Modern chat header (Telegram-like group header) */
+        .com-chat-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(var(--accent-rgb),0.08), transparent 60%);
+            flex-shrink: 0;
+        }
+        .com-chat-header-icon {
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            background: var(--accent); color: var(--accent-text);
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(var(--accent-rgb),0.3);
+        }
+        .com-chat-header-info { min-width: 0; }
+        .com-chat-header-title { font-size: 14px; font-weight: 800; color: var(--text); letter-spacing: -0.2px; }
+        .com-chat-header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+        .com-chat-header-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; box-shadow: 0 0 0 2px rgba(34,197,94,0.2); }
+
+        /* Reactions row under a bubble */
+        .com-msg-reactions { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 4px; margin-top: 2px; }
+        .com-msg.mine .com-msg-reactions { justify-content: flex-end; }
+        .com-reaction-pill {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 11px; padding: 2px 8px;
+            border-radius: 12px; cursor: pointer;
+            background: rgba(var(--accent-rgb), 0.08);
+            border: 1px solid rgba(var(--accent-rgb), 0.18);
+            transition: all .2s; font-family: inherit;
+        }
+        .com-reaction-pill:hover { background: rgba(var(--accent-rgb), 0.16); }
+        .com-reaction-pill.mine-reacted { background: rgba(var(--accent-rgb), 0.22); border-color: var(--accent); }
+        .com-reaction-pill .cnt { font-weight: 700; color: var(--text-secondary); font-size: 10px; }
+
+        /* Reply quote inside a bubble */
+        .com-msg-reply-quote {
+            display: flex; flex-direction: column;
+            padding: 4px 8px; margin-bottom: 6px;
+            border-left: 2.5px solid var(--accent);
+            border-radius: 6px;
+            background: rgba(var(--accent-rgb), 0.06);
+        }
+        .com-msg-reply-name { font-size: 10.5px; font-weight: 700; color: var(--accent); }
+        .com-msg-reply-text { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+
+        /* @mentions inside message text */
+        .com-mention { color: var(--accent); font-weight: 700; }
+
+        /* Reply banner above composer */
+        .com-reply-banner {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 12px; margin: 0 0.9rem;
+            border-radius: 12px 12px 0 0;
+            background: rgba(var(--accent-rgb), 0.08);
+            border: 1px solid rgba(var(--accent-rgb), 0.2);
+            border-bottom: none;
+        }
+        .com-reply-banner-bar { width: 3px; align-self: stretch; border-radius: 2px; background: var(--accent); flex-shrink: 0; }
+        .com-reply-banner-info { flex: 1; min-width: 0; }
+        .com-reply-banner-info b { display: block; font-size: 11px; color: var(--accent); }
+        .com-reply-banner-info span { display: block; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .com-reply-cancel {
+            width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+            font-size: 16px; display: flex; align-items: center; justify-content: center;
+        }
+        .com-reply-cancel:hover { color: var(--text); }
+
+        /* Mention autocomplete dropdown */
+        .com-mention-dropdown {
+            position: absolute; bottom: calc(100% + 6px); left: 0.9rem; right: 0.9rem;
+            max-height: 160px; overflow-y: auto;
+            background: var(--glass); backdrop-filter: blur(28px) saturate(1.5);
+            -webkit-backdrop-filter: blur(28px) saturate(1.5);
+            border: 1px solid var(--border); border-radius: 14px;
+            box-shadow: var(--shadow-md); z-index: 22;
+        }
+        .com-mention-opt {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--text);
+        }
+        .com-mention-opt:hover { background: rgba(var(--accent-rgb), 0.08); }
+
+        /* Telegram-style long-press context menu */
+        .com-ctx-overlay {
+            position: fixed; inset: 0; z-index: 998;
+            background: rgba(0,0,0,0.08);
+            backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            animation: fadeInUp 0.15s ease;
+        }
+        .com-ctx-menu {
+            position: fixed; z-index: 999;
+            min-width: 210px;
+            background: var(--glass);
+            backdrop-filter: blur(32px) saturate(1.6);
+            -webkit-backdrop-filter: blur(32px) saturate(1.6);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-md), 0 12px 32px rgba(0,0,0,0.25);
+            padding: 8px;
+            opacity: 0; transform: scale(0.92);
+            transition: all .16s cubic-bezier(.2,.9,.2,1);
+        }
+        .com-ctx-menu.show { opacity: 1; transform: scale(1); }
+        .com-ctx-emojis {
+            display: flex; justify-content: space-between;
+            padding: 4px 4px 8px; margin-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        .com-ctx-emoji-btn {
+            width: 32px; height: 32px; font-size: 19px;
+            background: none; border: none; cursor: pointer;
+            border-radius: 50%; transition: transform .15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .com-ctx-emoji-btn:hover { transform: scale(1.25); background: rgba(var(--accent-rgb), 0.08); }
+        .com-ctx-actions { display: flex; flex-direction: column; gap: 1px; }
+        .com-ctx-action {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 10px; font-size: 13px; font-weight: 600;
+            color: var(--text); background: none; border: none;
+            border-radius: 10px; cursor: pointer; text-align: left;
+            font-family: inherit; transition: background .15s;
+        }
+        .com-ctx-action:hover { background: rgba(var(--accent-rgb), 0.08); }
+        .com-ctx-action svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-muted); }
+        .com-ctx-action.com-ctx-danger { color: #ef4444; }
+        .com-ctx-action.com-ctx-danger svg { color: #ef4444; }
+
         /* Login wall */
         .com-login-wall {
             display: flex; flex-direction: column; align-items: center;
@@ -5530,6 +5661,8 @@
             setDoc,
             deleteDoc,
             updateDoc,
+            arrayUnion,
+            arrayRemove,
             serverTimestamp,
             addDoc,
             collection,
@@ -8207,6 +8340,51 @@
         let comFilterType = 'text';
         let editingMsgId = null;
         let _comMsgsCache = [];
+        let replyingTo = null;
+        let _refreshComposeExtra = null;
+
+        function _renderReplyBanner() {
+            const wrap = document.getElementById('comReplyBannerWrap');
+            if (!wrap) return;
+            if (!replyingTo) { wrap.innerHTML = ''; return; }
+            wrap.innerHTML = `
+                <div class="com-reply-banner">
+                    <div class="com-reply-banner-bar"></div>
+                    <div class="com-reply-banner-info">
+                        <b>Відповідь ${escapeHtml(replyingTo.authorName || 'Аніматор')}</b>
+                        <span>${escapeHtml(replyingTo.text || 'медіа-повідомлення')}</span>
+                    </div>
+                    <button type="button" class="com-reply-cancel" id="comReplyCancelBtn">&times;</button>
+                </div>`;
+            document.getElementById('comReplyCancelBtn')?.addEventListener('click', () => {
+                replyingTo = null;
+                _renderReplyBanner();
+            });
+        }
+
+        function _setReplyTo(m) {
+            replyingTo = { id: m.id, authorName: m.authorName || 'Аніматор', text: (m.text || (m.media?.length ? '📎 медіа' : (m.animeData ? '🎬 ' + m.animeData.title : (m.achData ? '🏆 ' + m.achData.name : '')))).slice(0, 100) };
+            _renderReplyBanner();
+            document.getElementById('comInput')?.focus();
+        }
+
+        function _uniqueCommunityAuthors() {
+            const seen = new Map();
+            _comMsgsCache.forEach(m => {
+                if (m.authorName && !seen.has(m.authorName)) seen.set(m.authorName, m.authorPhoto || '');
+            });
+            return Array.from(seen.entries()).map(([name, photo]) => ({ name, photo }));
+        }
+
+        function _highlightMentions(escapedText) {
+            const authors = _uniqueCommunityAuthors();
+            if (!authors.length || !escapedText) return escapedText;
+            const names = authors.map(a => a.name).sort((a, b) => b.length - a.length);
+            const pattern = names.map(n => n.replace(/[.*+?^\${}()|[\]\\]/g, '\\$&')).join('|');
+            if (!pattern) return escapedText;
+            const re = new RegExp('@(' + pattern + ')\\b', 'g');
+            return escapedText.replace(re, '<span class="com-mention">@$1</span>');
+        }
 
         function getMyEarnedAchievements() {
             const history   = Storage.getHistory()   || [];
@@ -8230,8 +8408,21 @@
                 ? `<img src="${profile.avatar}" alt="">`
                 : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
 
+            const tabMeta = {
+                text:  { placeholder: 'Написати в спільний чат...' },
+                anime: { placeholder: '' },
+                ach:   { placeholder: 'Короткий коментар (необов\'язково)...' }
+            };
+
             panel.innerHTML = `
                 <div class="com-chat-wrap">
+                    <div class="com-chat-header">
+                        <div class="com-chat-header-icon">💬</div>
+                        <div class="com-chat-header-info">
+                            <div class="com-chat-header-title">Спільний чат MonoAnime</div>
+                            <div class="com-chat-header-sub"><span class="com-chat-header-dot"></span>Живе спілкування фанатів аніме</div>
+                        </div>
+                    </div>
                     <div class="com-filter-tabs" id="comFilterTabs">
                         <button class="com-filter-tab active" data-type="text">Думка</button>
                         <button class="com-filter-tab" data-type="anime">Рекомендація</button>
@@ -8246,31 +8437,16 @@
 
                     ${user ? `
                     <div class="com-compose-extra" id="comComposeExtra"></div>
-                    <div class="com-input-wrap">
-                        <div class="com-type-menu hidden" id="comTypeMenu">
-                            <button class="com-type-opt" data-type="text">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                Думка
-                            </button>
-                            <button class="com-type-opt" data-type="anime">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-                                Рекомендація
-                            </button>
-                            <button class="com-type-opt" data-type="ach">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                                Досягнення
-                            </button>
-                        </div>
+                    <div id="comReplyBannerWrap"></div>
+                    <div class="com-input-wrap" style="position:relative;">
+                        <div id="comMentionDropdown"></div>
                         <input type="file" id="comMediaInput" accept="image/*,video/*" style="display:none" multiple>
                         <div class="com-msg-avatar" style="flex-shrink:0;margin-bottom:5px;">${avHtml}</div>
                         <div class="com-input-box">
                             <button class="com-attach-btn" id="comAttachBtn" title="Додати фото/відео">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                             </button>
-                            <button class="com-type-btn" id="comTypeToggle" title="Тип повідомлення">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                            </button>
-                            <textarea id="comInput" placeholder="Написати в спільноті..." maxlength="500" rows="1"></textarea>
+                            <textarea id="comInput" placeholder="Написати в спільний чат..." maxlength="500" rows="1"></textarea>
                         </div>
                         <button class="com-send-btn" id="comSendBtn">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -8293,7 +8469,11 @@
                     panel.querySelectorAll('.com-filter-tab').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     comFilterType = btn.dataset.type;
+                    comPostType = btn.dataset.type;
+                    replyingTo = null;
+                    _renderReplyBanner();
                     _renderComMessages(user);
+                    if (_refreshComposeExtra) _refreshComposeExtra();
                 });
             });
 
@@ -8304,12 +8484,11 @@
         function _setupCompose(user) {
             const inp        = document.getElementById('comInput');
             const sendBtn    = document.getElementById('comSendBtn');
-            const typeToggle = document.getElementById('comTypeToggle');
-            const typeMenu   = document.getElementById('comTypeMenu');
             const attachBtn  = document.getElementById('comAttachBtn');
             const mediaInput = document.getElementById('comMediaInput');
             const mediaPreview = document.getElementById('comMediaPreview');
             const extraBox   = document.getElementById('comComposeExtra');
+            const mentionBox = document.getElementById('comMentionDropdown');
 
             if (!inp || !sendBtn) return;
 
@@ -8318,7 +8497,20 @@
             let pendingAchievement = null;
             let animeSearchTimer = null;
 
+            function updateInputVisibility() {
+                if (comPostType === 'anime') {
+                    inp.style.display = 'none';
+                    if (attachBtn) attachBtn.style.display = 'none';
+                } else {
+                    inp.style.display = '';
+                    if (attachBtn) attachBtn.style.display = comPostType === 'text' ? '' : 'none';
+                    const ph = { text: 'Написати в спільний чат...', ach: 'Короткий коментар (необов\'язково)...' };
+                    inp.placeholder = ph[comPostType] || ph.text;
+                }
+            }
+
             function refreshExtra() {
+                updateInputVisibility();
                 if (!extraBox) return;
                 if (comPostType === 'anime') {
                     if (pendingAnime) {
@@ -8338,7 +8530,7 @@
                     } else {
                         extraBox.innerHTML = `
                             <div class="com-anime-search">
-                                <input type="text" id="comAnimeSearchInput" placeholder="Введи назву аніме, щоб знайти і поділитись...">
+                                <input type="text" id="comAnimeSearchInput" placeholder="Введи назву аніме, щоб знайти і порекомендувати...">
                                 <div class="com-anime-results" id="comAnimeResults"></div>
                             </div>`;
                         const searchInp = document.getElementById('comAnimeSearchInput');
@@ -8421,43 +8613,55 @@
                 }
             }
 
+            function doSend() {
+                if (comPostType === 'anime' && !pendingAnime) {
+                    showToast('Спочатку обери аніме для рекомендації');
+                    return;
+                }
+                _sendMessage(user, { media: pendingMedia, anime: pendingAnime, achievement: pendingAchievement, replyTo: replyingTo }, () => {
+                    pendingMedia.length = 0;
+                    pendingAnime = null;
+                    pendingAchievement = null;
+                    replyingTo = null;
+                    _renderReplyBanner();
+                    _renderMediaPreview(pendingMedia, mediaPreview);
+                    refreshExtra();
+                });
+            }
+
             inp.addEventListener('input', () => {
                 inp.style.height = 'auto';
                 inp.style.height = Math.min(inp.scrollHeight, 110) + 'px';
-            });
 
-            inp.addEventListener('keydown', e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    _sendMessage(user, { media: pendingMedia, anime: pendingAnime, achievement: pendingAchievement }, () => {
-                        pendingMedia.length = 0;
-                        pendingAnime = null;
-                        pendingAchievement = null;
-                        _renderMediaPreview(pendingMedia, mediaPreview);
-                        refreshExtra();
-                    });
-                }
-            });
-
-            if (typeToggle && typeMenu) {
-                typeToggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    typeMenu.classList.toggle('hidden');
-                });
-                typeMenu.querySelectorAll('.com-type-opt').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        comPostType = btn.dataset.type;
-                        pendingAnime = null;
-                        pendingAchievement = null;
-                        typeMenu.classList.add('hidden');
-                        const labels = { text: 'Написати в спільноті...', anime: 'Короткий коментар до рекомендації (необов\'язково)...', ach: 'Короткий коментар (необов\'язково)...' };
-                        inp.placeholder = labels[comPostType] || labels.text;
-                        refreshExtra();
+                if (!mentionBox) return;
+                const val = inp.value;
+                const caret = inp.selectionStart;
+                const upToCaret = val.slice(0, caret);
+                const match = upToCaret.match(/@([\wа-яіїєА-ЯІЇЄ]*)$/);
+                if (!match) { mentionBox.innerHTML = ''; return; }
+                const q = match[1].toLowerCase();
+                const authors = _uniqueCommunityAuthors().filter(a => a.name.toLowerCase().includes(q));
+                if (!authors.length) { mentionBox.innerHTML = ''; return; }
+                mentionBox.innerHTML = `<div class="com-mention-dropdown">${authors.slice(0, 6).map(a => `
+                    <div class="com-mention-opt" data-name="${escapeHtml(a.name)}">${a.photo ? `<img src="${a.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" alt="">` : ''}${escapeHtml(a.name)}</div>
+                `).join('')}</div>`;
+                mentionBox.querySelectorAll('.com-mention-opt').forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        const name = opt.dataset.name;
+                        inp.value = upToCaret.replace(/@[\wа-яіїєА-ЯІЇЄ]*$/, '@' + name + ' ') + val.slice(caret);
+                        mentionBox.innerHTML = '';
                         inp.focus();
                     });
                 });
-                document.addEventListener('click', () => typeMenu?.classList.add('hidden'));
-            }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (mentionBox && !mentionBox.contains(e.target) && e.target !== inp) mentionBox.innerHTML = '';
+            });
+
+            inp.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+            });
 
             if (attachBtn && mediaInput) {
                 attachBtn.addEventListener('click', () => mediaInput.click());
@@ -8472,14 +8676,9 @@
                 });
             }
 
-            sendBtn.addEventListener('click', () => _sendMessage(user, { media: pendingMedia, anime: pendingAnime, achievement: pendingAchievement }, () => {
-                pendingMedia.length = 0;
-                pendingAnime = null;
-                pendingAchievement = null;
-                _renderMediaPreview(pendingMedia, mediaPreview);
-                refreshExtra();
-            }));
+            sendBtn.addEventListener('click', doSend);
 
+            _refreshComposeExtra = refreshExtra;
             refreshExtra();
         }
 
@@ -8535,6 +8734,14 @@
                     createdAt: serverTimestamp()
                 };
 
+                if (extra.replyTo) {
+                    msgData.replyTo = {
+                        id: extra.replyTo.id || '',
+                        authorName: extra.replyTo.authorName || 'Аніматор',
+                        text: (extra.replyTo.text || '').slice(0, 100)
+                    };
+                }
+
                 if (pendingAnime) {
                     msgData.animeData = {
                         title: pendingAnime.title || '',
@@ -8586,6 +8793,7 @@
             }
         }
 
+        const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','🔥'];
         const COM_TYPE_ICONS = {
             anime: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
             ach:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
@@ -8595,10 +8803,12 @@
         function _renderComMessages(currentUser) {
             const box = document.getElementById('comMessages');
             if (!box) return;
-            const filtered = _comMsgsCache.filter(m => (m.type || 'text') === comFilterType);
+            const filtered = comFilterType === 'text'
+                ? _comMsgsCache
+                : _comMsgsCache.filter(m => (m.type || 'text') === comFilterType);
 
             if (!filtered.length) {
-                const emptyLabels = { text: 'Ще немає думок. Напиши першим!', anime: 'Ще немає рекомендацій. Поділись улюбленим аніме!', ach: 'Ще немає досягнень у стрічці. Поділись своїм!' };
+                const emptyLabels = { text: 'Ще немає повідомлень у спільному чаті. Напиши першим!', anime: 'Ще немає рекомендацій. Поділись улюбленим аніме!', ach: 'Ще немає досягнень у стрічці. Поділись своїм!' };
                 box.innerHTML = `<div class="com-feed-empty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <p>${emptyLabels[comFilterType] || emptyLabels.text}</p>
@@ -8606,6 +8816,7 @@
                 return;
             }
 
+            const myUid = currentUser ? currentUser.uid : null;
             let lastDate = null;
             let html = '';
             filtered.forEach(m => {
@@ -8663,6 +8874,14 @@
                     </div>`;
                 }
 
+                let replyQuoteHtml = '';
+                if (m.replyTo && m.replyTo.text) {
+                    replyQuoteHtml = `<div class="com-msg-reply-quote">
+                        <span class="com-msg-reply-name">${escapeHtml(m.replyTo.authorName || 'Аніматор')}</span>
+                        <span class="com-msg-reply-text">${escapeHtml(m.replyTo.text)}</span>
+                    </div>`;
+                }
+
                 const watermark = m.watermark
                     ? `<div class="com-msg-watermark">${escapeHtml(m.watermark)}</div>`
                     : '';
@@ -8679,18 +8898,20 @@
                         </div>
                     </div>`;
                 } else {
-                    bodyHtml = `${typeTag}${mediaHtml}${animeCardHtml}${achCardHtml}${m.text ? `<div class="com-msg-text">${escapeHtml(m.text)}</div>` : ''}`;
+                    const textHtml = m.text ? `<div class="com-msg-text">${_highlightMentions(escapeHtml(m.text))}</div>` : '';
+                    bodyHtml = `${typeTag}${replyQuoteHtml}${mediaHtml}${animeCardHtml}${achCardHtml}${textHtml}`;
                 }
 
-                const actionsHtml = (isMe && editingMsgId !== m.id) ? `
-                    <div class="com-msg-actions">
-                        <button type="button" class="com-msg-action-btn com-msg-edit-btn" title="Редагувати">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                        </button>
-                        <button type="button" class="com-msg-action-btn com-msg-delete-btn" title="Видалити">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                        </button>
-                    </div>` : '';
+                let reactionsHtml = '';
+                if (m.reactions) {
+                    const pills = Object.entries(m.reactions)
+                        .filter(([, uids]) => Array.isArray(uids) && uids.length > 0)
+                        .map(([emoji, uids]) => {
+                            const mine = myUid && uids.includes(myUid);
+                            return `<button type="button" class="com-reaction-pill${mine ? ' mine-reacted' : ''}" data-emoji="${emoji}">${emoji}<span class="cnt">${uids.length}</span></button>`;
+                        }).join('');
+                    if (pills) reactionsHtml = `<div class="com-msg-reactions">${pills}</div>`;
+                }
 
                 html += `<div class="com-msg ${isMe ? 'mine' : ''}" data-id="${m.id}">
                     <div class="com-msg-avatar">${av}</div>
@@ -8699,7 +8920,7 @@
                         <div class="com-msg-bubble">
                             ${bodyHtml}
                         </div>
-                        ${actionsHtml}
+                        ${reactionsHtml}
                         ${watermark}
                         <div class="com-msg-time">${timeStr}${editedTag}</div>
                     </div>
@@ -8716,56 +8937,150 @@
                     if (url) openPlayerPage(url);
                 });
             });
+
+            box.querySelectorAll('.com-reaction-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    const msgEl = pill.closest('.com-msg');
+                    if (msgEl) _toggleReaction(msgEl.dataset.id, pill.dataset.emoji, currentUser);
+                });
+            });
+
+            box.querySelectorAll('.com-msg-bubble').forEach(bubble => {
+                let pressTimer = null;
+                let startX = 0, startY = 0;
+                const clearPress = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+                bubble.addEventListener('pointerdown', (e) => {
+                    if (e.target.closest('.com-msg-edit-box') || e.target.closest('.com-anime-card')) return;
+                    startX = e.clientX; startY = e.clientY;
+                    clearPress();
+                    pressTimer = setTimeout(() => {
+                        const msgEl = bubble.closest('.com-msg');
+                        const id = msgEl?.dataset.id;
+                        const m = _comMsgsCache.find(x => x.id === id);
+                        if (m) _showMsgContextMenu(m, currentUser, e.clientX, e.clientY);
+                    }, 450);
+                });
+                bubble.addEventListener('pointermove', (e) => {
+                    if (pressTimer && (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10)) clearPress();
+                });
+                ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => bubble.addEventListener(ev, clearPress));
+                bubble.addEventListener('contextmenu', (e) => {
+                    if (e.target.closest('.com-msg-edit-box') || e.target.closest('.com-anime-card')) return;
+                    e.preventDefault();
+                    const msgEl = bubble.closest('.com-msg');
+                    const id = msgEl?.dataset.id;
+                    const m = _comMsgsCache.find(x => x.id === id);
+                    if (m) _showMsgContextMenu(m, currentUser, e.clientX, e.clientY);
+                });
+            });
+
+            box.querySelectorAll('.com-msg-edit-cancel').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    editingMsgId = null;
+                    _renderComMessages(currentUser);
+                });
+            });
+            box.querySelectorAll('.com-msg-edit-save').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const msgEl = btn.closest('.com-msg');
+                    const id = msgEl?.dataset.id;
+                    const ta = msgEl?.querySelector('.com-msg-edit-input');
+                    const newText = ta ? ta.value.trim() : '';
+                    if (!newText) { showToast('Повідомлення не може бути порожнім'); return; }
+                    try {
+                        await updateDoc(doc(db, 'community_posts', id), {
+                            text: newText, edited: true, editedAt: serverTimestamp()
+                        });
+                        editingMsgId = null;
+                    } catch (err) { showToast('Помилка редагування: ' + err.message); }
+                });
+            });
+        }
+
+        async function _toggleReaction(msgId, emoji, currentUser) {
+            if (!currentUser) { showToast('Увійдіть, щоб реагувати'); return; }
+            const m = _comMsgsCache.find(x => x.id === msgId);
+            const already = !!(m?.reactions?.[emoji] || []).includes(currentUser.uid);
+            try {
+                await updateDoc(doc(db, 'community_posts', msgId), {
+                    [`reactions.${emoji}`]: already ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
+                });
+            } catch (e) { showToast('Помилка: ' + e.message); }
+        }
+
+        function _closeMsgContextMenu() {
+            document.getElementById('comCtxOverlay')?.remove();
+            document.querySelector('.com-ctx-menu')?.remove();
+        }
+
+        function _showMsgContextMenu(m, currentUser, x, y) {
+            _closeMsgContextMenu();
+            const isMe = currentUser && m.uid === currentUser.uid;
+            const overlay = document.createElement('div');
+            overlay.className = 'com-ctx-overlay';
+            overlay.id = 'comCtxOverlay';
+            const menu = document.createElement('div');
+            menu.className = 'com-ctx-menu';
+            menu.innerHTML = `
+                <div class="com-ctx-emojis">
+                    ${REACTION_EMOJIS.map(em => `<button type="button" class="com-ctx-emoji-btn" data-emoji="${em}">${em}</button>`).join('')}
+                </div>
+                <div class="com-ctx-actions">
+                    <button type="button" class="com-ctx-action" data-action="reply">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                        Відповісти
+                    </button>
+                    ${isMe ? `<button type="button" class="com-ctx-action" data-action="edit">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                        Редагувати
+                    </button>` : ''}
+                    ${isMe ? `<button type="button" class="com-ctx-action com-ctx-danger" data-action="delete">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Видалити
+                    </button>` : ''}
+                </div>`;
+            document.body.appendChild(overlay);
+            document.body.appendChild(menu);
+
+            requestAnimationFrame(() => {
+                const rect = menu.getBoundingClientRect();
+                let left = x - rect.width / 2;
+                let top = y - rect.height - 12;
+                left = Math.max(10, Math.min(left, window.innerWidth - rect.width - 10));
+                if (top < 10) top = y + 12;
+                top = Math.max(10, Math.min(top, window.innerHeight - rect.height - 10));
+                menu.style.left = left + 'px';
+                menu.style.top = top + 'px';
+                menu.classList.add('show');
+            });
+
+            overlay.addEventListener('click', _closeMsgContextMenu);
+            menu.querySelectorAll('.com-ctx-emoji-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    await _toggleReaction(m.id, btn.dataset.emoji, currentUser);
+                    _closeMsgContextMenu();
+                });
+            });
+            menu.querySelector('[data-action="reply"]')?.addEventListener('click', () => {
+                _setReplyTo(m);
+                _closeMsgContextMenu();
+            });
+            menu.querySelector('[data-action="edit"]')?.addEventListener('click', () => {
+                editingMsgId = m.id;
+                _renderComMessages(currentUser);
+                _closeMsgContextMenu();
+            });
+            menu.querySelector('[data-action="delete"]')?.addEventListener('click', async () => {
+                _closeMsgContextMenu();
+                if (!confirm('Видалити це повідомлення?')) return;
+                try { await deleteDoc(doc(db, 'community_posts', m.id)); } catch (e) { showToast('Помилка: ' + e.message); }
+            });
         }
 
         function _subscribeToChat(currentUser) {
             const box = document.getElementById('comMessages');
             if (!box) return;
             if (comUnsub) { comUnsub(); comUnsub = null; }
-
-            if (!box.dataset.actionsBound) {
-                box.dataset.actionsBound = '1';
-                box.addEventListener('click', async (e) => {
-                    const msgEl = e.target.closest('.com-msg');
-                    if (!msgEl) return;
-                    const id = msgEl.dataset.id;
-
-                    if (e.target.closest('.com-msg-delete-btn')) {
-                        if (!confirm('Видалити це повідомлення?')) return;
-                        try {
-                            await deleteDoc(doc(db, 'community_posts', id));
-                        } catch (err) { showToast('Помилка видалення: ' + err.message); }
-                        return;
-                    }
-
-                    if (e.target.closest('.com-msg-edit-btn')) {
-                        editingMsgId = id;
-                        _renderComMessages(currentUser);
-                        const ta = box.querySelector(`.com-msg[data-id="${id}"] .com-msg-edit-input`);
-                        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
-                        return;
-                    }
-
-                    if (e.target.closest('.com-msg-edit-cancel')) {
-                        editingMsgId = null;
-                        _renderComMessages(currentUser);
-                        return;
-                    }
-
-                    if (e.target.closest('.com-msg-edit-save')) {
-                        const ta = msgEl.querySelector('.com-msg-edit-input');
-                        const newText = ta ? ta.value.trim() : '';
-                        if (!newText) { showToast('Повідомлення не може бути порожнім'); return; }
-                        try {
-                            await updateDoc(doc(db, 'community_posts', id), {
-                                text: newText, edited: true, editedAt: serverTimestamp()
-                            });
-                            editingMsgId = null;
-                        } catch (err) { showToast('Помилка редагування: ' + err.message); }
-                        return;
-                    }
-                });
-            }
 
             try {
                 if (!firebaseInitialized || !db) throw new Error('no db');
