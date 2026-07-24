@@ -5243,7 +5243,7 @@
         }
         .com-anime-selected img { width: 38px; height: 54px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
         .com-anime-selected-info, .com-ach-selected-info { flex: 1; min-width: 0; }
-        .com-anime-selected-title, originalTitle, .com-ach-selected-name { font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .com-anime-selected-title, .com-ach-selected-name { font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .com-anime-selected-desc, .com-ach-selected-req {
             font-size: 11px; color: var(--text-muted); margin-top: 2px;
             overflow: hidden; text-overflow: ellipsis;
@@ -6394,7 +6394,7 @@
                 const title = (titleEl?.textContent || '').trim() || 'Без назви';
                 return {
                     mal_id: href.hashCode(),
-                    title, originalTitle,
+                    title,
                     url: href.startsWith('http') ? href : ANIMEUA_BASE + href,
                     images: { jpg: { large_image_url: posterSrc.startsWith('http') ? posterSrc : (posterSrc ?
                                 ANIMEUA_BASE + posterSrc : '') } },
@@ -6448,7 +6448,7 @@
             const doc = await fetchUA(animeUrl);
             
             // Перевіряємо чи сторінка є реальною сторінкою аніме (не 404/головна)
-            const hasAnimeContent = safeQuery('.pmovie__title, originalTitle, .page__subcol-main h1, .pmovie__player, .video-responsive iframe, .video-responsive iframe[data-src]', doc);
+            const hasAnimeContent = safeQuery('.pmovie__title, .page__subcol-main h1, .pmovie__player, .video-responsive iframe, .video-responsive iframe[data-src]', doc);
             const rawHtml = doc._rawHtml || '';
             const hasIframe = rawHtml.includes('ashdi.vip') || rawHtml.includes('vidmoly') || rawHtml.includes('iframe');
             if (!hasAnimeContent && !hasIframe) {
@@ -6462,7 +6462,7 @@
                 if (el?.textContent.trim()) { 
                     title = el.textContent.trim(); 
                     // Спробуємо знайти оригінальну назву (часто в дужках або окремо)
-                    const origEl = safeQuery('.pmovie__original-title, originalTitle, .alternative-title', doc);
+                    const origEl = safeQuery('.pmovie__original-title, .alternative-title', doc);
                     if (origEl) originalTitle = origEl.textContent.trim();
                     else {
                         const m = title.match(/\/\s*([^\/]+)$/);
@@ -6560,7 +6560,7 @@
 
             return {
                 mal_id: animeUrl.hashCode(),
-                title, originalTitle,
+                title, originalTitle: "",
                 images: { jpg: { large_image_url: poster, image_url: poster } },
                 genres,
                 year,
@@ -6592,7 +6592,7 @@
             const resp = await fetch(KODIK_FN_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, originalTitle, limit: 20 })
+                body: JSON.stringify({ title, limit: 20 })
             });
             if (!resp.ok) throw new Error('Kodik недоступний (HTTP ' + resp.status + ')');
             const json = await resp.json();
@@ -6667,7 +6667,9 @@
         }
 
         async function loadAnimeGoSeasons(title) {
-            const doc = await fetchUA(`${ANIMEGO_BASE}/search/anime?q=${encodeURIComponent(title)}`);
+            // AnimeGO краще шукає по чистій назві без сезонів
+            const cleanTitle = title.split('/')[0].replace(/\s*\d+\s*[Сс]езон.*/gi, '').trim();
+            const doc = await fetchUA(`${ANIMEGO_BASE}/search/anime?q=${encodeURIComponent(cleanTitle)}`);
             const items = safeQueryAll('div.ani-grid__item', doc);
             let animeId = null, animeTitle = null;
             for (const item of items) {
@@ -6705,7 +6707,7 @@
                 if (!embed) return;
                 if (!seasons['1'][name]) seasons['1'][name] = [];
                 seasons['1'][name].push({
-                    title: animeTitle || title, originalTitle,
+                    title: animeTitle || title,
                     season: '1',
                     episode: '1',
                     file: embed,
@@ -6746,7 +6748,7 @@
             const key = `${provider}:${title}`;
             return sourceCache[key];
         }
-        function setCachedSource(provider, title, originalTitle, data) {
+        function setCachedSource(provider, title, data) {
             const key = `${provider}:${title}`;
             sourceCache[key] = data;
         }
@@ -6770,6 +6772,7 @@
                 let seasons = externalSourceCache[providerName];
                 if (!seasons) {
                     const searchTitle = playerPageAnime.originalTitle || playerPageAnime.title;
+                    console.log('[switchProviderSource] Searching for:', searchTitle);
                     if (providerName === 'Kodik') seasons = await loadKodikSeasons(searchTitle);
                     else if (providerName === 'JutSu') seasons = await loadJutsuSeasons(searchTitle);
                     else if (providerName === 'AnimeGO') seasons = await loadAnimeGoSeasons(searchTitle);
@@ -7511,7 +7514,7 @@
                 item.detailsLoaded = true;
                 item.rating = (7 + Math.random() * 2.5).toFixed(1);
             } catch (e) {
-                console.warn('Hero details fallback:', item.title, originalTitle, e.message);
+                console.warn('Hero details fallback:', item.title, e.message);
                 item.genres = item.genres || ['Аніме'];
                 item.totalEpisodes = item.totalEpisodes || 0;
                 item.synopsis = item.synopsis || 'Натисніть «Дивитися», щоб перейти до перегляду.';
@@ -8821,7 +8824,7 @@
                                                 synopsis = (detail.synopsis || '').trim();
                                                 poster = detail.images?.jpg?.large_image_url || poster;
                                             } catch (e) { console.warn('Не вдалося завантажити опис аніме:', e.message); }
-                                            pendingAnime = { title: item.title, originalTitle, url: item.url, poster, synopsis: synopsis.slice(0, 300) };
+                                            pendingAnime = { title: item.title, url: item.url, poster, synopsis: synopsis.slice(0, 300) };
                                             refreshExtra();
                                         });
                                     });
@@ -10916,7 +10919,7 @@ function renderProfilePage() {
                         } else {
                             const entry = {
                                 animeId: playerPageAnime.mal_id || playerPageAnime.url.hashCode(),
-                                title: playerPageAnime.title, originalTitle,
+                                title: playerPageAnime.title,
                                 poster: playerPageAnime.images?.jpg?.large_image_url || '',
                                 url: playerPageAnime.url,
                                 episode: ep,
@@ -10998,7 +11001,7 @@ function renderProfilePage() {
                 e) => Math.max(s2, e.length), 0), 0);
             bookmarks.push({
                 url: anime.url,
-                title: anime.title, originalTitle,
+                title: anime.title,
                 poster: anime.images?.jpg?.large_image_url || '',
                 episodes: totalEpisodes + ' еп.',
                 addedAt: Date.now()
