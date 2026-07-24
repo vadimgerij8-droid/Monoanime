@@ -6559,7 +6559,7 @@
 
             return {
                 mal_id: animeUrl.hashCode(),
-                title, originalTitle: originalTitle || "",
+                title, originalTitle: (typeof originalTitle !== "undefined" ? originalTitle : ""),
                 images: { jpg: { large_image_url: poster, image_url: poster } },
                 genres,
                 year,
@@ -6649,7 +6649,7 @@
             sourceCache[key] = data;
         }
 
-                async function switchProviderSource(providerName) {
+        async function switchProviderSource(providerName) {
             if (providerName === playerPageCurrentSource) return;
             const prevSource = playerPageCurrentSource;
             playerPageCurrentSource = providerName;
@@ -11007,13 +11007,17 @@ function renderProfilePage() {
         // ====================================================================
         let bottomSheetMode = 'full';
 
-                function buildBottomSheetData() {
+                                function buildBottomSheetData() {
             const list = document.getElementById('bottomSheetSourceList');
             if (!list) return;
             const sources = ['Основне', 'Kodik'];
             list.innerHTML = sources.map(s => {
                 const active = s === playerPageCurrentSource ? ' active' : '';
                 return `<div class="source-item${active}" onclick="switchProviderSource('${s}')">${s}</div>`;
+            }).join('');
+        }" onclick="switchProviderSource('${s}')">${s}</div>`;
+            }).join('');
+        }" onclick="switchProviderSource('${s}')">${s}</div>`;
             }).join('');
         }
 
