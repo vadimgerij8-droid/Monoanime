@@ -5679,6 +5679,10 @@
         const CLOUDINARY_CLOUD_NAME = 'w1a1sqp0';
         const CLOUDINARY_UPLOAD_PRESET = 'VakDab';
         const ANIMEUA_BASE = 'https://animeua.club';
+        const KODIK_FN_URL = 'https://vesper-7952b19c.base44.app/functions/kodikSearch';
+        const ANIMEGO_BASE = 'https://animego.org';
+        let playerPageAnimeuaSeasons = null;
+        let externalSourceCache = {};
 
         const GENRE_MAP = {
             "Аніфільми": "film",
@@ -5722,7 +5726,9 @@
 
         function isEmbedUrl(url) {
             if (!url) return false;
-            return url.includes('tortuga.tw/embed') || url.includes('/embed/');
+            return url.includes('tortuga.tw/embed') || url.includes('/embed/') ||
+                url.includes('kodikplayer.com') || url.includes('kodik.info') ||
+                url.includes('aniboom') || url.includes('cdn-iframe') || url.includes('cdnvideohub');
         }
 
         // ====================================================================
@@ -6548,6 +6554,195 @@
                 totalEpisodes: Object.values(seasons).reduce((sum, s) => sum + Object.values(s).reduce((s2, e) => Math.max(
                     s2, e.length), 0), 0)
             };
+        }
+
+        // ====================================================================
+        //  ДОДАТКОВІ ДЖЕРЕЛА: KODIK / JUTSU / ANIMEGO
+        // ====================================================================
+
+        function slugifyForJutsu(title) {
+            return (title || '')
+                .toLowerCase()
+                .replace(/['\u2019]/g, '')
+                .replace(/[^a-z0-9\s-]/gi, '')
+                .trim()
+                .replace(/\s+/g, '-');
+        }
+
+        async function loadKodikSeasons(title) {
+            const resp = await fetch(KODIK_FN_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, limit: 20 })
+            });
+            if (!resp.ok) throw new Error('Kodik недоступний (HTTP ' + resp.status + ')');
+            const json = await resp.json();
+            if (!json.ok) throw new Error(json.error || 'Помилка Kodik');
+            if (!json.results || json.results.length === 0) throw new Error('Не знайдено на Kodik');
+            const seasons = { '1': {} };
+            json.results.slice(0, 15).forEach((r, idx) => {
+                if (!r.link) return;
+                const dub = r.translation || `Варіант ${idx + 1}`;
+                if (!seasons['1'][dub]) seasons['1'][dub] = [];
+                seasons['1'][dub].push({
+                    title: `${r.title}${r.year ? ' (' + r.year + ')' : ''}`,
+                    season: '1',
+                    episode: '1',
+                    file: r.link,
+                    dub,
+                    provider: 'Kodik'
+                });
+            });
+            if (Object.keys(seasons['1']).length === 0) throw new Error('Не знайдено на Kodik');
+            return seasons;
+        }
+
+        async function loadJutsuSeasons(title) {
+            const slug = slugifyForJutsu(title);
+            if (!slug) throw new Error('Не знайдено на JutSu');
+            const url = `https://jut.su/${slug}/`;
+            const doc = await fetchUA(url);
+            const dleContent = doc.getElementById ? doc.getElementById('dle-content') : safeQuery('#dle-content', doc);
+            if (!dleContent) throw new Error('Не знайдено на JutSu');
+            const epLinks = safeQueryAll('a.video', dleContent);
+            if (epLinks.length === 0) throw new Error('Не знайдено на JutSu (можливо потрібна інша назва)');
+            const seasons = {};
+            epLinks.forEach((a, idx) => {
+                const href = a.getAttribute('href') || '';
+                if (!href) return;
+                const full = href.startsWith('http') ? href : `https://jut.su${href.startsWith('/') ? '' : '/'}${href}`;
+                let seasonNum = '1';
+                const m = href.match(/season-(\d+)/);
+                if (m) seasonNum = m[1];
+                if (!seasons[seasonNum]) seasons[seasonNum] = { 'JutSu': [] };
+                seasons[seasonNum]['JutSu'].push({
+                    title: (a.textContent || '').trim() || `Серія ${idx + 1}`,
+                    season: seasonNum,
+                    episode: String(idx + 1),
+                    file: full,
+                    dub: 'JutSu',
+                    provider: 'JutSu',
+                    _needsResolve: true
+                });
+            });
+            if (Object.keys(seasons).length === 0) throw new Error('Не знайдено на JutSu');
+            return seasons;
+        }
+
+        async function resolveJutsuVideoUrl(pageUrl) {
+            const doc = await fetchUA(pageUrl);
+            const video = safeQuery('video#my-player', doc) || safeQuery('video', doc);
+            if (!video) throw new Error('Відео не знайдено на JutSu');
+            const sources = safeQueryAll('source', video);
+            let best = null;
+            sources.forEach(s => {
+                const res = parseInt(s.getAttribute('res') || '0', 10) || 0;
+                const src = s.getAttribute('src');
+                if (src && (!best || res > best.res)) best = { res, url: src };
+            });
+            if (!best) throw new Error('Відео не знайдено на JutSu');
+            return best.url;
+        }
+
+        async function loadAnimeGoSeasons(title) {
+            const doc = await fetchUA(`${ANIMEGO_BASE}/search/anime?q=${encodeURIComponent(title)}`);
+            const items = safeQueryAll('div.ani-grid__item', doc);
+            let animeId = null, animeTitle = null;
+            for (const item of items) {
+                const linkEl = safeQuery("a.ani-grid__item-body, div.ani-grid__item-title a, a[href*='/anime/']", item);
+                if (!linkEl) continue;
+                let href = (linkEl.getAttribute('href') || '').replace(/^\/+|\/+$/g, '');
+                if (!href.startsWith('anime/')) continue;
+                const path = href.substring('anime/'.length);
+                const m = path.match(/^(.+)-(\d+)$/);
+                if (!m) continue;
+                animeId = m[2];
+                const titleEl = safeQuery('div.ani-grid__item-title a', item);
+                animeTitle = titleEl ? titleEl.textContent.trim() : m[1].replace(/-/g, ' ');
+                break;
+            }
+            if (!animeId) throw new Error('AnimeGO наразі недоступний (захист від ботів) або аніме не знайдено');
+
+            const playerDoc = await fetchUA(`${ANIMEGO_BASE}/player/${animeId}`);
+            const raw = playerDoc._rawHtml || '';
+            let contentHtml = raw;
+            try {
+                const j = JSON.parse(raw);
+                contentHtml = (j && j.data && j.data.content) || raw;
+            } catch (e) { /* не JSON — використовуємо як є */ }
+            const frag = new DOMParser().parseFromString(contentHtml, 'text/html');
+            const providerDiv = frag.getElementById('provider');
+            if (!providerDiv) throw new Error('AnimeGO наразі недоступний (захист від ботів)');
+            const buttons = safeQueryAll('button', providerDiv);
+            const seasons = { '1': {} };
+            buttons.forEach((btn, idx) => {
+                const name = (btn.getAttribute('data-translation-title') || `Варіант ${idx + 1}`).replace(' (ошибка)', '').trim();
+                let embed = btn.getAttribute('data-player') || '';
+                if (embed.startsWith('//')) embed = 'https:' + embed;
+                if (!embed) return;
+                if (!seasons['1'][name]) seasons['1'][name] = [];
+                seasons['1'][name].push({
+                    title: animeTitle || title,
+                    season: '1',
+                    episode: '1',
+                    file: embed,
+                    dub: name,
+                    provider: 'AnimeGO'
+                });
+            });
+            if (Object.keys(seasons['1']).length === 0) throw new Error('AnimeGO наразі недоступний (захист від ботів)');
+            return seasons;
+        }
+
+        async function switchProviderSource(providerName) {
+            if (providerName === playerPageCurrentSource) return;
+            const prevSource = playerPageCurrentSource;
+            playerPageCurrentSource = providerName;
+            updateSourceChip();
+            buildBottomSheetData();
+
+            if (providerName === 'Основне') {
+                playerPageAnime.seasons = playerPageAnimeuaSeasons || {};
+                refreshAfterSourceSwitch();
+                showToast('Джерело: Основне');
+                return;
+            }
+
+            showToast(`Шукаю на ${providerName}...`);
+            try {
+                let seasons = externalSourceCache[providerName];
+                if (!seasons) {
+                    if (providerName === 'Kodik') seasons = await loadKodikSeasons(playerPageAnime.title);
+                    else if (providerName === 'JutSu') seasons = await loadJutsuSeasons(playerPageAnime.title);
+                    else if (providerName === 'AnimeGO') seasons = await loadAnimeGoSeasons(playerPageAnime.title);
+                    else seasons = {};
+                    externalSourceCache[providerName] = seasons;
+                }
+                playerPageAnime.seasons = seasons;
+                refreshAfterSourceSwitch();
+                showToast(`Джерело: ${providerName}`);
+            } catch (e) {
+                console.warn('[switchProviderSource]', providerName, e);
+                showToast(`${providerName}: ${e.message || 'недоступно'}`);
+                playerPageCurrentSource = prevSource;
+                updateSourceChip();
+                buildBottomSheetData();
+            }
+        }
+
+        function refreshAfterSourceSwitch() {
+            const seasons = Object.keys(playerPageAnime.seasons || {}).sort((a, b) => parseInt(a) - parseInt(b));
+            playerPageCurrentSeason = seasons[0] || '1';
+            const dubs = Object.keys((playerPageAnime.seasons[playerPageCurrentSeason]) || {}).sort();
+            playerPageCurrentDub = dubs[0] || '';
+            buildSeasonRow(seasons);
+            buildEpisodeViews();
+            updateFilterChip();
+            buildBottomSheetData();
+            if (seasons.length === 0) {
+                document.getElementById('episodeViewGrid').innerHTML =
+                    '<div class="episode-empty"><i class="fas fa-search"></i> Серії не знайдені на цьому джерелі.</div>';
+            }
         }
 
         function extractPlayerIframeUrls(doc) {
@@ -10387,8 +10582,10 @@ function renderProfilePage() {
                 // Якщо плеєр вже закрили поки завантажувалось — не оновлювати DOM
                 if (_thisSignal.aborted || modal.style.display === 'none') return;
                 playerPageAnime = anime;
-                playerPageSources = anime.sources || ['Основне'];
-                playerPageCurrentSource = playerPageSources[0] || 'Основне';
+                playerPageAnimeuaSeasons = anime.seasons || {};
+                externalSourceCache = {};
+                playerPageSources = ['Основне', 'Kodik', 'JutSu', 'AnimeGO'];
+                playerPageCurrentSource = 'Основне';
                 const posterUrl = anime.images?.jpg?.large_image_url || '';
                 document.getElementById('playerPosterImg').src = posterUrl;
                 document.getElementById('playerPosterTitle').textContent = anime.title;
@@ -10587,13 +10784,24 @@ function renderProfilePage() {
             }).join('');
             document.querySelectorAll('#episodeViewGrid .episode-grid-card, #episodeViewCompact .episode-compact-card, #episodeViewClassic .episode-classic-card')
                 .forEach(card => {
-                    card.addEventListener('click', () => {
+                    card.addEventListener('click', async () => {
                         const file = card.dataset.file;
                         const epNum = card.dataset.episode;
-                        if (file) {
-                            playerPageCurrentEpisodeNum = epNum;
-                            playEpisode(file, epNum);
+                        if (!file) return;
+                        const epData = (playerPageEpisodes || []).find(e => e.file === file && String(e.episode) === String(epNum));
+                        if (epData && epData._needsResolve) {
+                            showToast('Завантажую відео з JutSu...');
+                            try {
+                                const realUrl = await resolveJutsuVideoUrl(file);
+                                playerPageCurrentEpisodeNum = epNum;
+                                playEpisode(realUrl, epNum);
+                            } catch (e) {
+                                showToast('Не вдалося завантажити відео з JutSu');
+                            }
+                            return;
                         }
+                        playerPageCurrentEpisodeNum = epNum;
+                        playEpisode(file, epNum);
                     });
                 });
             showViewMode(playerPageCurrentView);
@@ -10829,10 +11037,7 @@ function renderProfilePage() {
                     el.addEventListener('click', () => {
                         const src = el.dataset.source;
                         if (src === playerPageCurrentSource) return;
-                        playerPageCurrentSource = src;
-                        updateSourceChip();
-                        buildBottomSheetData();
-                        showToast(`Джерело: ${src}`);
+                        switchProviderSource(src);
                     });
                 });
             }
