@@ -6346,11 +6346,19 @@
                         mode: 'cors',
                         credentials: 'omit',
                         cache: 'no-cache',
-                        signal: controller.signal
+                        signal: controller.signal,
+                        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
                     });
                     clearTimeout(timer);
                     if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                    const html = await resp.text();
+                    let html = await resp.text();
+                    // Видаляємо рекламні скрипти та трекери
+                    html = html.replace(/<script[^>]*>.*?<\/script>/gi, (match) => {
+                        if (match.includes('ad') || match.includes('track') || match.includes('ga.js') || 
+                            match.includes('analytics') || match.includes('doubleclick')) return '';
+                        return match;
+                    });
+                    html = html.replace(/<iframe[^>]*src=["']?[^"']*(?:ad|banner|track)[^"']*["']?[^>]*>.*?<\/iframe>/gi, '');
                     const doc = new DOMParser().parseFromString(html, 'text/html');
                     doc._rawHtml = html;
                     return doc;
@@ -6580,9 +6588,10 @@
             if (!json.ok) throw new Error(json.error || 'Помилка Kodik');
             if (!json.results || json.results.length === 0) throw new Error('Не знайдено на Kodik');
             const seasons = { '1': {} };
-            json.results.slice(0, 15).forEach((r, idx) => {
+            json.results.slice(0, 20).forEach((r, idx) => {
                 if (!r.link) return;
-                const dub = r.translation || `Варіант ${idx + 1}`;
+                let dub = (r.translation || `Варіант ${idx + 1}`).trim();
+                dub = dub.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+/g, ' ').trim() || `Варіант ${idx + 1}`;
                 if (!seasons['1'][dub]) seasons['1'][dub] = [];
                 seasons['1'][dub].push({
                     title: `${r.title}${r.year ? ' (' + r.year + ')' : ''}`,
@@ -6614,13 +6623,15 @@
                 let seasonNum = '1';
                 const m = href.match(/season-(\d+)/);
                 if (m) seasonNum = m[1];
-                if (!seasons[seasonNum]) seasons[seasonNum] = { 'JutSu': [] };
-                seasons[seasonNum]['JutSu'].push({
+                if (!seasons[seasonNum]) seasons[seasonNum] = {};
+                const dubName = 'JutSu';
+                if (!seasons[seasonNum][dubName]) seasons[seasonNum][dubName] = [];
+                seasons[seasonNum][dubName].push({
                     title: (a.textContent || '').trim() || `Серія ${idx + 1}`,
                     season: seasonNum,
                     episode: String(idx + 1),
                     file: full,
-                    dub: 'JutSu',
+                    dub: dubName,
                     provider: 'JutSu',
                     _needsResolve: true
                 });
@@ -6676,7 +6687,8 @@
             const buttons = safeQueryAll('button', providerDiv);
             const seasons = { '1': {} };
             buttons.forEach((btn, idx) => {
-                const name = (btn.getAttribute('data-translation-title') || `Варіант ${idx + 1}`).replace(' (ошибка)', '').trim();
+                let name = (btn.getAttribute('data-translation-title') || `Варіант ${idx + 1}`).replace(' (ошибка)', '').trim();
+                name = name.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+/g, ' ').trim() || `Варіант ${idx + 1}`;
                 let embed = btn.getAttribute('data-player') || '';
                 if (embed.startsWith('//')) embed = 'https:' + embed;
                 if (!embed) return;
@@ -6692,6 +6704,40 @@
             });
             if (Object.keys(seasons['1']).length === 0) throw new Error('AnimeGO наразі недоступний (захист від ботів)');
             return seasons;
+        }
+
+        // Об'єднує дані аніме з AnimeUA постерами та озвучками від інших джерел
+        function unifyAnimeDataWithExternalDubs(animeUAData, externalSeasons, providerName) {
+            if (!animeUAData) return externalSeasons;
+            
+            // Зберігаємо постер та інформацію з AnimeUA
+            const unifiedData = {
+                ...animeUAData,
+                seasons: externalSeasons || {}
+            };
+            
+            // Переконуємось що постер завжди з AnimeUA
+            if (animeUAData.images?.jpg?.large_image_url) {
+                unifiedData.images = { 
+                    jpg: { 
+                        large_image_url: animeUAData.images.jpg.large_image_url,
+                        image_url: animeUAData.images.jpg.large_image_url
+                    } 
+                };
+            }
+            
+            return unifiedData;
+        }
+
+        // Оптимізація: кешування результатів для швидшого переключення джерел
+        const sourceCache = {};
+        function getCachedSource(provider, title) {
+            const key = `${provider}:${title}`;
+            return sourceCache[key];
+        }
+        function setCachedSource(provider, title, data) {
+            const key = `${provider}:${title}`;
+            sourceCache[key] = data;
         }
 
         async function switchProviderSource(providerName) {
@@ -6718,7 +6764,13 @@
                     else seasons = {};
                     externalSourceCache[providerName] = seasons;
                 }
+                // Зберігаємо постер з AnimeUA для всіх джерел
+                const animeUAPoster = playerPageAnime.images?.jpg?.large_image_url || '';
                 playerPageAnime.seasons = seasons;
+                // Відновлюємо постер AnimeUA
+                if (animeUAPoster) {
+                    playerPageAnime.images = { jpg: { large_image_url: animeUAPoster, image_url: animeUAPoster } };
+                }
                 refreshAfterSourceSwitch();
                 showToast(`Джерело: ${providerName}`);
             } catch (e) {
