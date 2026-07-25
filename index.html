@@ -6559,7 +6559,7 @@
 
             return {
                 mal_id: animeUrl.hashCode(),
-                title, originalTitle: (typeof originalTitle !== "undefined" ? originalTitle : ""),
+                title, originalTitle: (typeof originalTitle !== "undefined" && originalTitle ? originalTitle : ""),
                 images: { jpg: { large_image_url: poster, image_url: poster } },
                 genres,
                 year,
@@ -6580,32 +6580,48 @@
 
         
 
-        async function loadKodikSeasons(title) {
+                async function loadKodikSeasons(title) {
             const resp = await fetch(KODIK_FN_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, limit: 20 })
+                body: JSON.stringify({ title, limit: 30 })
             });
             if (!resp.ok) throw new Error('Kodik недоступний (HTTP ' + resp.status + ')');
             const json = await resp.json();
             if (!json.ok) throw new Error(json.error || 'Помилка Kodik');
             if (!json.results || json.results.length === 0) throw new Error('Не знайдено на Kodik');
-            const seasons = { '1': {} };
-            json.results.slice(0, 20).forEach((r, idx) => {
+            
+            const seasons = {};
+            json.results.forEach((r, idx) => {
                 if (!r.link) return;
+                
+                // Спробуємо визначити сезон та серію
+                let sn = r.season ? String(r.season) : '1';
+                let en = r.episode ? String(r.episode) : '1';
                 let dub = (r.translation || `Варіант ${idx + 1}`).trim();
                 dub = dub.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+/g, ' ').trim() || `Варіант ${idx + 1}`;
-                if (!seasons['1'][dub]) seasons['1'][dub] = [];
-                seasons['1'][dub].push({
-                    title: `${r.title}${r.year ? ' (' + r.year + ')' : ''}`,
-                    season: '1',
-                    episode: '1',
+                
+                if (!seasons[sn]) seasons[sn] = {};
+                if (!seasons[sn][dub]) seasons[sn][dub] = [];
+                
+                seasons[sn][dub].push({
+                    title: r.episode ? `Серія ${r.episode}` : r.title,
+                    season: sn,
+                    episode: en,
                     file: r.link,
                     dub,
                     provider: 'Kodik'
                 });
             });
-            if (Object.keys(seasons['1']).length === 0) throw new Error('Не знайдено на Kodik');
+            
+            // Сортування серій
+            for (const s in seasons) {
+                for (const d in seasons[s]) {
+                    seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
+                }
+            }
+            
+            if (Object.keys(seasons).length === 0) throw new Error('Не знайдено на Kodik');
             return seasons;
         }
 
