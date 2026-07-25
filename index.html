@@ -87,6 +87,34 @@
             --shadow-lg: 0 30px 60px rgba(0, 0, 0, 0.6);
         }
 
+        /* ===================================================================
+           MODERN WHITE GLASSMORPHISM LAYER — ambient blurred background +
+           frosted glass surfaces for header / pills / cards.
+           =================================================================== */
+        body:not(.dark-mode)::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(48rem 32rem at 8% 0%, rgba(120, 150, 255, 0.16), transparent 60%),
+                radial-gradient(40rem 30rem at 92% 12%, rgba(255, 150, 200, 0.14), transparent 60%),
+                radial-gradient(46rem 34rem at 15% 92%, rgba(150, 255, 210, 0.13), transparent 60%),
+                radial-gradient(38rem 30rem at 88% 96%, rgba(255, 210, 130, 0.12), transparent 60%),
+                #ffffff;
+        }
+        .glass-surface {
+            background: rgba(255, 255, 255, 0.62);
+            -webkit-backdrop-filter: blur(22px) saturate(180%);
+            backdrop-filter: blur(22px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .dark-mode .glass-surface {
+            background: rgba(24, 24, 24, 0.55);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -171,6 +199,35 @@
         }
         .header>* {
             pointer-events: auto;
+        }
+
+        .header.header-scrolled {
+            position: fixed !important;
+            top: 0.6rem;
+            left: 0.6rem;
+            right: 0.6rem;
+            width: auto;
+            margin: 0 auto;
+            max-width: 1400px;
+            border-radius: var(--radius-xl) !important;
+            background: rgba(255, 255, 255, 0.65) !important;
+            border: 1px solid rgba(255, 255, 255, 0.55) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+            backdrop-filter: blur(24px) saturate(190%) !important;
+            box-shadow: 0 10px 40px rgba(11, 11, 11, 0.10) !important;
+            animation: headerDropIn 0.4s cubic-bezier(.2,.9,.2,1);
+        }
+        .dark-mode .header.header-scrolled {
+            background: rgba(18, 18, 18, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        }
+        @keyframes headerDropIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (min-width:768px) {
+            .header.header-scrolled { top: 0.9rem; left: 1.2rem; right: 1.2rem; }
         }
 
         @media (min-width:480px) {
@@ -619,11 +676,13 @@
         .dark-mode .hero-slide-content { background: transparent; }
 
         .anime-card {
-            background: var(--surface);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+            background: rgba(255, 255, 255, 0.55);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            backdrop-filter: blur(16px) saturate(180%);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 26px rgba(11, 11, 11, 0.06);
+            transition: transform 0.35s cubic-bezier(.2,.9,.2,1), box-shadow 0.35s cubic-bezier(.2,.9,.2,1), border-color var(--transition);
             cursor: pointer;
             overflow: hidden;
             position: relative;
@@ -633,9 +692,13 @@
             width: 100%;
             min-height: 160px;
         }
+        .dark-mode .anime-card {
+            background: rgba(22, 22, 22, 0.55);
+            border-color: rgba(255, 255, 255, 0.07);
+        }
         .anime-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-6px) scale(1.015);
+            box-shadow: 0 22px 46px rgba(11, 11, 11, 0.16);
             border-color: var(--accent);
         }
         @media (min-width:480px) {
@@ -945,10 +1008,11 @@
             position: relative;
         }
         .genre-title {
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
             color: var(--text);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             padding-left: 0.2rem;
         }
         @media (min-width:480px) {
@@ -1015,16 +1079,22 @@
             width: 2.2rem;
             height: 2.2rem;
             border-radius: 50%;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
+            background: rgba(255, 255, 255, 0.65);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
+            backdrop-filter: blur(14px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             color: var(--text);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 8px 22px rgba(11, 11, 11, 0.10);
             cursor: pointer;
             align-items: center;
             justify-content: center;
             transition: all 0.25s ease;
             z-index: 5;
             font-size: 0.9rem;
+        }
+        .dark-mode .carousel-btn {
+            background: rgba(24, 24, 24, 0.6);
+            border-color: rgba(255, 255, 255, 0.08);
         }
         @media (min-width:768px) {
             .carousel-btn {
@@ -1085,8 +1155,10 @@
         }
 
         .action-pill {
-            background: var(--surface);
-            border: 1.5px solid var(--border);
+            background: rgba(255, 255, 255, 0.55);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            backdrop-filter: blur(18px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             color: var(--text);
             border-radius: var(--radius-xl);
             padding: 0.45rem 0.9rem;
@@ -1095,13 +1167,17 @@
             cursor: pointer;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             white-space: nowrap;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 8px 24px rgba(11, 11, 11, 0.07);
             font-family: inherit;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
             min-height: 44px;
             min-width: 44px;
+        }
+        .dark-mode .action-pill {
+            background: rgba(24, 24, 24, 0.55);
+            border-color: rgba(255, 255, 255, 0.08);
         }
         @media (min-width:480px) {
             .action-pill {
@@ -1120,10 +1196,13 @@
         }
 
         .action-pill:hover {
-            background: var(--hover);
+            background: rgba(255, 255, 255, 0.8);
             transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 14px 34px rgba(11, 11, 11, 0.12);
             border-color: var(--accent);
+        }
+        .dark-mode .action-pill:hover {
+            background: rgba(30, 30, 30, 0.75);
         }
         .action-pill.active-pill {
             background: var(--accent-gradient);
@@ -11331,6 +11410,16 @@ function renderProfilePage() {
             else backToTopBtn.classList.remove('visible'); }
         backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
         window.addEventListener('scroll', updateBackToTop, { passive: true });
+
+        // Frosted-glass header: solidifies with blur once the hero is scrolled past
+        const _headerEl = document.querySelector('.header');
+        function updateHeaderGlass() {
+            if (!_headerEl) return;
+            if (window.scrollY > 80) _headerEl.classList.add('header-scrolled');
+            else _headerEl.classList.remove('header-scrolled');
+        }
+        window.addEventListener('scroll', updateHeaderGlass, { passive: true });
+        updateHeaderGlass();
 
         // ====================================================================
         //  ПОКАЗ ВИГЛЯДУ ЕПІЗОДІВ
