@@ -3729,6 +3729,78 @@
             border-color: rgba(255, 255, 255, 0.18);
         }
 
+        /* Bug fix: .source-item / .quality-item had zero CSS, so they inherited
+           var(--text) (black in light mode) on the dark bottom-sheet background —
+           making dub/source/season/quality text invisible. Give them proper styling. */
+        .source-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0.8rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            margin-bottom: 0.35rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            min-height: 44px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        @media (min-width:480px) {
+            .source-item {
+                padding: 0.7rem 1rem;
+                margin-bottom: 0.4rem;
+                min-height: 48px;
+                font-size: 0.88rem;
+            }
+        }
+        .source-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+        .source-item:active {
+            transform: scale(.98);
+        }
+        .source-item.active {
+            border-color: rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+        }
+
+        .quality-item {
+            padding: 0.25rem 0.7rem;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+        }
+        @media (min-width:480px) {
+            .quality-item {
+                padding: 0.3rem 0.85rem;
+                font-size: 0.75rem;
+                min-height: 36px;
+            }
+        }
+        .quality-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .quality-item.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
         .bottom-sheet-apply {
             width: 100%;
             margin-top: 0.4rem;
