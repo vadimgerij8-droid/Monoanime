@@ -5399,6 +5399,143 @@
         .com-chat-header-title { font-size: 14px; font-weight: 800; color: var(--text); letter-spacing: -0.2px; }
         .com-chat-header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; display: flex; align-items: center; gap: 4px; }
         .com-chat-header-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; box-shadow: 0 0 0 2px rgba(34,197,94,0.2); }
+        .com-chat-header { cursor: pointer; transition: background .2s; }
+        .com-chat-header:hover { background: linear-gradient(135deg, rgba(var(--accent-rgb),0.14), transparent 60%); }
+        .com-chat-header-chevron { margin-left: auto; color: var(--text-muted); flex-shrink: 0; }
+        .com-chat-header-chevron svg { width: 16px; height: 16px; }
+
+        /* ===================================================================
+           GROUP MODULE — Telegram-2026-style group info / members / edit
+           sheets for the Dumbka/VakDab community. Theme-aware (uses the
+           site's light/dark CSS variables, not hardcoded colors).
+           =================================================================== */
+        .grp-sheet-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.4);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; transition: opacity .25s ease;
+        }
+        .grp-sheet-overlay.open { opacity: 1; }
+        .grp-sheet {
+            width: 100%; max-width: 560px;
+            max-height: 82vh; overflow-y: auto;
+            background: var(--surface);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 22px 22px 0 0;
+            padding: 0.8rem 1.1rem 1.6rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(16px);
+            transition: transform .3s cubic-bezier(.16,1,.3,1);
+        }
+        .grp-sheet-overlay.open .grp-sheet { transform: translateY(0); }
+        .grp-sheet-tall { max-height: 86vh; }
+        .grp-sheet-handle {
+            width: 36px; height: 4px; border-radius: 99px;
+            background: var(--border-hover); margin: 0 auto 0.9rem;
+        }
+
+        .grp-info-header { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0.4rem 0 1.1rem; }
+        .grp-info-avatar {
+            position: relative;
+            width: 84px; height: 84px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 34px;
+            background: var(--accent-gradient); color: var(--accent-text);
+            margin-bottom: 0.7rem; box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        .grp-info-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .grp-avatar-edit {
+            position: absolute; bottom: -2px; right: -2px;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); cursor: pointer; box-shadow: var(--shadow-sm);
+        }
+        .grp-avatar-edit svg { width: 14px; height: 14px; }
+        .grp-info-name { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+        .grp-info-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem; max-width: 420px; }
+        .grp-info-stats { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        .grp-action-row {
+            width: 100%; display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.75rem 0.6rem; border: none; background: none;
+            border-top: 1px solid var(--border-light);
+            color: var(--text); font-family: inherit; font-size: 0.88rem; font-weight: 600;
+            cursor: pointer; text-align: left;
+        }
+        .grp-action-row:hover { background: var(--hover); }
+        .grp-action-row svg { width: 19px; height: 19px; color: var(--text-muted); flex-shrink: 0; }
+        .grp-action-row-count { margin-left: auto; color: var(--text-muted); font-weight: 600; font-size: 0.8rem; }
+
+        .grp-access-section { padding: 0.8rem 0.6rem 0.2rem; border-top: 1px solid var(--border-light); }
+        .grp-access-title { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 0.5rem; }
+        .grp-access-toggle { display: flex; gap: 0.4rem; }
+        .grp-access-opt {
+            flex: 1; padding: 0.5rem 0.6rem; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--bg);
+            color: var(--text-secondary); font-family: inherit; font-size: 0.78rem; font-weight: 700;
+            cursor: pointer; transition: all .2s;
+        }
+        .grp-access-opt.active { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+
+        .grp-edit-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 0.9rem; }
+        .grp-field-label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0.7rem 0 0.3rem; }
+        .grp-field-input {
+            width: 100%; padding: 0.6rem 0.8rem; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--bg); color: var(--text);
+            font-family: inherit; font-size: 0.88rem; resize: none;
+        }
+        .grp-field-input:focus { outline: none; border-color: var(--accent); }
+        .grp-edit-actions { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
+        .grp-btn-secondary, .grp-btn-primary {
+            flex: 1; padding: 0.65rem; border-radius: 12px; font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; font-family: inherit; border: 1px solid var(--border);
+        }
+        .grp-btn-secondary { background: var(--bg); color: var(--text); }
+        .grp-btn-primary { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+
+        .grp-members-list { margin-top: 0.3rem; }
+        .grp-member-row {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.55rem 0.3rem; border-bottom: 1px solid var(--border-light);
+        }
+        .grp-member-avatar {
+            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--accent-gradient); color: var(--accent-text); font-weight: 700; font-size: 0.9rem;
+            overflow: hidden;
+        }
+        .grp-member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .grp-member-info { min-width: 0; flex: 1; }
+        .grp-member-name { font-size: 0.86rem; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .grp-banned-tag { font-size: 0.68rem; font-weight: 700; color: #ef4444; }
+        .grp-role-badge { font-size: 0.7rem; font-weight: 700; margin-top: 0.1rem; display: inline-block; }
+        .grp-role-badge.owner { color: #eab308; }
+        .grp-role-badge.admin { color: var(--accent); }
+        .grp-member-menu-btn {
+            width: 30px; height: 30px; border-radius: 50%; border: none; background: none;
+            color: var(--text-muted); font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+        }
+        .grp-member-menu-btn:hover { background: var(--hover); }
+
+        .grp-member-ctx {
+            position: fixed; z-index: 260; min-width: 180px;
+            background: var(--surface); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border); border-radius: 14px;
+            box-shadow: var(--shadow-lg); padding: 0.35rem;
+            opacity: 0; transform: scale(.95); transition: all .15s ease;
+        }
+        .grp-member-ctx.show { opacity: 1; transform: scale(1); }
+        .grp-member-ctx button {
+            display: block; width: 100%; text-align: left; padding: 0.55rem 0.7rem;
+            border: none; background: none; border-radius: 10px;
+            color: var(--text); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+        }
+        .grp-member-ctx button:hover { background: var(--hover); }
+        .grp-member-ctx button.grp-ctx-danger { color: #ef4444; }
 
         /* Reactions row under a bubble */
         .com-msg-reactions { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 4px; margin-top: 2px; }
@@ -8775,12 +8912,13 @@
 
             panel.innerHTML = `
                 <div class="com-chat-wrap">
-                    <div class="com-chat-header">
+                    <div class="com-chat-header" id="comChatHeader" title="Інформація про групу">
                         <div class="com-chat-header-icon">💬</div>
                         <div class="com-chat-header-info">
                             <div class="com-chat-header-title">VakDab</div>
                             <div class="com-chat-header-sub"><span class="com-chat-header-dot"></span>Живе спілкування фанатів аніме</div>
                         </div>
+                        <div class="com-chat-header-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
                     </div>
                     <div class="com-filter-tabs" id="comFilterTabs">
                         <button class="com-filter-tab active" data-type="text">Думка</button>
@@ -8838,6 +8976,11 @@
 
             if (user) _setupCompose(user);
             _subscribeToChat(user);
+
+            document.getElementById('comChatHeader')?.addEventListener('click', () => openGroupInfo(user));
+            _ensureGroupSettings(user).then(() => _subscribeGroupSettings());
+            _subscribeMyMembership(user);
+            _subscribeGroupMembers();
         }
 
         function _setupCompose(user) {
@@ -9076,6 +9219,11 @@
 
             const hasSomethingToSend = !!text || pendingMedia.length > 0 || !!pendingAnime || !!pendingAchievement;
             if (!hasSomethingToSend) return;
+
+            if (myMemberCache.banned) { showToast('Вас заблоковано в цій групі'); return; }
+            if (groupSettingsCache.accessMode === 'admins' && !isPrivilegedRole(myMemberCache.role)) {
+                showToast('У цій групі писати можуть лише адміни'); return;
+            }
 
             sendBtn.disabled = true;
             try {
@@ -9375,6 +9523,7 @@
         function _showMsgContextMenu(m, currentUser, x, y) {
             _closeMsgContextMenu();
             const isMe = currentUser && m.uid === currentUser.uid;
+            const canModerate = isMe || isPrivilegedRole(myMemberCache.role);
             const overlay = document.createElement('div');
             overlay.className = 'com-ctx-overlay';
             overlay.id = 'comCtxOverlay';
@@ -9393,7 +9542,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                         Редагувати
                     </button>` : ''}
-                    ${isMe ? `<button type="button" class="com-ctx-action com-ctx-danger" data-action="delete">
+                    ${canModerate ? `<button type="button" class="com-ctx-action com-ctx-danger" data-action="delete">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         Видалити
                     </button>` : ''}
@@ -9433,6 +9582,268 @@
                 _closeMsgContextMenu();
                 if (!confirm('Видалити це повідомлення?')) return;
                 try { await deleteDoc(doc(db, 'community_posts', m.id)); } catch (e) { showToast('Помилка: ' + e.message); }
+            });
+        }
+
+        // ====================================================================
+        //  GROUP MODULE — Telegram-2026-style group management for the
+        //  Dumbka/VakDab community. Firestore-backed:
+        //   groupSettings/dumbka  { name, description, avatar, accessMode, ownerId }
+        //   users/{uid}.role      'owner' | 'admin' | 'member'
+        //   users/{uid}.banned    true/false (blocked from posting)
+        // ====================================================================
+        const GROUP_DOC_ID = 'dumbka';
+        let groupSettingsCache = { name: 'VakDab', description: 'Живе спілкування фанатів аніме', avatar: '💬', accessMode: 'all', ownerId: '' };
+        let myMemberCache = { role: 'member', banned: false };
+        let groupMembersCache = [];
+        let groupUnsub = null, membersUnsub = null, myMemberUnsub = null;
+
+        function isPrivilegedRole(role) { return role === 'owner' || role === 'admin'; }
+
+        async function _ensureGroupSettings(currentUser) {
+            try {
+                const ref = doc(db, 'groupSettings', GROUP_DOC_ID);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) {
+                    await setDoc(ref, {
+                        name: 'VakDab',
+                        description: 'Живе спілкування фанатів аніме',
+                        avatar: '💬',
+                        accessMode: 'all',
+                        ownerId: currentUser ? currentUser.uid : '',
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp()
+                    });
+                    if (currentUser) {
+                        await setDoc(doc(db, 'users', currentUser.uid), { role: 'owner' }, { merge: true });
+                    }
+                }
+            } catch (e) { console.warn('Group settings init failed:', e); }
+        }
+
+        function _subscribeGroupSettings() {
+            if (groupUnsub) { groupUnsub(); groupUnsub = null; }
+            groupUnsub = onSnapshot(doc(db, 'groupSettings', GROUP_DOC_ID), snap => {
+                if (snap.exists()) {
+                    groupSettingsCache = Object.assign({}, groupSettingsCache, snap.data());
+                    _updateGroupHeaderUI();
+                }
+            });
+        }
+
+        function _subscribeMyMembership(currentUser) {
+            if (myMemberUnsub) { myMemberUnsub(); myMemberUnsub = null; }
+            if (!currentUser) { myMemberCache = { role: 'member', banned: false }; return; }
+            myMemberUnsub = onSnapshot(doc(db, 'users', currentUser.uid), snap => {
+                const d = snap.exists() ? snap.data() : {};
+                myMemberCache = { role: d.role || 'member', banned: !!d.banned };
+            });
+        }
+
+        function _subscribeGroupMembers() {
+            if (membersUnsub) { membersUnsub(); membersUnsub = null; }
+            const q = query(collection(db, 'users'), limit(500));
+            membersUnsub = onSnapshot(q, snap => {
+                groupMembersCache = snap.docs.map(d => {
+                    const data = d.data();
+                    return {
+                        uid: d.id,
+                        name: data.profile?.nickname || data.profile?.name || 'Аніматор',
+                        avatar: data.profile?.avatar || '',
+                        role: data.role || 'member',
+                        banned: !!data.banned
+                    };
+                });
+                const btn = document.getElementById('grpMembersBtn');
+                if (btn) { const c = btn.querySelector('.grp-action-row-count'); if (c) c.textContent = groupMembersCache.length; }
+            });
+        }
+
+        function _updateGroupHeaderUI() {
+            const titleEl = document.querySelector('.com-chat-header-title');
+            const subEl = document.querySelector('.com-chat-header-sub');
+            const iconEl = document.querySelector('.com-chat-header-icon');
+            if (titleEl) titleEl.textContent = groupSettingsCache.name || 'VakDab';
+            if (subEl) subEl.innerHTML = `<span class="com-chat-header-dot"></span>${escapeHtml(groupSettingsCache.description || '')}`;
+            if (iconEl) {
+                if (groupSettingsCache.avatar && groupSettingsCache.avatar.startsWith('http')) {
+                    iconEl.innerHTML = `<img src="${groupSettingsCache.avatar}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                } else {
+                    iconEl.textContent = groupSettingsCache.avatar || '💬';
+                }
+            }
+        }
+
+        function _closeGroupSheets() {
+            document.getElementById('grpInfoOverlay')?.remove();
+            document.getElementById('grpEditOverlay')?.remove();
+            document.getElementById('grpMembersOverlay')?.remove();
+            document.querySelector('.grp-member-ctx')?.remove();
+        }
+
+        function openGroupInfo(currentUser) {
+            _closeGroupSheets();
+            const privileged = isPrivilegedRole(myMemberCache.role);
+            const overlay = document.createElement('div');
+            overlay.className = 'grp-sheet-overlay';
+            overlay.id = 'grpInfoOverlay';
+            const avatarHtml = (groupSettingsCache.avatar && groupSettingsCache.avatar.startsWith('http'))
+                ? `<img src="${groupSettingsCache.avatar}" alt="">`
+                : `<span>${groupSettingsCache.avatar || '💬'}</span>`;
+
+            overlay.innerHTML = `
+                <div class="grp-sheet" id="grpInfoSheet">
+                    <div class="grp-sheet-handle"></div>
+                    <div class="grp-info-header">
+                        <div class="grp-info-avatar">${avatarHtml}${privileged ? `<button class="grp-avatar-edit" id="grpAvatarEditBtn" title="Змінити аватар"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>` : ''}</div>
+                        <div class="grp-info-name" id="grpInfoName">${escapeHtml(groupSettingsCache.name || 'VakDab')}</div>
+                        <div class="grp-info-desc" id="grpInfoDesc">${escapeHtml(groupSettingsCache.description || '')}</div>
+                        <div class="grp-info-stats">${groupMembersCache.length || 0} учасників</div>
+                    </div>
+                    ${privileged ? `<button class="grp-action-row" id="grpEditBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+                        <span>Редагувати групу</span>
+                    </button>` : ''}
+                    <button class="grp-action-row" id="grpMembersBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Учасники</span>
+                        <span class="grp-action-row-count">${groupMembersCache.length || 0}</span>
+                    </button>
+                    ${privileged ? `
+                    <div class="grp-access-section">
+                        <div class="grp-access-title">Хто може писати</div>
+                        <div class="grp-access-toggle" id="grpAccessToggle">
+                            <button class="grp-access-opt${groupSettingsCache.accessMode !== 'admins' ? ' active' : ''}" data-mode="all">Всі учасники</button>
+                            <button class="grp-access-opt${groupSettingsCache.accessMode === 'admins' ? ' active' : ''}" data-mode="admins">Тільки адміни</button>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('open'));
+            overlay.addEventListener('click', e => { if (e.target === overlay) _closeGroupSheets(); });
+
+            document.getElementById('grpEditBtn')?.addEventListener('click', () => _openEditGroupModal());
+            document.getElementById('grpAvatarEditBtn')?.addEventListener('click', () => _openEditGroupModal());
+            document.getElementById('grpMembersBtn')?.addEventListener('click', () => _openMembersList(currentUser));
+            overlay.querySelectorAll('.grp-access-opt').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const mode = btn.dataset.mode;
+                    if (mode === groupSettingsCache.accessMode) return;
+                    try {
+                        await updateDoc(doc(db, 'groupSettings', GROUP_DOC_ID), { accessMode: mode, updatedAt: serverTimestamp() });
+                        showToast(mode === 'admins' ? 'Тепер писати можуть лише адміни' : 'Писати можуть усі учасники');
+                    } catch (e) { showToast('Помилка: ' + e.message); }
+                });
+            });
+        }
+
+        function _openEditGroupModal() {
+            const overlay = document.createElement('div');
+            overlay.className = 'grp-sheet-overlay open';
+            overlay.id = 'grpEditOverlay';
+            const currentEmoji = (groupSettingsCache.avatar || '').startsWith('http') ? '💬' : (groupSettingsCache.avatar || '💬');
+            overlay.innerHTML = `
+                <div class="grp-sheet" id="grpEditSheet">
+                    <div class="grp-sheet-handle"></div>
+                    <div class="grp-edit-title">Редагувати групу</div>
+                    <label class="grp-field-label">Назва групи</label>
+                    <input type="text" class="grp-field-input" id="grpEditName" maxlength="60" value="${escapeHtml(groupSettingsCache.name || '')}">
+                    <label class="grp-field-label">Опис</label>
+                    <textarea class="grp-field-input" id="grpEditDesc" maxlength="160" rows="2">${escapeHtml(groupSettingsCache.description || '')}</textarea>
+                    <label class="grp-field-label">Емодзі-іконка групи</label>
+                    <input type="text" class="grp-field-input" id="grpEditAvatar" maxlength="4" value="${escapeHtml(currentEmoji)}">
+                    <div class="grp-edit-actions">
+                        <button class="grp-btn-secondary" id="grpEditCancel">Скасувати</button>
+                        <button class="grp-btn-primary" id="grpEditSave">Зберегти</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.getElementById('grpEditCancel').addEventListener('click', () => overlay.remove());
+            document.getElementById('grpEditSave').addEventListener('click', async () => {
+                const name = document.getElementById('grpEditName').value.trim() || 'VakDab';
+                const desc = document.getElementById('grpEditDesc').value.trim();
+                const avatar = document.getElementById('grpEditAvatar').value.trim() || '💬';
+                try {
+                    await updateDoc(doc(db, 'groupSettings', GROUP_DOC_ID), { name, description: desc, avatar, updatedAt: serverTimestamp() });
+                    showToast('Групу оновлено');
+                    overlay.remove();
+                    _closeGroupSheets();
+                } catch (e) { showToast('Помилка: ' + e.message); }
+            });
+        }
+
+        function _openMembersList(currentUser) {
+            const overlay = document.createElement('div');
+            overlay.className = 'grp-sheet-overlay open';
+            overlay.id = 'grpMembersOverlay';
+            const privileged = isPrivilegedRole(myMemberCache.role);
+            const rolesOrder = { owner: 0, admin: 1, member: 2 };
+            const sorted = [...groupMembersCache].sort((a, b) => (rolesOrder[a.role] ?? 2) - (rolesOrder[b.role] ?? 2) || a.name.localeCompare(b.name));
+            const roleBadge = r => r === 'owner' ? '<span class="grp-role-badge owner">👑 Власник</span>' : r === 'admin' ? '<span class="grp-role-badge admin">⭐ Адмін</span>' : '';
+
+            overlay.innerHTML = `
+                <div class="grp-sheet grp-sheet-tall" id="grpMembersSheet">
+                    <div class="grp-sheet-handle"></div>
+                    <div class="grp-edit-title">Учасники · ${sorted.length}</div>
+                    <div class="grp-members-list">
+                        ${sorted.map(m => `
+                            <div class="grp-member-row" data-uid="${m.uid}">
+                                <div class="grp-member-avatar">${m.avatar ? `<img src="${m.avatar}" alt="">` : `<span>${escapeHtml((m.name || '?')[0].toUpperCase())}</span>`}</div>
+                                <div class="grp-member-info">
+                                    <div class="grp-member-name">${escapeHtml(m.name)}${m.banned ? ' <span class="grp-banned-tag">заблок.</span>' : ''}</div>
+                                    ${roleBadge(m.role)}
+                                </div>
+                                ${(privileged && m.uid !== currentUser?.uid && m.role !== 'owner') ? `<button class="grp-member-menu-btn" data-uid="${m.uid}">⋮</button>` : ''}
+                            </div>`).join('')}
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            overlay.querySelectorAll('.grp-member-menu-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const uid = btn.dataset.uid;
+                    const m = groupMembersCache.find(x => x.uid === uid);
+                    if (m) _showMemberActionMenu(m, currentUser, btn);
+                });
+            });
+        }
+
+        function _showMemberActionMenu(member, currentUser, anchorBtn) {
+            document.querySelector('.grp-member-ctx')?.remove();
+            const isOwnerMe = myMemberCache.role === 'owner';
+            const menu = document.createElement('div');
+            menu.className = 'grp-member-ctx';
+            const isAdmin = member.role === 'admin';
+            menu.innerHTML = `
+                ${isOwnerMe ? `<button data-action="${isAdmin ? 'demote' : 'promote'}">${isAdmin ? 'Зняти адміна' : 'Призначити адміном'}</button>` : ''}
+                <button data-action="${member.banned ? 'unban' : 'ban'}" class="grp-ctx-danger">${member.banned ? 'Розблокувати' : 'Заблокувати'}</button>`;
+            document.body.appendChild(menu);
+            const rect = anchorBtn.getBoundingClientRect();
+            let top = rect.bottom + 6;
+            let left = rect.right - 180;
+            left = Math.max(10, Math.min(left, window.innerWidth - 190));
+            top = Math.min(top, window.innerHeight - 100);
+            menu.style.top = top + 'px';
+            menu.style.left = left + 'px';
+            requestAnimationFrame(() => menu.classList.add('show'));
+
+            const closeMenu = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu, true); } };
+            setTimeout(() => document.addEventListener('click', closeMenu, true), 0);
+
+            menu.querySelectorAll('button[data-action]').forEach(b => {
+                b.addEventListener('click', async () => {
+                    const action = b.dataset.action;
+                    try {
+                        if (action === 'promote') await updateDoc(doc(db, 'users', member.uid), { role: 'admin' });
+                        if (action === 'demote') await updateDoc(doc(db, 'users', member.uid), { role: 'member' });
+                        if (action === 'ban') await updateDoc(doc(db, 'users', member.uid), { banned: true });
+                        if (action === 'unban') await updateDoc(doc(db, 'users', member.uid), { banned: false });
+                        showToast('Готово');
+                    } catch (e) { showToast('Помилка: ' + e.message); }
+                    menu.remove();
+                });
             });
         }
 
