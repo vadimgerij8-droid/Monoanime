@@ -1620,6 +1620,97 @@
             height: 12px;
         }
 
+        /* ===================================================================
+           IMAGE EDITOR — fullscreen crop/position tool for avatar & banner.
+           GIFs skip this (to keep animation) and upload as-is.
+           =================================================================== */
+        .imgedit-overlay {
+            position: fixed; inset: 0; z-index: 400;
+            background: #000;
+            display: flex; flex-direction: column;
+            opacity: 0; transition: opacity .2s ease;
+        }
+        .imgedit-overlay.open { opacity: 1; }
+        .imgedit-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.9rem 1rem;
+            flex-shrink: 0;
+        }
+        .imgedit-back {
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: none; border: none; color: #fff; cursor: pointer;
+        }
+        .imgedit-back:hover { background: rgba(255,255,255,0.1); }
+        .imgedit-back svg { width: 22px; height: 22px; }
+        .imgedit-save {
+            padding: 0.5rem 1.1rem; border-radius: 99px;
+            background: #fff; color: #0b0b0b; border: none;
+            font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+        }
+        .imgedit-save:hover { background: #e5e5e5; }
+        .imgedit-save:disabled { opacity: .5; cursor: default; }
+
+        .imgedit-stage {
+            flex: 1; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+        .imgedit-img {
+            position: absolute;
+            top: 0; left: 0;
+            transform-origin: 0 0;
+            user-select: none; -webkit-user-drag: none;
+            will-change: transform;
+        }
+        .imgedit-frame {
+            position: absolute;
+            pointer-events: none;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.62);
+            border: 1px solid rgba(255,255,255,0.85);
+        }
+        .imgedit-frame.circle { border-radius: 50%; }
+
+        .imgedit-grid-line {
+            position: absolute; pointer-events: none;
+            background: rgba(255,255,255,0.55);
+        }
+        .imgedit-grid-chip {
+            position: absolute; pointer-events: none;
+            background: rgba(0,0,0,0.55);
+            color: #fff; font-size: 10.5px; font-weight: 700;
+            padding: 3px 8px; border-radius: 6px;
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+        }
+
+        .imgedit-bottombar {
+            flex-shrink: 0;
+            padding: 0.9rem 1.2rem 1.3rem;
+            display: flex; flex-direction: column; align-items: center; gap: 0.7rem;
+        }
+        .imgedit-caption {
+            font-size: 11.5px; color: rgba(255,255,255,0.55);
+            text-align: center; max-width: 420px; line-height: 1.4;
+        }
+        .imgedit-zoom-row {
+            display: flex; align-items: center; gap: 0.6rem; width: 100%; max-width: 320px;
+        }
+        .imgedit-zoom-row svg { width: 16px; height: 16px; color: rgba(255,255,255,0.6); flex-shrink: 0; }
+        .imgedit-zoom-slider {
+            flex: 1; -webkit-appearance: none; appearance: none;
+            height: 3px; border-radius: 99px; background: rgba(255,255,255,0.25);
+            outline: none; cursor: pointer;
+        }
+        .imgedit-zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+            background: #fff; cursor: pointer;
+        }
+        .imgedit-zoom-slider::-moz-range-thumb {
+            width: 16px; height: 16px; border-radius: 50%; background: #fff; border: none; cursor: pointer;
+        }
+
         .profile-nick-row {
             display: flex;
             align-items: center;
@@ -5828,8 +5919,8 @@
         </div>
     </div>
 
-    <input type="file" id="avatarFileInput" class="hidden-file-input" accept="image/*" />
-    <input type="file" id="bannerFileInput" class="hidden-file-input" accept="image/*" />
+    <input type="file" id="avatarFileInput" class="hidden-file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
+    <input type="file" id="bannerFileInput" class="hidden-file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
 
     <script type="module">
         // ====================================================================
@@ -10419,6 +10510,219 @@
             return data.secure_url;
         }
 
+        // Uploads a file/blob to Cloudinary AS-IS, no canvas resize/compression.
+        // Used for GIFs so the animation survives (canvas would flatten it to 1 frame).
+        async function uploadRawToCloudinary(fileOrBlob, filename) {
+            const formData = new FormData();
+            formData.append('file', fileOrBlob, filename || 'upload.gif');
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const resp = await fetch(uploadUrl, { method: 'POST', body: formData, mode: 'cors', credentials: 'omit' });
+            if (!resp.ok) {
+                const errText = await resp.text().catch(() => '');
+                throw new Error('Cloudinary upload failed: ' + resp.status + ' ' + errText.substring(0, 100));
+            }
+            const data = await resp.json();
+            if (!data.secure_url) throw new Error('Cloudinary: no secure_url in response');
+            return data.secure_url;
+        }
+
+        // Uploads an already-cropped Blob (from the image editor canvas) to Cloudinary.
+        async function uploadBlobToCloudinary(blob, filename) {
+            return uploadRawToCloudinary(blob, filename || 'upload.jpg');
+        }
+
+        // ====================================================================
+        //  IMAGE EDITOR — fullscreen crop/position tool for avatar & banner
+        //  (Telegram/Instagram-style for avatar; YouTube-style device safe-zone
+        //  guide for banner). GIFs bypass this entirely to keep animation.
+        // ====================================================================
+        function _imgeditClamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+        function openImageEditor(file, mode, onSaved) {
+            // mode: 'avatar' (1:1 circle) or 'banner' (wide rect w/ device guide)
+            const objectUrl = URL.createObjectURL(file);
+            const overlay = document.createElement('div');
+            overlay.className = 'imgedit-overlay';
+            overlay.innerHTML = `
+                <div class="imgedit-topbar">
+                    <button class="imgedit-back" id="imgeditBack" title="Скасувати">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button class="imgedit-save" id="imgeditSave">Зберегти</button>
+                </div>
+                <div class="imgedit-stage" id="imgeditStage">
+                    <img class="imgedit-img" id="imgeditImg" src="${objectUrl}" alt="">
+                    <div class="imgedit-frame" id="imgeditFrame"></div>
+                    <div id="imgeditGuides"></div>
+                </div>
+                <div class="imgedit-bottombar">
+                    ${mode === 'banner' ? `<div class="imgedit-caption">Банер профілю виглядатиме по-різному залежно від пристрою. Найбільшим він буде на комп'ютері, менший — на телефоні. Тримайте важливе ближче до центру, щоб воно не обрізалось.</div>` : `<div class="imgedit-caption">Перемістіть і масштабуйте фото, щоб обрати область для аватарки.</div>`}
+                    <div class="imgedit-zoom-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/><line x1="7" y1="10" x2="13" y2="10"/></svg>
+                        <input type="range" class="imgedit-zoom-slider" id="imgeditZoom" min="100" max="300" value="100">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/><line x1="10" y1="7" x2="10" y2="13"/><line x1="7" y1="10" x2="13" y2="10"/></svg>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('open'));
+
+            const stage = overlay.querySelector('#imgeditStage');
+            const imgEl = overlay.querySelector('#imgeditImg');
+            const frameEl = overlay.querySelector('#imgeditFrame');
+            const guidesEl = overlay.querySelector('#imgeditGuides');
+            const zoomSlider = overlay.querySelector('#imgeditZoom');
+            const saveBtn = overlay.querySelector('#imgeditSave');
+            const backBtn = overlay.querySelector('#imgeditBack');
+
+            let frameW, frameH, frameX, frameY;
+            let natW = 0, natH = 0;
+            let baseScale = 1, scale = 1, minScale = 1;
+            let tx = 0, ty = 0;
+            let dragging = false, dragStartX = 0, dragStartY = 0, startTx = 0, startTy = 0;
+            let pinchStartDist = 0, pinchStartScale = 1;
+
+            function layoutFrame() {
+                const stageRect = stage.getBoundingClientRect();
+                if (mode === 'avatar') {
+                    const size = Math.min(stageRect.width, stageRect.height) * 0.72;
+                    frameW = size; frameH = size;
+                } else {
+                    frameW = stageRect.width * 0.92;
+                    frameH = Math.min(stageRect.height * 0.62, frameW * 0.24);
+                }
+                frameX = (stageRect.width - frameW) / 2;
+                frameY = (stageRect.height - frameH) / 2;
+                frameEl.style.width = frameW + 'px';
+                frameEl.style.height = frameH + 'px';
+                frameEl.style.left = frameX + 'px';
+                frameEl.style.top = frameY + 'px';
+                frameEl.classList.toggle('circle', mode === 'avatar');
+
+                if (mode === 'banner') {
+                    // Device safe-zone guide, mirroring a YouTube-style channel art tool:
+                    // outer band = "Телевізор" (largest), inner narrower band = the
+                    // guaranteed-visible zone across computer/mobile.
+                    const bands = [
+                        { wRatio: 1.0, label: 'Телевізор' },
+                        { wRatio: 0.72, label: "Комп'ютер" },
+                        { wRatio: 0.46, label: 'Усі пристрої' }
+                    ];
+                    guidesEl.innerHTML = bands.map((b, i) => {
+                        const w = frameW * b.wRatio;
+                        const x = frameX + (frameW - w) / 2;
+                        return `<div class="imgedit-grid-line" style="left:${x}px; top:${frameY}px; width:1px; height:${frameH}px;"></div>
+                                <div class="imgedit-grid-line" style="left:${x + w}px; top:${frameY}px; width:1px; height:${frameH}px;"></div>
+                                <div class="imgedit-grid-chip" style="left:${x + 4}px; top:${frameY + 4 + i * 16}px;">${b.label}</div>`;
+                    }).join('');
+                } else {
+                    guidesEl.innerHTML = '';
+                }
+            }
+
+            function clampPan() {
+                const w = natW * scale, h = natH * scale;
+                const minTx = frameX + frameW - w, maxTx = frameX;
+                const minTy = frameY + frameH - h, maxTy = frameY;
+                tx = _imgeditClamp(tx, Math.min(minTx, maxTx), Math.max(minTx, maxTx));
+                ty = _imgeditClamp(ty, Math.min(minTy, maxTy), Math.max(minTy, maxTy));
+            }
+
+            function applyTransform() {
+                imgEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+            }
+
+            function centerImage() {
+                const w = natW * scale, h = natH * scale;
+                tx = frameX + (frameW - w) / 2;
+                ty = frameY + (frameH - h) / 2;
+                clampPan();
+                applyTransform();
+            }
+
+            imgEl.onload = () => {
+                natW = imgEl.naturalWidth;
+                natH = imgEl.naturalHeight;
+                layoutFrame();
+                baseScale = Math.max(frameW / natW, frameH / natH);
+                minScale = baseScale;
+                scale = baseScale;
+                imgEl.style.width = natW + 'px';
+                imgEl.style.height = natH + 'px';
+                zoomSlider.value = 100;
+                centerImage();
+            };
+
+            stage.addEventListener('pointerdown', (e) => {
+                if (e.target === zoomSlider) return;
+                dragging = true;
+                dragStartX = e.clientX; dragStartY = e.clientY;
+                startTx = tx; startTy = ty;
+                stage.setPointerCapture(e.pointerId);
+            });
+            stage.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+                tx = startTx + (e.clientX - dragStartX);
+                ty = startTy + (e.clientY - dragStartY);
+                clampPan();
+                applyTransform();
+            });
+            ['pointerup', 'pointercancel'].forEach(ev => stage.addEventListener(ev, () => { dragging = false; }));
+
+            stage.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.08 : 0.08;
+                const newScale = _imgeditClamp(scale + delta * scale, minScale, minScale * 3);
+                scale = newScale;
+                zoomSlider.value = Math.round((scale / minScale) * 100);
+                clampPan();
+                applyTransform();
+            }, { passive: false });
+
+            zoomSlider.addEventListener('input', () => {
+                scale = minScale * (parseFloat(zoomSlider.value) / 100);
+                clampPan();
+                applyTransform();
+            });
+
+            function closeEditor() {
+                overlay.classList.remove('open');
+                window.removeEventListener('resize', layoutFrame);
+                setTimeout(() => { overlay.remove(); URL.revokeObjectURL(objectUrl); }, 200);
+            }
+            backBtn.addEventListener('click', closeEditor);
+
+            saveBtn.addEventListener('click', () => {
+                saveBtn.disabled = true;
+                saveBtn.textContent = '...';
+                try {
+                    const outScale = mode === 'avatar' ? (480 / frameW) : (Math.max(1, 1200 / frameW));
+                    const outW = Math.round(frameW * outScale);
+                    const outH = Math.round(frameH * outScale);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = outW; canvas.height = outH;
+                    const ctx = canvas.getContext('2d');
+                    const sx = (frameX - tx) / scale;
+                    const sy = (frameY - ty) / scale;
+                    const sW = frameW / scale;
+                    const sH = frameH / scale;
+                    ctx.drawImage(imgEl, sx, sy, sW, sH, 0, 0, outW, outH);
+                    canvas.toBlob(blob => {
+                        if (!blob) { showToast('Помилка обробки зображення'); saveBtn.disabled = false; saveBtn.textContent = 'Зберегти'; return; }
+                        closeEditor();
+                        onSaved(blob);
+                    }, 'image/jpeg', 0.88);
+                } catch (err) {
+                    console.error('Image editor save failed:', err);
+                    showToast('Помилка кадрування');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Зберегти';
+                }
+            });
+
+            window.addEventListener('resize', layoutFrame);
+        }
+
         function compressImage(file, maxW, maxH, quality, callback) {
             const reader = new FileReader();
             reader.onload = function(ev) {
@@ -10967,17 +11271,30 @@ function renderProfilePage() {
         document.getElementById('avatarFileInput').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            showToast('Завантаження аватарки...');
-            try {
-                const imageUrl = await uploadToCloudinary(file, 256, 256, 0.7);
-                const profile = getProfile();
-                profile.avatar = imageUrl;
-                saveProfile(profile);
-                if (Router.currentRoute === 'profile') renderProfilePage();
-                showToast('Аватарку оновлено');
-            } catch (err) {
-                console.error('Avatar upload error:', err);
-                showToast('Помилка завантаження аватарки');
+            const isGif = file.type === 'image/gif';
+            if (file.size > 15 * 1024 * 1024) { showToast('Файл занадто великий (максимум 15 МБ)'); e.target.value = ''; return; }
+
+            const doUpload = async (blobOrFile, raw) => {
+                showToast(isGif ? 'Завантаження GIF-аватарки...' : 'Завантаження аватарки...');
+                try {
+                    const imageUrl = raw ? await uploadRawToCloudinary(blobOrFile, 'avatar.gif') : await uploadBlobToCloudinary(blobOrFile, 'avatar.jpg');
+                    const profile = getProfile();
+                    profile.avatar = imageUrl;
+                    saveProfile(profile);
+                    if (Router.currentRoute === 'profile') renderProfilePage();
+                    showToast('Аватарку оновлено');
+                } catch (err) {
+                    console.error('Avatar upload error:', err);
+                    showToast('Помилка завантаження аватарки');
+                }
+            };
+
+            if (isGif) {
+                // GIFs skip the cropper — canvas cropping would flatten the animation to 1 frame.
+                showToast('GIF без кадрування — щоб зберегти анімацію');
+                await doUpload(file, true);
+            } else {
+                openImageEditor(file, 'avatar', (blob) => doUpload(blob, false));
             }
             e.target.value = '';
         });
@@ -10985,17 +11302,29 @@ function renderProfilePage() {
         document.getElementById('bannerFileInput').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            showToast('Завантаження банера...');
-            try {
-                const imageUrl = await uploadToCloudinary(file, 1200, 400, 0.7);
-                const profile = getProfile();
-                profile.banner = imageUrl;
-                saveProfile(profile);
-                if (Router.currentRoute === 'profile') renderProfilePage();
-                showToast('Банер оновлено');
-            } catch (err) {
-                console.error('Banner upload error:', err);
-                showToast('Помилка завантаження банера');
+            const isGif = file.type === 'image/gif';
+            if (file.size > 15 * 1024 * 1024) { showToast('Файл занадто великий (максимум 15 МБ)'); e.target.value = ''; return; }
+
+            const doUpload = async (blobOrFile, raw) => {
+                showToast(isGif ? 'Завантаження GIF-банера...' : 'Завантаження банера...');
+                try {
+                    const imageUrl = raw ? await uploadRawToCloudinary(blobOrFile, 'banner.gif') : await uploadBlobToCloudinary(blobOrFile, 'banner.jpg');
+                    const profile = getProfile();
+                    profile.banner = imageUrl;
+                    saveProfile(profile);
+                    if (Router.currentRoute === 'profile') renderProfilePage();
+                    showToast('Банер оновлено');
+                } catch (err) {
+                    console.error('Banner upload error:', err);
+                    showToast('Помилка завантаження банера');
+                }
+            };
+
+            if (isGif) {
+                showToast('GIF без кадрування — щоб зберегти анімацію');
+                await doUpload(file, true);
+            } else {
+                openImageEditor(file, 'banner', (blob) => doUpload(blob, false));
             }
             e.target.value = '';
         });
