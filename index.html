@@ -6592,37 +6592,156 @@
             if (!json.results || json.results.length === 0) throw new Error('Не знайдено на Kodik');
             
             const seasons = {};
+            
+            // Перша спроба — знайти найкращий результат
+            // Пріоритет: серіал з найбільшою кількістю епізодів, потім фільм
+            const bestResults = [];
             json.results.forEach((r, idx) => {
                 if (!r.link) return;
-                
-                // Спробуємо визначити сезон та серію
-                let sn = r.season ? String(r.season) : '1';
-                let en = r.episode ? String(r.episode) : '1';
-                let dub = (r.translation || `Варіант ${idx + 1}`).trim();
-                dub = dub.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+/g, ' ').trim() || `Варіант ${idx + 1}`;
-                
-                if (!seasons[sn]) seasons[sn] = {};
-                if (!seasons[sn][dub]) seasons[sn][dub] = [];
-                
-                seasons[sn][dub].push({
-                    title: r.episode ? `Серія ${r.episode}` : r.title,
-                    season: sn,
-                    episode: en,
-                    file: r.link,
-                    dub,
-                    provider: 'Kodik'
-                });
+                bestResults.push({ ...r, idx });
             });
             
-            // Сортування серій
-            for (const s in seasons) {
-                for (const d in seasons[s]) {
-                    seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
+            // Сортуємо: серіали з більшою кількістю епізодів перші
+            bestResults.sort((a, b) => {
+                const aEp = a.episodesTotal || 0;
+                const bEp = b.episodesTotal || 0;
+                return bEp - aEp;
+            });
+            
+            // Беремо тільки кращі результати (топ озвучки)
+            const topResults = bestResults.slice(0, 10);
+            
+            for (const r of topResults) {
+                const link = r.link;
+                if (!link) continue;
+                
+                let dub = (r.translation || `Варіант ${r.idx + 1}`).trim();
+                dub = dub.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+/g, ' ').trim() || `Варіант ${r.idx + 1}`;
+                
+                const isSerial = link.includes('/serial/');
+                const isMovie = link.includes('/video/');
+                
+                let sn = '1';
+                
+                if (isSerial) {
+                    // Серіал — треба спарсити епізоди з embed сторінки
+                    try {
+                        const episodes = await loadKodikSerialEpisodes(link);
+                        if (episodes && episodes.length > 0) {
+                            sn = String(r.seasonNumber || '1');
+                            if (!seasons[sn]) seasons[sn] = {};
+                            if (!seasons[sn][dub]) seasons[sn][dub] = [];
+                            episodes.forEach(ep => {
+                                seasons[sn][dub].push({
+                                    title: `Серія ${ep.episode}`,
+                                    season: sn,
+                                    episode: String(ep.episode),
+                                    file: link,
+                                    episodeHash: ep.hash,
+                                    episodeId: ep.id,
+                                    dub,
+                                    provider: 'Kodik',
+                                    _isEmbed: true,
+                                    _isSerial: true,
+                                    _serialBaseLink: link
+                                });
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('[loadKodikSeasons] Failed to parse serial episodes:', link, e.message);
+                        // Fallback: додати як один епізод
+                        if (!seasons[sn]) seasons[sn] = {};
+                        if (!seasons[sn][dub]) seasons[sn][dub] = [];
+                        seasons[sn][dub].push({
+                            title: r.title || 'Серія 1',
+                            season: sn,
+                            episode: '1',
+                            file: link,
+                            dub,
+                            provider: 'Kodik',
+                            _isEmbed: true
+                        });
+                    }
+                } else if (isMovie) {
+                    // Фільм / OVA — один епізод
+                    if (!seasons[sn]) seasons[sn] = {};
+                    if (!seasons[sn][dub]) seasons[sn][dub] = [];
+                    seasons[sn][dub].push({
+                        title: r.title || 'Фільм',
+                        season: sn,
+                        episode: '1',
+                        file: link,
+                        dub,
+                        provider: 'Kodik',
+                        _isEmbed: true,
+                        _isSerial: false
+                    });
                 }
             }
             
             if (Object.keys(seasons).length === 0) throw new Error('Не знайдено на Kodik');
             return seasons;
+        }
+
+        async function loadKodikSerialEpisodes(serialLink) {
+            // Завантажуємо embed сторінку серіалу через проксі і парсимо епізоди
+            const doc = await fetchUA(serialLink);
+            const html = doc._rawHtml || '';
+            if (!html) throw new Error('Empty response');
+            
+            const episodes = [];
+            
+            // Парсимо serial-series-box: кожен <option> це епізод
+            const seriesBoxMatch = html.match(/<div\s+class="serial-series-box">([\s\S]*?)<\/div>\s*<div\s+class="serial-series-box">/);
+            if (seriesBoxMatch) {
+                const boxHtml = seriesBoxMatch[1] + seriesBoxMatch[0];
+                // Шукаємо всі option елементи в select
+                const options = boxHtml.matchAll(/<option\s+value="(\d+)"[^>]*data-hash="([^"]+)"[^>]*data-title="([^"]+)"/g);
+                for (const opt of options) {
+                    episodes.push({
+                        episode: parseInt(opt[1]),
+                        hash: opt[2],
+                        title: opt[3],
+                        id: ''
+                    });
+                }
+            }
+            
+            // Fallback: парсимо series-options > season-N
+            if (episodes.length === 0) {
+                const seasonMatch = html.match(/<div\s+class="season-(\d+)">([\s\S]*?)<\/div>/);
+                if (seasonMatch) {
+                    const seasonHtml = seasonMatch[2];
+                    const options = seasonHtml.matchAll(/<option\s+value="(\d+)"[^>]*data-hash="([^"]+)"[^>]*data-title="([^"]+)"/g);
+                    for (const opt of options) {
+                        episodes.push({
+                            episode: parseInt(opt[1]),
+                            hash: opt[2],
+                            title: opt[3],
+                            id: ''
+                        });
+                    }
+                }
+            }
+            
+            // Ще один fallback: шукаємо в serial-series-box select
+            if (episodes.length === 0) {
+                const selectMatch = html.match(/<div\s+class="serial-series-box">([\s\S]*?)<\/div>/);
+                if (selectMatch) {
+                    const selectHtml = selectMatch[1];
+                    const options = selectHtml.matchAll(/<option\s+value="(\d+)"[^>]*data-hash="([^"]+)"[^>]*data-title="([^"]+)"/g);
+                    for (const opt of options) {
+                        episodes.push({
+                            episode: parseInt(opt[1]),
+                            hash: opt[2],
+                            title: opt[3],
+                            id: ''
+                        });
+                    }
+                }
+            }
+            
+            return episodes;
         }
 
         
@@ -10778,26 +10897,6 @@ function renderProfilePage() {
         }
 
         
-        async function resolveKodikStream(embedUrl) {
-            try {
-                // Використовуємо проксі для доступу до сторінки плеєра
-                const doc = await fetchUA(embedUrl);
-                const html = doc._rawHtml || "";
-                
-                // Шукаємо відео-дані в скриптах Kodik
-                // Зазвичай вони зашифровані або в змінних типу videoInfo, link, і т.д.
-                // Спробуємо знайти m3u8 посилання
-                const m3u8Match = html.match(/["'](https?:\/\/[^"']+\.m3u8[^"']*)["']/);
-                if (m3u8Match) return m3u8Match[1].replace(/\\/g, '');
-                
-                // Якщо не знайшли пряме посилання, спробуємо знайти зашифровані дані
-                // Kodik часто використовує сервіси типу /gsu/ для отримання посилань
-                return null; // Повертаємо null якщо не вдалося витягнути прямий потік
-            } catch (e) {
-                console.warn('[resolveKodikStream] Error:', e);
-                return null;
-            }
-        }
 
         async function playEpisode(file, epNum) {
             if (!file) { showToast('Немає файлу для відтворення'); return; }
@@ -10809,12 +10908,22 @@ function renderProfilePage() {
             videoDiv.innerHTML = '';
             
             let finalUrl = file;
-            if (file.includes('kodik') || file.includes('tortuga')) {
-                showToast('Оптимізація потоку Kodik...');
-                const streamUrl = await resolveKodikStream(file);
-                if (streamUrl) {
-                    finalUrl = streamUrl;
-                    showToast('Потік Kodik успішно витягнуто');
+            // Для Kodik — просто передаємо embed URL напряму, LampaPlayer автоматично 
+            // визначає embed URL через isEmbedUrl() і вставляє iframe
+            if (isEmbedUrl(file)) {
+                // Kodik serial — якщо є episodeHash, будуємо URL конкретного епізоду
+                const epData = (playerPageEpisodes || []).find(e => e.file === file && String(e.episode) === String(epNum));
+                if (epData?._isSerial && epData._serialBaseLink && epData.episodeHash) {
+                    // Заміняємо /serial/ID/HASH/ на /serial/ID/EPISODE_HASH/
+                    finalUrl = epData._serialBaseLink.replace(/\/serial\/\d+\/[^/]+\//, (match) => {
+                        const base = match.substring(0, match.lastIndexOf('/') + 1);
+                        return `${base}${epData.episodeHash}/`;
+                    });
+                    // Або просто будуємо URL з hash
+                    const serialMatch = epData._serialBaseLink.match(/\/serial\/(\d+)\/[^/]+\/(\d+p?)/);
+                    if (serialMatch) {
+                        finalUrl = `https://kodikplayer.com/serial/${serialMatch[1]}/${epData.episodeHash}/${serialMatch[2]}`;
+                    }
                 }
             }
 
@@ -11024,14 +11133,70 @@ function renderProfilePage() {
         let bottomSheetMode = 'full';
 
                                 function buildBottomSheetData() {
-            const list = document.getElementById('bottomSheetSourceList');
-            if (!list) return;
-            const sources = ['Основне', 'Kodik'];
-            list.innerHTML = sources.map(s => {
-                const active = s === playerPageCurrentSource ? ' active' : '';
-                return `<div class="source-item${active}" onclick="switchProviderSource('${s}')">${s}</div>`;
-            }).join('');
+            const sourceList = document.getElementById('bsSourceList');
+            if (sourceList) {
+                const sources = ['Основне', 'Kodik'];
+                sourceList.innerHTML = sources.map(s => {
+                    const active = s === playerPageCurrentSource ? ' active' : '';
+                    return `<div class="source-item${active}" onclick="switchProviderSource('${s}')">${s}</div>`;
+                }).join('');
+            }
+
+            // Озвучки
+            const dubList = document.getElementById('bsDubList');
+            if (dubList && playerPageAnime?.seasons) {
+                const seasons = Object.keys(playerPageAnime.seasons || {}).sort((a, b) => parseInt(a) - parseInt(b));
+                const currentSeason = playerPageCurrentSeason || seasons[0] || '1';
+                const dubs = Object.keys(playerPageAnime.seasons[currentSeason] || {}).sort();
+                dubList.innerHTML = dubs.map(d => {
+                    const active = d === playerPageCurrentDub ? ' active' : '';
+                    return `<div class="source-item${active}" onclick="selectDubFromSheet('${d}')">${d}</div>`;
+                }).join('');
+            }
+
+            // Сезони
+            const seasonList = document.getElementById('bsSeasonList');
+            if (seasonList && playerPageAnime?.seasons) {
+                const seasons = Object.keys(playerPageAnime.seasons || {}).sort((a, b) => parseInt(a) - parseInt(b));
+                seasonList.innerHTML = seasons.map(s => {
+                    const active = s === playerPageCurrentSeason ? ' active' : '';
+                    return `<div class="source-item${active}" onclick="selectSeasonFromSheet('${s}')">Сезон ${s}</div>`;
+                }).join('');
+            }
+
+            // Якість
+            const qualityRow = document.getElementById('bsQualityRow');
+            if (qualityRow) {
+                qualityRow.innerHTML = QUALITY_OPTIONS.map(q => {
+                    const active = q === playerPageCurrentQuality ? ' active' : '';
+                    return `<div class="quality-item${active}" onclick="selectQualityFromSheet('${q}')">${q}</div>`;
+                }).join('');
+            }
         }
+
+        window.selectDubFromSheet = function(dub) {
+            playerPageCurrentDub = dub;
+            buildEpisodeViews();
+            updateFilterChip();
+            buildBottomSheetData();
+            showToast(`Озвучка: ${dub}`);
+        };
+
+        window.selectSeasonFromSheet = function(season) {
+            playerPageCurrentSeason = season;
+            const dubs = Object.keys(playerPageAnime?.seasons?.[season] || {}).sort();
+            playerPageCurrentDub = dubs[0] || '';
+            buildEpisodeViews();
+            updateFilterChip();
+            buildBottomSheetData();
+            showToast(`Сезон ${season}`);
+        };
+
+        window.selectQualityFromSheet = function(quality) {
+            playerPageCurrentQuality = quality;
+            buildBottomSheetData();
+            showToast(`Якість: ${quality}`);
+        };
 
         function openBottomSheet(mode) {
             bottomSheetMode = mode || 'full';
@@ -11271,6 +11436,10 @@ function renderProfilePage() {
         window.Auth = Auth;
         window.Storage = Storage;
         window.showViewMode = showViewMode;
+        window.switchProviderSource = switchProviderSource;
+        window.showToast = showToast;
+        window.loadContent = loadContent;
+        window.loadAndDisplayGenreSections = loadAndDisplayGenreSections;
     
         // ====================================================================
         //  BOTTOM NAV — логіка
