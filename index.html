@@ -6652,10 +6652,19 @@
                     // Видаляємо рекламні скрипти та трекери
                     html = html.replace(/<script[^>]*>.*?<\/script>/gi, (match) => {
                         if (match.includes('ad') || match.includes('track') || match.includes('ga.js') || 
-                            match.includes('analytics') || match.includes('doubleclick')) return '';
+                            match.includes('analytics') || match.includes('doubleclick') || match.includes('yandex') || match.includes('google') || match.includes('facebook') || match.includes('tiktok')) return '';
                         return match;
                     });
-                    html = html.replace(/<iframe[^>]*src=["']?[^"']*(?:ad|banner|track)[^"']*["']?[^>]*>.*?<\/iframe>/gi, '');
+                    html = html.replace(/<iframe[^>]*src=["']?[^"']*(?:ad|banner|track|yandex|google|doubleclick)[^"']*["']?[^>]*>.*?<\/iframe>/gi, '');
+                    // Видаляємо div контейнери з рекламою
+                    html = html.replace(/<div[^>]*(?:id|class)=["']?[^"']*(?:ad|banner|advertisement|advert)[^"']*["']?[^>]*>.*?<\/div>/gi, '');
+                    // Видаляємо скрипти, які завантажують рекламу динамічно
+                    html = html.replace(/<script[^>]*src=["']?[^"']*(?:ads|banner|adv|tracking)[^"']*["']?[^>]*>.*?<\/script>/gi, '');
+                    // Видаляємо data атрибути для реклами
+                    html = html.replace(/data-ad[^=]*="[^"]*"/gi, '');
+                    html = html.replace(/data-banner[^=]*="[^"]*"/gi, '');
+                    // Видаляємо style теги з рекламою
+                    html = html.replace(/<style[^>]*>.*?(?:ad|banner|advertisement).*?<\/style>/gi, '');
                     const doc = new DOMParser().parseFromString(html, 'text/html');
                     doc._rawHtml = html;
                     return doc;
