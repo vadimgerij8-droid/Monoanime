@@ -6654,10 +6654,13 @@
                     // Видаляємо рекламні скрипти та трекери
                     html = html.replace(/<script[^>]*>.*?<\/script>/gi, (match) => {
                         if (match.includes('ad') || match.includes('track') || match.includes('ga.js') || 
-                            match.includes('analytics') || match.includes('doubleclick')) return '';
+                            match.includes('analytics') || match.includes('doubleclick') || match.includes('yandex') ||
+                            match.includes('google') || match.includes('facebook') || match.includes('tiktok')) return '';
                         return match;
                     });
-                    html = html.replace(/<iframe[^>]*src=["']?[^"']*(?:ad|banner|track)[^"']*["']?[^>]*>.*?<\/iframe>/gi, '');
+                    html = html.replace(/<iframe[^>]*src=["']?[^"']*(?:ad|banner|track|yandex|google|doubleclick)[^"']*["']?[^>]*>.*?<\/iframe>/gi, '');
+                    // Видаляємо div контейнери з рекламою
+                    html = html.replace(/<div[^>]*(?:id|class)=["']?[^"']*(?:ad|banner|advertisement|advert)[^"']*["']?[^>]*>.*?<\/div>/gi, '');
                     const doc = new DOMParser().parseFromString(html, 'text/html');
                     doc._rawHtml = html;
                     return doc;
@@ -7022,6 +7025,23 @@
                         });
                     }
                 }
+            }
+            
+            // Fallback: шукаємо всі option елементи без обмежень
+            if (episodes.length === 0) {
+                const options = html.matchAll(/<option\s+value="(\d+)"[^>]*data-hash="([^"]+)"[^>]*(?:data-title="([^"]+)")?/g);
+                for (const opt of options) {
+                    episodes.push({
+                        episode: parseInt(opt[1]),
+                        hash: opt[2],
+                        title: opt[3] || `Серія ${opt[1]}`,
+                        id: ''
+                    });
+                }
+            }
+            
+            if (episodes.length === 0) {
+                console.warn('[loadKodikSerialEpisodes] Failed to parse any episodes from:', serialLink);
             }
             
             // Ще один fallback: шукаємо в serial-series-box select
@@ -7655,9 +7675,15 @@
                 if (isEmbedUrl(src)) {
                     this.container.innerHTML = '';
                     const iframe = document.createElement('iframe');
-                    iframe.src = src;
+                    // Проксуємо Kodik URL через наш проксі для видалення реклами
+                    let iframeSrc = src;
+                    if (src.includes('kodikplayer.com') || src.includes('kodik.info')) {
+                        iframeSrc = getProxyUrl(src);
+                    }
+                    iframe.src = iframeSrc;
                     iframe.setAttribute('allowfullscreen', '');
                     iframe.setAttribute('allow', 'autoplay; fullscreen');
+                    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-presentation allow-fullscreen');
                     iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
                     const wrap = document.createElement('div');
                     wrap.className = 'lampa-player-container';
