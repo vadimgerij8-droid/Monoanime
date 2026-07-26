@@ -6660,6 +6660,13 @@
                     html = html.replace(/<iframe[^>]*src=["']?[^"']*(?:ad|banner|track|yandex|google|doubleclick)[^"']*["']?[^>]*>.*?<\/iframe>/gi, '');
                     // Видаляємо div контейнери з рекламою
                     html = html.replace(/<div[^>]*(?:id|class)=["']?[^"']*(?:ad|banner|advertisement|advert)[^"']*["']?[^>]*>.*?<\/div>/gi, '');
+                    // Видаляємо скрипти, які завантажують рекламу динамічно
+                    html = html.replace(/<script[^>]*src=["']?[^"']*(?:ads|banner|adv|tracking)[^"']*["']?[^>]*>.*?<\/script>/gi, '');
+                    // Видаляємо data атрибути для реклами
+                    html = html.replace(/data-ad[^=]*="[^"]*"/gi, '');
+                    html = html.replace(/data-banner[^=]*="[^"]*"/gi, '');
+                    // Видаляємо style теги з рекламою
+                    html = html.replace(/<style[^>]*>.*?(?:ad|banner|advertisement).*?<\/style>/gi, '');
                     const doc = new DOMParser().parseFromString(html, 'text/html');
                     doc._rawHtml = html;
                     return doc;
@@ -7669,6 +7676,19 @@
             loadSource(src, animeTitle, episodeTitle) {
                 if (isEmbedUrl(src)) {
                     this.container.innerHTML = '';
+                    // Очищуємо Kodik HTML від реклами перед вставкою в iframe
+                    if (src.includes('kodikplayer.com') || src.includes('kodik.info')) {
+                        // Додаємо CSS для блокування реклами
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            [class*="ad"], [class*="banner"], [id*="ad"], [id*="banner"],
+                            [class*="advertisement"], [id*="advertisement"],
+                            .yandex-rtb, .google-ads, .adsbygoogle { display: none !important; }
+                            iframe[src*="ads"], iframe[src*="banner"], iframe[src*="yandex"],
+                            iframe[src*="doubleclick"], iframe[src*="google"] { display: none !important; }
+                        `;
+                        document.head.appendChild(style);
+                    }
                     const iframe = document.createElement('iframe');
                     iframe.src = src;
                     iframe.setAttribute('allowfullscreen', '');
@@ -11735,21 +11755,17 @@ function renderProfilePage() {
             videoDiv.innerHTML = '';
             
             let finalUrl = file;
-            // Для Kodik — просто передаємо embed URL напряму, LampaPlayer автоматично 
-            // визначає embed URL через isEmbedUrl() і вставляє iframe
+            // Для Kodik — передаємо URL напряму з episodeHash для конкретного епізоду
             if (isEmbedUrl(file)) {
                 // Kodik serial — якщо є episodeHash, будуємо URL конкретного епізоду
                 const epData = (playerPageEpisodes || []).find(e => e.file === file && String(e.episode) === String(epNum));
-                if (epData?._isSerial && epData._serialBaseLink && epData.episodeHash) {
-                    // Заміняємо /serial/ID/HASH/ на /serial/ID/EPISODE_HASH/
-                    finalUrl = epData._serialBaseLink.replace(/\/serial\/\d+\/[^/]+\//, (match) => {
-                        const base = match.substring(0, match.lastIndexOf('/') + 1);
-                        return `${base}${epData.episodeHash}/`;
-                    });
-                    // Або просто будуємо URL з hash
-                    const serialMatch = epData._serialBaseLink.match(/\/serial\/(\d+)\/[^/]+\/(\d+p?)/);
-                    if (serialMatch) {
-                        finalUrl = `https://kodikplayer.com/serial/${serialMatch[1]}/${epData.episodeHash}/${serialMatch[2]}`;
+                if (epData?._isSerial && epData.episodeHash) {
+                    // Формуємо URL з episodeHash для конкретного епізоду
+                    if (file.includes('/serial/')) {
+                        const serialMatch = file.match(/\/serial\/(\d+)\/[^/]+\/(\d+p?)/);
+                        if (serialMatch) {
+                            finalUrl = `https://kodikplayer.com/serial/${serialMatch[1]}/${epData.episodeHash}/${serialMatch[2]}`;
+                        }
                     }
                 }
             }
