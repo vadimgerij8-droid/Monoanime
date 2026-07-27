@@ -2510,6 +2510,106 @@
             .genre-page-header h2 { font-size: 1.8rem; }
         }
 
+        /* Розклад виходу */
+        .schedule-entry-card {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 1.1rem;
+            border-radius: var(--radius-lg, 14px);
+            background: var(--card-bg, rgba(120,120,140,0.08));
+            border: 1px solid var(--border-color, rgba(120,120,140,0.15));
+            cursor: pointer;
+            transition: transform .15s ease, background .15s ease;
+        }
+        .schedule-entry-card:hover { transform: translateY(-1px); background: var(--card-bg-hover, rgba(120,120,140,0.14)); }
+        .schedule-entry-card__icon {
+            width: 42px; height: 42px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: var(--accent, #6c63ff);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .schedule-entry-card__text { flex: 1; min-width: 0; }
+        .schedule-entry-card__title { font-weight: 700; color: var(--text); font-size: 0.98rem; }
+        .schedule-entry-card__sub { font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.15rem; }
+        .schedule-entry-card__arrow { color: var(--text-secondary); font-size: 0.85rem; }
+
+        .schedule-page-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: -0.6rem 0 1rem;
+            line-height: 1.4;
+        }
+        .schedule-day-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.6rem;
+            margin-bottom: 1rem;
+            scrollbar-width: none;
+        }
+        .schedule-day-tabs::-webkit-scrollbar { display: none; }
+        .schedule-day-tab {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.15rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color, rgba(120,120,140,0.15));
+            background: var(--card-bg, rgba(120,120,140,0.08));
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background .15s ease, color .15s ease;
+        }
+        .schedule-day-tab__date { font-size: 0.7rem; opacity: 0.75; }
+        .schedule-day-tab.active {
+            background: var(--accent, #6c63ff);
+            border-color: var(--accent, #6c63ff);
+            color: #fff;
+        }
+        .schedule-day-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem;
+            border-radius: 12px;
+            background: var(--card-bg, rgba(120,120,140,0.06));
+            cursor: pointer;
+            transition: background .15s ease;
+        }
+        .schedule-item:hover { background: var(--card-bg-hover, rgba(120,120,140,0.12)); }
+        .schedule-item__poster {
+            width: 52px; height: 74px; flex-shrink: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--card-bg, rgba(120,120,140,0.1));
+        }
+        .schedule-item__poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .schedule-item__info { flex: 1; min-width: 0; }
+        .schedule-item__title {
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .schedule-item__ep { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem; }
+        .schedule-item__arrow { color: var(--text-secondary); font-size: 0.8rem; flex-shrink: 0; }
+
         .hidden-file-input {
             display: none;
         }
@@ -5825,6 +5925,7 @@
         <div id="genrePageContainer"></div>
         <div id="genresPageContainer"></div>
         <div id="ratingPageContainer"></div>
+        <div id="schedulePageContainer"></div>
 
         <div class="pagination-row" id="paginationRow"></div>
 
@@ -7978,6 +8079,8 @@
                 document.getElementById('ratingPageContainer').style.display = 'none';
                 document.getElementById('genresPageContainer').classList.remove('active');
                 document.getElementById('genresPageContainer').style.display = 'none';
+                document.getElementById('schedulePageContainer').classList.remove('active');
+                document.getElementById('schedulePageContainer').style.display = 'none';
 
                 const hero = document.getElementById('heroWrapper');
                 const actions = document.getElementById('actionsRow');
@@ -8025,6 +8128,8 @@
                     this.showGenres();
                 } else if (route === 'rating') {
                     this.showRating();
+                } else if (route === 'schedule') {
+                    this.showSchedule();
                 } else {
                     window.location.hash = 'main';
                 }
@@ -8090,6 +8195,13 @@
                 container.style.display = 'block';
                 container.classList.add('active');
                 renderGenresPage();
+            },
+
+            showSchedule() {
+                const container = document.getElementById('schedulePageContainer');
+                container.style.display = 'block';
+                container.classList.add('active');
+                renderSchedulePage();
             },
 
             showSearch() {
@@ -11171,6 +11283,14 @@ function renderProfilePage() {
             if (!container) return;
             const genres = loadGenres();
             let html = '<div class="genre-page-header"><h2>Жанри</h2></div>';
+            html += `<div class="schedule-entry-card" id="scheduleEntryCard">
+                <div class="schedule-entry-card__icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="schedule-entry-card__text">
+                    <div class="schedule-entry-card__title">Розклад виходу</div>
+                    <div class="schedule-entry-card__sub">Які серії виходять цього тижня</div>
+                </div>
+                <i class="fas fa-chevron-right schedule-entry-card__arrow"></i>
+            </div>`;
             html += '<div class="genres-grid">';
             genres.forEach(g => {
                 const letter = g.name.charAt(0).toUpperCase();
@@ -11181,6 +11301,8 @@ function renderProfilePage() {
             });
             html += '</div>';
             container.innerHTML = html;
+            const scheduleCard = document.getElementById('scheduleEntryCard');
+            if (scheduleCard) scheduleCard.addEventListener('click', () => Router.goTo('schedule'));
             container.querySelectorAll('.genre-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const slug = card.dataset.slug;
@@ -11259,6 +11381,118 @@ function renderProfilePage() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             loadGenrePageContent();
         };
+
+        // ====================================================================
+        //  РОЗКЛАД ВИХОДУ (дані з animeon.club, проксі через PROXY_URL)
+        // ====================================================================
+        const ANIMEON_API_BASE = 'https://animeon.club/api';
+        const scheduleState = { dayOffset: 0, cache: {}, loadingOffset: null };
+        const WEEKDAY_SHORT_UA = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+        function scheduleDateForOffset(offset) {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + offset);
+            return d;
+        }
+
+        function formatScheduleApiDate(d) {
+            const pad = n => String(n).padStart(2, '0');
+            return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
+        }
+
+        function formatScheduleDisplayDate(d) {
+            const pad = n => String(n).padStart(2, '0');
+            return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}`;
+        }
+
+        async function fetchScheduleByOffset(offset) {
+            if (scheduleState.cache[offset]) return scheduleState.cache[offset];
+            const dateStr = formatScheduleApiDate(scheduleDateForOffset(offset));
+            const apiUrl = `${ANIMEON_API_BASE}/schedule/by-date/${dateStr}`;
+            const resp = await fetch(getProxyUrl(apiUrl), {
+                mode: 'cors',
+                credentials: 'omit',
+                cache: 'no-cache',
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            scheduleState.cache[offset] = data;
+            return data;
+        }
+
+        function renderSchedulePage() {
+            const container = document.getElementById('schedulePageContainer');
+            if (!container) return;
+            let tabsHtml = '';
+            for (let i = 0; i < 7; i++) {
+                const d = scheduleDateForOffset(i);
+                const label = i === 0 ? 'Сьогодні' : WEEKDAY_SHORT_UA[d.getDay()];
+                tabsHtml += `<button class="schedule-day-tab${i === 0 ? ' active' : ''}" data-offset="${i}">
+                    <span class="schedule-day-tab__label">${label}</span>
+                    <span class="schedule-day-tab__date">${formatScheduleDisplayDate(d)}</span>
+                </button>`;
+            }
+            container.innerHTML = `
+                <div class="genre-page-header"><h2>Розклад виходу</h2></div>
+                <p class="schedule-page-hint">Розклад ведеться за датою виходу епізодів у Японії — на сайт епізод потрапляє за 1-2 дні.</p>
+                <div class="schedule-day-tabs" id="scheduleDayTabs">${tabsHtml}</div>
+                <div id="scheduleDayContent" class="schedule-day-content"></div>
+            `;
+            container.querySelectorAll('.schedule-day-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const offset = parseInt(tab.dataset.offset, 10);
+                    scheduleState.dayOffset = offset;
+                    container.querySelectorAll('.schedule-day-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadScheduleDayContent(offset);
+                });
+            });
+            loadScheduleDayContent(0);
+        }
+
+        async function loadScheduleDayContent(offset) {
+            const content = document.getElementById('scheduleDayContent');
+            if (!content) return;
+            scheduleState.loadingOffset = offset;
+            content.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+            try {
+                const list = await fetchScheduleByOffset(offset);
+                if (scheduleState.loadingOffset !== offset) return; // користувач вже перемкнув вкладку
+                if (!list.length) {
+                    content.innerHTML = '<div class="loader">На цей день розкладу немає</div>';
+                    return;
+                }
+                content.innerHTML = list.map(item => {
+                    const a = item.anime || {};
+                    const poster = a.image?.preview ? `https://animeon.club/api/uploads/images/${a.image.preview}` : '';
+                    const title = a.titleUa || a.titleEn || 'Без назви';
+                    return `
+                    <div class="schedule-item" data-title="${title.replace(/"/g, '&quot;')}">
+                        <div class="schedule-item__poster">
+                            <img src="${poster}" alt="${title}" loading="lazy" onerror="this.style.opacity=0">
+                        </div>
+                        <div class="schedule-item__info">
+                            <div class="schedule-item__title">${title}</div>
+                            <div class="schedule-item__ep">${item.episode ? item.episode + ' серія' : ''}</div>
+                        </div>
+                        <i class="fas fa-chevron-right schedule-item__arrow"></i>
+                    </div>`;
+                }).join('');
+                content.querySelectorAll('.schedule-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const title = el.dataset.title;
+                        searchPageState.query = title;
+                        searchPageState.page = 1;
+                        Router.goTo('search');
+                    });
+                });
+            } catch (err) {
+                content.innerHTML = `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка завантаження: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="loadScheduleDayContent(${offset})">Спробувати знову</button></div>`;
+            }
+        }
+        window.loadScheduleDayContent = loadScheduleDayContent;
 
         // ====================================================================
         //  ПЛЕЄР
