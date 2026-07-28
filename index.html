@@ -6,15 +6,21 @@
     <title>VakDab • твій аніме каталог</title>
     <link rel="preconnect" href="https://monoanime.animegran8.workers.dev" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" as="style" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&amp;display=swap" as="style" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&amp;display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <meta property="og:title" content="VakDab - твій аніме каталог" />
-    <meta property="og:description" content="Сучасна платформа для перегляду аніме" />
+    <meta property="og:title" content="VakDab — твій аніме каталог" />
+    <meta property="og:description" content="Переглядай аніме онлайн, відстежуй прогрес, спілкуйся зі спільнотою." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vakdab.netlify.app" />
+    <meta property="og:image" content="https://vakdab.netlify.app/og-image.png" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <meta name="theme-color" content="#0d0d0d" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236d5efc'/><text x='50' y='72' font-size='62' font-weight='900' text-anchor='middle' fill='white' font-family='sans-serif'>V</text></svg>" />
+    <meta name="theme-color" content="#6d5efc" />
+    <meta name="description" content="VakDab — твій аніме каталог. Переглядай аніме онлайн, відстежуй прогрес, спілкуйся зі спільнотою." />
+    <meta name="keywords" content="аніме, аніме онлайн, дивитися аніме, аніме каталог, VakDab, anime" />
+    <meta name="author" content="VakDab" />
+    <meta name="robots" content="index, follow" />
 
     <script type="importmap">
         {
@@ -28,18 +34,18 @@
 
     <style>
         :root {
-            --accent: #0b0b0b;
-            --accent-rgb: 11, 11, 11;
-            --accent-hover: #1a1a1a;
+            --accent: #6d5efc;
+            --accent-rgb: 109, 94, 252;
+            --accent-hover: #5a4ce0;
             --accent-text: #ffffff;
-            --accent-gradient: linear-gradient(135deg, #0b0b0b, #1a1a1a);
-            --accent-light: rgba(11, 11, 11, 0.15);
-            --accent-glow: rgba(11, 11, 11, 0.35);
-            --bg: #ffffff;
-            --surface: rgba(255, 255, 255, 0.98);
+            --accent-gradient: linear-gradient(135deg, #6d5efc, #8b7fff);
+            --accent-light: rgba(109, 94, 252, 0.12);
+            --accent-glow: rgba(109, 94, 252, 0.30);
+            --bg: #fafafa;
+            --surface: rgba(255, 255, 255, 0.96);
             --text: #0b0b0b;
             --text-secondary: #4a4a4a;
-            --text-muted: #7a7a7a;
+            --text-muted: #6b6b6b;
             --border: #e9e9e9;
             --border-light: #f3f3f3;
             --border-hover: #d0d0d0;
@@ -48,14 +54,14 @@
             --glass: rgba(255, 255, 255, 0.6);
             --glass-dark: rgba(20, 20, 20, 0.35);
             --blur-amount: 8px;
-            --shadow-sm: 0 6px 18px rgba(11, 11, 11, 0.06);
-            --shadow-md: 0 14px 32px rgba(11, 11, 11, 0.10);
-            --shadow-lg: 0 30px 60px rgba(11, 11, 11, 0.14);
-            --radius-sm: 12px;
-            --radius: 16px;
-            --radius-md: 14px;
-            --radius-lg: 22px;
-            --radius-xl: 28px;
+            --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.10);
+            --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.14);
+            --radius-sm: 10px;
+            --radius: 14px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
             --transition: 280ms cubic-bezier(.2, .9, .2, 1);
             --transition-smooth: 360ms cubic-bezier(.2, .9, .2, 1);
             --agnative-scale: 1;
@@ -63,34 +69,45 @@
         }
 
         .dark-mode {
-            --accent: #f7f7f7;
-            --accent-rgb: 247, 247, 247;
-            --accent-hover: #cfcfcf;
+            --accent: #8b7fff;
+            --accent-rgb: 139, 127, 255;
+            --accent-hover: #a89bff;
             --accent-text: #0a0a0a;
-            --accent-gradient: linear-gradient(135deg, #f7f7f7, #cfcfcf);
-            --accent-light: rgba(247, 247, 247, 0.15);
-            --accent-glow: rgba(247, 247, 247, 0.35);
-            --bg: #0a0a0a;
-            --surface: rgba(20, 20, 20, 0.95);
+            --accent-gradient: linear-gradient(135deg, #8b7fff, #6d5efc);
+            --accent-light: rgba(139, 127, 255, 0.15);
+            --accent-glow: rgba(139, 127, 255, 0.35);
+            --bg: #0b0c10;
+            --surface: rgba(17, 18, 24, 0.95);
             --text: #f7f7f7;
             --text-secondary: #cfcfcf;
-            --text-muted: #9a9a9a;
-            --border: #222222;
-            --border-light: #151515;
-            --border-hover: #3a3a3a;
+            --text-muted: #a8a8a8;
+            --border: #1e1f26;
+            --border-light: #14151a;
+            --border-hover: #2e2f38;
             --hover: rgba(255, 255, 255, 0.02);
-            --tag-bg: #141414;
+            --tag-bg: #161719;
             --glass: rgba(255, 255, 255, 0.04);
             --glass-dark: rgba(0, 0, 0, 0.45);
-            --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.4);
-            --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.55);
-            --shadow-lg: 0 30px 60px rgba(0, 0, 0, 0.6);
+            --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.5);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        ::selection {
+            background: rgba(var(--accent-rgb), 0.2);
+            color: var(--text);
+        }
+        button:focus-visible,
+        a:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            border-radius: 4px;
         }
         html,
         body {
@@ -99,7 +116,7 @@
             -webkit-text-size-adjust: 100%;
         }
         body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
             -webkit-font-smoothing: antialiased;
@@ -634,9 +651,16 @@
             min-height: 160px;
         }
         .anime-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-light);
+            border-color: rgba(var(--accent-rgb), 0.4);
+        }
+        .anime-card:active {
+            transform: translateY(-1px);
+        }
+        .anime-card:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
         }
         @media (min-width:480px) {
             .anime-card {
@@ -3369,6 +3393,8 @@
             position: relative;
         }
         .episode-grid-card:hover {
+            border-color: rgba(var(--accent-rgb), 0.4);
+            
             transform: translateY(-3px);
             border-color: rgba(255, 255, 255, 0.14);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
@@ -4713,6 +4739,7 @@
             white-space: nowrap;
         }
         .bn-item.active .bn-pill {
+            box-shadow: 0 2px 12px rgba(var(--accent-rgb), 0.3);
             background: var(--text);
             color: var(--bg);
             padding: 10px 18px;
@@ -5868,13 +5895,13 @@
         .com-feed-empty svg { width: 40px; height: 40px; opacity: 0.15; }
         .com-feed-empty p { font-size: 12.5px; max-width: 220px; line-height: 1.5; }
 
-        @keyframes spin { to { transform: rotate(360deg); } } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
 </style>
 </head>
 <body class="appletv-agnative-topnav">
 
-    <div class="app-container" id="appRoot">
+    <main class="app-container" id="appRoot">
 
         <header class="header">
             <div class="header-left">
@@ -5929,8 +5956,8 @@
 
         <div class="pagination-row" id="paginationRow"></div>
 
-        <footer><span>VAKDAB 2026 — Усі права захищено • Клавіші: / пошук, M меню, T тема, R випадкове, Esc закрити</span></footer>
-    </div>
+        <footer><span>VakDab 2026 — Усі права захищено • Клавіші: / пошук, M меню, T тема, R випадкове, Esc закрити</span></footer>
+    </main>
 
     <button class="back-to-top" id="backToTopBtn" title="Нагору" aria-label="Прокрутити нагору">
         <i class="fas fa-chevron-up"></i>
@@ -6144,7 +6171,7 @@
             setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence error:', e));
             db = getFirestore(firebaseApp);
             firebaseInitialized = true;
-            console.log('Firebase initialized');
+            /* console.log removed */
         } catch (e) {
             console.warn('Firebase init error:', e.message);
             firebaseInitialized = false;
@@ -6270,9 +6297,9 @@
                     if (docSnap.exists()) {
                         // Існуючий юзер — завантажуємо його дані з Firestore
                         const data = docSnap.data();
-                        console.log('[Load] Firestore doc fields:', Object.keys(data));
-                        console.log('[Load] profile avatar:', data.profile?.avatar ? data.profile.avatar.substring(0,50) : 'EMPTY');
-                        console.log('[Load] profile banner:', data.profile?.banner ? data.profile.banner.substring(0,50) : 'EMPTY');
+                        /* console.log removed */
+                        /* console.log removed */
+                        /* console.log removed */
                         if (data.profile) {
                             const mergedProfile = Object.assign(getDefaultProfile(), data.profile);
                             // Доповнюємо Google displayName/photoURL якщо в Firestore порожньо
@@ -6446,7 +6473,7 @@
                 try {
                     const timeoutP = new Promise(r => setTimeout(r, 6000));
                     await Promise.race([this.syncUserData(), timeoutP]);
-                    console.log('Logout: sync done');
+                    /* console.log removed */
                 } catch(e) {
                     console.warn('Logout: sync error', e.message);
                 }
@@ -6460,7 +6487,7 @@
                 this._notifyListeners();
 
                 // 4. Виходимо з Firebase Auth
-                try { await signOut(auth); } catch(e) {}
+                try { await signOut(auth); } catch(e) { console.error("Silent error:", e); }
 
                 showToast('Ви вийшли з акаунту');
                 Router.showProfile();
@@ -6508,8 +6535,8 @@
                     if (b.poster && b.poster.startsWith('data:')) return { ...b, poster: '' };
                     return b;
                 });
-                console.log('[Sync] profile avatar:', cleanProfile.avatar ? cleanProfile.avatar.substring(0,50) : 'EMPTY');
-                console.log('[Sync] profile banner:', cleanProfile.banner ? cleanProfile.banner.substring(0,50) : 'EMPTY');
+                /* console.log removed */
+                /* console.log removed */
                 // Спроба 1: повні дані
                 const _xp = calcTotalXP();
                 const _lv = getLevel(_xp);
@@ -6524,7 +6551,7 @@
                         level: _lv,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    console.log('[Firestore] Sync OK (full)');
+                    /* console.log removed */
                     return { ok: true };
                 } catch (e) {
                     console.error('[Firestore] Sync FAILED (full):', e.code, e.message);
@@ -6541,7 +6568,7 @@
                         level: _lv,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    console.log('[Firestore] Sync OK (trimmed history)');
+                    /* console.log removed */
                     return { ok: true };
                 } catch (e) {
                     console.error('[Firestore] Sync FAILED (trimmed):', e.code, e.message);
@@ -6556,7 +6583,7 @@
                         level: _lv,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
-                    console.log('[Firestore] Sync OK (profile only)');
+                    /* console.log removed */
                     return { ok: true };
                 } catch (e2) {
                     console.error('[Firestore] Sync FAILED (profile only):', e2.code, e2.message);
@@ -6574,7 +6601,7 @@
                 if (this._syncTimer) clearTimeout(this._syncTimer);
                 this._syncTimer = setTimeout(() => {
                     if (Auth.isAuthenticated()) Auth.syncUserData().then(r => {
-                        if (r && r.ok) console.log('[Storage] Synced to Firestore');
+                        if (r && r.ok) { /* synced */ }
                         else if (r) console.warn('[Storage] Sync failed:', r.error);
                     });
                 }, 1500);
@@ -6726,7 +6753,7 @@
                     createdAt: new Date().toISOString()
                 };
                 await setDoc(doc(db, 'diagnostics', id), payload);
-                console.log('[diagnostic] saved to Firestore id=', id);
+                /* console.log removed */
             } catch (e) {
                 console.warn('[diagnostic] saveParseDiagnostic error:', e);
             }
@@ -6898,9 +6925,9 @@
             const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
             if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
 
-            console.log('[loadAnimeuaDetail] animeUrl=', animeUrl);
+            /* console.log removed */
             const playerUrls = extractPlayerIframeUrls(doc);
-            console.log('[loadAnimeuaDetail] playerUrls=', playerUrls);
+            /* console.log removed */
             const allRawSources = [];
             // Завантажуємо всі плеєр-сторінки паралельно — швидше і одна помилка не зупиняє решту
             const playerFetchResults = await Promise.allSettled(
@@ -6932,7 +6959,7 @@
                 else console.warn('Player fetch failed:', r.reason?.message || r.reason);
             });
 
-            console.log('[loadAnimeuaDetail] allRawSources.length=', allRawSources.length, 'samples=', allRawSources.slice(0,10));
+            /* console.log removed */
 
             // Зберігаємо діагностику у Firestore для аналізу з Android
             saveParseDiagnostic({
@@ -7281,7 +7308,7 @@
                 .lp-time {
                     font-size: 12px;
                     color: rgba(255,255,255,0.85);
-                    font-family: 'Inter', monospace;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
                     white-space: nowrap;
                     flex-shrink: 0;
                 }
@@ -8148,9 +8175,9 @@
                 currentCategory = '';
                 currentPage = 1;
                 document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
-                const si = document.getElementById('searchInput');
+                const si = document.getElementById('searchPageInput');
                 if (si) si.value = '';
-                const cb = document.getElementById('searchClearBtn');
+                const cb = document.getElementById('searchPageClearBtn');
                 if (cb) cb.classList.remove('visible');
                 document.getElementById('animeContainer').style.display = 'none';
                 document.getElementById('paginationRow').innerHTML = '';
@@ -10143,16 +10170,20 @@
             const input = document.getElementById('searchPageInput');
             const clearBtn = document.getElementById('searchPageClearBtn');
             if (input) {
+                let searchPageDebounce;
                 input.addEventListener('input', () => {
                     const q = input.value.trim();
                     if (clearBtn) {
                         if (q.length > 0) clearBtn.classList.add('visible');
                         else clearBtn.classList.remove('visible');
                     }
+                    clearTimeout(searchPageDebounce);
                     if (q.length >= 2) {
-                        searchPageState.query = q;
-                        searchPageState.page = 1;
-                        performSearchPage();
+                        searchPageDebounce = setTimeout(() => {
+                            searchPageState.query = q;
+                            searchPageState.page = 1;
+                            performSearchPage();
+                        }, 350);
                     } else if (q.length === 0) {
                         searchPageState.query = '';
                         searchPageState.list = [];
@@ -10448,7 +10479,7 @@
             }
             const data = await resp.json();
             if (!data.secure_url) throw new Error('Cloudinary: no secure_url in response');
-            console.log('[Cloudinary] Upload OK:', data.secure_url.substring(0, 60));
+            /* console.log removed */
             return data.secure_url;
         }
 
@@ -11762,8 +11793,9 @@ function renderProfilePage() {
                         if (epData && epData._needsResolve) {
                             try {
                                 playerPageCurrentEpisodeNum = epNum;
-                                playEpisode(realUrl, epNum);
+                                playEpisode(file, epNum);
                             } catch (e) {
+                                console.error('Episode resolve error:', e);
                             }
                             return;
                         }
@@ -12264,8 +12296,8 @@ function renderProfilePage() {
                 }
             });
 
-            console.log('VAKDAB v6.6 — Firebase: vakdab project');
-            console.log('Клавіші: / пошук • M меню • T тема • R випадкове • Esc закрити');
+            /* console.log removed */
+            /* console.log removed */
         }
 
         if (document.readyState === 'loading') {
