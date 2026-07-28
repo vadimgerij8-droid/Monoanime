@@ -1612,6 +1612,14 @@
         .profile-banner:hover img {
             opacity: 0.6;
         }
+        /* GIF autoplay: no grayscale on GIF banners */
+        .profile-banner.is-gif img {
+            filter: none;
+            opacity: 0.65;
+        }
+        .profile-banner.is-gif:hover img {
+            opacity: 0.85;
+        }
         .profile-banner-overlay {
             position: absolute;
             inset: 0;
@@ -1701,6 +1709,10 @@
             height: 100%;
             object-fit: cover;
             filter: grayscale(60%) contrast(1.05);
+        }
+        /* GIF autoplay: no grayscale on GIF avatars */
+        .profile-avatar.is-gif img {
+            filter: none;
         }
         .profile-avatar .avatar-placeholder {
             font-size: 28px;
@@ -4946,6 +4958,7 @@
             box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.08);
         }
         .rg-stats-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(40%) contrast(1.05); }
+        .rg-stats-avatar img.is-gif { filter: none; }
         .rg-stats-name {
             font-size: 17px; font-weight: 700;
             color: var(--text);
@@ -5106,6 +5119,7 @@
         .rg-podium-item.p2 .rg-podium-avatar { border-color: var(--text-muted); }
         .rg-podium-item.p3 .rg-podium-avatar { border-color: var(--border-hover); }
         .rg-podium-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(50%); }
+        .rg-podium-avatar img.is-gif { filter: none; }
         .rg-podium-name {
             font-size: 11px; font-weight: 700; color: var(--text);
             text-align: center; line-height: 1.2;
@@ -5162,6 +5176,7 @@
             border: 1px solid var(--border);
         }
         .rg-lb-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(50%); }
+        .rg-lb-avatar img.is-gif { filter: none; }
         .rg-lb-info { flex: 1; min-width: 0; }
         .rg-lb-name {
             font-size: 13px; font-weight: 700; color: var(--text);
@@ -5272,6 +5287,7 @@
             align-self: flex-end;
         }
         .com-msg-avatar img { width:100%; height:100%; object-fit:cover; filter: grayscale(50%); }
+        .com-msg-avatar img.is-gif { filter: none; }
         .com-msg.mine .com-msg-avatar { display: none; }
 
         .com-msg-col { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
@@ -8763,8 +8779,9 @@
             const earnedIds  = new Set(ACHIEVEMENTS.filter(a => achStats[a.field] >= a.need).map(a => a.id));
             const xpProg     = getXPProgress(totalXP);
 
+            const avatarGifClass = isGifUrl(profile.avatar) ? ' class="is-gif"' : '';
             const avHtml = profile.avatar
-                ? `<img src="${profile.avatar}" alt="">`
+                ? `<img src="${profile.avatar}" alt=""${avatarGifClass}>`
                 : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
 
             statsEl.innerHTML = `
@@ -8828,7 +8845,8 @@
                 const profile = getProfile();
                 const xp = calcTotalXP();
                 const lv = getLevel(xp);
-                const av = profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
+                const gifCls = isGifUrl(profile.avatar) ? ' class="is-gif"' : '';
+                const av = profile.avatar ? `<img src="${profile.avatar}" alt=""${gifCls}>` : `<span>${(profile.nickname||'?')[0].toUpperCase()}</span>`;
                 lb.innerHTML = `
                     <div class="rg-lb-list">
                         <div class="rg-lb-item is-me">
@@ -8938,7 +8956,8 @@
                 const crowns = ['\ud83e\udd48', '\ud83d\udc51', '\ud83e\udd49'];
                 html += '<div class="rg-podium">';
                 order.forEach((u, i) => {
-                    const av = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                    const gifCls = isGifUrl(u.avatar) ? ' class="is-gif"' : '';
+                    const av = u.avatar ? `<img src="${u.avatar}" alt=""${gifCls}>` : `<span>${u.name[0].toUpperCase()}</span>`;
                     html += `<div class="rg-podium-item ${cls[i]}" style="animation-delay:${i*0.08}s">
                         <div class="rg-podium-crown">${crowns[i]}</div>
                         <div class="rg-podium-avatar">${av}</div>
@@ -8953,7 +8972,8 @@
             html += '<div class="rg-lb-list">';
             sorted.slice(3).forEach((u, i) => {
                 const isMe = u.uid === myUid;
-                const av   = u.avatar ? `<img src="${u.avatar}" alt="">` : `<span>${u.name[0].toUpperCase()}</span>`;
+                const gifCls = isGifUrl(u.avatar) ? ' class="is-gif"' : '';
+                const av   = u.avatar ? `<img src="${u.avatar}" alt=""${gifCls}>` : `<span>${u.name[0].toUpperCase()}</span>`;
                 const ri   = getUserRankInfo(u.episodes, u.hours);
                 html += `<div class="rg-lb-item ${isMe ? 'is-me' : ''}" style="animation-delay:${Math.min(i*0.02, 0.4)}s">
                     <div class="rg-lb-num">${i + 4}</div>
@@ -9042,8 +9062,9 @@
 
             const user    = Auth.isAuthenticated() ? Auth._user : null;
             const profile = getProfile();
+            const gifCls = isGifUrl(profile.avatar) ? ' class="is-gif"' : '';
             const avHtml  = profile.avatar
-                ? `<img src="${profile.avatar}" alt="">`
+                ? `<img src="${profile.avatar}" alt=""${gifCls}>`
                 : `<span>${(profile.nickname || '?')[0].toUpperCase()}</span>`;
 
             const tabMeta = {
@@ -9480,8 +9501,9 @@
                     }
                 }
 
+                const gifCls = isGifUrl(m.authorPhoto) ? ' class="is-gif"' : '';
                 const av = m.authorPhoto
-                    ? `<img src="${m.authorPhoto}" alt="" onerror="this.style.display='none'">`
+                    ? `<img src="${m.authorPhoto}" alt=""${gifCls} onerror="this.style.display='none'">`
                     : `<span>${(m.authorName || '?')[0].toUpperCase()}</span>`;
                 const timeStr = date ? date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '';
                 const typeTag = m.type && COM_TYPE_LABELS[m.type]
@@ -9809,7 +9831,8 @@
             if (subEl) subEl.innerHTML = `<span class="com-chat-header-dot"></span>${escapeHtml(groupSettingsCache.description || '')}`;
             if (iconEl) {
                 if (groupSettingsCache.avatar && groupSettingsCache.avatar.startsWith('http')) {
-                    iconEl.innerHTML = `<img src="${groupSettingsCache.avatar}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                    const gifCls = isGifUrl(groupSettingsCache.avatar) ? ' class="is-gif"' : '';
+                    iconEl.innerHTML = `<img src="${groupSettingsCache.avatar}" alt=""${gifCls} style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
                 } else {
                     iconEl.textContent = groupSettingsCache.avatar || '💬';
                 }
@@ -9829,8 +9852,9 @@
             const overlay = document.createElement('div');
             overlay.className = 'grp-sheet-overlay';
             overlay.id = 'grpInfoOverlay';
+            const grpGifCls = (groupSettingsCache.avatar && groupSettingsCache.avatar.startsWith('http') && isGifUrl(groupSettingsCache.avatar)) ? ' class="is-gif"' : '';
             const avatarHtml = (groupSettingsCache.avatar && groupSettingsCache.avatar.startsWith('http'))
-                ? `<img src="${groupSettingsCache.avatar}" alt="">`
+                ? `<img src="${groupSettingsCache.avatar}" alt=""${grpGifCls}>`
                 : `<span>${groupSettingsCache.avatar || '💬'}</span>`;
 
             overlay.innerHTML = `
@@ -9929,9 +9953,11 @@
                     <div class="grp-sheet-handle"></div>
                     <div class="grp-edit-title">Учасники · ${sorted.length}</div>
                     <div class="grp-members-list">
-                        ${sorted.map(m => `
+                        ${sorted.map(m => {
+                            const memGifCls = isGifUrl(m.avatar) ? ' class="is-gif"' : '';
+                            return `
                             <div class="grp-member-row" data-uid="${m.uid}">
-                                <div class="grp-member-avatar">${m.avatar ? `<img src="${m.avatar}" alt="">` : `<span>${escapeHtml((m.name || '?')[0].toUpperCase())}</span>`}</div>
+                                <div class="grp-member-avatar">${m.avatar ? `<img src="${m.avatar}" alt=""${memGifCls}>` : `<span>${escapeHtml((m.name || '?')[0].toUpperCase())}</span>`}</div>
                                 <div class="grp-member-info">
                                     <div class="grp-member-name">${escapeHtml(m.name)}${m.banned ? ' <span class="grp-banned-tag">заблок.</span>' : ''}</div>
                                     ${roleBadge(m.role)}
@@ -10677,6 +10703,22 @@
             return data.secure_url;
         }
 
+        // Checks if a URL points to a GIF (by extension or query param).
+        function isGifUrl(url) {
+            if (!url || typeof url !== 'string') return false;
+            const lower = url.toLowerCase();
+            return lower.endsWith('.gif') || lower.includes('.gif?') || lower.includes('.gif/');
+        }
+
+        // Applies 'is-gif' class to an <img> inside a given container if the src is a GIF.
+        function applyGifClass(container, imgSelector) {
+            if (!container) return;
+            const img = container.querySelector(imgSelector || 'img');
+            if (img && img.src && isGifUrl(img.src)) {
+                img.classList.add('is-gif');
+            }
+        }
+
         // Uploads a file/blob to Cloudinary AS-IS, no canvas resize/compression.
         // Used for GIFs so the animation survives (canvas would flatten it to 1 frame).
         async function uploadRawToCloudinary(fileOrBlob, filename) {
@@ -10923,9 +10965,14 @@ function renderProfilePage() {
             const isGuestMode = Auth.isGuest();
             const profile = getProfile();
             const stats = getProfileStats();
+            // GIF detection — use isGifUrl helper
+            const isGifBanner = isGifUrl(profile.banner);
+            const isGifAvatar = isGifUrl(profile.avatar);
+            const bannerClass = isGifBanner ? 'profile-banner is-gif' : 'profile-banner';
+            const avatarClass = isGifAvatar ? 'profile-avatar is-gif' : 'profile-avatar';
             container.innerHTML = `
             <div class="profile-wrapper">
-              <div class="profile-banner" onclick="document.getElementById('bannerFileInput').click()">
+              <div class="${bannerClass}" onclick="document.getElementById('bannerFileInput').click()">
                 <img src="${profile.banner}" alt="banner" onerror="this.style.display='none'">
                 <div class="profile-banner-overlay"></div>
                 <div class="profile-banner-edit">
@@ -10934,7 +10981,7 @@ function renderProfilePage() {
               </div>
               <div class="profile-info">
                 <div class="profile-avatar-wrap" onclick="document.getElementById('avatarFileInput').click()">
-                  <div class="profile-avatar">
+                  <div class="${avatarClass}">
                     <img src="${profile.avatar}" alt="avatar" onerror="this.style.display='none'; this.parentElement.querySelector('.avatar-placeholder').style.display='flex'">
                     <span class="avatar-placeholder" style="display:none;">${profile.nickname.charAt(0).toUpperCase()}</span>
                   </div>
