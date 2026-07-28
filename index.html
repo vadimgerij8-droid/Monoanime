@@ -458,24 +458,14 @@
             transform: translateY(-1px);
         }
 
+        /* Rating/meta eyebrow — above the title, so it never collides with the bottom nav controls */
+        .hero-rating-row--top {
+            margin-bottom: 2px;
+        }
+
         /* Button — glassmorphism */
-        .hero-slide-btn-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        @media (max-width: 480px) {
-            .hero-slide-btn-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.7rem;
-            }
-        }
-        .hero-slide-btn-row .hero-rating-row {
-            flex-wrap: wrap;
-        }
         .hero-slide-btn {
+            align-self: flex-start;
             display: inline-flex;
             align-items: center;
             gap: 10px;
@@ -529,9 +519,10 @@
         /* Navigation arrows — glassmorphism */
         .hero-nav {
             position: absolute;
-            bottom: clamp(70px, 10vh, 130px);
-            width: 46px;
-            height: 46px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
             background: rgba(10,10,10,0.4);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -544,19 +535,19 @@
             z-index: 20;
             transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             color: rgba(255,255,255,0.7);
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             padding: 0;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
         .hero-nav:hover {
             background: rgba(255,255,255,0.15);
-            transform: scale(1.12);
+            transform: translateY(-50%) scale(1.12);
             color: #fff;
             border-color: rgba(255,255,255,0.25);
             box-shadow: 0 8px 32px rgba(0,0,0,0.35);
         }
-        .hero-nav-prev { left: 24px; }
-        .hero-nav-next { right: 24px; }
+        .hero-nav-prev { left: 14px; }
+        .hero-nav-next { right: 14px; }
 
         /* Dot indicators */
         .hero-dots {
@@ -607,7 +598,6 @@
         @media (min-width: 768px) {
             .hero-slide-content { padding: 55px 6% 65px; }
             .hero-nav {
-                bottom: clamp(70px, 10vh, 130px);
                 width: 52px;
                 height: 52px;
                 font-size: 1.2rem;
@@ -624,16 +614,15 @@
                 gap: clamp(8px, 1.5vh, 16px);
             }
             .hero-nav {
-                bottom: 70px;
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
+                width: 38px;
+                height: 38px;
+                font-size: 0.95rem;
             }
-            .hero-nav-prev { left: 16px; }
-            .hero-nav-next { right: 16px; }
-            .hero-dots { bottom: 32px; gap: 6px; }
-            .hero-dot { width: 18px; height: 2px; }
-            .hero-dot.active { width: 30px; }
+            .hero-nav-prev { left: 10px; }
+            .hero-nav-next { right: 10px; }
+            .hero-dots { bottom: 20px; gap: 6px; }
+            .hero-dot { width: 16px; height: 2px; }
+            .hero-dot.active { width: 26px; }
         }
 
         .dark-mode .hero-slide-content { background: transparent; }
@@ -994,6 +983,127 @@
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        /* ===== Розклад виходу — home widget, deliberately distinct from the poster carousels ===== */
+        .home-schedule-widget {
+            background: #0b0b0b;
+            border-radius: var(--radius-xl, 20px);
+            padding: 1.1rem 1rem 1rem;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        @media (min-width:480px) {
+            .home-schedule-widget { padding: 1.3rem 1.2rem 1.2rem; }
+        }
+        @media (min-width:768px) {
+            .home-schedule-widget { padding: 1.5rem 1.5rem 1.4rem; }
+        }
+        .home-schedule-widget__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-bottom: 0.9rem;
+            flex-wrap: wrap;
+        }
+        .home-schedule-widget__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .home-schedule-widget__title i { color: rgba(255,255,255,0.55); font-size: 0.9rem; }
+        .home-schedule-widget__date {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.08);
+            padding: 0.2rem 0.55rem;
+            border-radius: 50px;
+            letter-spacing: 0.2px;
+        }
+        .home-schedule-widget__link {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.65);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: inherit;
+            padding: 0.3rem 0;
+            transition: color 0.2s ease;
+        }
+        .home-schedule-widget__link:hover { color: #fff; }
+        .home-schedule-widget__link i { font-size: 0.7rem; }
+        .home-schedule-widget__list {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding-bottom: 0.2rem;
+            scrollbar-width: none;
+        }
+        .home-schedule-widget__list::-webkit-scrollbar { display: none; }
+        .home-schedule-widget__empty {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.85rem;
+            padding: 0.8rem 0.2rem;
+        }
+        .home-schedule-item {
+            flex-shrink: 0;
+            width: 108px;
+            cursor: pointer;
+        }
+        @media (min-width:480px) {
+            .home-schedule-item { width: 122px; }
+        }
+        @media (min-width:768px) {
+            .home-schedule-item { width: 140px; }
+        }
+        .home-schedule-item__poster {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 0.4rem;
+        }
+        .home-schedule-item__poster img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            filter: grayscale(1) contrast(1.05);
+            transition: filter 0.25s ease, transform 0.3s ease;
+        }
+        .home-schedule-item:hover .home-schedule-item__poster img {
+            filter: grayscale(0);
+            transform: scale(1.05);
+        }
+        .home-schedule-item__ep-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #fff;
+            color: #0b0b0b;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 0.1rem 0.4rem;
+            border-radius: 50px;
+            line-height: 1.4;
+        }
+        .home-schedule-item__title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
         }
 
         .genre-carousel-wrapper {
@@ -5940,10 +6050,8 @@
         </div>
 
         <div class="actions-row" id="actionsRow">
-            <button class="action-pill" id="newestBtn" title="Нові аніме"><i class="fas fa-bolt"></i> Нові аніме</button>
             <button class="action-pill" id="top100Btn" title="ТОП 100 аніме"><i class="fas fa-crown"></i> ТОП 100</button>
             <button class="action-pill" id="randomBtn" title="Випадкове аніме (R)"><i class="fas fa-dice-d6"></i> Випадкове</button>
-            <button class="action-pill" id="scheduleBtn" title="Розклад виходу"><i class="fas fa-calendar-alt"></i> Розклад виходу</button>
         </div>
 
         <div id="genreSectionsContainer"></div>
@@ -7848,21 +7956,19 @@
                 <div class="hero-slide-bg" id="heroBg_${Date.now()}" style="${bgStyle}"></div>
                 <div class="hero-slide-overlay"></div>
                 <div class="hero-slide-content">
+                    <div class="hero-rating-row hero-rating-row--top">
+                        <div class="hero-rating-badge"><span class="star">★</span> ${rating}</div>
+                        ${metaHtml}
+                    </div>
                     <div class="hero-slide-title">${title}</div>
                     ${synopsisHtml}
                     <div class="hero-slide-tags">
-                        ${genres.slice(0, 4).map(g => `<span class="hero-tag genre-tag">${g}</span>`).join('')}
+                        ${genres.slice(0, 3).map(g => `<span class="hero-tag genre-tag">${g}</span>`).join('')}
                     </div>
-                    <div class="hero-slide-btn-row">
-                        <button class="hero-slide-btn">
-                            <span>Дивитися</span>
-                            <span class="btn-icon"><i class="fas fa-play"></i></span>
-                        </button>
-                        <div class="hero-rating-row">
-                            <div class="hero-rating-badge"><span class="star">★</span> ${rating}</div>
-                            ${metaHtml}
-                        </div>
-                    </div>
+                    <button class="hero-slide-btn">
+                        <span>Дивитися</span>
+                        <span class="btn-icon"><i class="fas fa-play"></i></span>
+                    </button>
                 </div>
             `;
 
@@ -10040,18 +10146,6 @@
             loadContent();
         };
 
-        function showNewest() {
-            currentTab = 'newest';
-            currentPage = 1;
-            currentSearchQuery = '';
-            currentCategory = '';
-            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
-            document.getElementById('newestBtn')?.classList.add('active-pill');
-            if (Router.currentRoute === 'main') loadContent();
-            syncLeftdockActive();
-            showToast('Нові аніме');
-        }
-
         function showTop100() {
             currentTab = 'top100';
             currentPage = 1;
@@ -10092,33 +10186,29 @@
                     }
                 });
 
-                const results = await Promise.all(genrePromises);
+                const newestPromise = fetchAnimeuaMain(1).catch(e => {
+                    console.warn('Помилка завантаження нових аніме:', e);
+                    return [];
+                });
+
+                const schedulePromise = fetchScheduleByOffset(0).catch(e => {
+                    console.warn('Помилка завантаження розкладу:', e);
+                    return [];
+                });
+
+                const [results, newestItems, scheduleItems] = await Promise.all([
+                    Promise.all(genrePromises), newestPromise, schedulePromise
+                ]);
+
                 let html = '';
+
+                html += buildScheduleWidgetHtml(scheduleItems);
+                html += buildAnimeCarouselSectionHtml('genre-newest', 'Нові аніме', newestItems.slice(0, 80));
 
                 for (const { genre, items } of results) {
                     if (items.length === 0) continue;
                     const sectionId = 'genre-' + genre.slug;
-                    html += `
-                    <div class="genre-section" id="${sectionId}">
-                      <div class="genre-title">
-                        <span class="genre-name">${genre.name}</span>
-                      </div>
-                      <div class="genre-carousel-wrapper">
-                        <button class="carousel-btn carousel-btn-left" data-target="${sectionId}" aria-label="Вліво"><i class="fas fa-chevron-left"></i></button>
-                        <div class="genre-carousel" id="${sectionId}-carousel">
-                          ${items.map(a => `
-                            <div class="anime-card" data-url="${a.url}" tabindex="0" role="button" aria-label="${a.title}">
-                              <div class="anime-poster">
-                                <img src="${a.images.jpg.large_image_url}" alt="${a.title}" loading="lazy" class="img--blur" onload="this.classList.add('img--loaded')" onerror="this.src='data:image/svg+xml,...'">
-                              </div>
-                              <div class="anime-title-under">${a.title}</div>
-                            </div>
-                          `).join('')}
-                        </div>
-                        <button class="carousel-btn carousel-btn-right" data-target="${sectionId}" aria-label="Вправо"><i class="fas fa-chevron-right"></i></button>
-                      </div>
-                    </div>
-                  `;
+                    html += buildAnimeCarouselSectionHtml(sectionId, genre.name, items);
                 }
 
                 if (!html) {
@@ -10148,11 +10238,83 @@
                     });
                 });
 
+                const seeAllBtn = document.getElementById('homeScheduleSeeAll');
+                if (seeAllBtn) seeAllBtn.addEventListener('click', () => Router.goTo('schedule'));
+
+                container.querySelectorAll('.home-schedule-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const title = el.dataset.title;
+                        if (!title) return;
+                        searchPageState.query = title;
+                        searchPageState.page = 1;
+                        Router.goTo('search');
+                    });
+                });
+
             } catch (err) {
                 console.error('Помилка завантаження жанрових секцій:', err);
                 container.innerHTML =
                     `<div class="loader"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="loadAndDisplayGenreSections()">Спробувати знову</button></div>`;
             }
+        }
+
+        function buildAnimeCarouselSectionHtml(sectionId, name, items) {
+            if (!items || items.length === 0) return '';
+            return `
+                    <div class="genre-section" id="${sectionId}">
+                      <div class="genre-title">
+                        <span class="genre-name">${name}</span>
+                      </div>
+                      <div class="genre-carousel-wrapper">
+                        <button class="carousel-btn carousel-btn-left" data-target="${sectionId}" aria-label="Вліво"><i class="fas fa-chevron-left"></i></button>
+                        <div class="genre-carousel" id="${sectionId}-carousel">
+                          ${items.map(a => `
+                            <div class="anime-card" data-url="${a.url}" tabindex="0" role="button" aria-label="${a.title}">
+                              <div class="anime-poster">
+                                <img src="${a.images.jpg.large_image_url}" alt="${a.title}" loading="lazy" class="img--blur" onload="this.classList.add('img--loaded')" onerror="this.src='data:image/svg+xml,...'">
+                              </div>
+                              <div class="anime-title-under">${a.title}</div>
+                            </div>
+                          `).join('')}
+                        </div>
+                        <button class="carousel-btn carousel-btn-right" data-target="${sectionId}" aria-label="Вправо"><i class="fas fa-chevron-right"></i></button>
+                      </div>
+                    </div>
+                  `;
+        }
+
+        function buildScheduleWidgetHtml(scheduleItems) {
+            const list = (scheduleItems || []).slice(0, 12);
+            const todayLabel = formatScheduleDisplayDate(scheduleDateForOffset(0));
+            const itemsHtml = list.length
+                ? list.map(item => {
+                    const a = item.anime || {};
+                    const poster = a.image?.preview ? `https://animeon.club/api/uploads/images/${a.image.preview}` : '';
+                    const title = a.titleUa || a.titleEn || 'Без назви';
+                    const epLabel = item.episode ? item.episode + ' серія' : '';
+                    return `
+                    <div class="home-schedule-item" data-title="${title.replace(/"/g, '&quot;')}">
+                        <div class="home-schedule-item__poster">
+                            ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" onerror="this.style.opacity=0">` : ''}
+                            ${epLabel ? `<span class="home-schedule-item__ep-badge">${epLabel.replace(' серія','')}</span>` : ''}
+                        </div>
+                        <div class="home-schedule-item__title">${title}</div>
+                    </div>`;
+                }).join('')
+                : `<div class="home-schedule-widget__empty">Сьогодні виходів не заплановано</div>`;
+
+            return `
+                <div class="home-schedule-widget" id="homeScheduleWidget">
+                    <div class="home-schedule-widget__header">
+                        <div class="home-schedule-widget__title">
+                            <i class="fas fa-calendar-alt"></i> Розклад виходу
+                            <span class="home-schedule-widget__date">Сьогодні, ${todayLabel}</span>
+                        </div>
+                        <button class="home-schedule-widget__link" id="homeScheduleSeeAll">Весь розклад <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <div class="home-schedule-widget__list">${itemsHtml}</div>
+                </div>
+            `;
         }
 
         // ====================================================================
@@ -12133,10 +12295,8 @@ function renderProfilePage() {
             }, 200);
         });
 
-        document.getElementById('newestBtn').addEventListener('click', showNewest);
         document.getElementById('top100Btn').addEventListener('click', showTop100);
         document.getElementById('randomBtn').addEventListener('click', openRandomAnime);
-        document.getElementById('scheduleBtn').addEventListener('click', () => Router.goTo('schedule'));
         document.getElementById('logoHome').addEventListener('click', () => Router.goTo('main'));
 
         const cpBtn = document.getElementById('closePlayerPageBtn');
