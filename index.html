@@ -9963,7 +9963,8 @@
                                     ${roleBadge(m.role)}
                                 </div>
                                 ${(privileged && m.uid !== currentUser?.uid && m.role !== 'owner') ? `<button class="grp-member-menu-btn" data-uid="${m.uid}">⋮</button>` : ''}
-                            </div>`).join('')}
+                            </div>`;
+                        }).join('')}
                     </div>
                 </div>`;
             document.body.appendChild(overlay);
