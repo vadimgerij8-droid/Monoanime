@@ -458,96 +458,11 @@
             transform: translateY(-1px);
         }
 
-        /* Rating/meta eyebrow — above the title, so it never collides with the bottom nav controls */
-        .hero-rating-row--top {
-            margin-bottom: 2px;
+        /* Rating/meta row — now sits at the bottom, where the watch button used to be.
+           The whole slide is tap-to-open, so this reads as info, not a control. */
+        .hero-rating-row--bottom {
+            margin-top: 4px;
         }
-
-        /* Button — glassmorphism */
-        .hero-slide-btn {
-            align-self: flex-start;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.10);
-            border: 1px solid rgba(255,255,255,0.18);
-            color: #ffffff !important;
-            padding: 14px 36px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-            text-decoration: none;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 6px rgba(0,0,0,0.2);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-        }
-        .hero-slide-btn:hover {
-            background: rgba(255,255,255,0.22);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            border-color: rgba(255,255,255,0.30);
-        }
-        .hero-slide-btn:active {
-            transform: translateY(-1px) scale(1);
-        }
-        .hero-slide-btn .btn-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-        .hero-slide-btn:hover .btn-icon {
-            background: rgba(255,255,255,0.25);
-            transform: translateX(3px);
-        }
-        @media (max-width: 480px) {
-            .hero-slide-btn {
-                padding: 12px 28px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Navigation arrows — glassmorphism */
-        .hero-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 44px;
-            height: 44px;
-            background: rgba(10,10,10,0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 20;
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-            color: rgba(255,255,255,0.7);
-            font-size: 1.05rem;
-            padding: 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        .hero-nav:hover {
-            background: rgba(255,255,255,0.15);
-            transform: translateY(-50%) scale(1.12);
-            color: #fff;
-            border-color: rgba(255,255,255,0.25);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-        }
-        .hero-nav-prev { left: 14px; }
-        .hero-nav-next { right: 14px; }
 
         /* Dot indicators */
         .hero-dots {
@@ -593,17 +508,9 @@
 
         @media (min-width: 480px) {
             .hero-slide-content { padding: 50px 5% 60px; }
-            .hero-nav { width: 46px; height: 46px; font-size: 1.1rem; }
         }
         @media (min-width: 768px) {
             .hero-slide-content { padding: 55px 6% 65px; }
-            .hero-nav {
-                width: 52px;
-                height: 52px;
-                font-size: 1.2rem;
-            }
-            .hero-nav-prev { left: 32px; }
-            .hero-nav-next { right: 32px; }
         }
         @media (min-width: 1024px) {
             .hero-slide-content { padding: 55px 8% 65px; }
@@ -613,13 +520,6 @@
                 padding: 40px 16px 50px;
                 gap: clamp(8px, 1.5vh, 16px);
             }
-            .hero-nav {
-                width: 38px;
-                height: 38px;
-                font-size: 0.95rem;
-            }
-            .hero-nav-prev { left: 10px; }
-            .hero-nav-next { right: 10px; }
             .hero-dots { bottom: 20px; gap: 6px; }
             .hero-dot { width: 16px; height: 2px; }
             .hero-dot.active { width: 26px; }
@@ -987,62 +887,76 @@
 
         /* ===== Розклад виходу — home widget, deliberately distinct from the poster carousels ===== */
         .home-schedule-widget {
-            background: #0b0b0b;
+            background: linear-gradient(160deg, #181818, #060606);
             border-radius: var(--radius-xl, 20px);
-            padding: 1.1rem 1rem 1rem;
+            padding: 1.2rem 1.1rem 1.3rem;
             border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.28);
         }
         @media (min-width:480px) {
-            .home-schedule-widget { padding: 1.3rem 1.2rem 1.2rem; }
+            .home-schedule-widget { padding: 1.4rem 1.3rem 1.4rem; }
         }
         @media (min-width:768px) {
-            .home-schedule-widget { padding: 1.5rem 1.5rem 1.4rem; }
+            .home-schedule-widget { padding: 1.6rem 1.6rem 1.6rem; }
         }
         .home-schedule-widget__header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 0.6rem;
-            margin-bottom: 0.9rem;
+            margin-bottom: 1.1rem;
             flex-wrap: wrap;
         }
         .home-schedule-widget__title {
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 800;
             color: #fff;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.7rem;
+            letter-spacing: -0.2px;
         }
-        .home-schedule-widget__title i { color: rgba(255,255,255,0.55); font-size: 0.9rem; }
+        .home-schedule-widget__icon-badge {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #fff;
+            color: #0b0b0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
         .home-schedule-widget__date {
             font-size: 0.72rem;
             font-weight: 600;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.55);
             background: rgba(255,255,255,0.08);
-            padding: 0.2rem 0.55rem;
+            padding: 0.25rem 0.6rem;
             border-radius: 50px;
             letter-spacing: 0.2px;
         }
         .home-schedule-widget__link {
-            background: transparent;
-            border: none;
-            color: rgba(255,255,255,0.65);
-            font-size: 0.8rem;
-            font-weight: 600;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.78rem;
+            font-weight: 700;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
+            gap: 0.4rem;
             font-family: inherit;
-            padding: 0.3rem 0;
-            transition: color 0.2s ease;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            transition: all 0.2s ease;
         }
-        .home-schedule-widget__link:hover { color: #fff; }
-        .home-schedule-widget__link i { font-size: 0.7rem; }
+        .home-schedule-widget__link:hover { background: rgba(255,255,255,0.16); color: #fff; }
+        .home-schedule-widget__link i { font-size: 0.68rem; }
         .home-schedule-widget__list {
             display: flex;
-            gap: 0.8rem;
+            gap: 0.9rem;
             overflow-x: auto;
             padding-bottom: 0.2rem;
             scrollbar-width: none;
@@ -1055,48 +969,65 @@
         }
         .home-schedule-item {
             flex-shrink: 0;
-            width: 108px;
+            width: 118px;
             cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
         }
+        .home-schedule-item:hover { transform: translateY(-4px); }
         @media (min-width:480px) {
-            .home-schedule-item { width: 122px; }
+            .home-schedule-item { width: 132px; }
         }
         @media (min-width:768px) {
-            .home-schedule-item { width: 140px; }
+            .home-schedule-item { width: 152px; }
         }
         .home-schedule-item__poster {
             position: relative;
             width: 100%;
             aspect-ratio: 2/3;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
             background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 0.4rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            margin-bottom: 0.5rem;
         }
         .home-schedule-item__poster img {
             width: 100%; height: 100%; object-fit: cover; display: block;
-            filter: grayscale(1) contrast(1.05);
-            transition: filter 0.25s ease, transform 0.3s ease;
+            transition: transform 0.35s ease;
         }
         .home-schedule-item:hover .home-schedule-item__poster img {
-            filter: grayscale(0);
-            transform: scale(1.05);
+            transform: scale(1.06);
+        }
+        .home-schedule-item__poster::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 55%;
+            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+            pointer-events: none;
         }
         .home-schedule-item__ep-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            background: #fff;
-            color: #0b0b0b;
-            font-size: 0.68rem;
+            left: 8px;
+            bottom: 8px;
+            z-index: 2;
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+            color: #fff;
+        }
+        .home-schedule-item__ep-badge .num {
+            font-size: 1.15rem;
             font-weight: 800;
-            padding: 0.1rem 0.4rem;
-            border-radius: 50px;
-            line-height: 1.4;
+            line-height: 1;
+        }
+        .home-schedule-item__ep-badge .label {
+            font-size: 0.62rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            text-transform: lowercase;
         }
         .home-schedule-item__title {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: rgba(255,255,255,0.85);
             display: -webkit-box;
@@ -6043,8 +5974,6 @@
 
         <div class="hero-wrapper" id="heroWrapper">
             <div id="heroSlidesContainer"></div>
-            <button class="hero-nav hero-nav-prev" id="heroPrevBtn" aria-label="Попередній"><i class="fas fa-chevron-left"></i></button>
-            <button class="hero-nav hero-nav-next" id="heroNextBtn" aria-label="Наступний"><i class="fas fa-chevron-right"></i></button>
             <div class="hero-dots" id="heroDots"></div>
             <div class="hero-progress-bar"><div class="hero-progress-fill" id="heroProgressFill"></div></div>
         </div>
@@ -7841,7 +7770,8 @@
         // ====================================================================
         let heroItems = [],
             heroCurrentIndex = 0,
-            heroRotationTimer = null;
+            heroRotationTimer = null,
+            heroJustSwiped = false;
 
         async function buildHeroBanner() {
             const wrapper = document.getElementById('heroWrapper');
@@ -7878,6 +7808,7 @@
 
             wrapper.style.display = 'block';
             heroCurrentIndex = 0;
+            initHeroSwipe();
 
             // Показуємо перший слайд ОДРАЗУ з тим що є, не чекаємо деталей
             renderHeroSlide(heroItems[0]);
@@ -7956,19 +7887,15 @@
                 <div class="hero-slide-bg" id="heroBg_${Date.now()}" style="${bgStyle}"></div>
                 <div class="hero-slide-overlay"></div>
                 <div class="hero-slide-content">
-                    <div class="hero-rating-row hero-rating-row--top">
-                        <div class="hero-rating-badge"><span class="star">★</span> ${rating}</div>
-                        ${metaHtml}
-                    </div>
                     <div class="hero-slide-title">${title}</div>
                     ${synopsisHtml}
                     <div class="hero-slide-tags">
                         ${genres.slice(0, 3).map(g => `<span class="hero-tag genre-tag">${g}</span>`).join('')}
                     </div>
-                    <button class="hero-slide-btn">
-                        <span>Дивитися</span>
-                        <span class="btn-icon"><i class="fas fa-play"></i></span>
-                    </button>
+                    <div class="hero-rating-row hero-rating-row--bottom">
+                        <div class="hero-rating-badge"><span class="star">★</span> ${rating}</div>
+                        ${metaHtml}
+                    </div>
                 </div>
             `;
 
@@ -7989,11 +7916,9 @@
             container.innerHTML = '';
             container.appendChild(slide);
 
-            slide.querySelector('.hero-slide-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (item.url) openPlayerPage(item.url);
-            });
+            // Весь слайд клікабельний — відкриває аніме. Свайп (не тап) перемикає слайди, не відкриваючи сторінку.
             slide.addEventListener('click', () => {
+                if (heroJustSwiped) { heroJustSwiped = false; return; }
                 if (item.url) openPlayerPage(item.url);
             });
         }
@@ -8046,6 +7971,30 @@
             goToSlide((heroCurrentIndex - 1 + heroItems.length) % heroItems.length);
         }
 
+        // Гортання пальцем замість стрілок — свайп вліво/вправо перемикає слайди
+        function initHeroSwipe() {
+            const wrapper = document.getElementById('heroWrapper');
+            if (!wrapper || wrapper.dataset.swipeInit) return;
+            wrapper.dataset.swipeInit = '1';
+            let startX = 0, startY = 0, tracking = false;
+            wrapper.addEventListener('touchstart', (e) => {
+                if (!e.touches.length) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                tracking = true;
+            }, { passive: true });
+            wrapper.addEventListener('touchend', (e) => {
+                if (!tracking || !e.changedTouches.length) return;
+                tracking = false;
+                const dx = e.changedTouches[0].clientX - startX;
+                const dy = e.changedTouches[0].clientY - startY;
+                if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                    heroJustSwiped = true;
+                    if (dx < 0) nextSlide(); else prevSlide();
+                }
+            }, { passive: true });
+        }
+
         let heroProgressInterval = null;
         const HERO_SLIDE_DURATION = 6000;
 
@@ -8073,9 +8022,6 @@
             stopHeroRotation();
             startHeroRotation();
         }
-
-        document.getElementById('heroPrevBtn').addEventListener('click', prevSlide);
-        document.getElementById('heroNextBtn').addEventListener('click', nextSlide);
 
         // ====================================================================
         //  ГОДИННИК
@@ -10291,12 +10237,14 @@
                     const a = item.anime || {};
                     const poster = a.image?.preview ? `https://animeon.club/api/uploads/images/${a.image.preview}` : '';
                     const title = a.titleUa || a.titleEn || 'Без назви';
-                    const epLabel = item.episode ? item.episode + ' серія' : '';
+                    const epBadge = item.episode
+                        ? `<div class="home-schedule-item__ep-badge"><span class="num">${item.episode}</span><span class="label">серія</span></div>`
+                        : '';
                     return `
                     <div class="home-schedule-item" data-title="${title.replace(/"/g, '&quot;')}">
                         <div class="home-schedule-item__poster">
                             ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" onerror="this.style.opacity=0">` : ''}
-                            ${epLabel ? `<span class="home-schedule-item__ep-badge">${epLabel.replace(' серія','')}</span>` : ''}
+                            ${epBadge}
                         </div>
                         <div class="home-schedule-item__title">${title}</div>
                     </div>`;
@@ -10307,7 +10255,8 @@
                 <div class="home-schedule-widget" id="homeScheduleWidget">
                     <div class="home-schedule-widget__header">
                         <div class="home-schedule-widget__title">
-                            <i class="fas fa-calendar-alt"></i> Розклад виходу
+                            <span class="home-schedule-widget__icon-badge"><i class="fas fa-calendar-alt"></i></span>
+                            Розклад виходу
                             <span class="home-schedule-widget__date">Сьогодні, ${todayLabel}</span>
                         </div>
                         <button class="home-schedule-widget__link" id="homeScheduleSeeAll">Весь розклад <i class="fas fa-arrow-right"></i></button>
