@@ -34,13 +34,13 @@
 
     <style>
         :root {
-            --accent: #6d5efc;
-            --accent-rgb: 109, 94, 252;
-            --accent-hover: #5a4ce0;
+            --accent: #0b0b0b;
+            --accent-rgb: 11, 11, 11;
+            --accent-hover: #1a1a1a;
             --accent-text: #ffffff;
-            --accent-gradient: linear-gradient(135deg, #6d5efc, #8b7fff);
-            --accent-light: rgba(109, 94, 252, 0.12);
-            --accent-glow: rgba(109, 94, 252, 0.30);
+            --accent-gradient: linear-gradient(135deg, #0b0b0b, #1a1a1a);
+            --accent-light: rgba(11, 11, 11, 0.15);
+            --accent-glow: rgba(11, 11, 11, 0.35);
             --bg: #fafafa;
             --surface: rgba(255, 255, 255, 0.96);
             --text: #0b0b0b;
@@ -69,13 +69,13 @@
         }
 
         .dark-mode {
-            --accent: #8b7fff;
-            --accent-rgb: 139, 127, 255;
-            --accent-hover: #a89bff;
+            --accent: #f7f7f7;
+            --accent-rgb: 247, 247, 247;
+            --accent-hover: #cfcfcf;
             --accent-text: #0a0a0a;
-            --accent-gradient: linear-gradient(135deg, #8b7fff, #6d5efc);
-            --accent-light: rgba(139, 127, 255, 0.15);
-            --accent-glow: rgba(139, 127, 255, 0.35);
+            --accent-gradient: linear-gradient(135deg, #f7f7f7, #cfcfcf);
+            --accent-light: rgba(247, 247, 247, 0.15);
+            --accent-glow: rgba(247, 247, 247, 0.35);
             --bg: #0b0c10;
             --surface: rgba(17, 18, 24, 0.95);
             --text: #f7f7f7;
@@ -212,15 +212,17 @@
             overflow: hidden;
             box-shadow: none;
             background: #0a0a0a;
-            height: 100vh;
-            height: 100svh;
-            min-height: 500px;
+            height: 62vh;
+            height: 62svh;
+            min-height: 420px;
+            max-height: 620px;
         }
         @media (max-width: 768px) {
             .hero-wrapper {
-                height: 100vh;
-                height: 100svh;
-                min-height: 400px;
+                height: 52vh;
+                height: 52svh;
+                min-height: 340px;
+                max-height: 480px;
                 width: calc(100% + 2rem);
                 margin-left: -1rem;
                 margin-right: -1rem;
@@ -229,9 +231,10 @@
         }
         @media (max-width: 480px) {
             .hero-wrapper {
-                height: 100vh;
-                height: 100svh;
-                min-height: 360px;
+                height: 48vh;
+                height: 48svh;
+                min-height: 300px;
+                max-height: 420px;
                 width: calc(100% + 1.5rem);
                 margin-left: -0.75rem;
                 margin-right: -0.75rem;
@@ -320,8 +323,8 @@
             justify-content: flex-end;
             align-items: flex-start;
             text-align: left;
-            gap: clamp(10px, 1.8vh, 24px);
-            padding: 90px 20px 140px;
+            gap: clamp(8px, 1.4vh, 18px);
+            padding: 50px 20px 70px;
             height: 100%;
             box-sizing: border-box;
             background: transparent;
@@ -598,11 +601,11 @@
         }
 
         @media (min-width: 480px) {
-            .hero-slide-content { padding: 90px 5% 140px; }
+            .hero-slide-content { padding: 50px 5% 60px; }
             .hero-nav { width: 46px; height: 46px; font-size: 1.1rem; }
         }
         @media (min-width: 768px) {
-            .hero-slide-content { padding: 100px 6% 150px; }
+            .hero-slide-content { padding: 55px 6% 65px; }
             .hero-nav {
                 bottom: clamp(70px, 10vh, 130px);
                 width: 52px;
@@ -613,12 +616,12 @@
             .hero-nav-next { right: 32px; }
         }
         @media (min-width: 1024px) {
-            .hero-slide-content { padding: 100px 8% 150px; }
+            .hero-slide-content { padding: 55px 8% 65px; }
         }
         @media (max-width: 480px) {
             .hero-slide-content {
-                padding: 80px 16px 130px;
-                gap: clamp(10px, 1.5vh, 18px);
+                padding: 40px 16px 50px;
+                gap: clamp(8px, 1.5vh, 16px);
             }
             .hero-nav {
                 bottom: 70px;
@@ -5937,8 +5940,10 @@
         </div>
 
         <div class="actions-row" id="actionsRow">
+            <button class="action-pill" id="newestBtn" title="Нові аніме"><i class="fas fa-bolt"></i> Нові аніме</button>
             <button class="action-pill" id="top100Btn" title="ТОП 100 аніме"><i class="fas fa-crown"></i> ТОП 100</button>
             <button class="action-pill" id="randomBtn" title="Випадкове аніме (R)"><i class="fas fa-dice-d6"></i> Випадкове</button>
+            <button class="action-pill" id="scheduleBtn" title="Розклад виходу"><i class="fas fa-calendar-alt"></i> Розклад виходу</button>
         </div>
 
         <div id="genreSectionsContainer"></div>
@@ -10035,6 +10040,18 @@
             loadContent();
         };
 
+        function showNewest() {
+            currentTab = 'newest';
+            currentPage = 1;
+            currentSearchQuery = '';
+            currentCategory = '';
+            document.querySelectorAll('.action-pill').forEach(p => p.classList.remove('active-pill'));
+            document.getElementById('newestBtn')?.classList.add('active-pill');
+            if (Router.currentRoute === 'main') loadContent();
+            syncLeftdockActive();
+            showToast('Нові аніме');
+        }
+
         function showTop100() {
             currentTab = 'top100';
             currentPage = 1;
@@ -12116,8 +12133,10 @@ function renderProfilePage() {
             }, 200);
         });
 
+        document.getElementById('newestBtn').addEventListener('click', showNewest);
         document.getElementById('top100Btn').addEventListener('click', showTop100);
         document.getElementById('randomBtn').addEventListener('click', openRandomAnime);
+        document.getElementById('scheduleBtn').addEventListener('click', () => Router.goTo('schedule'));
         document.getElementById('logoHome').addEventListener('click', () => Router.goTo('main'));
 
         const cpBtn = document.getElementById('closePlayerPageBtn');
