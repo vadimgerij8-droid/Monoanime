@@ -2942,6 +2942,8 @@
         }
         .schedule-item__ep { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem; }
         .schedule-item__arrow { color: var(--text-secondary); font-size: 0.8rem; flex-shrink: 0; }
+        .schedule-item--loading { opacity: 0.55; pointer-events: none; }
+        .schedule-item--loading .schedule-item__arrow::before { content: '\f110'; animation: fa-spin 1s linear infinite; }
 
         .hidden-file-input {
             display: none;
@@ -10728,15 +10730,33 @@
             }).join('');
         }
 
+        async function openScheduleItemInPlayer(title, el) {
+            if (!title) return;
+            if (el && el.classList.contains('schedule-item--loading')) return; // вже вантажиться
+            if (el) el.classList.add('schedule-item--loading');
+            try {
+                const results = await searchAnimeua(title, 1);
+                if (results && results.length) {
+                    openPlayerPage(results[0].url);
+                } else {
+                    showToast(`Не знайшли «${title}» — спробуйте пошук вручну`);
+                    searchPageState.query = title;
+                    searchPageState.page = 1;
+                    Router.goTo('search');
+                }
+            } catch (err) {
+                showToast('Помилка пошуку: ' + err.message);
+            } finally {
+                if (el) el.classList.remove('schedule-item--loading');
+            }
+        }
+
         function wireHomeScheduleItemClicks(container) {
             if (!container) return;
             container.querySelectorAll('.schedule-item').forEach(el => {
                 el.addEventListener('click', () => {
                     const title = el.dataset.title;
-                    if (!title) return;
-                    searchPageState.query = title;
-                    searchPageState.page = 1;
-                    Router.goTo('search');
+                    openScheduleItemInPlayer(title, el);
                 });
             });
         }
@@ -12169,10 +12189,7 @@ function renderProfilePage() {
                 }).join('');
                 content.querySelectorAll('.schedule-item').forEach(el => {
                     el.addEventListener('click', () => {
-                        const title = el.dataset.title;
-                        searchPageState.query = title;
-                        searchPageState.page = 1;
-                        Router.goTo('search');
+                        openScheduleItemInPlayer(el.dataset.title, el);
                     });
                 });
             } catch (err) {
