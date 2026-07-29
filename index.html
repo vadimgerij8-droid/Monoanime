@@ -7152,8 +7152,9 @@
 
         function getProxyUrl(url) {
             if (!url) return null;
-            // Не передаємо ua= — робить URL задовгим і може обрізатися
-            return PROXY_URL + '?url=' + encodeURIComponent(url);
+            // force_ua=desktop — проксі підміняє UA на десктопний, бо Android
+            // Chrome/WebView віддає спрощену мобільну версію сторінки без плеєра
+            return PROXY_URL + '?url=' + encodeURIComponent(url) + '&force_ua=desktop';
         }
 
         function isEmbedUrl(url) {
@@ -7810,8 +7811,7 @@
                         mode: 'cors',
                         credentials: 'omit',
                         cache: 'no-cache',
-                        signal: controller.signal,
-                        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+                        signal: controller.signal
                     });
                     clearTimeout(timer);
                     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -7834,6 +7834,8 @@
                     html = html.replace(/<style[^>]*>.*?(?:ad|banner|advertisement).*?<\/style>/gi, '');
                     const doc = new DOMParser().parseFromString(html, 'text/html');
                     doc._rawHtml = html;
+                    // TODO: дебаг для Android — прибрати після підтвердження фіксу
+                    console.log('[fetchUA]', url, 'HTML length:', html.length, 'has iframe:', html.includes('iframe'));
                     return doc;
                 } catch (e) {
                     clearTimeout(timer);
@@ -7945,10 +7947,14 @@
             const doc = await fetchUA(animeUrl);
             
             // Перевіряємо чи сторінка є реальною сторінкою аніме (не 404/головна)
-            const hasAnimeContent = safeQuery('.pmovie__title, .page__subcol-main h1, .pmovie__player, .video-responsive iframe, .video-responsive iframe[data-src]', doc);
             const rawHtml = doc._rawHtml || '';
-            const hasIframe = rawHtml.includes('ashdi.vip') || rawHtml.includes('vidmoly') || rawHtml.includes('iframe');
-            if (!hasAnimeContent && !hasIframe) {
+            const hasAnimeContent = safeQuery('.pmovie__title, .page__subcol-main h1', doc) ||
+                                    safeQuery('.pmovie__player, .video-responsive', doc) ||
+                                    rawHtml.includes('ashdi.vip') ||
+                                    rawHtml.includes('vidmoly') ||
+                                    rawHtml.includes('Playerjs') ||
+                                    rawHtml.includes('iframe');
+            if (!hasAnimeContent) {
                 throw new Error('Це аніме не знайдено на сайті. Можливо воно ще не додане або URL застарів.');
             }
             
@@ -8160,7 +8166,11 @@
 
         function extractPlayerIframeUrls(doc) {
             const selectors = ['.video-responsive iframe', '.player-responsive iframe', '#player iframe',
-                '.pmovie__player iframe', 'iframe[src]', 'iframe[data-src]'
+                '.pmovie__player iframe', 'iframe[src]', 'iframe[data-src]',
+                // мобільна версія animeua.club верстає плеєр в інших контейнерах
+                '[class*="player"] iframe', '[class*="video"] iframe',
+                'iframe[src*="ashdi"]', 'iframe[src*="vidmoly"]',
+                'iframe[data-src*="ashdi"]', 'iframe[data-src*="vidmoly"]'
             ];
             const urls = [];
             for (const sel of selectors) {
@@ -8182,6 +8192,20 @@
                         if (!url.startsWith('http')) url = ANIMEUA_BASE + url;
                         urls.push(url);
                     }
+                }
+            }
+            // Fallback: якщо DOM-парсинг нічого не знайшов (мобільна версія сторінки
+            // інколи віддає плеєр у сирому вигляді, який DOMParser не будує правильно) —
+            // шукаємо iframe src/data-src прямо в raw HTML через regex.
+            if (urls.length === 0) {
+                const rawHtml = doc._rawHtml || '';
+                const iframeRegex = /iframe[^>]+(?:src|data-src)=["']([^"']*(?:ashdi\.vip|vidmoly|player)[^"']*)["']/gi;
+                let m;
+                while ((m = iframeRegex.exec(rawHtml)) !== null) {
+                    let url = m[1];
+                    if (url.startsWith('//')) url = 'https:' + url;
+                    if (!url.startsWith('http')) url = ANIMEUA_BASE + url;
+                    if (!urls.includes(url)) urls.push(url);
                 }
             }
             return [...new Set(urls)];
