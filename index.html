@@ -754,6 +754,27 @@
         @media (min-width:480px) {
             .popular-card__title { font-size: 1.02rem; }
         }
+        .popular-card__rank--loading { font-size: 0.7rem; }
+        .popular-card__desc {
+            margin-top: 0.5rem;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        @media (min-width:480px) {
+            .popular-card__desc { font-size: 0.82rem; }
+        }
+        .popular-card__desc--empty { min-height: 1.1em; }
+        .popular-card__desc-skel {
+            height: 0.7rem;
+            width: 100%;
+            border-radius: 6px;
+            margin: 0.5rem auto 0;
+        }
         .popular-card__poster.skeleton { border-radius: 50%; }
 
         .genre-carousel .anime-card {
@@ -1283,23 +1304,27 @@
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+            margin-top: 1.1rem;
             margin-bottom: 1rem;
             align-items: center;
         }
         @media (min-width:480px) {
             .actions-row {
                 gap: 0.6rem;
+                margin-top: 1.3rem;
                 margin-bottom: 1.2rem;
             }
         }
         @media (min-width:768px) {
             .actions-row {
                 gap: 0.7rem;
+                margin-top: 1.6rem;
                 margin-bottom: 1.5rem;
             }
         }
         @media (min-width:1024px) {
             .actions-row {
+                margin-top: 1.9rem;
                 margin-bottom: 1.8rem;
             }
         }
@@ -7009,6 +7034,8 @@
                 const posterSrc = img?.getAttribute('data-src') || img?.getAttribute('src') || '';
                 const titleEl = safeQuery('.poster__title', card) || safeQuery('h3', card);
                 const title = (titleEl?.textContent || '').trim() || 'Без назви';
+                const synopsisEl = safeQuery('.poster__text', card);
+                const synopsis = (synopsisEl?.textContent || '').trim();
                 return {
                     mal_id: href.hashCode(),
                     title,
@@ -7017,6 +7044,7 @@
                                 ANIMEUA_BASE + posterSrc : '') } },
                     score: null,
                     year: null,
+                    synopsis,
                     from: 'animeua'
                 };
             });
@@ -7054,6 +7082,24 @@
 
         async function fetchAnimeuaTop100() { const doc = await fetchUA(`${ANIMEUA_BASE}/top.html`); return parseAnimeuaCards(
                 doc); }
+
+        // Легкий запит для картки «Популярні» — лише кількість серій та повний опис,
+        // без завантаження плеєр-джерел (на відміну від loadAnimeuaDetail).
+        async function fetchAnimeLite(animeUrl) {
+            const doc = await fetchUA(animeUrl);
+            let episodes = null;
+            const labelEl = safeQuery('.page__subcol-side .poster__label, .pmovie__poster .poster__label', doc);
+            if (labelEl) {
+                const m = (labelEl.textContent || '').match(/(\d+)/);
+                if (m) episodes = parseInt(m[1], 10);
+            }
+            let synopsis = '';
+            for (const sel of ['.full-text', '.pmovie__description', '.anime__description']) {
+                const el = safeQuery(sel, doc);
+                if (el?.textContent.trim()) { synopsis = el.textContent.trim(); break; }
+            }
+            return { episodes, synopsis };
+        }
 
         async function fetchAnimeuaByGenre(genreSlug, page) {
             const url = page > 1 ? `${ANIMEUA_BASE}/${genreSlug}/page/${page}/` : `${ANIMEUA_BASE}/${genreSlug}/`;
@@ -10173,6 +10219,8 @@
                     <div class="popular-card">
                         <div class="popular-card__poster-wrap"><div class="popular-card__poster skeleton"></div></div>
                         <div class="popular-card__title">&nbsp;</div>
+                        <div class="popular-card__desc-skel skeleton"></div>
+                        <div class="popular-card__desc-skel skeleton" style="width:70%;"></div>
                     </div>`;
                 }
                 container.innerHTML = html;
@@ -10213,25 +10261,31 @@
             }
         }
 
+        let popularRenderGen = 0;
+
         function renderPopularCards(list) {
             const container = document.getElementById('animeContainer');
             container.classList.add('popular-list');
             container.classList.remove('anime-grid');
             container.style.display = '';
-            const startRank = (currentPage - 1) * list.length;
+            const gen = ++popularRenderGen;
             container.innerHTML = list.map((a, idx) => {
                 const poster = a.images?.jpg?.large_image_url || '';
                 const title = a.title || 'Без назви';
-                const rank = startRank + idx + 1;
+                const shortSynopsis = (a.synopsis || '').trim();
+                const descHtml = shortSynopsis
+                    ? `<div class="popular-card__desc">${escapeHtml(shortSynopsis.length > 130 ? shortSynopsis.slice(0,130)+'…' : shortSynopsis)}</div>`
+                    : `<div class="popular-card__desc popular-card__desc--empty"></div>`;
                 return `
-            <div class="popular-card" data-url="${a.url}" tabindex="0" role="button" aria-label="${title}" style="animation-delay:${idx*0.03}s">
+            <div class="popular-card" data-url="${a.url}" data-idx="${idx}" tabindex="0" role="button" aria-label="${title}" style="animation-delay:${idx*0.03}s">
               <div class="popular-card__poster-wrap">
                 <div class="popular-card__poster">
                   <img src="${poster}" alt="${title}" loading="lazy" class="img--blur" onload="this.classList.add('img--loaded')" onerror="this.src='data:image/svg+xml,...'">
                 </div>
-                <div class="popular-card__rank">${rank}</div>
+                <div class="popular-card__rank popular-card__rank--loading"><i class="fas fa-spinner fa-pulse"></i></div>
               </div>
               <div class="popular-card__title">${title}</div>
+              ${descHtml}
             </div>`;
             }).join('');
             container.querySelectorAll('.popular-card').forEach(card => {
@@ -10239,6 +10293,49 @@
                 card.addEventListener('keydown', e => { if (e.key === 'Enter') openPlayerPage(card.dataset.url); });
             });
             renderPagination();
+            loadPopularCardDetails(list, gen);
+        }
+
+        async function loadPopularCardDetails(list, gen) {
+            const container = document.getElementById('animeContainer');
+            const CONCURRENCY = 4;
+            let cursor = 0;
+            async function worker() {
+                while (cursor < list.length) {
+                    const i = cursor++;
+                    const item = list[i];
+                    if (gen !== popularRenderGen) return;
+                    const card = container?.querySelector(`.popular-card[data-idx="${i}"]`);
+                    if (!card) continue;
+                    const badge = card.querySelector('.popular-card__rank');
+                    const descEl = card.querySelector('.popular-card__desc');
+                    try {
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 9000));
+                        const detail = await Promise.race([fetchAnimeLite(item.url), timeoutPromise]);
+                        if (gen !== popularRenderGen) return;
+                        if (badge) {
+                            badge.classList.remove('popular-card__rank--loading');
+                            badge.textContent = detail.episodes != null ? detail.episodes : '–';
+                        }
+                        if (descEl && detail.synopsis) {
+                            descEl.classList.remove('popular-card__desc--empty');
+                            descEl.textContent = detail.synopsis.length > 130 ? detail.synopsis.slice(0, 130) + '…' : detail.synopsis;
+                        } else if (descEl && !descEl.textContent.trim()) {
+                            descEl.textContent = 'Опис відсутній.';
+                        }
+                    } catch (e) {
+                        if (gen !== popularRenderGen) return;
+                        if (badge) {
+                            badge.classList.remove('popular-card__rank--loading');
+                            badge.textContent = '–';
+                        }
+                        if (descEl && !descEl.textContent.trim()) {
+                            descEl.textContent = 'Опис відсутній.';
+                        }
+                    }
+                }
+            }
+            await Promise.all(Array.from({ length: Math.min(CONCURRENCY, list.length) }, worker));
         }
 
         function renderCards(list) {
