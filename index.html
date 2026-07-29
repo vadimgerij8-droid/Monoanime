@@ -93,6 +93,27 @@
             --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.5);
         }
 
+        /* Варіанти акцентного кольору (Налаштування → Зовнішній вигляд → Колір теми).
+           Лишаємось у чорно-білій гамі — це лише відтінки, не кольори. */
+        .theme-variant-graphite {
+            --accent: #4a4a4a;
+            --accent-rgb: 74, 74, 74;
+            --accent-hover: #5c5c5c;
+            --accent-text: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #4a4a4a, #5c5c5c);
+            --accent-light: rgba(74, 74, 74, 0.15);
+            --accent-glow: rgba(74, 74, 74, 0.35);
+        }
+        .theme-variant-white {
+            --accent: #ffffff;
+            --accent-rgb: 255, 255, 255;
+            --accent-hover: #e2e2e2;
+            --accent-text: #0b0b0b;
+            --accent-gradient: linear-gradient(135deg, #ffffff, #e2e2e2);
+            --accent-light: rgba(255, 255, 255, 0.15);
+            --accent-glow: rgba(255, 255, 255, 0.35);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -1780,6 +1801,648 @@
 
         .settings-toggle-btn .theme-icon {
             font-size: 0.9rem;
+        }
+
+        /* ===================================================================
+           МЕНЮ — попап зі швидкими діями (Фільтри / Жанри / Налаштування)
+           =================================================================== */
+        .menu-popover-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 1200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+        }
+        .menu-popover-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .menu-popover {
+            position: fixed;
+            right: 12px;
+            bottom: 76px;
+            width: 224px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 0.4rem;
+            z-index: 1201;
+            transform: translateY(12px) scale(0.96);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform var(--transition), opacity var(--transition);
+        }
+        @supports (backdrop-filter: blur(10px)) {
+            .menu-popover { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+        }
+        .menu-popover-overlay.visible .menu-popover {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .menu-popover-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.7rem 0.8rem;
+            border-radius: var(--radius-md);
+            border: none;
+            background: none;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: background var(--transition);
+        }
+        .menu-popover-item i {
+            width: 1.2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .menu-popover-item:hover {
+            background: var(--hover);
+        }
+        .menu-popover-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.3rem 0.4rem;
+        }
+
+        /* ===================================================================
+           ФІЛЬТРИ — швидкий сортувальний bottom-sheet
+           =================================================================== */
+        .filter-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .filter-sheet-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .filter-sheet {
+            width: 100%;
+            max-width: 520px;
+            background: var(--surface);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            padding: 0.6rem 1.2rem 1.6rem;
+            transform: translateY(100%);
+            transition: transform var(--transition-smooth);
+        }
+        .filter-sheet-overlay.visible .filter-sheet {
+            transform: translateY(0);
+        }
+        .filter-sheet-handle {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border-hover);
+            margin: 0.4rem auto 1rem;
+        }
+        .filter-sheet-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.9rem;
+        }
+        .filter-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+        .filter-chip {
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--border);
+            background: var(--tag-bg);
+            color: var(--text);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .filter-chip:hover {
+            border-color: var(--border-hover);
+        }
+        .filter-chip.active {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+        }
+
+        /* ===================================================================
+           НАЛАШТУВАННЯ — вкладки
+           =================================================================== */
+        .settings-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 1.2rem;
+            background: var(--surface);
+            border-radius: 14px;
+            padding: 5px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            flex-wrap: wrap;
+        }
+        .settings-tab {
+            flex: 1;
+            min-width: 88px;
+            padding: 0.6rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            border: none;
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-family: inherit;
+            min-height: 42px;
+            transition: all var(--transition);
+        }
+        .settings-tab:hover { color: var(--text-secondary); }
+        .settings-tab.active {
+            background: var(--accent);
+            color: var(--accent-text);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .settings-section-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin: 1.4rem 0 0.7rem;
+        }
+        .settings-section-title:first-child { margin-top: 0.2rem; }
+
+        .settings-hint-text {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: -0.4rem 0 1rem;
+        }
+
+        /* Перемикач (switch) */
+        .settings-switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .settings-switch input { opacity: 0; width: 0; height: 0; }
+        .settings-switch-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--border-hover);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+        .settings-switch-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            background: var(--surface);
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            transition: transform var(--transition);
+        }
+        .settings-switch input:checked + .settings-switch-slider {
+            background: var(--accent);
+        }
+        .settings-switch input:checked + .settings-switch-slider::before {
+            transform: translateX(20px);
+        }
+
+        .settings-card--nested {
+            margin: 0.8rem 0 1rem;
+            background: var(--tag-bg);
+        }
+
+        /* Поля вводу */
+        .settings-field {
+            display: block;
+            margin-bottom: 1.1rem;
+        }
+        .settings-field-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .settings-field input[type="text"],
+        .settings-field input[type="date"],
+        .settings-field textarea {
+            width: 100%;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 0.9rem;
+            font-size: 0.92rem;
+            font-family: inherit;
+            color: var(--text);
+            outline: none;
+            transition: border-color var(--transition);
+        }
+        .settings-field input:focus,
+        .settings-field textarea:focus {
+            border-color: var(--accent);
+        }
+        .settings-field-hint {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+        .settings-date-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .settings-date-row input { flex: 1; }
+        .settings-date-clear {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--tag-bg);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+        .settings-date-clear:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        /* Завантаження банера/аватара */
+        .settings-upload-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .settings-upload-preview-banner {
+            width: 100%;
+            max-width: 260px;
+            height: 84px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .settings-upload-preview-banner img,
+        .settings-upload-preview-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .settings-upload-preview-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .settings-upload-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .settings-upload-btn {
+            background: var(--tag-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-xl);
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-height: 40px;
+            transition: all var(--transition);
+        }
+        .settings-upload-btn:hover {
+            border-color: var(--border-hover);
+        }
+        .settings-upload-btn--danger {
+            color: var(--destructive, #d64545);
+        }
+
+        /* Опції (ефекти/атмосфера/декорація/табстиль/банер-ефект) */
+        .settings-option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.6rem;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .settings-option-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.7rem 0.5rem;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--tag-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all var(--transition);
+        }
+        .settings-option-item i { font-size: 1.1rem; }
+        .settings-option-item:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+        .settings-option-item.active {
+            border-color: var(--accent);
+            background: rgba(var(--accent-rgb), 0.08);
+            color: var(--text);
+        }
+
+        .settings-preview-toggle-btn {
+            background: var(--tag-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-xl);
+            padding: 0.4rem 0.9rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.8rem;
+        }
+        .settings-preview-toggle-btn:hover { border-color: var(--border-hover); }
+
+        .settings-preview-panel {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            margin-bottom: 1.2rem;
+        }
+        .settings-preview-panel img.preview-banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1);
+            opacity: 0.55;
+        }
+        .settings-preview-avatar-wrap {
+            position: absolute;
+            left: 16px;
+            bottom: -22px;
+            width: 60px;
+            height: 60px;
+        }
+        .settings-preview-avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--bg);
+        }
+
+        /* Кольори теми — свотчі */
+        .settings-swatch-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.7rem;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .settings-swatch {
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--tag-bg);
+            padding: 0.8rem 0.6rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .settings-swatch:hover { border-color: var(--border-hover); }
+        .settings-swatch.active { border-color: var(--accent); }
+        .settings-swatch-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid var(--border-hover);
+        }
+        .settings-swatch-bar {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+        }
+        .settings-swatch-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .settings-swatch-check {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            display: none;
+        }
+        .settings-swatch.active .settings-swatch-check { display: block; }
+
+        /* ===================================================================
+           Ефекти профілю — накладні частинки (дощ / сніг / іскри)
+           =================================================================== */
+        .effect-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .effect-overlay .drop {
+            position: absolute;
+            top: -20px;
+            width: 1px;
+            height: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.55));
+            animation: effectFall linear infinite;
+        }
+        .dark-mode .effect-overlay .drop {
+            background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.7));
+        }
+        .effect-overlay .flake {
+            position: absolute;
+            top: -10px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.8);
+            animation: effectFallDrift linear infinite;
+        }
+        .effect-overlay .spark {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 6px 1px rgba(255,255,255,0.7);
+            animation: effectTwinkle ease-in-out infinite;
+        }
+        @keyframes effectFall {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(170px); opacity: 0; }
+        }
+        @keyframes effectFallDrift {
+            0% { transform: translate(0,0); opacity: 0; }
+            10% { opacity: 0.9; }
+            100% { transform: translate(14px,170px); opacity: 0; }
+        }
+        @keyframes effectTwinkle {
+            0%, 100% { opacity: 0.15; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* Атмосфера профілю — накладні тонування */
+        .atmosphere-night {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 100%);
+        }
+        .atmosphere-light {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.02));
+        }
+        .atmosphere-fog {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(200,200,200,0.35), rgba(200,200,200,0.05));
+            backdrop-filter: blur(1.5px);
+        }
+
+        /* Декорація аватара */
+        .avatar-decoration-glow {
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.25), 0 0 18px 4px rgba(var(--accent-rgb),0.35);
+            animation: avatarGlowPulse 2.4s ease-in-out infinite;
+        }
+        @keyframes avatarGlowPulse {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.2), 0 0 14px 2px rgba(var(--accent-rgb),0.25); }
+            50% { box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.4), 0 0 22px 6px rgba(var(--accent-rgb),0.5); }
+        }
+        .avatar-decoration-double::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px solid var(--border-hover);
+            pointer-events: none;
+        }
+        .avatar-decoration-dashed::after {
+            content: '';
+            position: absolute;
+            inset: -7px;
+            border-radius: 50%;
+            border: 2px dashed var(--text-muted);
+            pointer-events: none;
+            animation: avatarDashSpin 12s linear infinite;
+        }
+        @keyframes avatarDashSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Стиль табів профілю */
+        .profile-tabs--pills .profile-tab {
+            border-radius: 999px;
+        }
+        .profile-tabs--pills .profile-tab.active {
+            background: var(--accent);
+            color: var(--accent-text);
+        }
+        .profile-tabs--neon .profile-tab.active {
+            background: none;
+            color: var(--text);
+            box-shadow: inset 0 -2px 0 var(--accent);
+            position: relative;
+        }
+        .profile-tabs--neon .profile-tab.active::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 1px rgba(var(--accent-rgb), 0.5);
+            pointer-events: none;
+        }
+
+        /* Ефект банера */
+        .profile-banner.banner-effect-blur img { filter: grayscale(100%) contrast(1.1) blur(2px); }
+        .profile-banner.banner-effect-grain img { filter: grayscale(100%) contrast(1.35) brightness(0.9); }
+        .profile-banner.banner-effect-grain::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.18;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        .profile-banner.banner-effect-fog::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(200,200,200,0.4), rgba(200,200,200,0.05));
         }
 
         #profilePageContainer {
@@ -6363,6 +7026,36 @@
     <input type="file" id="avatarFileInput" class="hidden-file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
     <input type="file" id="bannerFileInput" class="hidden-file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
 
+    <!-- ===== МЕНЮ (попап швидких дій) ===== -->
+    <div class="menu-popover-overlay" id="menuPopoverOverlay">
+        <div class="menu-popover" id="menuPopover" role="menu" aria-label="Меню">
+            <button class="menu-popover-item" data-action="filters" role="menuitem">
+                <i class="fas fa-sliders-h"></i> Фільтри
+            </button>
+            <button class="menu-popover-item" data-action="genres" role="menuitem">
+                <i class="fas fa-layer-group"></i> Жанри
+            </button>
+            <div class="menu-popover-divider"></div>
+            <button class="menu-popover-item" data-action="settings" role="menuitem">
+                <i class="fas fa-cog"></i> Налаштування
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== ФІЛЬТРИ (bottom-sheet швидкого статус-фільтра) ===== -->
+    <div class="filter-sheet-overlay" id="filterSheetOverlay">
+        <div class="filter-sheet" id="filterSheet">
+            <div class="filter-sheet-handle"></div>
+            <div class="filter-sheet-title">Фільтри — статус аніме</div>
+            <div class="filter-chip-row" id="filterChipRow">
+                <button class="filter-chip active" data-status="all">Усі</button>
+                <button class="filter-chip" data-status="ongoing">Онгоінг</button>
+                <button class="filter-chip" data-status="released">Вийшло</button>
+                <button class="filter-chip" data-status="anons">Анонс</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // ====================================================================
         //  FIREBASE КОНФІГУРАЦІЯ (РЕАЛЬНІ ДАНІ)
@@ -7031,6 +7724,39 @@
             if (Router.currentRoute === 'settings') {
                 renderSettingsPage();
             }
+        }
+
+        // Колір теми (Налаштування → Зовнішній вигляд) — монохромні варіанти акценту
+        function applyThemeVariant(profile) {
+            document.body.classList.remove('theme-variant-graphite', 'theme-variant-white');
+            const v = profile?.themeVariant;
+            if (v === 'graphite') document.body.classList.add('theme-variant-graphite');
+            else if (v === 'white') document.body.classList.add('theme-variant-white');
+        }
+
+        // Генерує накладні частинки для "Ефектів профілю" (дощ / сніг / іскри)
+        function buildEffectOverlayHtml(type) {
+            const rand = (min, max) => Math.random() * (max - min) + min;
+            let n = 18,
+                cls = 'drop';
+            if (type === 'snow') { n = 16;
+                cls = 'flake'; } else if (type === 'sparks') { n = 14;
+                cls = 'spark'; }
+            let items = '';
+            for (let i = 0; i < n; i++) {
+                const left = rand(0, 100).toFixed(1);
+                const delay = rand(0, 3).toFixed(2);
+                const dur = type === 'sparks' ? rand(1.4, 2.6).toFixed(2) : rand(1.1, 2.4).toFixed(2);
+                if (type === 'sparks') {
+                    const top = rand(0, 100).toFixed(1);
+                    items +=
+                        `<span class="spark" style="left:${left}%;top:${top}%;animation-delay:${delay}s;animation-duration:${dur}s;"></span>`;
+                } else {
+                    items +=
+                        `<span class="${cls}" style="left:${left}%;animation-delay:${delay}s;animation-duration:${dur}s;"></span>`;
+                }
+            }
+            return `<div class="effect-overlay effect-overlay--${type}">${items}</div>`;
         }
 
         function showToast(msg) {
@@ -8502,13 +9228,15 @@
                 } else if (route === 'settings') {
                     document.querySelector('.agnative-leftdock__item.selector[data-action="settings"]')?.classList.add(
                         'is-active');
-                    this.showSettings();
+                    this.showSettings(params.tab);
                 } else if (route === 'genres') {
                     this.showGenres();
                 } else if (route === 'rating') {
                     this.showRating();
                 } else if (route === 'schedule') {
                     this.showSchedule();
+                } else if (route === 'filter') {
+                    this.showFilter(params.status || 'all');
                 } else {
                     window.location.hash = 'main';
                 }
@@ -8583,6 +9311,13 @@
                 renderSchedulePage();
             },
 
+            showFilter(status) {
+                const container = document.getElementById('genrePageContainer');
+                container.style.display = 'block';
+                container.classList.add('active');
+                renderFilterPage(status);
+            },
+
             showSearch() {
                 const container = document.getElementById('searchPageContainer');
                 if (container) {
@@ -8592,13 +9327,13 @@
                 renderSearchPage();
             },
 
-            showSettings() {
+            showSettings(tab) {
                 const container = document.getElementById('settingsPageContainer');
                 if (container) {
                     container.style.display = 'block';
                     container.classList.add('active');
                 }
-                renderSettingsPage();
+                renderSettingsPage(tab);
             },
 
             showRating() {
@@ -10975,31 +11710,145 @@
         // ====================================================================
         //  СТОРІНКА НАЛАШТУВАНЬ
         // ====================================================================
-        function renderSettingsPage() {
-            const container = document.getElementById('settingsPageContainer');
-            if (!container) return;
-            const theme = Storage.getTheme();
-            const isDark = theme === 'dark';
-            const icon = isDark ? 'fa-moon' : 'fa-sun';
-            const label = isDark ? 'Темна тема' : 'Світла тема';
+        // Стан сторінки Налаштувань — яка вкладка активна, чи відкрито прев'ю
+        let settingsState = { tab: 'profile', previewOpen: false };
+
+        const PROFILE_EFFECTS = [
+            { id: 'none', label: 'Немає', icon: 'fa-ban' },
+            { id: 'rain', label: 'Дощ', icon: 'fa-cloud-rain' },
+            { id: 'snow', label: 'Сніг', icon: 'fa-snowflake' },
+            { id: 'sparks', label: 'Іскри', icon: 'fa-star' }
+        ];
+        const PROFILE_ATMOSPHERES = [
+            { id: 'none', label: 'Без атмосфери', icon: 'fa-circle' },
+            { id: 'night', label: 'Ніч', icon: 'fa-moon' },
+            { id: 'light', label: 'Світло', icon: 'fa-lightbulb' },
+            { id: 'fog', label: 'Туман', icon: 'fa-smog' }
+        ];
+        const AVATAR_DECORATIONS = [
+            { id: 'none', label: 'Немає', icon: 'fa-ban' },
+            { id: 'glow', label: 'Сяйво', icon: 'fa-certificate' },
+            { id: 'double', label: 'Подвійне кільце', icon: 'fa-circle-notch' },
+            { id: 'dashed', label: 'Пунктир', icon: 'fa-dot-circle' }
+        ];
+        const TAB_STYLE_OPTIONS = [
+            { id: 'underline', label: 'Підкреслення', icon: 'fa-minus' },
+            { id: 'pills', label: 'Пігулки', icon: 'fa-capsules' },
+            { id: 'neon', label: 'Неон', icon: 'fa-bolt' }
+        ];
+        const BANNER_EFFECTS = [
+            { id: 'none', label: 'Немає', icon: 'fa-ban' },
+            { id: 'blur', label: 'Розмиття', icon: 'fa-water' },
+            { id: 'grain', label: 'Гранж', icon: 'fa-braille' },
+            { id: 'fog', label: 'Дим', icon: 'fa-smog' }
+        ];
+        const THEME_VARIANTS = [
+            { id: 'default', label: 'Чорний', color: '#0b0b0b' },
+            { id: 'graphite', label: 'Графіт', color: '#4a4a4a' },
+            { id: 'white', label: 'Білий', color: '#ffffff' }
+        ];
+
+        function buildOptionGridHtml(groupName, options, current) {
+            return '<div class="settings-option-grid">' +
+                options.map(o => `
+                  <button class="settings-option-item${o.id === current ? ' active' : ''}" data-group="${groupName}" data-value="${o.id}">
+                    <i class="fas ${o.icon}"></i><span>${o.label}</span>
+                  </button>`).join('') +
+                '</div>';
+        }
+
+        function buildThemeSwatchesHtml(current) {
+            return '<div class="settings-swatch-row">' +
+                THEME_VARIANTS.map(v => `
+                  <div class="settings-swatch${v.id === current ? ' active' : ''}" data-group="themeVariant" data-value="${v.id}">
+                    <span class="settings-swatch-check"><i class="fas fa-check-circle"></i></span>
+                    <span class="settings-swatch-dot" style="background:${v.color};"></span>
+                    <span class="settings-swatch-bar" style="background:${v.color};"></span>
+                    <span class="settings-swatch-label">${v.label}</span>
+                  </div>`).join('') +
+                '</div>';
+        }
+
+        function renderSettingsPreviewPanel(profile) {
+            const panel = document.getElementById('settingsPreviewPanel');
+            if (!panel) return;
+            const bannerEffectClass = (profile.bannerEffect && profile.bannerEffect !== 'none') ? ` banner-effect-${profile.bannerEffect}` : '';
+            const decorationClass = (profile.avatarDecoration && profile.avatarDecoration !== 'none') ? ` avatar-decoration-${profile.avatarDecoration}` : '';
+            panel.innerHTML = `
+              <div class="profile-banner${bannerEffectClass}">
+                ${profile.banner ? `<img class="preview-banner-img" src="${profile.banner}" alt="banner">` : ''}
+                ${profile.atmosphere && profile.atmosphere !== 'none' ? `<div class="atmosphere-${profile.atmosphere}"></div>` : ''}
+                ${profile.effect && profile.effect !== 'none' ? buildEffectOverlayHtml(profile.effect) : ''}
+              </div>
+              <div class="settings-preview-avatar-wrap${decorationClass}">
+                ${profile.avatar ? `<img src="${profile.avatar}" alt="avatar">` : ''}
+              </div>
+            `;
+        }
+
+        function buildProfileTabHtml(profile, isDark) {
             const nextIcon = isDark ? 'fa-sun' : 'fa-moon';
             const nextLabel = isDark ? 'Світла тема' : 'Темна тема';
-            container.innerHTML = `
-            <div class="settings-page-header">
-              <h2>Налаштування</h2>
+            return `
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-lock"></i>
+                <div>
+                  <div class="label">Приватність</div>
+                  <div class="desc">Приховати статистику та історію переглядів від інших</div>
+                </div>
+              </div>
+              <label class="settings-switch">
+                <input type="checkbox" id="settingsPrivacyToggle" ${profile.private ? 'checked' : ''}>
+                <span class="settings-switch-slider"></span>
+              </label>
             </div>
             <div class="settings-card">
               <div class="settings-card-left">
                 <i class="fas fa-paint-brush"></i>
                 <div>
                   <div class="label">Тема інтерфейсу</div>
-                  <div class="desc">${label} — ${isDark ? 'нічний режим' : 'денний режим'}</div>
+                  <div class="desc">${isDark ? 'Темна тема' : 'Світла тема'} — ${isDark ? 'нічний режим' : 'денний режим'}</div>
                 </div>
               </div>
               <button class="settings-toggle-btn" id="settingsThemeBtn">
                 <i class="fas ${nextIcon}"></i> ${nextLabel}
               </button>
             </div>
+
+            <div class="settings-section-title">Основне</div>
+            <div class="settings-hint-text">Зміни зберігаються автоматично.</div>
+            <div class="settings-field">
+              <label class="settings-field-label">Нікнейм</label>
+              <input type="text" id="settingsNicknameInput" maxlength="24" value="${escapeHtml(profile.nickname)}">
+              <span class="settings-field-hint" id="settingsNicknameCount">${profile.nickname.length}/24</span>
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label">Ім'я</label>
+              <input type="text" id="settingsRealNameInput" maxlength="40" placeholder="Необов'язково" value="${escapeHtml(profile.realName || '')}">
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label">Дата народження</label>
+              <div class="settings-date-row">
+                <input type="date" id="settingsBirthdateInput" value="${profile.birthdate || ''}">
+                <button class="settings-date-clear" id="settingsBirthdateClear" title="Очистити"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+            <div class="settings-card settings-card--nested">
+              <div class="settings-card-left">
+                <i class="fas fa-birthday-cake"></i>
+                <div>
+                  <div class="label">Показувати день народження</div>
+                  <div class="desc">День і місяць (без року). Інші зможуть привітати.</div>
+                </div>
+              </div>
+              <label class="settings-switch">
+                <input type="checkbox" id="settingsShowBirthdayToggle" ${profile.showBirthdate ? 'checked' : ''}>
+                <span class="settings-switch-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-section-title">Додатково</div>
             <div class="settings-card" style="opacity:0.6;pointer-events:none;">
               <div class="settings-card-left">
                 <i class="fas fa-globe"></i>
@@ -11021,9 +11870,215 @@
               <span style="font-size:0.75rem;color:var(--text-muted);"><i class="fas fa-flag"></i></span>
             </div>
           `;
+        }
+
+        function buildAppearanceTabHtml(profile) {
+            const bannerSrc = profile.banner || '';
+            const avatarSrc = profile.avatar || '';
+            return `
+            <div class="settings-section-title">Опис профілю</div>
+            <div class="settings-field">
+              <textarea id="settingsBioInput" maxlength="160" rows="3">${escapeHtml(profile.bio || '')}</textarea>
+              <span class="settings-field-hint">До 160 символів. Зміни зберігаються автоматично.</span>
+            </div>
+
+            <div class="settings-section-title">Банер</div>
+            <div class="settings-upload-row">
+              <div class="settings-upload-preview-banner" id="settingsBannerPreview">${bannerSrc ? `<img src="${bannerSrc}" alt="banner">` : ''}</div>
+              <div class="settings-upload-actions">
+                <button class="settings-upload-btn" id="settingsBannerUploadBtn"><i class="fas fa-upload"></i> Завантажити</button>
+                <button class="settings-upload-btn settings-upload-btn--danger" id="settingsBannerRemoveBtn"><i class="fas fa-trash"></i> Видалити</button>
+              </div>
+            </div>
+            <div class="settings-hint-text">JPG, PNG, WebP, GIF · Макс. 15 МБ</div>
+
+            <div class="settings-section-title">Аватар</div>
+            <div class="settings-upload-row">
+              <div class="settings-upload-preview-avatar" id="settingsAvatarPreview">${avatarSrc ? `<img src="${avatarSrc}" alt="avatar">` : ''}</div>
+              <div class="settings-upload-actions">
+                <button class="settings-upload-btn" id="settingsAvatarUploadBtn"><i class="fas fa-upload"></i> Завантажити</button>
+                <button class="settings-upload-btn settings-upload-btn--danger" id="settingsAvatarRemoveBtn"><i class="fas fa-trash"></i> Видалити</button>
+              </div>
+            </div>
+            <div class="settings-hint-text">JPG, PNG, WebP, GIF · Макс. 15 МБ</div>
+
+            <button class="settings-preview-toggle-btn" id="settingsPreviewToggleBtn">
+              <i class="fas fa-eye${settingsState.previewOpen ? '-slash' : ''}"></i> ${settingsState.previewOpen ? "Сховати прев'ю" : "Прев'ю"}
+            </button>
+            <div class="settings-preview-panel" id="settingsPreviewPanel" style="display:${settingsState.previewOpen ? 'block' : 'none'};"></div>
+
+            <div class="settings-section-title">Ефекти профілю</div>
+            ${buildOptionGridHtml('effect', PROFILE_EFFECTS, profile.effect)}
+
+            <div class="settings-section-title">Атмосфера профілю</div>
+            ${buildOptionGridHtml('atmosphere', PROFILE_ATMOSPHERES, profile.atmosphere)}
+
+            <div class="settings-section-title">Декорація аватара</div>
+            ${buildOptionGridHtml('avatarDecoration', AVATAR_DECORATIONS, profile.avatarDecoration)}
+
+            <div class="settings-section-title">Колір теми</div>
+            ${buildThemeSwatchesHtml(profile.themeVariant)}
+
+            <div class="settings-section-title">Стиль табів</div>
+            ${buildOptionGridHtml('tabStyle', TAB_STYLE_OPTIONS, profile.tabStyle)}
+
+            <div class="settings-section-title">Ефект банера</div>
+            ${buildOptionGridHtml('bannerEffect', BANNER_EFFECTS, profile.bannerEffect)}
+          `;
+        }
+
+        function wireProfileTab() {
             const themeBtn = document.getElementById('settingsThemeBtn');
-            if (themeBtn) {
-                themeBtn.addEventListener('click', toggleTheme);
+            if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+            const privacyToggle = document.getElementById('settingsPrivacyToggle');
+            if (privacyToggle) privacyToggle.addEventListener('change', () => {
+                const p = getProfile();
+                p.private = privacyToggle.checked;
+                saveProfile(p);
+                showToast(privacyToggle.checked ? 'Профіль приховано' : 'Профіль відкрито');
+            });
+
+            const nickInput = document.getElementById('settingsNicknameInput');
+            const nickCount = document.getElementById('settingsNicknameCount');
+            if (nickInput) {
+                nickInput.addEventListener('input', () => {
+                    if (nickCount) nickCount.textContent = `${nickInput.value.length}/24`;
+                });
+                nickInput.addEventListener('change', () => {
+                    const val = nickInput.value.trim();
+                    const p = getProfile();
+                    if (!val) { nickInput.value = p.nickname; return; }
+                    p.nickname = val;
+                    saveProfile(p);
+                    if (Router.currentRoute === 'profile') renderProfilePage();
+                });
+            }
+
+            const nameInput = document.getElementById('settingsRealNameInput');
+            if (nameInput) nameInput.addEventListener('change', () => {
+                const p = getProfile();
+                p.realName = nameInput.value.trim();
+                saveProfile(p);
+            });
+
+            const birthInput = document.getElementById('settingsBirthdateInput');
+            const birthClear = document.getElementById('settingsBirthdateClear');
+            if (birthInput) birthInput.addEventListener('change', () => {
+                const p = getProfile();
+                p.birthdate = birthInput.value;
+                saveProfile(p);
+            });
+            if (birthClear) birthClear.addEventListener('click', () => {
+                if (birthInput) birthInput.value = '';
+                const p = getProfile();
+                p.birthdate = '';
+                saveProfile(p);
+            });
+
+            const birthdayToggle = document.getElementById('settingsShowBirthdayToggle');
+            if (birthdayToggle) birthdayToggle.addEventListener('change', () => {
+                const p = getProfile();
+                p.showBirthdate = birthdayToggle.checked;
+                saveProfile(p);
+            });
+        }
+
+        function wireAppearanceTab(profile) {
+            const bioInput = document.getElementById('settingsBioInput');
+            if (bioInput) bioInput.addEventListener('change', () => {
+                const p = getProfile();
+                p.bio = bioInput.value.trim() || p.bio;
+                saveProfile(p);
+                if (Router.currentRoute === 'profile') renderProfilePage();
+            });
+
+            document.getElementById('settingsBannerUploadBtn')?.addEventListener('click', () => {
+                document.getElementById('bannerFileInput').click();
+            });
+            document.getElementById('settingsAvatarUploadBtn')?.addEventListener('click', () => {
+                document.getElementById('avatarFileInput').click();
+            });
+            document.getElementById('settingsBannerRemoveBtn')?.addEventListener('click', () => {
+                const p = getProfile();
+                p.banner = '';
+                saveProfile(p);
+                showToast('Банер видалено');
+                renderSettingsPage();
+                if (Router.currentRoute === 'profile') renderProfilePage();
+            });
+            document.getElementById('settingsAvatarRemoveBtn')?.addEventListener('click', () => {
+                const p = getProfile();
+                p.avatar = '';
+                saveProfile(p);
+                showToast('Аватарку видалено');
+                renderSettingsPage();
+                if (Router.currentRoute === 'profile') renderProfilePage();
+            });
+
+            const previewBtn = document.getElementById('settingsPreviewToggleBtn');
+            if (previewBtn) previewBtn.addEventListener('click', () => {
+                settingsState.previewOpen = !settingsState.previewOpen;
+                const panel = document.getElementById('settingsPreviewPanel');
+                if (panel) panel.style.display = settingsState.previewOpen ? 'block' : 'none';
+                previewBtn.innerHTML =
+                    `<i class="fas fa-eye${settingsState.previewOpen ? '-slash' : ''}"></i> ${settingsState.previewOpen ? "Сховати прев'ю" : "Прев'ю"}`;
+                if (settingsState.previewOpen) renderSettingsPreviewPanel(getProfile());
+            });
+            if (settingsState.previewOpen) renderSettingsPreviewPanel(profile);
+
+            document.querySelectorAll('.settings-option-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const group = btn.dataset.group;
+                    const value = btn.dataset.value;
+                    const p = getProfile();
+                    p[group] = value;
+                    saveProfile(p);
+                    document.querySelectorAll(`.settings-option-item[data-group="${group}"]`).forEach(b => b
+                        .classList.toggle('active', b.dataset.value === value));
+                    if (settingsState.previewOpen) renderSettingsPreviewPanel(p);
+                    if (Router.currentRoute === 'profile') renderProfilePage();
+                });
+            });
+
+            document.querySelectorAll('.settings-swatch[data-group="themeVariant"]').forEach(sw => {
+                sw.addEventListener('click', () => {
+                    const value = sw.dataset.value;
+                    const p = getProfile();
+                    p.themeVariant = value;
+                    saveProfile(p);
+                    applyThemeVariant(p);
+                    document.querySelectorAll('.settings-swatch[data-group="themeVariant"]').forEach(s => s
+                        .classList.toggle('active', s.dataset.value === value));
+                });
+            });
+        }
+
+        function renderSettingsPage(initialTab) {
+            const container = document.getElementById('settingsPageContainer');
+            if (!container) return;
+            if (initialTab === 'profile' || initialTab === 'appearance') settingsState.tab = initialTab;
+            const profile = getProfile();
+            const isDark = Storage.getTheme() === 'dark';
+            container.innerHTML = `
+            <div class="settings-page-header"><h2>Налаштування</h2></div>
+            <div class="settings-tabs" id="settingsTabs">
+              <button class="settings-tab${settingsState.tab === 'profile' ? ' active' : ''}" data-tab="profile"><i class="fas fa-user"></i> Профіль</button>
+              <button class="settings-tab${settingsState.tab === 'appearance' ? ' active' : ''}" data-tab="appearance"><i class="fas fa-palette"></i> Зовнішній вигляд</button>
+            </div>
+            <div id="settingsTabContent">${settingsState.tab === 'appearance' ? buildAppearanceTabHtml(profile) : buildProfileTabHtml(profile, isDark)}</div>
+          `;
+            document.querySelectorAll('#settingsTabs .settings-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    if (tab.dataset.tab === settingsState.tab) return;
+                    settingsState.tab = tab.dataset.tab;
+                    renderSettingsPage();
+                });
+            });
+            if (settingsState.tab === 'appearance') {
+                wireAppearanceTab(profile);
+            } else {
+                wireProfileTab();
             }
             syncLeftdockActive();
         }
@@ -11036,16 +12091,26 @@
                 nickname: 'Користувач',
                 avatar: '',
                 banner: '',
-                bio: 'Аніме ентузіаст. Дивлюсь усе підряд — від слайс-оф-лайф до психологічного трилера.'
+                bio: 'Аніме ентузіаст. Дивлюсь усе підряд — від слайс-оф-лайф до психологічного трилера.',
+                realName: '',
+                birthdate: '',
+                showBirthdate: true,
+                private: false,
+                effect: 'none',
+                atmosphere: 'none',
+                avatarDecoration: 'none',
+                themeVariant: 'default',
+                tabStyle: 'underline',
+                bannerEffect: 'none'
             };
         }
 
         function getProfile() {
             const p = Storage.getProfile();
-            if (p) return p;
             const def = getDefaultProfile();
-            Storage.setProfile(def);
-            return def;
+            if (!p) { Storage.setProfile(def); return def; }
+            // Мердж дефолтів для полів, яких не було у старіших збережених профілях
+            return { ...def, ...p };
         }
 
         function saveProfile(data) {
@@ -11413,41 +12478,34 @@ function renderProfilePage() {
             // GIF detection — use isGifUrl helper
             const isGifBanner = isGifUrl(profile.banner);
             const isGifAvatar = isGifUrl(profile.avatar);
-            const bannerClass = isGifBanner ? 'profile-banner is-gif' : 'profile-banner';
+            const bannerEffectClass = (profile.bannerEffect && profile.bannerEffect !== 'none') ? ` banner-effect-${profile.bannerEffect}` : '';
+            const decorationClass = (profile.avatarDecoration && profile.avatarDecoration !== 'none') ? ` avatar-decoration-${profile.avatarDecoration}` : '';
+            const tabsStyleClass = (profile.tabStyle && profile.tabStyle !== 'underline') ? ` profile-tabs--${profile.tabStyle}` : '';
+            const bannerClass = (isGifBanner ? 'profile-banner is-gif' : 'profile-banner') + bannerEffectClass;
             const avatarClass = isGifAvatar ? 'profile-avatar is-gif' : 'profile-avatar';
             container.innerHTML = `
             <div class="profile-wrapper">
-              <div class="${bannerClass}" onclick="document.getElementById('bannerFileInput').click()">
+              <div class="${bannerClass}">
                 <img src="${profile.banner}" alt="banner" onerror="this.style.display='none'">
+                ${profile.atmosphere && profile.atmosphere !== 'none' ? `<div class="atmosphere-${profile.atmosphere}"></div>` : ''}
+                ${profile.effect && profile.effect !== 'none' ? buildEffectOverlayHtml(profile.effect) : ''}
                 <div class="profile-banner-overlay"></div>
-                <div class="profile-banner-edit">
-                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                </div>
               </div>
               <div class="profile-info">
-                <div class="profile-avatar-wrap" onclick="document.getElementById('avatarFileInput').click()">
+                <div class="profile-avatar-wrap${decorationClass}">
                   <div class="${avatarClass}">
                     <img src="${profile.avatar}" alt="avatar" onerror="this.style.display='none'; this.parentElement.querySelector('.avatar-placeholder').style.display='flex'">
                     <span class="avatar-placeholder" style="display:none;">${profile.nickname.charAt(0).toUpperCase()}</span>
                   </div>
-                  <div class="profile-avatar-badge">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                  </div>
                 </div>
                 <div class="profile-nick-row">
                   <span class="profile-nick" id="profileNickText">${profile.nickname}</span>
-                  <button class="profile-nick-edit-btn" onclick="profileEditNick()">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                  </button>
                 </div>
                 <div class="profile-meta">
                   <span>@${profile.nickname.toLowerCase().replace(/\s/g,'_')}</span>
                 </div>
                 <div class="profile-bio-row">
                   <div class="profile-bio" id="profileBioText">${profile.bio}</div>
-                  <button class="profile-bio-edit-btn" onclick="profileEditBio()" title="Редагувати опис">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                  </button>
                 </div>
                 <div class="profile-stats">
                   <div class="profile-stat-pill">
@@ -11464,14 +12522,16 @@ function renderProfilePage() {
                   </div>
                 </div>
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn-outline" id="profileEditBtn" onclick="Router.goTo('settings',{tab:'appearance'})" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
+                    <i class="fas fa-pen"></i> Редагувати профіль
+                  </button>
                   <button class="btn-outline" id="profileLogoutBtn" onclick="Auth.handleExit()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
                     <i class="fas fa-sign-out-alt"></i> Вийти
                   </button>
-                  
                 </div>
               </div>
             </div>
-            <div class="profile-tabs" id="profileTabs">
+            <div class="profile-tabs${tabsStyleClass}" id="profileTabs">
               <button class="profile-tab active" data-tab="history">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
                 Історія
@@ -11942,6 +13002,7 @@ function renderProfilePage() {
                     profile.avatar = imageUrl;
                     saveProfile(profile);
                     if (Router.currentRoute === 'profile') renderProfilePage();
+                    if (Router.currentRoute === 'settings') renderSettingsPage();
                     showToast('Аватарку оновлено');
                 } catch (err) {
                     console.error('Avatar upload error:', err);
@@ -11974,6 +13035,7 @@ function renderProfilePage() {
                     profile.banner = imageUrl;
                     saveProfile(profile);
                     if (Router.currentRoute === 'profile') renderProfilePage();
+                    if (Router.currentRoute === 'settings') renderSettingsPage();
                     showToast('Банер оновлено');
                 } catch (err) {
                     console.error('Banner upload error:', err);
@@ -12088,6 +13150,99 @@ function renderProfilePage() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             loadGenrePageContent();
         };
+
+        // ====================================================================
+        //  ФІЛЬТРИ — сторінка результатів за статусом (Меню → Фільтри)
+        // ====================================================================
+        let filterPageState = { status: 'all', page: 0, items: [], loadingMore: false };
+
+        async function renderFilterPage(status) {
+            const container = document.getElementById('genrePageContainer');
+            if (!container) return;
+            filterPageState = { status, page: 0, items: [], loadingMore: false };
+            const chipDef = [
+                { status: 'all', label: 'Усі' },
+                { status: 'ongoing', label: 'Онгоінг' },
+                { status: 'released', label: 'Вийшло' },
+                { status: 'anons', label: 'Анонс' }
+            ];
+            container.innerHTML = `
+            <div class="genre-page-header"><h2>Фільтр: ${chipDef.find(c => c.status === status)?.label || 'Усі'}</h2></div>
+            <div class="filter-chip-row" id="filterPageChipRow" style="margin-bottom:1.2rem;">
+              ${chipDef.map(c => `<button class="filter-chip${c.status === status ? ' active' : ''}" data-status="${c.status}">${c.label}</button>`).join('')}
+            </div>
+            <div id="filterPageContent" class="grid-3cols">
+              <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
+            </div>
+            <div class="pagination-row" id="filterPagePagination"></div>
+          `;
+            container.querySelectorAll('#filterPageChipRow .filter-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    if (chip.dataset.status === filterPageState.status) return;
+                    Router.goTo('filter', { status: chip.dataset.status });
+                });
+            });
+            await loadMoreFilterResults(true);
+        }
+
+        async function loadMoreFilterResults(reset) {
+            const content = document.getElementById('filterPageContent');
+            const pagination = document.getElementById('filterPagePagination');
+            if (!content || filterPageState.loadingMore) return;
+            filterPageState.loadingMore = true;
+            if (reset) content.innerHTML = '<div class="loader" style="grid-column:1/-1;"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+            try {
+                const maxPages = 6;
+                const seen = new Set(filterPageState.items.map(i => i.url));
+                let found = 0;
+                while (filterPageState.page < maxPages && found < 24) {
+                    filterPageState.page++;
+                    const pageItems = await fetchAnimeuaMain(filterPageState.page);
+                    if (!pageItems.length) break;
+                    const matched = filterPageState.status === 'all' ? pageItems : pageItems.filter(a => a.status ===
+                        filterPageState.status);
+                    for (const m of matched) {
+                        if (!seen.has(m.url)) { filterPageState.items.push(m);
+                            seen.add(m.url);
+                            found++; }
+                    }
+                }
+                if (!filterPageState.items.length) {
+                    content.innerHTML =
+                        '<div class="loader" style="grid-column:1/-1;">Нічого не знайдено за цим фільтром</div>';
+                    pagination.innerHTML = '';
+                    return;
+                }
+                content.innerHTML = filterPageState.items.map((a, idx) => {
+                    const poster = a.images?.jpg?.large_image_url || '';
+                    const title = a.title || 'Без назви';
+                    return `
+                <div class="anime-card" data-url="${a.url}" tabindex="0" role="button" aria-label="${title}" style="animation-delay:${(idx % 24)*0.03}s">
+                  <div class="anime-poster">
+                    <img src="${poster}" alt="${title}" loading="lazy" class="img--blur" onload="this.classList.add('img--loaded')" onerror="this.src='data:image/svg+xml,...'">
+                  </div>
+                  <div class="anime-title-under">${title}</div>
+                </div>
+              `;
+                }).join('');
+                content.querySelectorAll('.anime-card').forEach(card => {
+                    card.addEventListener('click', () => openPlayerPage(card.dataset.url));
+                    card.addEventListener('keydown', e => { if (e.key === 'Enter') openPlayerPage(card.dataset
+                            .url); });
+                });
+                pagination.innerHTML = filterPageState.page < maxPages ?
+                    `<button class="btn-outline" onclick="loadMoreFilterResults(false)">Показати ще <i class="fas fa-chevron-down"></i></button>` :
+                    '';
+            } catch (err) {
+                content.innerHTML =
+                    `<div class="loader" style="grid-column:1/-1;"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="loadMoreFilterResults(true)">Спробувати знову</button></div>`;
+                pagination.innerHTML = '';
+            } finally {
+                filterPageState.loadingMore = false;
+            }
+        }
+        window.loadMoreFilterResults = loadMoreFilterResults;
+        window.renderFilterPage = renderFilterPage;
 
         // ====================================================================
         //  РОЗКЛАД ВИХОДУ (дані з animeon.club, проксі через PROXY_URL)
@@ -12778,8 +13933,70 @@ function renderProfilePage() {
         // ====================================================================
         //  ОБРОБНИКИ ПОДІЙ
         // ====================================================================
-        document.getElementById('bnMenu')?.addEventListener('click', (e) => { e.stopPropagation();
-            Router.goTo('genres'); });
+        function openMenuPopover() {
+            const overlay = document.getElementById('menuPopoverOverlay');
+            if (overlay) overlay.classList.add('visible');
+        }
+        function closeMenuPopover() {
+            const overlay = document.getElementById('menuPopoverOverlay');
+            if (overlay) overlay.classList.remove('visible');
+        }
+        window.closeMenuPopover = closeMenuPopover;
+
+        document.getElementById('bnMenu')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openMenuPopover();
+        });
+
+        document.getElementById('menuPopoverOverlay')?.addEventListener('click', (e) => {
+            if (e.target.id === 'menuPopoverOverlay') closeMenuPopover();
+        });
+
+        document.querySelectorAll('.menu-popover-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                closeMenuPopover();
+                if (action === 'genres') {
+                    Router.goTo('genres');
+                } else if (action === 'settings') {
+                    Router.goTo('settings');
+                } else if (action === 'filters') {
+                    openFilterSheet();
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMenuPopover();
+                closeFilterSheet();
+            }
+        });
+
+        // ---- Фільтри (bottom-sheet зі швидким статус-фільтром) ----
+        function openFilterSheet() {
+            const overlay = document.getElementById('filterSheetOverlay');
+            if (overlay) overlay.classList.add('visible');
+        }
+        function closeFilterSheet() {
+            const overlay = document.getElementById('filterSheetOverlay');
+            if (overlay) overlay.classList.remove('visible');
+        }
+        window.closeFilterSheet = closeFilterSheet;
+
+        document.getElementById('filterSheetOverlay')?.addEventListener('click', (e) => {
+            if (e.target.id === 'filterSheetOverlay') closeFilterSheet();
+        });
+
+        document.querySelectorAll('#filterChipRow .filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('#filterChipRow .filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                const status = chip.dataset.status;
+                closeFilterSheet();
+                Router.goTo('filter', { status });
+            });
+        });
 
         document.getElementById('searchCircleBtn').addEventListener('click', () => {
             Router.goTo('search');
@@ -12921,6 +14138,7 @@ function renderProfilePage() {
         // ====================================================================
         async function init() {
             applyTheme(Storage.getTheme());
+            applyThemeVariant(getProfile());
             /* leftdock removed */
             startClock();
             updateBackToTop();
