@@ -15,6 +15,8 @@
     <meta property="og:url" content="https://vakdab.netlify.app" />
     <meta property="og:image" content="https://vakdab.netlify.app/og-image.png" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236d5efc'/><text x='50' y='72' font-size='62' font-weight='900' text-anchor='middle' fill='white' font-family='sans-serif'>V</text></svg>" />
     <meta name="theme-color" content="#6d5efc" />
     <meta name="description" content="VakDab — твій аніме каталог. Переглядай аніме онлайн, відстежуй прогрес, спілкуйся зі спільнотою." />
@@ -7219,6 +7221,7 @@
         <div id="genresPageContainer"></div>
         <div id="ratingPageContainer"></div>
         <div id="schedulePageContainer"></div>
+        <div id="stickersPageContainer"></div>
 
         <div class="pagination-row" id="paginationRow"></div>
 
@@ -7324,6 +7327,9 @@
             </button>
             <button class="menu-popover-item" data-action="genres" role="menuitem">
                 <i class="fas fa-layer-group"></i> Жанри
+            </button>
+            <button class="menu-popover-item" data-action="stickers" role="menuitem">
+                <i class="fas fa-sticky-note"></i> Мої наліпки
             </button>
             <div class="menu-popover-divider"></div>
             <button class="menu-popover-item" data-action="settings" role="menuitem">
@@ -9720,6 +9726,8 @@
                 document.getElementById('genresPageContainer').style.display = 'none';
                 document.getElementById('schedulePageContainer').classList.remove('active');
                 document.getElementById('schedulePageContainer').style.display = 'none';
+                document.getElementById('stickersPageContainer').classList.remove('active');
+                document.getElementById('stickersPageContainer').style.display = 'none';
 
                 const hero = document.getElementById('heroWrapper');
                 const actions = document.getElementById('actionsRow');
@@ -9769,6 +9777,8 @@
                     this.showRating();
                 } else if (route === 'schedule') {
                     this.showSchedule();
+                } else if (route === 'stickers') {
+                    this.showStickers();
                 } else if (route === 'filter') {
                     this.showFilter();
                 } else {
@@ -9843,6 +9853,13 @@
                 container.style.display = 'block';
                 container.classList.add('active');
                 renderSchedulePage();
+            },
+            showStickers() {
+                const container = document.getElementById('stickersPageContainer');
+                container.style.display = 'block';
+                container.classList.add('active');
+                renderStickersPage();
+                syncLeftdockActive();
             },
 
             showFilter() {
@@ -14951,6 +14968,8 @@ function renderProfilePage() {
                     Router.goTo('settings');
                 } else if (action === 'filters') {
                     Router.goTo('filter');
+                } else if (action === 'stickers') {
+                    Router.goTo('stickers');
                 }
             });
         });
@@ -15291,7 +15310,353 @@ function renderProfilePage() {
             handleNavVisibility(Router.currentRoute || 'main');
         })();
 
-    </script>
+        function renderStickersPage() {
+            const container = document.getElementById('stickersPageContainer');
+            if (!container) return;
+
+            if (!window.stickersState) {
+                window.stickersState = {
+                    activeFilter: "Всі",
+                    view: "grid",
+                    sets: [
+                        { id: "s1", title: "Аніме дівчата", variants: [0, 2, 4, 6, 12, 13] },
+                        { id: "s2", title: "Мілі та милі", variants: [3, 5, 7, 1, 4, 6] },
+                        { id: "s3", title: "Меми аніме", variants: [9, 10, 11, 8, 1, 13] },
+                    ],
+                    singles: [0, 8, 3, 4, 5, 6, 1, 9, 10, 12, 13],
+                    step: null,
+                    pickedSingle: null,
+                    pickedForPack: [],
+                    packName: ""
+                };
+            }
+
+            const state = window.stickersState;
+
+            function Face(variant = 0) {
+                const s = 'stroke="#1a1a1a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+                const faces = [
+                    `<g><circle cx="32" cy="30" r="16" ${s} /><path d="M18 24c2-8 8-12 14-12s12 4 14 12" ${s} /><path d="M25 30q3 3 6 0M33 30q3 3 6 0" ${s} /><path d="M27 39q5 4 10 0" ${s} /><path d="M46 44l6-4 3 3-7 6z" ${s} /></g>`,
+                    `<g><path d="M20 20l4-8 6 8M44 20l-4-8-6 8" ${s} /><circle cx="32" cy="30" r="15" ${s} /><path d="M25 29l3 2M39 29l-3 2" ${s} /><path d="M29 40q3 2 6 0" ${s} /><path d="M46 12l3 5M53 10l1 6M49 8l4 4" ${s} /></g>`,
+                    `<g><path d="M14 42c-3-16 5-28 18-28s21 12 18 28" ${s} /><circle cx="32" cy="30" r="14" ${s} /><path d="M25 29q2 2 4 0M35 29q2 2 4 0" ${s} /><path d="M27 38q5 4 10 0" ${s} /></g>`,
+                    `<g><circle cx="32" cy="28" r="14" ${s} /><path d="M20 34c8 6 16 6 24 0" ${s} /><path d="M26 27h2M36 27h2" ${s} /><path d="M28 34q4 2 8 0" ${s} /><path d="M44 46q6-2 8-8" ${s} /></g>`,
+                    `<g><circle cx="14" cy="26" r="6" ${s} /><circle cx="50" cy="26" r="6" ${s} /><circle cx="32" cy="30" r="14" ${s} /><path d="M25 29l4 1" ${s} /><path d="M35 27q2 2 4 0" ${s} /><path d="M28 39q4 3 8 0" ${s} /></g>`,
+                    `<g><path d="M16 44c-4-18 4-30 16-30s20 12 16 30" ${s} /><circle cx="32" cy="29" r="13" ${s} /><path d="M26 29h3M35 29h3" ${s} /><path d="M29 37q3 2 6 0" ${s} /></g>`,
+                    `<g><circle cx="32" cy="30" r="15" ${s} /><path d="M18 15l6 4-6 4 6-4-6-4z" ${s} /><path d="M25 30q3 3 6 0M33 30q3 3 6 0" ${s} /><path d="M27 40q5 4 10 0" ${s} /></g>`,
+                    `<g><circle cx="32" cy="30" r="15" ${s} /><path d="M44 16l7-2-3 6z" ${s} /><path d="M25 29q2 2 4 0M35 29q2 2 4 0" ${s} /><path d="M27 39q5 3 10 0" ${s} /></g>`,
+                    `<g><path d="M18 18l6-8 4 8M46 18l-6-8-4 8" ${s} /><circle cx="32" cy="30" r="15" ${s} /><rect x="21" y="26" width="10" height="6" rx="2" ${s} /><rect x="33" y="26" width="10" height="6" rx="2" ${s} /><path d="M31 29h2" ${s} /><path d="M28 41q4 2 8 0" ${s} /></g>`,
+                    `<g><path d="M16 22l4-10 4 8 4-9 4 8 4-9 4 8 4-9 4 10" ${s} /><circle cx="32" cy="31" r="14" ${s} /><path d="M26 30q2-2 4 0M34 30q2-2 4 0" ${s} /><path d="M28 24q10-8 0 0" ${s} fill="none" /><path d="M29 40q3-4 6 0" ${s} /><path d="M46 44l3 6M50 44l1 6M54 42l4 5" ${s} /></g>`,
+                    `<g><circle cx="32" cy="30" r="14" ${s} /><path d="M22 20q4-6 10-6M42 20q-4-6-10-6" ${s} /><path d="M26 40q6 4 12 0" ${s} /><path d="M24 30l-3 6M40 30l3 6" ${s} /></g>`,
+                    `<g><circle cx="32" cy="30" r="14" ${s} /><path d="M24 29q3 2 6 0M34 29q3 2 6 0" ${s} /><path d="M28 40q4 2 8 0" ${s} /><path d="M12 20q4-2 6 2M52 20q-4-2-6 2" ${s} /></g>`,
+                    `<g><circle cx="32" cy="30" r="14" ${s} /><path d="M25 29q2 2 4 0M35 29q2 2 4 0" ${s} /><path d="M27 39q5 3 10 0" ${s} /><circle cx="18" cy="17" r="3" ${s} /><circle cx="26" cy="12" r="3" ${s} /><circle cx="38" cy="12" r="3" ${s} /><circle cx="46" cy="17" r="3" ${s} /></g>`,
+                    `<g><circle cx="32" cy="30" r="15" ${s} /><path d="M25 28q2-2 4 0M35 28q2-2 4 0" ${s} /><path d="M25 38q7 6 14 0" ${s} /></g>`
+                ];
+                return `<svg viewBox="0 0 64 56" class="w-full h-full">${faces[variant % faces.length]}</svg>`;
+            }
+
+            function StickerTile(variant, selected = false, muted = false) {
+                return `
+                    <button type="button" class="aspect-square rounded-xl border flex items-center justify-center p-2 shrink-0 relative transition-colors ${
+                        selected ? "bg-neutral-900 border-neutral-900" : "bg-neutral-50 border-neutral-200"
+                    } ${muted ? "" : "active:bg-neutral-100"}" data-variant="${variant}">
+                        <div style="${selected ? "filter: invert(1)" : ""}">
+                            ${Face(variant)}
+                        </div>
+                        ${selected ? `
+                            <span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center">
+                                <i data-lucide="check" class="text-neutral-900" style="width:11px; height:11px; stroke-width:3"></i>
+                            </span>
+                        ` : ""}
+                    </button>
+                `;
+            }
+
+            const FILTERS = ["Всі", "Набори", "Одиночні", "Улюблені"];
+
+            function render() {
+                container.innerHTML = `
+                    <div class="min-h-screen bg-white flex justify-center stickers-mobile-page" style="color: #1a1a1a; font-family: Inter, sans-serif;">
+                        <div class="w-full max-w-[420px] min-h-screen bg-white flex flex-col relative">
+                            <header class="px-4 pt-5 pb-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-xl border-2 border-neutral-900 flex items-center justify-center">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                            <path d="M8 2l1.2 3.6L13 7l-3.8 1.4L8 12l-1.2-3.6L3 7l3.8-1.4L8 2z" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <h1 class="text-[22px] font-bold tracking-tight text-neutral-900">Мої наліпки</h1>
+                                </div>
+                                <button id="toggleView" class="w-9 h-9 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-700 active:bg-neutral-100">
+                                    <i data-lucide="${state.view === "grid" ? "grid-3x3" : "list"}" style="width:17px; height:17px;"></i>
+                                </button>
+                            </header>
+
+                            <div class="px-4 pb-3">
+                                <div class="flex items-center gap-2 bg-neutral-100 rounded-2xl px-3.5 py-2.5">
+                                    <i data-lucide="search" class="text-neutral-500 shrink-0" style="width:17px; height:17px;"></i>
+                                    <input type="text" placeholder="Пошук наліпок..." class="bg-transparent outline-none text-[15px] w-full placeholder:text-neutral-500 text-neutral-900" />
+                                </div>
+                            </div>
+
+                            <div class="px-4 pb-4 flex gap-2 overflow-x-auto no-scrollbar">
+                                ${FILTERS.map(f => `
+                                    <button class="filter-btn shrink-0 px-4 py-2 rounded-full text-[13.5px] font-medium flex items-center gap-1.5 transition-colors ${
+                                        state.activeFilter === f ? "bg-neutral-900 text-white" : "bg-white border border-neutral-200 text-neutral-700"
+                                    }" data-filter="${f}">
+                                        ${f === "Улюблені" ? `<i data-lucide="star" class="${state.activeFilter === f ? "fill-white" : ""}" style="width:13px; height:13px;"></i>` : ""}
+                                        ${f}
+                                    </button>
+                                `).join('')}
+                            </div>
+
+                            <div class="flex-1 overflow-y-auto px-4 pb-28">
+                                <button id="openAddModal" class="w-full mb-4 border-2 border-dashed border-neutral-300 rounded-2xl py-6 flex flex-col items-center justify-center gap-2 active:bg-neutral-50">
+                                    <div class="w-11 h-11 rounded-full border-2 border-neutral-900 flex items-center justify-center">
+                                        <i data-lucide="plus" class="text-neutral-900" style="width:20px; height:20px;"></i>
+                                    </div>
+                                    <span class="text-[14px] font-semibold text-neutral-900">Додати наліпку</span>
+                                    <span class="text-[12px] text-neutral-500">Одну наліпку або цілий набір</span>
+                                </button>
+
+                                <div class="flex flex-col gap-4 mb-6">
+                                    ${state.sets.map(set => `
+                                        <div class="border border-neutral-200 rounded-2xl p-4">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <div>
+                                                    <h2 class="text-[15.5px] font-bold text-neutral-900">${set.title}</h2>
+                                                    <p class="text-[12.5px] text-neutral-500">${set.variants.length} наліпки</p>
+                                                </div>
+                                                <button class="text-neutral-400 active:text-neutral-700 p-1">
+                                                    <i data-lucide="more-vertical" style="width:18px; height:18px;"></i>
+                                                </button>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2 mb-3">
+                                                ${set.variants.slice(0, 6).map(v => StickerTile(v, false, true)).join('')}
+                                            </div>
+                                            <button class="w-full flex items-center justify-between text-[13.5px] font-medium text-neutral-700 pt-2 border-t border-neutral-100">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i data-lucide="folder" style="width:15px; height:15px;"></i>
+                                                    Переглянути
+                                                </span>
+                                                <span class="flex items-center gap-1 text-neutral-500">
+                                                    ${set.variants.length}
+                                                    <i data-lucide="chevron-right" style="width:15px; height:15px;"></i>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <div class="flex items-center justify-between mb-3">
+                                    <h2 class="text-[16px] font-bold text-neutral-900 flex items-center gap-2">
+                                        Одиночні наліпки
+                                        <span class="text-[12px] font-semibold text-neutral-500 bg-neutral-100 rounded-full px-2 py-0.5">
+                                            ${state.singles.length}
+                                        </span>
+                                    </h2>
+                                    <button class="text-[13px] font-medium text-neutral-700 flex items-center gap-1">
+                                        <i data-lucide="sliders-horizontal" style="width:13px; height:13px;"></i>
+                                        Вибрати
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2.5">
+                                    ${state.singles.map(v => StickerTile(v, false, true)).join('')}
+                                </div>
+                            </div>
+
+                            <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-neutral-200 px-2 pt-2 pb-5 flex items-center justify-around">
+                                <button class="flex flex-col items-center gap-1 text-neutral-400 px-4 py-1">
+                                    <i data-lucide="folder" style="width:20px; height:20px;"></i>
+                                    <span class="text-[11px] font-medium">Набори</span>
+                                </button>
+                                <button class="flex flex-col items-center gap-1 text-neutral-900 px-4 py-1">
+                                    <div class="w-12 h-8 rounded-full bg-neutral-900 flex items-center justify-center -mt-1">
+                                        <i data-lucide="heart" class="text-white fill-white" style="width:16px; height:16px;"></i>
+                                    </div>
+                                    <span class="text-[11px] font-semibold">Мої наліпки</span>
+                                </button>
+                                <button class="flex flex-col items-center gap-1 text-neutral-400 px-4 py-1">
+                                    <i data-lucide="shuffle" style="width:20px; height:20px;"></i>
+                                    <span class="text-[11px] font-medium">Випадкова</span>
+                                </button>
+                            </nav>
+
+                            ${state.step ? `
+                                <div class="absolute inset-0 z-[1001] flex items-end justify-center">
+                                    <div id="closeModalOverlay" class="absolute inset-0 bg-black/40"></div>
+                                    <div class="relative w-full bg-white rounded-t-3xl px-4 pt-4 pb-6 max-h-[85%] overflow-y-auto">
+                                        <div class="w-10 h-1.5 bg-neutral-200 rounded-full mx-auto mb-3"></div>
+                                        ${renderModalContent()}
+                                    </div>
+                                </div>
+                            ` : ""}
+                        </div>
+                    </div>
+                `;
+
+                if (window.lucide) lucide.createIcons();
+                bindEvents();
+            }
+
+            function renderModalContent() {
+                if (state.step === "choose") {
+                    return `
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-[17px] font-bold text-neutral-900">Що додати?</h3>
+                            <button id="closeModalBtn" class="text-neutral-400 active:text-neutral-700">
+                                <i data-lucide="x" style="width:20px; height:20px;"></i>
+                            </button>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <button id="chooseSingle" class="w-full flex items-center gap-3 border border-neutral-200 rounded-2xl p-4 active:bg-neutral-50 text-left">
+                                <div class="w-11 h-11 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+                                    <i data-lucide="image" class="text-neutral-900" style="width:20px; height:20px;"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[14.5px] font-semibold text-neutral-900">Одиночна наліпка</p>
+                                    <p class="text-[12.5px] text-neutral-500">Додати одну наліпку в загальний список</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="text-neutral-300 ml-auto shrink-0" style="width:18px; height:18px;"></i>
+                            </button>
+                            <button id="choosePack" class="w-full flex items-center gap-3 border border-neutral-200 rounded-2xl p-4 active:bg-neutral-50 text-left">
+                                <div class="w-11 h-11 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+                                    <i data-lucide="layers" class="text-neutral-900" style="width:20px; height:20px;"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[14.5px] font-semibold text-neutral-900">Набір наліпок</p>
+                                    <p class="text-[12.5px] text-neutral-500">Створити колекцію з декількох наліпок</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="text-neutral-300 ml-auto shrink-0" style="width:18px; height:18px;"></i>
+                            </button>
+                        </div>
+                    `;
+                } else if (state.step === "single") {
+                    return `
+                        <div class="flex items-center justify-between mb-5">
+                            <button id="backToChoose" class="text-neutral-400 active:text-neutral-700"><i data-lucide="chevron-right" class="rotate-180" style="width:20px; height:20px;"></i></button>
+                            <h3 class="text-[17px] font-bold text-neutral-900">Виберіть наліпку</h3>
+                            <button id="closeModalBtn" class="text-neutral-400 active:text-neutral-700"><i data-lucide="x" style="width:20px; height:20px;"></i></button>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3 mb-6">
+                            ${Array.from({length: 14}, (_, i) => i).map(v => StickerTile(v, state.pickedSingle === v)).join('')}
+                        </div>
+                        <button id="confirmSingle" class="w-full bg-neutral-900 text-white rounded-2xl py-4 font-bold text-[15px] active:scale-[0.98] transition-transform disabled:opacity-50" ${state.pickedSingle === null ? "disabled" : ""}>
+                            Додати наліпку
+                        </button>
+                    `;
+                } else if (state.step === "pack") {
+                    return `
+                        <div class="flex items-center justify-between mb-5">
+                            <button id="backToChoose" class="text-neutral-400 active:text-neutral-700"><i data-lucide="chevron-right" class="rotate-180" style="width:20px; height:20px;"></i></button>
+                            <h3 class="text-[17px] font-bold text-neutral-900">Новий набір</h3>
+                            <button id="closeModalBtn" class="text-neutral-400 active:text-neutral-700"><i data-lucide="x" style="width:20px; height:20px;"></i></button>
+                        </div>
+                        <div class="mb-5">
+                            <label class="block text-[13px] font-bold text-neutral-900 mb-2 ml-1">Назва набору</label>
+                            <input id="packNameInput" type="text" placeholder="Наприклад: Мої улюблені" class="w-full bg-neutral-100 rounded-xl px-4 py-3.5 outline-none text-[15px] border-2 border-transparent focus:border-neutral-900 transition-colors" value="${state.packName}" />
+                        </div>
+                        <label class="block text-[13px] font-bold text-neutral-900 mb-2 ml-1">Виберіть наліпки (${state.pickedForPack.length})</label>
+                        <div class="grid grid-cols-4 gap-3 mb-6">
+                            ${Array.from({length: 14}, (_, i) => i).map(v => StickerTile(v, state.pickedForPack.includes(v))).join('')}
+                        </div>
+                        <button id="confirmPack" class="w-full bg-neutral-900 text-white rounded-2xl py-4 font-bold text-[15px] active:scale-[0.98] transition-transform disabled:opacity-50" ${!state.packName.trim() || state.pickedForPack.length === 0 ? "disabled" : ""}>
+                            Створити набір
+                        </button>
+                    `;
+                }
+                return "";
+            }
+
+            function bindEvents() {
+                document.getElementById('toggleView')?.addEventListener('click', () => {
+                    state.view = state.view === "grid" ? "list" : "grid";
+                    render();
+                });
+
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        state.activeFilter = btn.dataset.filter;
+                        render();
+                    });
+                });
+
+                document.getElementById('openAddModal')?.addEventListener('click', () => {
+                    state.step = "choose";
+                    render();
+                });
+
+                document.getElementById('closeModalOverlay')?.addEventListener('click', closeModal);
+                document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+                document.getElementById('backToChoose')?.addEventListener('click', () => {
+                    state.step = "choose";
+                    render();
+                });
+
+                document.getElementById('chooseSingle')?.addEventListener('click', () => {
+                    state.step = "single";
+                    render();
+                });
+
+                document.getElementById('choosePack')?.addEventListener('click', () => {
+                    state.step = "pack";
+                    render();
+                });
+
+                document.querySelectorAll('[data-variant]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const v = parseInt(btn.dataset.variant);
+                        if (state.step === "single") {
+                            state.pickedSingle = v;
+                            render();
+                        } else if (state.step === "pack") {
+                            if (state.pickedForPack.includes(v)) {
+                                state.pickedForPack = state.pickedForPack.filter(x => x !== v);
+                            } else {
+                                state.pickedForPack.push(v);
+                            }
+                            render();
+                        }
+                    });
+                });
+
+                document.getElementById('packNameInput')?.addEventListener('input', (e) => {
+                    state.packName = e.target.value;
+                });
+
+                document.getElementById('confirmSingle')?.addEventListener('click', () => {
+                    if (state.pickedSingle !== null) {
+                        state.singles.unshift(state.pickedSingle);
+                        closeModal();
+                    }
+                });
+
+                document.getElementById('confirmPack')?.addEventListener('click', () => {
+                    if (state.packName.trim() && state.pickedForPack.length > 0) {
+                        state.sets.unshift({
+                            id: "set-" + Date.now(),
+                            title: state.packName.trim(),
+                            variants: [...state.pickedForPack]
+                        });
+                        closeModal();
+                    }
+                });
+            }
+
+            function closeModal() {
+                state.step = null;
+                state.pickedSingle = null;
+                state.pickedForPack = [];
+                state.packName = "";
+                render();
+            }
+
+            render();
+        }
+
+        // Initialize navigation visibility
+        handleNavVisibility(Router.currentRoute || 'main');
+    })();
+</script>
 
     <!-- ===== BOTTOM NAV ===== -->
     <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="Навігація">
