@@ -1948,6 +1948,263 @@
         }
 
         /* ===================================================================
+           ФІЛЬТР АНІМЕ — повна сторінка (Меню → Фільтри)
+           =================================================================== */
+        .filter-page {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .filter-page__header {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            margin-bottom: 1.3rem;
+        }
+        .filter-page__back {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--tag-bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+        }
+        .filter-page__back:hover {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+        }
+        .filter-page__eyebrow {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+        }
+        .filter-page__title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-top: 0.15rem;
+        }
+        .filter-page__section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.1rem 1.2rem;
+            margin-bottom: 0.9rem;
+        }
+        .filter-page__section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .filter-page__section-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .filter-page__soon-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.14rem 0.5rem;
+            border-radius: 999px;
+            background: var(--tag-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            text-transform: uppercase;
+        }
+        .filter-page__genre-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text);
+        }
+        .filter-page__genre-toggle-value {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .filter-page__genre-toggle-value i {
+            transition: transform var(--transition);
+        }
+        .filter-page__genre-toggle.open .filter-page__genre-toggle-value i {
+            transform: rotate(90deg);
+        }
+        .filter-page__genre-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-smooth);
+        }
+        .filter-page__genre-panel.open {
+            max-height: 800px;
+            margin-top: 1rem;
+        }
+        .filter-page__checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.7rem 1rem;
+        }
+        .filter-page__checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-size: 0.84rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .filter-page__checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .filter-page__checkbox--soon {
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+        .filter-page__checkbox--soon em {
+            font-style: normal;
+            font-size: 0.72rem;
+        }
+        .filter-page__number-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 0.9rem;
+        }
+        .filter-page__number-box {
+            flex: 1;
+            background: var(--tag-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.7rem;
+            color: var(--text);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .filter-page__number-sep {
+            color: var(--text-muted);
+        }
+        .filter-page__dual-range {
+            position: relative;
+            height: 24px;
+            margin-top: 1rem;
+        }
+        .filter-page__dual-range-track {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            transform: translateY(-50%);
+            background: var(--border);
+            border-radius: 2px;
+        }
+        .filter-page__dual-range-fill {
+            position: absolute;
+            top: 50%;
+            height: 4px;
+            transform: translateY(-50%);
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        .filter-page__dual-range-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 24px;
+            margin: 0;
+            -webkit-appearance: none;
+            appearance: none;
+            background: none;
+            pointer-events: none;
+        }
+        .filter-page__dual-range-input::-webkit-slider-runnable-track {
+            background: transparent;
+            height: 24px;
+        }
+        .filter-page__dual-range-input::-moz-range-track {
+            background: transparent;
+            height: 24px;
+        }
+        .filter-page__dual-range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            pointer-events: auto;
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--surface);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+        .filter-page__dual-range-input::-moz-range-thumb {
+            pointer-events: auto;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--surface);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+        .filter-page__dual-range--disabled {
+            opacity: 0.45;
+        }
+        .filter-page__dual-range--disabled .filter-page__dual-range-input::-webkit-slider-thumb,
+        .filter-page__dual-range--disabled .filter-page__dual-range-input::-moz-range-thumb {
+            cursor: not-allowed;
+        }
+        .filter-page__select {
+            width: 100%;
+            background: var(--tag-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 0.8rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.88rem;
+        }
+        .filter-page__select:disabled {
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+        .filter-page__reset-btn {
+            width: 100%;
+            justify-content: center;
+            margin: 0.4rem 0 1.2rem;
+        }
+        .filter-page__results-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+        }
+
+        /* ===================================================================
            НАЛАШТУВАННЯ — вкладки
            =================================================================== */
         .settings-tabs {
@@ -7042,19 +7299,6 @@
         </div>
     </div>
 
-    <!-- ===== ФІЛЬТРИ (bottom-sheet швидкого статус-фільтра) ===== -->
-    <div class="filter-sheet-overlay" id="filterSheetOverlay">
-        <div class="filter-sheet" id="filterSheet">
-            <div class="filter-sheet-handle"></div>
-            <div class="filter-sheet-title">Фільтри — статус аніме</div>
-            <div class="filter-chip-row" id="filterChipRow">
-                <button class="filter-chip active" data-status="all">Усі</button>
-                <button class="filter-chip" data-status="ongoing">Онгоінг</button>
-                <button class="filter-chip" data-status="released">Вийшло</button>
-                <button class="filter-chip" data-status="anons">Анонс</button>
-            </div>
-        </div>
-    </div>
 
     <script type="module">
         // ====================================================================
@@ -9440,7 +9684,7 @@
                 } else if (route === 'schedule') {
                     this.showSchedule();
                 } else if (route === 'filter') {
-                    this.showFilter(params.status || 'all');
+                    this.showFilter();
                 } else {
                     window.location.hash = 'main';
                 }
@@ -9515,11 +9759,11 @@
                 renderSchedulePage();
             },
 
-            showFilter(status) {
+            showFilter() {
                 const container = document.getElementById('genrePageContainer');
                 container.style.display = 'block';
                 container.classList.add('active');
-                renderFilterPage(status);
+                renderFilterPage();
             },
 
             showSearch() {
@@ -13353,68 +13597,311 @@ function renderProfilePage() {
         };
 
         // ====================================================================
-        //  ФІЛЬТРИ — сторінка результатів за статусом (Меню → Фільтри)
+        //  ФІЛЬТРИ — повна сторінка фільтра аніме (Меню → Фільтри)
         // ====================================================================
-        let filterPageState = { status: 'all', page: 0, items: [], loadingMore: false };
+        const FILTER_STATUS_OPTIONS = [
+            { key: 'anons', label: 'Анонс' },
+            { key: 'released', label: 'Завершено' },
+            { key: 'ongoing', label: 'Онгоінг' }
+        ];
+        const FILTER_TYPE_OPTIONS = [
+            { key: 'tv', label: 'ТБ-серіал', functional: false },
+            { key: 'movie', label: 'Фільм', functional: true },
+            { key: 'ova', label: 'OVA', functional: false },
+            { key: 'ona', label: 'ONA', functional: false },
+            { key: 'special', label: 'Спешл', functional: false }
+        ];
+        const FILTER_SEASON_OPTIONS = [
+            { key: 'winter', label: 'Зима' },
+            { key: 'spring', label: 'Весна' },
+            { key: 'summer', label: 'Літо' },
+            { key: 'fall', label: 'Осінь' }
+        ];
+        const FILTER_AGE_OPTIONS = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
+        // Реальний список команд озвучення/перекладу з animeua.club (для відображення;
+        // застосування цього фільтра до результатів поки в розробці — джерело не віддає
+        // переклад на рівні каталогу, лише всередині картки конкретного аніме)
+        const FILTER_TRANSLATION_OPTIONS = [
+            'FanVoxUA', 'InariDuB', 'Багатоголосий закадровий', 'Amanogawa', 'Клан Кайзоку', 'AniUA',
+            'Glass moon', 'Робота Голосом', 'Субтитри', 'Flame Studio', 'AniTube', 'UAnime', 'VRdub',
+            'DZUSKI', 'HATOSHI', 'SkiDub'
+        ];
 
-        async function renderFilterPage(status) {
-            const container = document.getElementById('genrePageContainer');
-            if (!container) return;
-            filterPageState = { status, page: 0, items: [], loadingMore: false };
-            const chipDef = [
-                { status: 'all', label: 'Усі' },
-                { status: 'ongoing', label: 'Онгоінг' },
-                { status: 'released', label: 'Вийшло' },
-                { status: 'anons', label: 'Анонс' }
-            ];
-            container.innerHTML = `
-            <div class="genre-page-header"><h2>Фільтр: ${chipDef.find(c => c.status === status)?.label || 'Усі'}</h2></div>
-            <div class="filter-chip-row" id="filterPageChipRow" style="margin-bottom:1.2rem;">
-              ${chipDef.map(c => `<button class="filter-chip${c.status === status ? ' active' : ''}" data-status="${c.status}">${c.label}</button>`).join('')}
-            </div>
-            <div id="filterPageContent" class="grid-3cols">
-              <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
-            </div>
-            <div class="pagination-row" id="filterPagePagination"></div>
-          `;
-            container.querySelectorAll('#filterPageChipRow .filter-chip').forEach(chip => {
-                chip.addEventListener('click', () => {
-                    if (chip.dataset.status === filterPageState.status) return;
-                    Router.goTo('filter', { status: chip.dataset.status });
-                });
-            });
-            await loadMoreFilterResults(true);
+        let filterState = null;
+        let filterResultsState = { items: [], loadingMore: false, page: 0, genrePages: {}, exhausted: false };
+
+        function resetFilterState() {
+            filterState = {
+                genres: new Set(), status: 'all', types: new Set(), genrePanelOpen: false
+            };
         }
 
-        async function loadMoreFilterResults(reset) {
+        function buildDualRangeHtml(id, min, max, valMin, valMax, step) {
+            return `
+              <div class="filter-page__number-row">
+                <input type="number" class="filter-page__number-box" id="${id}MinBox" value="${valMin}" disabled>
+                <span class="filter-page__number-sep">—</span>
+                <input type="number" class="filter-page__number-box" id="${id}MaxBox" value="${valMax}" disabled>
+              </div>
+              <div class="filter-page__dual-range filter-page__dual-range--disabled">
+                <div class="filter-page__dual-range-track"></div>
+                <div class="filter-page__dual-range-fill" id="${id}Fill"></div>
+                <input type="range" class="filter-page__dual-range-input" id="${id}MinSlider" min="${min}" max="${max}" step="${step}" value="${valMin}" disabled>
+                <input type="range" class="filter-page__dual-range-input" id="${id}MaxSlider" min="${min}" max="${max}" step="${step}" value="${valMax}" disabled>
+              </div>
+            `;
+        }
+
+        function initDualRangeVisual(id, min, max) {
+            const minSlider = document.getElementById(id + 'MinSlider');
+            const maxSlider = document.getElementById(id + 'MaxSlider');
+            const fill = document.getElementById(id + 'Fill');
+            if (!minSlider || !maxSlider || !fill) return;
+            const a = parseFloat(minSlider.value), b = parseFloat(maxSlider.value);
+            const pctA = ((a - min) / (max - min)) * 100;
+            const pctB = ((b - min) / (max - min)) * 100;
+            fill.style.left = pctA + '%';
+            fill.style.width = (pctB - pctA) + '%';
+        }
+
+        function updateGenreToggleLabel() {
+            const el = document.getElementById('filterGenreValue');
+            if (!el) return;
+            const n = filterState.genres.size;
+            el.innerHTML = (n === 0 ? 'Всі' : n + ' обрано') + ' <i class="fas fa-chevron-right"></i>';
+        }
+
+        function buildFilterPageHtml() {
+            const genreEntries = loadGenres();
+            return `
+            <div class="filter-page">
+              <div class="filter-page__header">
+                <button class="filter-page__back" id="filterBackBtn" aria-label="Назад"><i class="fas fa-arrow-left"></i></button>
+                <div>
+                  <div class="filter-page__eyebrow">Каталог</div>
+                  <h2 class="filter-page__title">Фільтр аніме</h2>
+                </div>
+              </div>
+
+              <div class="filter-page__section">
+                <button class="filter-page__genre-toggle" id="filterGenreToggle">
+                  <span class="filter-page__section-title">Жанри</span>
+                  <span class="filter-page__genre-toggle-value" id="filterGenreValue">Всі <i class="fas fa-chevron-right"></i></span>
+                </button>
+                <div class="filter-page__genre-panel" id="filterGenrePanel">
+                  <div class="filter-page__checkbox-grid">
+                    ${genreEntries.map(g => `
+                      <label class="filter-page__checkbox">
+                        <input type="checkbox" data-genre="${g.slug}">
+                        <span>${g.name}</span>
+                      </label>`).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Статус</div>
+                <div class="filter-page__section-sub">Стан виходу аніме</div>
+                <div class="filter-chip-row" id="filterStatusRow" style="margin-top:0.8rem;">
+                  <button class="filter-chip active" data-status="all">Всі</button>
+                  ${FILTER_STATUS_OPTIONS.map(s => `<button class="filter-chip" data-status="${s.key}">${s.label}</button>`).join('')}
+                </div>
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Сезон <span class="filter-page__soon-badge">Скоро</span></div>
+                <div class="filter-page__section-sub">Пошук за сезоном виходу</div>
+                <div class="filter-chip-row" style="margin-top:0.8rem;">
+                  ${FILTER_SEASON_OPTIONS.map(s => `<button class="filter-chip" disabled>${s.label}</button>`).join('')}
+                </div>
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Рік виходу <span class="filter-page__soon-badge">Скоро</span></div>
+                <div class="filter-page__section-sub">1970-2026</div>
+                ${buildDualRangeHtml('filterYear', 1970, 2026, 1970, 2026, 1)}
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Тип</div>
+                <div class="filter-page__section-sub">Формат аніме</div>
+                <div class="filter-page__checkbox-grid" style="margin-top:0.8rem;">
+                  ${FILTER_TYPE_OPTIONS.map(t => `
+                    <label class="filter-page__checkbox${t.functional ? '' : ' filter-page__checkbox--soon'}">
+                      <input type="checkbox" data-type="${t.key}" ${t.functional ? '' : 'disabled'}>
+                      <span>${t.label}${t.functional ? '' : ' <em>(скоро)</em>'}</span>
+                    </label>`).join('')}
+                </div>
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Вікове обмеження <span class="filter-page__soon-badge">Скоро</span></div>
+                <div class="filter-page__section-sub">Рейтинг контенту</div>
+                <div class="filter-page__checkbox-grid" style="margin-top:0.8rem;">
+                  ${FILTER_AGE_OPTIONS.map(a => `
+                    <label class="filter-page__checkbox filter-page__checkbox--soon">
+                      <input type="checkbox" disabled>
+                      <span>${a}</span>
+                    </label>`).join('')}
+                </div>
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Оцінка <span class="filter-page__soon-badge">Скоро</span></div>
+                <div class="filter-page__section-sub">Рейтинг MonoAnime</div>
+                <label class="filter-page__checkbox filter-page__checkbox--soon" style="margin-top:0.6rem;">
+                  <input type="checkbox" disabled>
+                  <span>Брати оцінку з MyAnimeList</span>
+                </label>
+                ${buildDualRangeHtml('filterRating', 0, 10, 0, 10, 0.1)}
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Переклад <span class="filter-page__soon-badge">Скоро</span></div>
+                <div class="filter-page__section-sub">Команда озвучення або субтитрів</div>
+                <select class="filter-page__select" disabled style="margin-top:0.8rem;">
+                  <option>Виберіть переклад</option>
+                  ${FILTER_TRANSLATION_OPTIONS.map(t => `<option>${t}</option>`).join('')}
+                </select>
+                <label class="filter-page__checkbox filter-page__checkbox--soon" style="margin-top:0.8rem;">
+                  <input type="checkbox" disabled>
+                  <span>Усі епізоди озвучені</span>
+                </label>
+              </div>
+
+              <div class="filter-page__section">
+                <div class="filter-page__section-title">Студія <span class="filter-page__soon-badge">Скоро</span></div>
+                <div class="filter-page__section-sub">Виробник тайтлу</div>
+                <select class="filter-page__select" disabled style="margin-top:0.8rem;">
+                  <option>Виберіть студію</option>
+                </select>
+              </div>
+
+              <button class="btn-outline filter-page__reset-btn" id="filterResetBtn">
+                <i class="fas fa-times"></i> Скинути фільтри
+              </button>
+
+              <div id="filterResultsMeta" class="filter-page__results-meta"></div>
+              <div id="filterPageContent" class="grid-3cols">
+                <div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
+              </div>
+              <div class="pagination-row" id="filterPagePagination"></div>
+            </div>
+          `;
+        }
+
+        function wireFilterPageEvents(container) {
+            document.getElementById('filterBackBtn')?.addEventListener('click', () => {
+                if (history.length > 1) history.back(); else Router.goTo('main');
+            });
+
+            const genreToggle = document.getElementById('filterGenreToggle');
+            const genrePanel = document.getElementById('filterGenrePanel');
+            genreToggle?.addEventListener('click', () => {
+                filterState.genrePanelOpen = !filterState.genrePanelOpen;
+                genrePanel.classList.toggle('open', filterState.genrePanelOpen);
+                genreToggle.classList.toggle('open', filterState.genrePanelOpen);
+            });
+            container.querySelectorAll('[data-genre]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) filterState.genres.add(cb.dataset.genre); else filterState.genres.delete(cb.dataset.genre);
+                    updateGenreToggleLabel();
+                    applyFilters(true);
+                });
+            });
+
+            container.querySelectorAll('#filterStatusRow .filter-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    container.querySelectorAll('#filterStatusRow .filter-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    filterState.status = chip.dataset.status;
+                    applyFilters(true);
+                });
+            });
+
+            container.querySelectorAll('[data-type]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) filterState.types.add(cb.dataset.type); else filterState.types.delete(cb.dataset.type);
+                    applyFilters(true);
+                });
+            });
+
+            initDualRangeVisual('filterYear', 1970, 2026);
+            initDualRangeVisual('filterRating', 0, 10);
+
+            document.getElementById('filterResetBtn')?.addEventListener('click', () => {
+                renderFilterPage();
+            });
+        }
+
+        function renderFilterPage() {
+            const container = document.getElementById('genrePageContainer');
+            if (!container) return;
+            resetFilterState();
+            filterResultsState = { items: [], loadingMore: false, page: 0, genrePages: {}, exhausted: false };
+            container.innerHTML = buildFilterPageHtml();
+            wireFilterPageEvents(container);
+            applyFilters(true);
+        }
+
+        async function applyFilters(reset) {
             const content = document.getElementById('filterPageContent');
             const pagination = document.getElementById('filterPagePagination');
-            if (!content || filterPageState.loadingMore) return;
-            filterPageState.loadingMore = true;
-            if (reset) content.innerHTML = '<div class="loader" style="grid-column:1/-1;"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+            const meta = document.getElementById('filterResultsMeta');
+            if (!content || filterResultsState.loadingMore) return;
+            if (reset) {
+                filterResultsState = { items: [], loadingMore: false, page: 0, genrePages: {}, exhausted: false };
+                content.innerHTML = '<div class="loader" style="grid-column:1/-1;"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+                if (meta) meta.textContent = '';
+            }
+            filterResultsState.loadingMore = true;
             try {
-                const maxPages = 6;
-                const seen = new Set(filterPageState.items.map(i => i.url));
+                const effectiveGenres = new Set(filterState.genres);
+                if (filterState.types.has('movie')) effectiveGenres.add('film');
+                const maxTotal = 30;
+                const seen = new Set(filterResultsState.items.map(i => i.url));
                 let found = 0;
-                while (filterPageState.page < maxPages && found < 24) {
-                    filterPageState.page++;
-                    const pageItems = await fetchAnimeuaMain(filterPageState.page);
-                    if (!pageItems.length) break;
-                    const matched = filterPageState.status === 'all' ? pageItems : pageItems.filter(a => a.status ===
-                        filterPageState.status);
-                    for (const m of matched) {
-                        if (!seen.has(m.url)) { filterPageState.items.push(m);
-                            seen.add(m.url);
-                            found++; }
+
+                if (effectiveGenres.size === 0) {
+                    const maxPages = 6;
+                    while (filterResultsState.page < maxPages && found < maxTotal) {
+                        filterResultsState.page++;
+                        const pageItems = await fetchAnimeuaMain(filterResultsState.page);
+                        if (!pageItems.length) break;
+                        const matched = filterState.status === 'all' ? pageItems : pageItems.filter(a => a.status === filterState.status);
+                        for (const m of matched) {
+                            if (!seen.has(m.url)) { filterResultsState.items.push(m); seen.add(m.url); found++; }
+                        }
+                    }
+                } else {
+                    for (const slug of effectiveGenres) {
+                        if (found >= maxTotal) break;
+                        let fetchedThisRound = 0;
+                        while (fetchedThisRound < 2 && found < maxTotal) {
+                            filterResultsState.genrePages[slug] = (filterResultsState.genrePages[slug] || 0) + 1;
+                            const pageItems = await fetchAnimeuaByGenre(slug, filterResultsState.genrePages[slug]);
+                            fetchedThisRound++;
+                            if (!pageItems.length) break;
+                            const matched = filterState.status === 'all' ? pageItems : pageItems.filter(a => a.status === filterState.status);
+                            for (const m of matched) {
+                                if (!seen.has(m.url)) { filterResultsState.items.push(m); seen.add(m.url); found++; }
+                            }
+                        }
                     }
                 }
-                if (!filterPageState.items.length) {
-                    content.innerHTML =
-                        '<div class="loader" style="grid-column:1/-1;">Нічого не знайдено за цим фільтром</div>';
+
+                filterResultsState.exhausted = (found === 0);
+
+                if (!filterResultsState.items.length) {
+                    content.innerHTML = '<div class="loader" style="grid-column:1/-1;">Нічого не знайдено за цими фільтрами</div>';
                     pagination.innerHTML = '';
+                    if (meta) meta.textContent = '';
                     return;
                 }
-                content.innerHTML = filterPageState.items.map((a, idx) => {
+
+                if (meta) meta.textContent = `Знайдено: ${filterResultsState.items.length}`;
+
+                content.innerHTML = filterResultsState.items.map((a, idx) => {
                     const poster = a.images?.jpg?.large_image_url || '';
                     const title = a.title || 'Без назви';
                     return `
@@ -13431,18 +13918,18 @@ function renderProfilePage() {
                     card.addEventListener('keydown', e => { if (e.key === 'Enter') openPlayerPage(card.dataset
                             .url); });
                 });
-                pagination.innerHTML = filterPageState.page < maxPages ?
-                    `<button class="btn-outline" onclick="loadMoreFilterResults(false)">Показати ще <i class="fas fa-chevron-down"></i></button>` :
+                pagination.innerHTML = !filterResultsState.exhausted ?
+                    `<button class="btn-outline" onclick="applyFilters(false)">Показати ще <i class="fas fa-chevron-down"></i></button>` :
                     '';
             } catch (err) {
                 content.innerHTML =
-                    `<div class="loader" style="grid-column:1/-1;"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="loadMoreFilterResults(true)">Спробувати знову</button></div>`;
+                    `<div class="loader" style="grid-column:1/-1;"><i class="fas fa-exclamation-triangle"></i> Помилка: ${err.message}<br><button class="btn-outline" style="margin-top:1rem;" onclick="applyFilters(true)">Спробувати знову</button></div>`;
                 pagination.innerHTML = '';
             } finally {
-                filterPageState.loadingMore = false;
+                filterResultsState.loadingMore = false;
             }
         }
-        window.loadMoreFilterResults = loadMoreFilterResults;
+        window.applyFilters = applyFilters;
         window.renderFilterPage = renderFilterPage;
 
         // ====================================================================
@@ -14179,7 +14666,7 @@ function renderProfilePage() {
                 } else if (action === 'settings') {
                     Router.goTo('settings');
                 } else if (action === 'filters') {
-                    openFilterSheet();
+                    Router.goTo('filter');
                 }
             });
         });
@@ -14187,33 +14674,7 @@ function renderProfilePage() {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeMenuPopover();
-                closeFilterSheet();
             }
-        });
-
-        // ---- Фільтри (bottom-sheet зі швидким статус-фільтром) ----
-        function openFilterSheet() {
-            const overlay = document.getElementById('filterSheetOverlay');
-            if (overlay) overlay.classList.add('visible');
-        }
-        function closeFilterSheet() {
-            const overlay = document.getElementById('filterSheetOverlay');
-            if (overlay) overlay.classList.remove('visible');
-        }
-        window.closeFilterSheet = closeFilterSheet;
-
-        document.getElementById('filterSheetOverlay')?.addEventListener('click', (e) => {
-            if (e.target.id === 'filterSheetOverlay') closeFilterSheet();
-        });
-
-        document.querySelectorAll('#filterChipRow .filter-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('#filterChipRow .filter-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                const status = chip.dataset.status;
-                closeFilterSheet();
-                Router.goTo('filter', { status });
-            });
         });
 
         document.getElementById('searchCircleBtn').addEventListener('click', () => {
