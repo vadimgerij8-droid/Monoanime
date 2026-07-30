@@ -9856,8 +9856,10 @@
             },
             showStickers() {
                 const container = document.getElementById('stickersPageContainer');
-                container.style.display = 'block';
-                container.classList.add('active');
+                if (container) {
+                    container.style.display = 'block';
+                    container.classList.add('active');
+                }
                 renderStickersPage();
                 syncLeftdockActive();
             },
@@ -15310,7 +15312,7 @@ function renderProfilePage() {
             handleNavVisibility(Router.currentRoute || 'main');
         })();
 
-        function renderStickersPage() {
+        window.renderStickersPage = function() {
             const container = document.getElementById('stickersPageContainer');
             if (!container) return;
 
@@ -15652,10 +15654,6 @@ function renderProfilePage() {
 
             render();
         }
-
-        // Initialize navigation visibility
-        handleNavVisibility(Router.currentRoute || 'main');
-    })();
 </script>
 
     <!-- ===== BOTTOM NAV ===== -->
