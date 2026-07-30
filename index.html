@@ -1759,11 +1759,36 @@
             gap: 0.8rem;
         }
         .settings-card-left i {
-            font-size: 1.3rem;
-            color: var(--text-secondary);
-            width: 2rem;
-            text-align: center;
+            font-size: 1.05rem;
+            color: var(--text);
+            width: 2.6rem;
+            height: 2.6rem;
+            border-radius: 50%;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
+            transition: all var(--transition);
+        }
+        .settings-card:hover .settings-card-left i {
+            border-color: var(--border-hover);
+        }
+        .settings-card--danger {
+            border-style: dashed;
+            border-color: var(--border-hover);
+        }
+        .settings-card--danger .settings-card-left i {
+            background: var(--accent);
+            color: var(--accent-text);
+            border-color: var(--accent);
+        }
+        .settings-toggle-btn--danger:hover {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+            box-shadow: var(--shadow-md);
         }
         .settings-card-left .label {
             font-weight: 600;
@@ -2216,14 +2241,18 @@
             padding: 5px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
         }
+        .settings-tabs::-webkit-scrollbar { display: none; }
         .settings-tab {
-            flex: 1;
-            min-width: 88px;
+            flex: 1 0 auto;
+            min-width: 76px;
             padding: 0.6rem 0.5rem;
             border-radius: 10px;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 700;
             text-align: center;
             cursor: pointer;
@@ -2233,10 +2262,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
             font-family: inherit;
             min-height: 42px;
+            white-space: nowrap;
             transition: all var(--transition);
+        }
+        @media (min-width:480px) {
+            .settings-tab { font-size: 0.82rem; min-width: 88px; }
         }
         .settings-tab:hover { color: var(--text-secondary); }
         .settings-tab.active {
@@ -7330,7 +7363,9 @@
             updateProfile,
             setPersistence,
             browserLocalPersistence,
-            signInAnonymously
+            signInAnonymously,
+            sendPasswordResetEmail,
+            deleteUser
         } from "firebase/auth";
         import {
             getFirestore,
@@ -7758,6 +7793,57 @@
                 } else {
                     // Юзер — повний logout
                     this.logout().catch(e => console.warn('Logout error:', e));
+                }
+            },
+
+            // Чи ввійшов юзер через email/пароль (а не Google/анонімно) — для показу "Змінити пароль"
+            hasPasswordProvider() {
+                if (!this.isAuthenticated()) return false;
+                return (this._user.providerData || []).some(p => p.providerId === 'password');
+            },
+
+            providerLabel() {
+                if (this.isGuest() || !this.isAuthenticated()) return 'Гість';
+                if ((this._user.providerData || []).some(p => p.providerId === 'google.com')) return 'Google';
+                if (this.hasPasswordProvider()) return 'Email і пароль';
+                return 'Акаунт';
+            },
+
+            async sendPasswordReset() {
+                if (!firebaseInitialized || !auth || !this._user?.email) {
+                    return { success: false, error: 'Пошта акаунту недоступна' };
+                }
+                try {
+                    await sendPasswordResetEmail(auth, this._user.email);
+                    return { success: true };
+                } catch (e) {
+                    console.warn('Password reset error:', e);
+                    return { success: false, error: e.message };
+                }
+            },
+
+            // Повне і незворотнє видалення акаунту: документ у Firestore + сам обліковий запис Firebase + локальні дані.
+            async deleteAccount() {
+                if (!firebaseInitialized || !auth || !this._user) {
+                    return { success: false, error: 'Акаунт недоступний' };
+                }
+                const uid = this._user.uid;
+                try {
+                    try { await deleteDoc(doc(db, 'users', uid)); } catch (e) { console.warn('Delete user doc failed:', e.message); }
+                    await deleteUser(auth.currentUser);
+                    this._user = null;
+                    this._authResolved = true;
+                    this._welcomeShown = false;
+                    this._isGuest = false;
+                    Storage.clear();
+                    this._notifyListeners();
+                    return { success: true };
+                } catch (e) {
+                    console.warn('Delete account error:', e);
+                    if (e.code === 'auth/requires-recent-login') {
+                        return { success: false, error: 'requires-recent-login' };
+                    }
+                    return { success: false, error: e.message };
                 }
             },
 
@@ -12235,8 +12321,6 @@
         }
 
         function buildProfileTabHtml(profile, isDark) {
-            const nextIcon = isDark ? 'fa-sun' : 'fa-moon';
-            const nextLabel = isDark ? 'Світла тема' : 'Темна тема';
             return `
             <div class="settings-card">
               <div class="settings-card-left">
@@ -12250,18 +12334,6 @@
                 <input type="checkbox" id="settingsPrivacyToggle" ${profile.private ? 'checked' : ''}>
                 <span class="settings-switch-slider"></span>
               </label>
-            </div>
-            <div class="settings-card">
-              <div class="settings-card-left">
-                <i class="fas fa-paint-brush"></i>
-                <div>
-                  <div class="label">Тема інтерфейсу</div>
-                  <div class="desc">${isDark ? 'Темна тема' : 'Світла тема'} — ${isDark ? 'нічний режим' : 'денний режим'}</div>
-                </div>
-              </div>
-              <button class="settings-toggle-btn" id="settingsThemeBtn">
-                <i class="fas ${nextIcon}"></i> ${nextLabel}
-              </button>
             </div>
 
             <div class="settings-section-title">Основне</div>
@@ -12295,8 +12367,132 @@
                 <span class="settings-switch-slider"></span>
               </label>
             </div>
+          `;
+        }
 
-            <div class="settings-section-title">Додатково</div>
+        function buildSecurityTabHtml() {
+            const authed = Auth.isAuthenticated();
+            const guest = Auth.isGuest();
+            const user = Auth.getUser();
+            const provider = Auth.providerLabel();
+            const email = authed && user?.email ? user.email : (guest ? 'Гостьовий режим — дані лише на цьому пристрої' : 'Ви не увійшли');
+            const device = detectDeviceInfo(navigator.userAgent);
+            const lastLogin = authed && user?.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString('uk-UA') : '—';
+            const canResetPassword = authed && Auth.hasPasswordProvider();
+
+            return `
+            <div class="settings-card" style="opacity:${authed || guest ? 1 : 0.6};pointer-events:${authed || guest ? 'auto' : 'none'};">
+              <div class="settings-card-left">
+                <i class="fas fa-id-badge"></i>
+                <div>
+                  <div class="label">${email}</div>
+                  <div class="desc">Спосіб входу: ${provider}</div>
+                </div>
+              </div>
+            </div>
+
+            ${canResetPassword ? `
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-key"></i>
+                <div>
+                  <div class="label">Пароль</div>
+                  <div class="desc">Надіслати лист для зміни пароля на ${escapeHtml(user.email)}</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn" id="settingsResetPasswordBtn"><i class="fas fa-envelope"></i> Надіслати</button>
+            </div>` : ''}
+
+            <div class="settings-section-title">Цей пристрій</div>
+            <div class="settings-card" style="opacity:0.6;pointer-events:none;">
+              <div class="settings-card-left">
+                <i class="fas fa-desktop"></i>
+                <div>
+                  <div class="label">${device.type}${device.osVersion ? ' · ' + device.osVersion : ''}</div>
+                  <div class="desc">Останній вхід: ${lastLogin}</div>
+                </div>
+              </div>
+            </div>
+
+            ${authed || guest ? `
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-right-from-bracket"></i>
+                <div>
+                  <div class="label">Вийти з акаунту</div>
+                  <div class="desc">${guest ? 'Завершити гостьовий сеанс' : 'Дані буде синхронізовано перед виходом'}</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn" id="settingsLogoutBtn"><i class="fas fa-right-from-bracket"></i> Вийти</button>
+            </div>` : ''}
+
+            ${authed && !guest ? `
+            <div class="settings-section-title">Небезпечна зона</div>
+            <div class="settings-card settings-card--danger">
+              <div class="settings-card-left">
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>
+                  <div class="label">Видалити акаунт</div>
+                  <div class="desc">Незворотньо видаляє акаунт і всі дані з сервера</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn settings-toggle-btn--danger" id="settingsDeleteAccountBtn"><i class="fas fa-trash"></i> Видалити</button>
+            </div>` : ''}
+          `;
+        }
+
+        function buildSiteTabHtml(isDark) {
+            const nextIcon = isDark ? 'fa-sun' : 'fa-moon';
+            const nextLabel = isDark ? 'Світла тема' : 'Темна тема';
+            const history = Storage.getHistory();
+            const bookmarks = Storage.getBookmarks();
+            return `
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-circle-half-stroke"></i>
+                <div>
+                  <div class="label">Тема інтерфейсу</div>
+                  <div class="desc">${isDark ? 'Темна тема' : 'Світла тема'} — ${isDark ? 'нічний режим' : 'денний режим'}</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn" id="settingsThemeBtn">
+                <i class="fas ${nextIcon}"></i> ${nextLabel}
+              </button>
+            </div>
+
+            <div class="settings-section-title">Дані</div>
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-download"></i>
+                <div>
+                  <div class="label">Експортувати мої дані</div>
+                  <div class="desc">Профіль, історія (${history.length}) і закладки (${bookmarks.length}) у файл JSON</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn" id="settingsExportDataBtn"><i class="fas fa-file-arrow-down"></i> Завантажити</button>
+            </div>
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-clock-rotate-left"></i>
+                <div>
+                  <div class="label">Очистити історію переглядів</div>
+                  <div class="desc">${history.length} записів буде видалено</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn" id="settingsClearHistoryBtn"><i class="fas fa-broom"></i> Очистити</button>
+            </div>
+            <div class="settings-card">
+              <div class="settings-card-left">
+                <i class="fas fa-bookmark"></i>
+                <div>
+                  <div class="label">Очистити закладки</div>
+                  <div class="desc">${bookmarks.length} тайтлів буде видалено зі списку</div>
+                </div>
+              </div>
+              <button class="settings-toggle-btn" id="settingsClearBookmarksBtn"><i class="fas fa-broom"></i> Очистити</button>
+            </div>
+
+            <div class="settings-section-title">Про сайт</div>
             <div class="settings-card" style="opacity:0.6;pointer-events:none;">
               <div class="settings-card-left">
                 <i class="fas fa-globe"></i>
@@ -12376,9 +12572,6 @@
         }
 
         function wireProfileTab() {
-            const themeBtn = document.getElementById('settingsThemeBtn');
-            if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
-
             const privacyToggle = document.getElementById('settingsPrivacyToggle');
             if (privacyToggle) privacyToggle.addEventListener('change', () => {
                 const p = getProfile();
@@ -12429,6 +12622,79 @@
                 const p = getProfile();
                 p.showBirthdate = birthdayToggle.checked;
                 saveProfile(p);
+            });
+        }
+
+        function wireSecurityTab() {
+            document.getElementById('settingsResetPasswordBtn')?.addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                const res = await Auth.sendPasswordReset();
+                btn.disabled = false;
+                showToast(res.success ? 'Лист надіслано на вашу пошту' : 'Помилка: ' + res.error);
+            });
+
+            document.getElementById('settingsLogoutBtn')?.addEventListener('click', () => {
+                if (!confirm('Вийти з акаунту?')) return;
+                Auth.handleExit();
+            });
+
+            document.getElementById('settingsDeleteAccountBtn')?.addEventListener('click', async () => {
+                if (!confirm('Ви дійсно хочете видалити акаунт? Усі дані на сервері буде втрачено назавжди.')) return;
+                const typed = prompt('Для підтвердження введіть слово ВИДАЛИТИ великими літерами:');
+                if (typed !== 'ВИДАЛИТИ') { showToast('Скасовано'); return; }
+                showToast('Видалення акаунту...');
+                const res = await Auth.deleteAccount();
+                if (res.success) {
+                    showToast('Акаунт видалено');
+                    Router.showProfile();
+                } else if (res.error === 'requires-recent-login') {
+                    showToast('З міркувань безпеки увійдіть ще раз і повторіть видалення');
+                } else {
+                    showToast('Помилка: ' + res.error);
+                }
+            });
+        }
+
+        function wireSiteTab() {
+            const themeBtn = document.getElementById('settingsThemeBtn');
+            if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+            document.getElementById('settingsExportDataBtn')?.addEventListener('click', () => {
+                const data = {
+                    exportedAt: new Date().toISOString(),
+                    profile: getProfile(),
+                    history: Storage.getHistory(),
+                    bookmarks: Storage.getBookmarks(),
+                    likes: Storage.getLikes(),
+                    watchTimeSeconds: Storage.getWatchTime()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'monoanime-data-' + new Date().toISOString().slice(0, 10) + '.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showToast('Дані завантажено');
+            });
+
+            document.getElementById('settingsClearHistoryBtn')?.addEventListener('click', () => {
+                if (!confirm('Очистити всю історію переглядів? Це незворотньо.')) return;
+                Storage.setHistory([]);
+                if (Auth.isAuthenticated()) Auth.syncUserData().catch(() => {});
+                showToast('Історію очищено');
+                renderSettingsPage();
+            });
+
+            document.getElementById('settingsClearBookmarksBtn')?.addEventListener('click', () => {
+                if (!confirm('Очистити всі закладки?')) return;
+                Storage.setBookmarks([]);
+                if (Auth.isAuthenticated()) Auth.syncUserData().catch(() => {});
+                showToast('Закладки очищено');
+                renderSettingsPage();
             });
         }
 
@@ -12502,19 +12768,41 @@
             });
         }
 
+        const SETTINGS_TABS = [
+            { id: 'profile', label: 'Профіль', icon: 'fa-user' },
+            { id: 'appearance', label: 'Вигляд', icon: 'fa-palette' },
+            { id: 'security', label: 'Безпека', icon: 'fa-shield-halved' },
+            { id: 'site', label: 'Сайт', icon: 'fa-sliders' }
+        ];
+
+        function buildSettingsTabContent(tab, profile, isDark) {
+            if (tab === 'appearance') return buildAppearanceTabHtml(profile);
+            if (tab === 'security') return buildSecurityTabHtml();
+            if (tab === 'site') return buildSiteTabHtml(isDark);
+            return buildProfileTabHtml(profile, isDark);
+        }
+
+        function wireSettingsTab(tab, profile) {
+            if (tab === 'appearance') wireAppearanceTab(profile);
+            else if (tab === 'security') wireSecurityTab();
+            else if (tab === 'site') wireSiteTab();
+            else wireProfileTab();
+        }
+
         function renderSettingsPage(initialTab) {
             const container = document.getElementById('settingsPageContainer');
             if (!container) return;
-            if (initialTab === 'profile' || initialTab === 'appearance') settingsState.tab = initialTab;
+            if (SETTINGS_TABS.some(t => t.id === initialTab)) settingsState.tab = initialTab;
             const profile = getProfile();
             const isDark = Storage.getTheme() === 'dark';
             container.innerHTML = `
             <div class="settings-page-header"><h2>Налаштування</h2></div>
             <div class="settings-tabs" id="settingsTabs">
-              <button class="settings-tab${settingsState.tab === 'profile' ? ' active' : ''}" data-tab="profile"><i class="fas fa-user"></i> Профіль</button>
-              <button class="settings-tab${settingsState.tab === 'appearance' ? ' active' : ''}" data-tab="appearance"><i class="fas fa-palette"></i> Зовнішній вигляд</button>
+              ${SETTINGS_TABS.map(t => `
+                <button class="settings-tab${settingsState.tab === t.id ? ' active' : ''}" data-tab="${t.id}"><i class="fas ${t.icon}"></i> ${t.label}</button>
+              `).join('')}
             </div>
-            <div id="settingsTabContent">${settingsState.tab === 'appearance' ? buildAppearanceTabHtml(profile) : buildProfileTabHtml(profile, isDark)}</div>
+            <div id="settingsTabContent">${buildSettingsTabContent(settingsState.tab, profile, isDark)}</div>
           `;
             document.querySelectorAll('#settingsTabs .settings-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -12523,11 +12811,7 @@
                     renderSettingsPage();
                 });
             });
-            if (settingsState.tab === 'appearance') {
-                wireAppearanceTab(profile);
-            } else {
-                wireProfileTab();
-            }
+            wireSettingsTab(settingsState.tab, profile);
             syncLeftdockActive();
         }
 
