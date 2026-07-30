@@ -4733,6 +4733,38 @@
             opacity: 0.4;
         }
 
+        .player-diag-report {
+            text-align: left;
+            max-width: 640px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .player-diag-report__toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.6rem;
+        }
+        .player-diag-report__pre {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 0.9rem;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.72rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+
         .bottom-sheet-overlay {
             position: fixed;
             inset: 0;
@@ -7799,7 +7831,32 @@
             }
         }
 
-        async function fetchUA(url, retries = 2) {
+        function detectDeviceInfo(ua) {
+            ua = ua || '';
+            let type = 'ПК', osVersion = '';
+            if (/Android/i.test(ua)) {
+                const verM = ua.match(/Android\s([\d.]+)/i);
+                osVersion = verM ? verM[1] : 'невідома';
+                const isTV = /\bTV\b/i.test(ua) || (!/Mobile/i.test(ua) && !/Tablet/i.test(ua));
+                type = isTV ? 'Android TV' : 'Android Phone';
+            } else if (/iPad/i.test(ua)) {
+                type = 'iPad';
+                const verM = ua.match(/OS\s([\d_]+)/i);
+                osVersion = verM ? verM[1].replace(/_/g, '.') : 'невідома';
+            } else if (/iPhone/i.test(ua)) {
+                type = 'iPhone';
+                const verM = ua.match(/OS\s([\d_]+)/i);
+                osVersion = verM ? verM[1].replace(/_/g, '.') : 'невідома';
+            } else if (/Windows|Macintosh|Linux/i.test(ua)) {
+                type = 'ПК';
+                osVersion = '';
+            } else {
+                type = 'Невідомий пристрій';
+            }
+            return { type, osVersion };
+        }
+
+        async function fetchUA(url, retries = 2, _diagRef = null) {
             if (url && url.startsWith('http://')) url = 'https://' + url.slice(7);
             const proxyUrl = getProxyUrl(url);
             const doFetch = async () => {
@@ -7814,6 +7871,13 @@
                         signal: controller.signal
                     });
                     clearTimeout(timer);
+                    if (_diagRef) {
+                        _diagRef.httpStatus = resp.status;
+                        _diagRef.contentType = resp.headers.get('content-type') || 'невідомо';
+                        _diagRef.cfCacheStatus = resp.headers.get('cf-cache-status') || 'невідомо (заголовок недоступний)';
+                        _diagRef.cfRay = resp.headers.get('cf-ray') || null;
+                        _diagRef.usedCloudflareWorker = true;
+                    }
                     if (!resp.ok) throw new Error('HTTP ' + resp.status);
                     let html = await resp.text();
                     // Видаляємо рекламні скрипти та трекери
@@ -7849,10 +7913,13 @@
             try {
                 return await doFetch();
             } catch (e) {
+                if (_diagRef && !_diagRef.corsError) {
+                    _diagRef.corsError = /Failed to fetch|CORS|NetworkError/i.test(e.message || '');
+                }
                 // Retry тільки якщо не скасовано плеєром (playerPageAborted)
                 if (retries > 0 && !(e && e._playerAborted)) {
                     await new Promise(r => setTimeout(r, 800));
-                    return fetchUA(url, retries - 1);
+                    return fetchUA(url, retries - 1, _diagRef);
                 }
                 throw e;
             }
@@ -7944,20 +8011,82 @@
         }
 
         async function loadAnimeuaDetail(animeUrl) {
-            const doc = await fetchUA(animeUrl);
-            
+            const diag = {
+                url: animeUrl,
+                ua: navigator.userAgent,
+                device: detectDeviceInfo(navigator.userAgent),
+                httpStatus: null,
+                contentType: null,
+                cfCacheStatus: null,
+                cfRay: null,
+                usedCloudflareWorker: false,
+                corsError: false,
+                htmlLoaded: false,
+                htmlSize: 0,
+                iframeCount: 0,
+                iframeUrls: [],
+                foundAshdi: false,
+                foundVidmoly: false,
+                foundPlayerjs: false,
+                foundDataSrc: false,
+                foundDataFile: false,
+                foundVideoTag: false,
+                foundSourceTag: false,
+                playerUrlsCount: 0,
+                seasonsCount: 0,
+                episodesCount: 0,
+                extractPlayerIframeUrlsRan: false,
+                extractSourcesFromTextRan: false,
+                foundM3u8: false,
+                foundMp4: false,
+                foundPlayerjsJson: false,
+                foundBase64Playerjs: false,
+                jsErrors: [],
+                failedStage: 'fetchUA() — завантаження HTML сторінки аніме',
+                emptyObject: null
+            };
+
+            let doc;
+            try {
+                doc = await fetchUA(animeUrl, 2, diag);
+                diag.htmlLoaded = true;
+                diag.htmlSize = (doc._rawHtml || '').length;
+            } catch (e) {
+                diag.jsErrors.push((e && e.stack) || (e && e.message) || String(e));
+                diag.failedStage = 'fetchUA() — не вдалося завантажити HTML';
+                if (!diag.httpStatus) {
+                    const m = (e && e.message || '').match(/HTTP\s+(\d+)/);
+                    if (m) diag.httpStatus = parseInt(m[1], 10);
+                }
+                e._diagnostics = diag;
+                throw e;
+            }
+
             // Перевіряємо чи сторінка є реальною сторінкою аніме (не 404/головна)
             const rawHtml = doc._rawHtml || '';
+            const rawHtmlLower = rawHtml.toLowerCase();
             const hasAnimeContent = safeQuery('.pmovie__title, .page__subcol-main h1', doc) ||
                                     safeQuery('.pmovie__player, .video-responsive', doc) ||
-                                    rawHtml.includes('ashdi.vip') ||
-                                    rawHtml.includes('vidmoly') ||
-                                    rawHtml.includes('Playerjs') ||
-                                    rawHtml.includes('iframe');
+                                    rawHtmlLower.includes('ashdi.vip') ||
+                                    rawHtmlLower.includes('vidmoly') ||
+                                    rawHtmlLower.includes('playerjs') ||
+                                    rawHtmlLower.includes('iframe');
+            diag.foundAshdi = rawHtmlLower.includes('ashdi');
+            diag.foundVidmoly = rawHtmlLower.includes('vidmoly');
+            diag.foundPlayerjs = rawHtmlLower.includes('playerjs');
+            diag.foundDataSrc = rawHtmlLower.includes('data-src');
+            diag.foundDataFile = rawHtmlLower.includes('data-file');
+            diag.foundVideoTag = /<video[\s>]/i.test(rawHtml);
+            diag.foundSourceTag = /<source[\s>]/i.test(rawHtml);
+            diag.iframeCount = (rawHtml.match(/<iframe[\s>]/gi) || []).length;
             if (!hasAnimeContent) {
-                throw new Error('Це аніме не знайдено на сайті. Можливо воно ще не додане або URL застарів.');
+                diag.failedStage = 'Перевірка контенту сторінки';
+                diag.emptyObject = 'hasAnimeContent';
+                const err = new Error('Це аніме не знайдено на сайті. Можливо воно ще не додане або URL застарів.');
+                err._diagnostics = diag;
+                throw err;
             }
-            
+
             let title = '';
             let originalTitle = '';
             for (const sel of ['.page__subcol-main h1', '.pmovie__title', 'h1.title', 'h1']) {
@@ -7994,10 +8123,19 @@
             const ratingEl = doc.querySelector('.pmovie__age p, .pmovie__age');
             if (ratingEl) rating = ratingEl.textContent.replace('Рейтинг:', '').trim();
 
-            /* console.log removed */
-            const playerUrls = extractPlayerIframeUrls(doc);
-            /* console.log removed */
+            diag.failedStage = 'extractPlayerIframeUrls() — пошук iframe плеєрів на сторінці';
+            let playerUrls = [];
+            try {
+                playerUrls = extractPlayerIframeUrls(doc);
+                diag.extractPlayerIframeUrlsRan = true;
+            } catch (e) {
+                diag.jsErrors.push((e && e.stack) || (e && e.message) || String(e));
+            }
+            diag.playerUrlsCount = playerUrls.length;
+            diag.iframeUrls = playerUrls.slice(0, 25);
+
             const allRawSources = [];
+            diag.failedStage = 'extractSourcesFromText() — парсинг плеєр-сторінок (ashdi/vidmoly)';
             // Завантажуємо всі плеєр-сторінки паралельно — швидше і одна помилка не зупиняє решту
             const playerFetchResults = await Promise.allSettled(
                 playerUrls.map(async (playerUrl) => {
@@ -8007,7 +8145,12 @@
                     else if (playerUrl.includes('player')) provider = 'Player';
                     const playerHtml = await fetchUA(playerUrl);
                     const text = playerHtml._rawHtml || playerHtml.body?.innerHTML || '';
+                    if (/https?:\/\/[^\s'"<>]+\.m3u8/i.test(text)) diag.foundM3u8 = true;
+                    if (/https?:\/\/[^\s'"<>]+\.mp4/i.test(text)) diag.foundMp4 = true;
+                    if (/Playerjs\s*\(/i.test(text)) diag.foundPlayerjsJson = true;
+                    if (/playerjs/i.test(text) && /[A-Za-z0-9+/]{120,}={0,2}/.test(text)) diag.foundBase64Playerjs = true;
                     const sources = extractSourcesFromText(text, provider);
+                    diag.extractSourcesFromTextRan = true;
                     // Вкладені iframe (якщо є)
                     const nestedResults = await Promise.allSettled(
                         safeQueryAll('iframe', playerHtml)
@@ -8025,7 +8168,10 @@
             );
             playerFetchResults.forEach(r => {
                 if (r.status === 'fulfilled') allRawSources.push(...r.value);
-                else console.warn('Player fetch failed:', r.reason?.message || r.reason);
+                else {
+                    console.warn('Player fetch failed:', r.reason?.message || r.reason);
+                    diag.jsErrors.push((r.reason && r.reason.stack) || (r.reason && r.reason.message) || String(r.reason));
+                }
             });
 
             /* console.log removed */
@@ -8040,6 +8186,7 @@
                 rawHtml: doc._rawHtml
             });
 
+            diag.failedStage = 'buildSeasons() — групування джерел у сезони/серії';
             const seasons = {};
             const seenKeys = new Set();
             allRawSources.forEach(s => {
@@ -8061,6 +8208,19 @@
             const sources = ['Основне'];
             if (sources.length === 0) sources.push('Основне');
 
+            diag.seasonsCount = Object.keys(seasons).length;
+            const totalEpisodes = Object.values(seasons).reduce((sum, s) => sum + Object.values(s).reduce((s2, e) => Math.max(
+                s2, e.length), 0), 0);
+            diag.episodesCount = totalEpisodes;
+
+            if (diag.playerUrlsCount === 0) diag.emptyObject = 'playerUrls';
+            else if (allRawSources.length === 0) diag.emptyObject = 'sources (allRawSources)';
+            else if (diag.seasonsCount === 0) diag.emptyObject = 'seasons';
+            else if (diag.episodesCount === 0) diag.emptyObject = 'episodes';
+            else diag.emptyObject = null;
+
+            diag.failedStage = diag.emptyObject ? diag.failedStage : 'OK — усі етапи пройдено успішно';
+
             return {
                 mal_id: animeUrl.hashCode(),
                 title, originalTitle: (typeof originalTitle !== "undefined" && originalTitle ? originalTitle : ""),
@@ -8073,8 +8233,8 @@
                 from: 'animeua',
                 score: rating,
                 sources: sources,
-                totalEpisodes: Object.values(seasons).reduce((sum, s) => sum + Object.values(s).reduce((s2, e) => Math.max(
-                    s2, e.length), 0), 0)
+                totalEpisodes,
+                _diagnostics: diag
             };
         }
 
@@ -13473,10 +13633,10 @@ function renderProfilePage() {
                 buildEpisodeViews();
                 updateFilterChip();
                 document.getElementById('episodePanel').classList.add('visible');
-                // Якщо серій немає — показати зрозуміле повідомлення
+                // Якщо серій немає — замість загального повідомлення показуємо повну технічну діагностику
                 if (seasons.length === 0 || Object.keys(anime.seasons || {}).length === 0) {
                     document.getElementById('episodeViewGrid').innerHTML =
-                        '<div class="episode-empty"><i class="fas fa-search"></i> Серії не знайдені на джерелі. Спробуйте інше аніме.</div>';
+                        renderPlayerDiagnosticReportHtml(anime._diagnostics);
                 }
                 buildBottomSheetData();
             } catch (err) {
@@ -13507,6 +13667,16 @@ function renderProfilePage() {
                     document.getElementById('playerSynopsis').textContent = userMsg;
                 }
 
+                const diagForErr = err._diagnostics || {
+                    url, ua: navigator.userAgent, device: detectDeviceInfo(navigator.userAgent),
+                    httpStatus: null, contentType: null, cfCacheStatus: null, cfRay: null, usedCloudflareWorker: true, corsError: isNetwork,
+                    htmlLoaded: false, htmlSize: 0, iframeCount: 0, iframeUrls: [], foundAshdi: false, foundVidmoly: false, foundPlayerjs: false,
+                    foundDataSrc: false, foundDataFile: false, foundVideoTag: false, foundSourceTag: false, playerUrlsCount: 0, seasonsCount: 0,
+                    episodesCount: 0, extractPlayerIframeUrlsRan: false, extractSourcesFromTextRan: false, foundM3u8: false, foundMp4: false,
+                    foundPlayerjsJson: false, foundBase64Playerjs: false, jsErrors: [err.stack || err.message || String(err)],
+                    failedStage: 'openPlayerPage() — необроблена помилка завантаження', emptyObject: null
+                };
+
                 document.getElementById('episodeViewGrid').innerHTML =
                     `<div class="episode-empty">
                         <i class="fas ${icon}" style="font-size:2rem;margin-bottom:12px;opacity:0.5;"></i>
@@ -13515,10 +13685,164 @@ function renderProfilePage() {
                             onclick="openPlayerPage('${url.replace(/'/g, "\'")}')">
                             <i class="fas fa-redo"></i> Спробувати знову
                         </button>
-                    </div>`;
+                    </div>` + renderPlayerDiagnosticReportHtml(diagForErr, userMsg);
                 document.getElementById('episodePanel').classList.add('visible');
                 console.error('Player load error:', err.message || err);
             }
+        }
+
+        function checkMark(b) { return b ? '✓ Так' : '✗ Ні'; }
+
+        function renderPlayerDiagnosticReportHtml(diag, extraErrorMsg) {
+            if (!diag) {
+                return `<div class="episode-empty"><i class="fas fa-bug"></i> Діагностика недоступна (немає даних).</div>`;
+            }
+            const lines = [];
+            lines.push('========================================');
+            lines.push('VakDab — Player Diagnostic');
+            lines.push('========================================');
+            lines.push('');
+            lines.push('📱 Пристрій:');
+            lines.push(`${diag.device?.type || 'невідомо'}${diag.device?.osVersion ? ' (версія ' + diag.device.osVersion + ')' : ''}`);
+            lines.push('');
+            lines.push('🌐 User-Agent:');
+            lines.push(diag.ua || '—');
+            lines.push('');
+            lines.push('📄 URL:');
+            lines.push(diag.url || '—');
+            lines.push('');
+            lines.push('🌍 HTTP:');
+            lines.push(diag.httpStatus ? `${diag.httpStatus} ${diag.httpStatus === 200 ? 'OK' : ''}`.trim() : 'невідомо (запит не завершився)');
+            lines.push('');
+            lines.push('📦 Content-Type:');
+            lines.push(diag.contentType || 'невідомо');
+            lines.push('');
+            lines.push('📦 HTML:');
+            lines.push(diag.htmlLoaded ? `${diag.htmlSize} bytes` : '✗ Не завантажився');
+            lines.push('');
+            lines.push('🖼 iframe:');
+            lines.push(diag.iframeCount > 0 ? `✓ Знайдено (${diag.iframeCount})` : '✗ Не знайдено');
+            if (diag.iframeUrls && diag.iframeUrls.length) {
+                lines.push('   ' + diag.iframeUrls.map(u => '- ' + u).join('\n   '));
+            }
+            lines.push('');
+            lines.push('🎬 Player URL (playerUrls):');
+            lines.push(diag.playerUrlsCount > 0 ? `✓ Знайдено (${diag.playerUrlsCount})` : '✗ Не знайдено (0)');
+            lines.push('');
+            lines.push('🎞 Playerjs у HTML:');
+            lines.push(checkMark(diag.foundPlayerjs));
+            lines.push('🎥 Ashdi:');
+            lines.push(checkMark(diag.foundAshdi));
+            lines.push('🎥 Vidmoly:');
+            lines.push(checkMark(diag.foundVidmoly));
+            lines.push('🔗 data-src:');
+            lines.push(checkMark(diag.foundDataSrc));
+            lines.push('🔗 data-file:');
+            lines.push(checkMark(diag.foundDataFile));
+            lines.push('📼 <video> тег:');
+            lines.push(checkMark(diag.foundVideoTag));
+            lines.push('📼 <source> тег:');
+            lines.push(checkMark(diag.foundSourceTag));
+            lines.push('');
+            lines.push('🧵 m3u8 знайдено:');
+            lines.push(checkMark(diag.foundM3u8));
+            lines.push('🧵 mp4 знайдено:');
+            lines.push(checkMark(diag.foundMp4));
+            lines.push('🧩 PlayerJS JSON знайдено:');
+            lines.push(checkMark(diag.foundPlayerjsJson));
+            lines.push('🧩 Base64 PlayerJS (евристика):');
+            lines.push(checkMark(diag.foundBase64Playerjs));
+            lines.push('');
+            lines.push('⚙️ extractPlayerIframeUrls() виконалась:');
+            lines.push(checkMark(diag.extractPlayerIframeUrlsRan));
+            lines.push('⚙️ extractSourcesFromText() виконалась:');
+            lines.push(checkMark(diag.extractSourcesFromTextRan));
+            lines.push('');
+            lines.push('📺 Seasons:');
+            lines.push(String(diag.seasonsCount || 0));
+            lines.push('🎬 Episodes:');
+            lines.push(String(diag.episodesCount || 0));
+            lines.push('');
+            lines.push('☁️ Cloudflare Worker використано:');
+            lines.push(checkMark(diag.usedCloudflareWorker));
+            lines.push('☁️ CF-Cache-Status:');
+            lines.push(diag.cfCacheStatus || 'невідомо');
+            if (diag.cfRay) { lines.push('☁️ CF-Ray:'); lines.push(diag.cfRay); }
+            lines.push('🚫 Помилка CORS:');
+            lines.push(checkMark(diag.corsError));
+            lines.push('');
+            lines.push('⚠ Етап помилки:');
+            lines.push(diag.failedStage || 'невідомо');
+            lines.push('');
+            lines.push('🧩 Порожній об\'єкт:');
+            lines.push(diag.emptyObject || 'немає (усі дані знайдено)');
+            lines.push('');
+
+            // Формуємо причину і рекомендацію на основі зібраних даних
+            let reason = '';
+            let recommendation = '';
+            if (diag.httpStatus && diag.httpStatus !== 200) {
+                reason = `Сторінка не завантажилась коректно (HTTP ${diag.httpStatus}).`;
+                recommendation = 'Перевірте доступність animeua.club та Cloudflare Worker (PROXY_URL). Можливо джерело заблокувало запит або тимчасово недоступне.';
+            } else if (diag.corsError) {
+                reason = 'Запит заблоковано політикою CORS або мережевою помилкою.';
+                recommendation = 'Перевірте налаштування Cloudflare Worker (заголовки Access-Control-Allow-Origin) і доступність проксі.';
+            } else if (!diag.htmlLoaded) {
+                reason = 'HTML сторінки взагалі не завантажився.';
+                recommendation = 'Перевірте мережу, проксі-сервер і URL аніме.';
+            } else if (diag.emptyObject === 'hasAnimeContent / hasIframe') {
+                reason = 'Сторінка завантажилась, але це не сторінка аніме (немає ні заголовка, ні плеєра, ні iframe).';
+                recommendation = 'Перевірте, чи актуальний URL аніме на animeua.club — можливо тайтл видалили або посилання застаріло.';
+            } else if (diag.emptyObject === 'playerUrls') {
+                reason = 'HTML завантажився, але жодного iframe із плеєром не знайдено на сторінці.';
+                recommendation = 'Перевірте extractPlayerIframeUrls() — можливо сайт змінив розмітку плеєра (селектори .video-responsive iframe, .pmovie__player iframe тощо).';
+            } else if (diag.emptyObject === 'sources (allRawSources)') {
+                reason = 'playerUrls знайдено, але не вдалося витягнути джерела (sources) з плеєр-сторінок.';
+                recommendation = 'Перевірте extractSourcesFromText() — можливо змінився формат Playerjs/плейлиста на ashdi.vip або vidmoly.';
+            } else if (diag.emptyObject === 'seasons') {
+                reason = 'playerUrls та sources знайдено, але seasons не були створені.';
+                recommendation = 'Перевірити групування джерел у seasons (парсер season/dub/episode).';
+            } else if (diag.emptyObject === 'episodes') {
+                reason = 'seasons створено, але усередині немає жодного епізоду.';
+                recommendation = 'Перевірити парсер номерів епізодів у extractSourcesFromText().';
+            } else if (diag.jsErrors && diag.jsErrors.length) {
+                reason = 'Під час виконання виникла помилка JavaScript (див. стек нижче).';
+                recommendation = 'Перевірте стек помилки — вона вказує на конкретну функцію, де стався збій.';
+            } else {
+                reason = 'Причина невідома: усі перевірені дані знайдено, але серії все одно не з\'явились у плеєрі.';
+                recommendation = 'Перевірте buildSeasonRow() / buildEpisodeViews() — можливо проблема в рендерингу UI, а не в парсингу даних.';
+            }
+            if (extraErrorMsg) reason = extraErrorMsg + ' ' + reason;
+
+            lines.push('🧩 Причина:');
+            lines.push(reason);
+            lines.push('');
+            lines.push('💡 Рекомендація:');
+            lines.push(recommendation);
+            lines.push('');
+            if (diag.jsErrors && diag.jsErrors.length) {
+                lines.push('🧵 Стек помилок JavaScript:');
+                diag.jsErrors.slice(0, 5).forEach(s => lines.push('   ' + String(s).slice(0, 500)));
+                lines.push('');
+            }
+            lines.push('========================================');
+
+            const reportText = lines.join('\n');
+            const safe = escapeHtml(reportText);
+            const reportId = 'diagReport_' + Date.now();
+            return `
+                <div class="episode-empty player-diag-report">
+                    <div class="player-diag-report__toolbar">
+                        <span><i class="fas fa-stethoscope"></i> Технічна діагностика плеєра</span>
+                        <button class="btn-outline" style="padding:4px 12px;border-radius:14px;font-size:0.75rem;cursor:pointer;" onclick="navigator.clipboard.writeText(document.getElementById('${reportId}').textContent).then(()=>showToast('Звіт скопійовано'))">
+                            <i class="fas fa-copy"></i> Копіювати
+                        </button>
+                    </div>
+                    <pre id="${reportId}" class="player-diag-report__pre">${safe}</pre>
+                    <button class="btn-outline" style="margin-top:12px;padding:8px 20px;border-radius:20px;cursor:pointer;" onclick="openPlayerPage('${(diag.url||'').replace(/'/g, "\\'")}')">
+                        <i class="fas fa-redo"></i> Спробувати знову
+                    </button>
+                </div>`;
         }
 
         function updateSourceChip() {
