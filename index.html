@@ -7182,11 +7182,13 @@
         function safeQueryAll(sel, parent) { try { return Array.from((parent || document).querySelectorAll(sel)); } catch {
                 return []; } }
 
-        function getProxyUrl(url) {
+        function getProxyUrl(url, forceUA = 'desktop') {
             if (!url) return null;
-            // force_ua=desktop — проксі підміняє UA на десктопний, бо Android
-            // Chrome/WebView віддає спрощену мобільну версію сторінки без плеєра
-            return PROXY_URL + '?url=' + encodeURIComponent(url) + '&force_ua=desktop';
+            // force_ua=desktop (за замовчуванням) — проксі підміняє UA на десктопний, бо Android
+            // Chrome/WebView віддає спрощену мобільну версію сторінки без плеєра.
+            // force_ua=mobile використовується як запасний варіант, коли десктопний UA
+            // повертає порожній результат (антибот ashdi.vip інколи блокує саме десктопний UA).
+            return PROXY_URL + '?url=' + encodeURIComponent(url) + '&force_ua=' + forceUA;
         }
 
         function isEmbedUrl(url) {
@@ -7856,9 +7858,9 @@
             return { type, osVersion };
         }
 
-        async function fetchUA(url, retries = 2, _diagRef = null) {
+        async function fetchUA(url, retries = 2, _diagRef = null, forceUA = 'desktop') {
             if (url && url.startsWith('http://')) url = 'https://' + url.slice(7);
-            const proxyUrl = getProxyUrl(url);
+            const proxyUrl = getProxyUrl(url, forceUA);
             const doFetch = async () => {
                 const controller = new AbortController();
                 // 20с timeout — достатньо для повільних з'єднань
@@ -7919,7 +7921,7 @@
                 // Retry тільки якщо не скасовано плеєром (playerPageAborted)
                 if (retries > 0 && !(e && e._playerAborted)) {
                     await new Promise(r => setTimeout(r, 800));
-                    return fetchUA(url, retries - 1, _diagRef);
+                    return fetchUA(url, retries - 1, _diagRef, forceUA);
                 }
                 throw e;
             }
@@ -8044,7 +8046,9 @@
                 jsErrors: [],
                 playerPageSnippets: [],
                 failedStage: 'fetchUA() — завантаження HTML сторінки аніме',
-                emptyObject: null
+                emptyObject: null,
+                mobileUAFallbackUsed: false,
+                mobileUAFallbackFound: false
             };
 
             let doc;
@@ -8192,6 +8196,35 @@
                     diag.jsErrors.push((r.reason && r.reason.stack) || (r.reason && r.reason.message) || String(r.reason));
                 }
             });
+
+            // Десктопний UA не знайшов жодного джерела — пробуємо мобільний UA.
+            // На Android деякі плеєр-сторінки (ashdi.vip) інколи віддають порожній HTML
+            // саме на десктопний UA (антибот/rate-limit), але нормально відповідають мобільному.
+            if (allRawSources.length === 0 && playerUrls.length > 0) {
+                diag.mobileUAFallbackUsed = true;
+                diag.failedStage = 'fetchUA(mobile) — повторна спроба з мобільним User-Agent';
+                console.warn('[VakDab] Перша спроба з десктопним UA не вдалася. Пробуємо мобільний UA...');
+                for (const playerUrl of playerUrls) {
+                    let provider = 'Джерело';
+                    if (playerUrl.includes('ashdi')) provider = 'AnimeUA';
+                    else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
+                    else if (playerUrl.includes('player')) provider = 'Player';
+                    try {
+                        const mobileHtml = await fetchUA(playerUrl, 2, diag, 'mobile');
+                        const text = mobileHtml._rawHtml || mobileHtml.body?.innerHTML || '';
+                        const mobileSources = extractSourcesFromText(text, provider + ' (Mobile)');
+                        if (mobileSources.length > 0) {
+                            allRawSources.push(...mobileSources);
+                            diag.mobileUAFallbackFound = true;
+                            console.log('[VakDab] Мобільний UA знайшов джерела:', mobileSources);
+                            break; // Зупиняємось, щойно знайшли хоч одне джерело
+                        }
+                    } catch (e) {
+                        diag.jsErrors.push('mobile UA fallback ' + playerUrl + ': ' + ((e && e.message) || String(e)));
+                        console.warn('[VakDab] Помилка з мобільним UA:', e.message);
+                    }
+                }
+            }
 
             /* console.log removed */
 
@@ -13795,6 +13828,9 @@ function renderProfilePage() {
             lines.push('');
             lines.push('🧩 Порожній об\'єкт:');
             lines.push(diag.emptyObject || 'немає (усі дані знайдено)');
+            lines.push('');
+            lines.push('📲 Fallback на мобільний UA:');
+            lines.push(diag.mobileUAFallbackUsed ? (diag.mobileUAFallbackFound ? '✓ Спрацював (знайшов джерела)' : '✗ Пробував, але джерел не знайшов') : 'не знадобився (десктопний UA спрацював одразу)');
             lines.push('');
 
             // Формуємо причину і рекомендацію на основі зібраних даних
