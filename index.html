@@ -8042,6 +8042,7 @@
                 foundPlayerjsJson: false,
                 foundBase64Playerjs: false,
                 jsErrors: [],
+                playerPageSnippets: [],
                 failedStage: 'fetchUA() — завантаження HTML сторінки аніме',
                 emptyObject: null
             };
@@ -8143,14 +8144,32 @@
                     if (playerUrl.includes('ashdi')) provider = 'AnimeUA';
                     else if (playerUrl.includes('vidmoly')) provider = 'Vidmoly';
                     else if (playerUrl.includes('player')) provider = 'Player';
-                    const playerHtml = await fetchUA(playerUrl);
-                    const text = playerHtml._rawHtml || playerHtml.body?.innerHTML || '';
+                    let playerHtml = await fetchUA(playerUrl);
+                    let text = playerHtml._rawHtml || playerHtml.body?.innerHTML || '';
+                    let sources = extractSourcesFromText(text, provider);
+                    diag.extractSourcesFromTextRan = true;
+                    // Джерело іноді тимчасово блокує запит (антибот/rate-limit) і повертає
+                    // "порожню" сторінку без Playerjs — пробуємо ще раз перед тим як здатись.
+                    let attemptsLeft = 2;
+                    while (sources.length === 0 && attemptsLeft > 0) {
+                        await new Promise(r => setTimeout(r, 700));
+                        try {
+                            playerHtml = await fetchUA(playerUrl);
+                            text = playerHtml._rawHtml || playerHtml.body?.innerHTML || '';
+                            sources = extractSourcesFromText(text, provider);
+                        } catch (e) {
+                            diag.jsErrors.push('retry ' + playerUrl + ': ' + ((e && e.message) || String(e)));
+                        }
+                        attemptsLeft--;
+                    }
                     if (/https?:\/\/[^\s'"<>]+\.m3u8/i.test(text)) diag.foundM3u8 = true;
                     if (/https?:\/\/[^\s'"<>]+\.mp4/i.test(text)) diag.foundMp4 = true;
                     if (/Playerjs\s*\(/i.test(text)) diag.foundPlayerjsJson = true;
                     if (/playerjs/i.test(text) && /[A-Za-z0-9+/]{120,}={0,2}/.test(text)) diag.foundBase64Playerjs = true;
-                    const sources = extractSourcesFromText(text, provider);
-                    diag.extractSourcesFromTextRan = true;
+                    if (sources.length === 0) {
+                        if (!diag.playerPageSnippets) diag.playerPageSnippets = [];
+                        diag.playerPageSnippets.push({ url: playerUrl, size: text.length, snippet: text.slice(0, 400) });
+                    }
                     // Вкладені iframe (якщо є)
                     const nestedResults = await Promise.allSettled(
                         safeQueryAll('iframe', playerHtml)
@@ -13824,6 +13843,16 @@ function renderProfilePage() {
                 lines.push('🧵 Стек помилок JavaScript:');
                 diag.jsErrors.slice(0, 5).forEach(s => lines.push('   ' + String(s).slice(0, 500)));
                 lines.push('');
+            }
+            if (diag.playerPageSnippets && diag.playerPageSnippets.length) {
+                lines.push('🔍 Сирий фрагмент плеєр-сторінки (коли sources порожні):');
+                diag.playerPageSnippets.slice(0, 3).forEach(p => {
+                    lines.push(`   URL: ${p.url}`);
+                    lines.push(`   Розмір: ${p.size} символів`);
+                    lines.push('   Перші 400 символів:');
+                    lines.push('   ' + p.snippet.replace(/\n/g, ' ').slice(0, 400));
+                    lines.push('');
+                });
             }
             lines.push('========================================');
 
