@@ -3341,8 +3341,8 @@
         }
 
         .profile-nick-badge {
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             flex-shrink: 0;
             color: var(--accent);
             display: inline-flex;
@@ -3353,18 +3353,29 @@
             background: transparent !important;
             border-radius: 6px;
             overflow: hidden;
+            margin-top: -3px;
+            margin-left: -2px;
         }
         .profile-nick-badge:hover {
             transform: scale(1.15);
         }
         @media (min-width:480px) {
-            .profile-nick-badge { width: 44px; height: 44px; }
+            .profile-nick-badge { width: 38px; height: 38px; }
         }
 
+        .profile-medals-section {
+            margin-top: 12px;
+        }
+        .profile-medals-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         .profile-medals-row {
             display: flex;
-            gap: 6px;
-            margin-top: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         .profile-medal {
@@ -3379,9 +3390,23 @@
             align-items: center;
             justify-content: center;
             transition: all .25s ease;
+            position: relative;
+        }
+        .profile-medal::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(10px);
+            z-index: -1;
+            transition: opacity .25s ease;
+        }
+        .profile-medal:hover::before {
+            opacity: 0.25;
         }
         .profile-medal:hover {
-            border-color: var(--accent);
             color: var(--accent);
             transform: translateY(-2px);
         }
@@ -12860,7 +12885,7 @@
                 ${s.nickBadge !== null ? `<span class="settings-sticker-mini">${renderStickerFaceByKey(s, s.nickBadge)}</span>` : `<span class="settings-sticker-summary-empty">Не встановлено</span>`}
               </div>
               <div class="settings-sticker-summary-row">
-                <span class="settings-sticker-summary-label">Медалі профілю (${s.medals.length}/5)</span>
+                <span class="settings-sticker-summary-label">Медалі профілю (${s.medals.length}/50)</span>
                 <div class="settings-sticker-medals-mini">${s.medals.length ? s.medals.map(k => `<span class="settings-sticker-mini">${renderStickerFaceByKey(s, k)}</span>`).join('') : `<span class="settings-sticker-summary-empty">Немає</span>`}</div>
               </div>
               <button class="settings-media-btn" id="settingsOpenStickersBtn" style="margin-top:0.9rem;width:100%;justify-content:center;">
@@ -13238,6 +13263,15 @@
                 history: history.slice(0, 50),
                 bookmarksList: bookmarks
             };
+        }
+
+        function getMedalWordForm(n) {
+            const lastTwo = n % 100;
+            const lastOne = n % 10;
+            if (lastTwo >= 11 && lastTwo <= 19) return 'медалей';
+            if (lastOne === 1) return 'медаль';
+            if (lastOne >= 2 && lastOne <= 4) return 'медалі';
+            return 'медалей';
         }
 
         function getAchievements(history, bookmarks, uniqueCount, totalEpisodes, totalWatchTime) {
@@ -13671,14 +13705,12 @@ function renderProfilePage() {
                   </div>
                 </div>
                 ${stickerData.medals.length ? `
-                <div class="profile-medals-row">
-                  ${stickerData.medals.map(k => `<span class="profile-medal">${renderStickerFaceByKey(stickerData, k)}</span>`).join('')}
+                <div class="profile-medals-section">
+                  <div class="profile-medals-count">${stickerData.medals.length} ${getMedalWordForm(stickerData.medals.length)}</div>
+                  <div class="profile-medals-row">
+                    ${stickerData.medals.map(k => `<span class="profile-medal" title="Медаль">${renderStickerFaceByKey(stickerData, k)}</span>`).join('')}
+                  </div>
                 </div>` : ''}
-                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="btn-outline" id="profileLogoutBtn" onclick="Auth.handleExit()" style="font-size:0.8rem;padding:0.3rem 1rem;min-height:36px;">
-                    <i class="fas fa-sign-out-alt"></i> Вийти
-                  </button>
-                </div>
               </div>
             </div>
             <div class="profile-tabs${tabsStyleClass}" id="profileTabs">
@@ -13716,18 +13748,10 @@ function renderProfilePage() {
                     document.getElementById('profilePanel-' + target).classList.add('active');
                 });
             });
-            // Guest mode: ховаємо sync кнопку, міняємо "Вийти" на "Увійти"
+            // Guest mode: ховаємо sync кнопку
             if (typeof isGuestMode !== 'undefined' && isGuestMode) {
                 const syncBtn = document.getElementById('profileSyncBtn');
                 if (syncBtn) syncBtn.style.display = 'none';
-                const logoutBtn = document.getElementById('profileLogoutBtn');
-                if (logoutBtn) {
-                    logoutBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Увійти';
-                    logoutBtn.onclick = () => {
-                        Auth.setGuest(false);
-                        renderAuthPage();
-                    };
-                }
             }
             syncLeftdockActive();
         }
@@ -16282,7 +16306,7 @@ function renderProfilePage() {
                                 if (cur.medals.includes(sKey)) {
                                     cur.medals = cur.medals.filter(k => k !== sKey);
                                 } else {
-                                    if (cur.medals.length >= 5) { showToast('Максимум 5 медалей — спочатку приберіть одну'); return; }
+                                    if (cur.medals.length >= 50) { showToast('Максимум 50 медалей — спочатку приберіть одну'); return; }
                                     cur.medals.push(sKey);
                                 }
                             }
