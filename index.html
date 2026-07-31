@@ -3318,15 +3318,21 @@
         }
 
         .profile-nick-badge {
-            width: 18px;
-            height: 18px;
+            width: 28px;
+            height: 28px;
             flex-shrink: 0;
             color: var(--accent);
             display: inline-flex;
             animation: fadeInUp .3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+        .profile-nick-badge:hover {
+            transform: scale(1.15);
         }
         @media (min-width:480px) {
-            .profile-nick-badge { width: 20px; height: 20px; }
+            .profile-nick-badge { width: 34px; height: 34px; }
         }
 
         .profile-medals-row {
@@ -15713,6 +15719,39 @@ function renderProfilePage() {
             return s ? renderStickerVisual(s) : '';
         }
 
+        let _everyoneStickersCache = null;
+        async function fetchEveryoneStickers() {
+            if (_everyoneStickersCache) return _everyoneStickersCache;
+            try {
+                const { collection, query, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+                const q = query(collection(db, 'users'), limit(60));
+                const snap = await getDocs(q);
+                let sets = [];
+                let singles = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.stickers) {
+                        if (Array.isArray(d.stickers.sets)) sets.push(...d.stickers.sets);
+                        if (Array.isArray(d.stickers.singles)) singles.push(...d.stickers.singles);
+                    }
+                });
+                // Фільтруємо дублікати за ID
+                const uniqueSets = [];
+                const setIds = new Set();
+                sets.forEach(s => { if (s.id && !setIds.has(s.id)) { setIds.add(s.id); uniqueSets.push(s); } });
+                
+                const uniqueSingles = [];
+                const singleIds = new Set();
+                singles.forEach(s => { if (s.id && !singleIds.has(s.id)) { singleIds.add(s.id); uniqueSingles.push(s); } });
+
+                _everyoneStickersCache = { sets: uniqueSets, singles: uniqueSingles };
+                return _everyoneStickersCache;
+            } catch (e) {
+                console.error('[Stickers] Global fetch failed:', e);
+                return { sets: [], singles: [] };
+            }
+        }
+
         window.renderStickersPage = function() {
             const container = document.getElementById('stickersPageContainer');
             if (!container) return;
@@ -15768,6 +15807,25 @@ function renderProfilePage() {
                 let visibleSingles = (ui.activeFilter === 'Набори') ? [] : d.singles.filter(s => matchesSearch('наліпка ' + (s.variant + 1)));
                 if (ui.activeFilter === 'Улюблені') visibleSingles = visibleSingles.filter(s => s.favorite);
 
+                if (ui.activeFilter === 'Всі') {
+                    const everyone = _everyoneStickersCache || { sets: [], singles: [] };
+                    const mySetIds = new Set(d.sets.map(s => s.id));
+                    everyone.sets.forEach(s => {
+                        if (!mySetIds.has(s.id) && matchesSearch(s.title)) {
+                            visibleSets.push(s);
+                        }
+                    });
+                    const mySingleIds = new Set(d.singles.map(s => s.id));
+                    everyone.singles.forEach(s => {
+                        if (!mySingleIds.has(s.id) && matchesSearch(s.image ? 'власна' : 'наліпка ' + (s.variant + 1))) {
+                            visibleSingles.push(s);
+                        }
+                    });
+                    if (!_everyoneStickersCache) {
+                        fetchEveryoneStickers().then(() => render());
+                    }
+                }
+
                 const nothingAtAll = d.singles.length === 0 && d.sets.length === 0;
                 const nothingVisible = visibleSets.length === 0 && visibleSingles.length === 0;
 
@@ -15776,8 +15834,7 @@ function renderProfilePage() {
                         <div class="filter-page__header" style="margin-bottom:0.9rem;">
                             <button class="filter-page__back" id="stickersBackBtn" aria-label="Назад"><i class="fas fa-arrow-left"></i></button>
                             <div style="flex:1;">
-                                <div class="filter-page__eyebrow">Профіль</div>
-                                <div class="filter-page__title">Мої наліпки</div>
+                                <div class="filter-page__title">Наліпки</div>
                             </div>
                             <button id="stickersToggleView" class="filter-page__back" aria-label="Вигляд">
                                 <i class="fas ${ui.view === 'grid' ? 'fa-list' : 'fa-table-cells'}"></i>
@@ -15832,7 +15889,7 @@ function renderProfilePage() {
                                                 </button>
                                             </div>
                                             <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.4rem;">
-                                                ${st.variants.slice(0, 6).map(v => `<div style="aspect-ratio:1;border-radius:10px;background:var(--tag-bg);border:1px solid var(--border);padding:0.35rem;">${stickerFaceSvg(v)}</div>`).join('')}
+                                                ${[...(st.variants || []).map(v => ({variant: v})), ...(st.images || []).map(id => d.singles.find(s => s.id === id))].filter(Boolean).slice(0, 6).map(s => `<div style="aspect-ratio:1;border-radius:10px;background:${s.image ? 'transparent' : 'var(--tag-bg)'};border:${s.image ? 'none' : '1px solid var(--border)'};padding:${s.image ? '0' : '0.35rem'};overflow:hidden;">${renderStickerVisual(s)}</div>`).join('')}
                                             </div>
                                         </div>
                                     `).join('')}
@@ -15846,7 +15903,7 @@ function renderProfilePage() {
                                 </div>
                                 <div style="display:grid;grid-template-columns:${ui.view === 'grid' ? 'repeat(4,1fr)' : '1fr'};gap:0.6rem;margin-bottom:1.5rem;">
                                     ${visibleSingles.map(s => { const sKey = stickerKeyFor(s); const sLabel = s.image ? 'Власна наліпка' : ('Наліпка #' + (s.variant + 1)); return ui.view === 'grid' ? `
-                                        <button class="sticker-single-tile" data-single-id="${s.id}" style="aspect-ratio:1;border-radius:14px;border:1px solid var(--border);background:var(--tag-bg);padding:${s.image ? '0' : '0.6rem'};position:relative;cursor:pointer;transition:all var(--transition);overflow:hidden;">
+                                        <button class="sticker-single-tile" data-single-id="${s.id}" style="aspect-ratio:1;border-radius:14px;border:${s.image ? 'none' : '1px solid var(--border)'};background:${s.image ? 'transparent' : 'var(--tag-bg)'};padding:${s.image ? '0' : '0.6rem'};position:relative;cursor:pointer;transition:all var(--transition);overflow:hidden;">
                                             ${renderStickerVisual(s)}
                                             ${s.favorite ? `<i class="fas fa-star" style="position:absolute;top:6px;right:6px;font-size:0.65rem;color:#fff;text-shadow:0 0 3px rgba(0,0,0,0.6);"></i>` : ''}
                                             ${d.nickBadge === sKey ? `<i class="fas fa-id-badge" style="position:absolute;bottom:6px;left:6px;font-size:0.65rem;color:#fff;text-shadow:0 0 3px rgba(0,0,0,0.6);"></i>` : ''}
@@ -15854,7 +15911,7 @@ function renderProfilePage() {
                                         </button>
                                     ` : `
                                         <button class="sticker-single-tile" data-single-id="${s.id}" style="display:flex;align-items:center;gap:0.8rem;border:1px solid var(--border);border-radius:14px;padding:0.6rem 0.8rem;background:var(--surface);cursor:pointer;text-align:left;">
-                                            <div style="width:42px;height:42px;flex-shrink:0;background:var(--tag-bg);border-radius:10px;padding:${s.image ? '0' : '0.4rem'};overflow:hidden;">${renderStickerVisual(s)}</div>
+                                            <div style="width:42px;height:42px;flex-shrink:0;background:${s.image ? 'transparent' : 'var(--tag-bg)'};border-radius:10px;padding:${s.image ? '0' : '0.4rem'};overflow:hidden;">${renderStickerVisual(s)}</div>
                                             <div style="flex:1;">
                                                 <div style="font-size:0.85rem;font-weight:700;">${sLabel}</div>
                                                 <div style="font-size:0.72rem;color:var(--text-muted);">
@@ -15927,6 +15984,15 @@ function renderProfilePage() {
                     `;
                 }
                 if (ui.step === 'pack') {
+                    const allOwned = [...d.singles];
+                    // Також додаємо базові варіанти, якщо їх ще немає в singles
+                    const ownedVariants = d.singles.map(s => s.variant).filter(v => v !== undefined);
+                    for (let i = 0; i < STICKER_VARIANT_COUNT; i++) {
+                        if (!ownedVariants.includes(i)) {
+                            allOwned.push({ variant: i, id: 'v_' + i });
+                        }
+                    }
+
                     return `
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
                             <button id="stickersBackToChoose" style="color:var(--text-muted);background:none;border:none;font-size:1rem;cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
@@ -15939,8 +16005,19 @@ function renderProfilePage() {
                                 style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:12px;padding:0.75rem 0.9rem;color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;">
                         </div>
                         <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-bottom:0.5rem;">Виберіть наліпки (${ui.pickedForPack.length})</label>
-                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem;">
-                            ${Array.from({ length: STICKER_VARIANT_COUNT }, (_, i) => i).map(v => Tile(v, { selected: ui.pickedForPack.includes(v) })).join('')}
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem;max-height:300px;overflow-y:auto;padding:2px;">
+                            ${allOwned.map(s => {
+                                const v = s.variant !== undefined ? s.variant : null;
+                                const isSelected = v !== null ? ui.pickedForPack.includes(v) : ui.pickedForPack.includes('img:' + s.id);
+                                return `
+                                    <button type="button" class="aspect-square rounded-xl border flex items-center justify-center p-2.5 shrink-0 relative transition-all"
+                                        style="background:${isSelected ? 'var(--accent)' : 'var(--tag-bg)'};border-color:${isSelected ? 'var(--accent)' : 'var(--border)'};color:${isSelected ? 'var(--accent-text)' : 'var(--text)'};"
+                                        data-pack-sticker="${v !== null ? v : 'img:' + s.id}">
+                                        <div style="width:100%;height:100%;padding:${s.image ? '0' : '0.2rem'};">${renderStickerVisual(s)}</div>
+                                        ${isSelected ? `<span class="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center" style="background:var(--accent-text);color:var(--accent);"><i class="fas fa-check" style="font-size:9px;"></i></span>` : ''}
+                                    </button>
+                                `;
+                            }).join('')}
                         </div>
                         <button id="stickersConfirmPack" ${!ui.packName.trim() || ui.pickedForPack.length === 0 ? 'disabled' : ''} style="width:100%;padding:0.9rem;border-radius:14px;border:none;font-weight:800;font-size:0.9rem;cursor:pointer;background:var(--accent);color:var(--accent-text);opacity:${!ui.packName.trim() || ui.pickedForPack.length === 0 ? 0.5 : 1};transition:all var(--transition);">
                             Створити набір
@@ -15975,11 +16052,14 @@ function renderProfilePage() {
                             <div style="margin-bottom:1rem;">
                                 <div style="font-size:1rem;font-weight:800;margin-bottom:0.7rem;">${escapeHtml(st.title)}</div>
                                 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.5rem;margin-bottom:1rem;">
-                                    ${st.variants.map(v => `<div style="aspect-ratio:1;background:var(--tag-bg);border:1px solid var(--border);border-radius:10px;padding:0.35rem;position:relative;">
-                                        ${stickerFaceSvg(v)}
-                                        ${d.nickBadge === ('v:' + v) ? `<i class="fas fa-id-badge" style="position:absolute;bottom:2px;left:2px;font-size:0.55rem;"></i>` : ''}
-                                        ${d.medals.includes('v:' + v) ? `<i class="fas fa-medal" style="position:absolute;bottom:2px;right:2px;font-size:0.55rem;"></i>` : ''}
-                                    </div>`).join('')}
+                                    ${[...(st.variants || []).map(v => ({variant: v})), ...(st.images || []).map(id => d.singles.find(s => s.id === id))].filter(Boolean).map(s => {
+                                        const sKey = stickerKeyFor(s);
+                                        return `<div style="aspect-ratio:1;background:${s.image ? 'transparent' : 'var(--tag-bg)'};border:${s.image ? 'none' : '1px solid var(--border)'};border-radius:10px;padding:${s.image ? '0' : '0.35rem'};position:relative;overflow:hidden;">
+                                            ${renderStickerVisual(s)}
+                                            ${d.nickBadge === sKey ? `<i class="fas fa-id-badge" style="position:absolute;bottom:2px;left:2px;font-size:0.55rem;color:#fff;text-shadow:0 0 2px #000;"></i>` : ''}
+                                            ${d.medals.includes(sKey) ? `<i class="fas fa-medal" style="position:absolute;bottom:2px;right:2px;font-size:0.55rem;color:#fff;text-shadow:0 0 2px #000;"></i>` : ''}
+                                        </div>`;
+                                    }).join('')}
                                 </div>
                             </div>
                             <div style="display:flex;flex-direction:column;gap:0.5rem;">
@@ -16033,16 +16113,25 @@ function renderProfilePage() {
                     document.getElementById('stickerFileInput')?.click();
                 });
 
-                if (ui.step === 'single' || ui.step === 'pack') {
+                if (ui.step === 'single') {
                     document.querySelectorAll('[data-variant]').forEach(btn => {
                         btn.addEventListener('click', () => {
-                            const v = parseInt(btn.dataset.variant, 10);
-                            if (ui.step === 'single') { ui.pickedSingle = v; render(); }
-                            else {
-                                if (ui.pickedForPack.includes(v)) ui.pickedForPack = ui.pickedForPack.filter(x => x !== v);
-                                else ui.pickedForPack.push(v);
-                                render();
+                            ui.pickedSingle = parseInt(btn.dataset.variant, 10);
+                            render();
+                        });
+                    });
+                }
+                if (ui.step === 'pack') {
+                    document.querySelectorAll('[data-pack-sticker]').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const val = btn.dataset.packSticker;
+                            const stickerVal = val.startsWith('img:') ? val : parseInt(val, 10);
+                            if (ui.pickedForPack.includes(stickerVal)) {
+                                ui.pickedForPack = ui.pickedForPack.filter(x => x !== stickerVal);
+                            } else {
+                                ui.pickedForPack.push(stickerVal);
                             }
+                            render();
                         });
                     });
                 }
@@ -16065,7 +16154,18 @@ function renderProfilePage() {
                 document.getElementById('stickersConfirmPack')?.addEventListener('click', () => {
                     if (!ui.packName.trim() || ui.pickedForPack.length === 0) return;
                     const cur = data();
-                    cur.sets.unshift({ id: 'set_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title: ui.packName.trim(), variants: [...ui.pickedForPack], favorite: false, addedAt: Date.now() });
+                    // Підтримка і варіантів (числа) і власних зображень (img:id)
+                    const packVariants = ui.pickedForPack.filter(x => typeof x === 'number');
+                    const packImages = ui.pickedForPack.filter(x => typeof x === 'string' && x.startsWith('img:'));
+                    
+                    cur.sets.unshift({ 
+                        id: 'set_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), 
+                        title: ui.packName.trim(), 
+                        variants: packVariants,
+                        images: packImages.map(x => x.slice(4)), // зберігаємо тільки ID
+                        favorite: false, 
+                        addedAt: Date.now() 
+                    });
                     saveData(cur);
                     showToast('Набір створено');
                     closeOverlay();
