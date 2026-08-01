@@ -7504,7 +7504,30 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-</style>
+
+        /* --- New Comments & UI Style --- */
+        .comments-section { margin-top: 24px; padding: 0 16px 20px; }
+        .comments-container { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .comment-item { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; backdrop-filter: blur(var(--blur-amount)); animation: fadeInUp 0.4s ease both; }
+        .comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .comment-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-text); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+        .comment-name { font-size: 13px; font-weight: 600; color: var(--text); }
+        .comment-time { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+        .comment-text { font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+        .comment-input-wrap { margin-top: 16px; display: flex; gap: 8px; }
+        .comment-input { flex: 1; background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s; }
+        .comment-input:focus { border-color: var(--accent); }
+        .comment-send { background: var(--accent); color: var(--accent-text); border: none; border-radius: var(--radius-sm); padding: 0 16px; cursor: pointer; font-weight: 600; font-size: 13px; transition: opacity 0.2s; }
+        .comment-send:hover { opacity: 0.9; }
+        
+        .player-play-fab { 
+            background: var(--accent) !important; 
+            color: var(--accent-text) !important; 
+            box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.4) !important;
+        }
+        .player-play-fab svg { fill: currentColor; }
+
+    </style>
 </head>
 <body class="appletv-agnative-topnav">
 
@@ -7595,6 +7618,23 @@
                 <div class="poster-meta" id="playerPosterMeta"></div>
                 <div class="poster-synopsis" id="playerSynopsis"></div>
                 <button class="synopsis-more-btn" id="synopsisMoreBtn">більше</button>
+
+                <div class="comments-section">
+                    <div class="section-title" style="margin-bottom:12px; justify-content: space-between; display: flex; align-items: center;">
+                        <span>Відгуки</span>
+                        <span id="animeCommentCount" style="font-size: 12px; color: var(--text-muted); font-weight: 400;">0 коментарів</span>
+                    </div>
+                    <div class="comments-container" id="animeCommentsList">
+                        <!-- Коментарі будуть тут -->
+                    </div>
+                    <div class="comment-input-wrap">
+                        <input type="text" class="comment-input" id="animeCommentInput" placeholder="Напишіть відгук...">
+                        <button class="comment-send" id="sendAnimeComment">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="player-actions-block">
                     <button class="player-play-fab" id="playerPlayFab" title="Дивитись">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
@@ -9982,6 +10022,67 @@
             stopHeroRotation();
             startHeroRotation();
         }
+
+        
+        // --- Anime Specific Comments Logic ---
+        function loadAnimeComments(url) {
+            const list = document.getElementById('animeCommentsList');
+            const count = document.getElementById('animeCommentCount');
+            if (!list) return;
+            
+            const key = 'comments_' + url.hashCode();
+            const comments = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            count.textContent = `${comments.length} коментарів`;
+            
+            if (comments.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Станьте першим, хто залишить відгук!</div>';
+                return;
+            }
+            
+            list.innerHTML = comments.map(c => `
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <div class="comment-avatar">${c.name[0]}</div>
+                        <div class="comment-name">${c.name}</div>
+                        <div class="comment-time">${c.time}</div>
+                    </div>
+                    <div class="comment-text">${c.text}</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('sendAnimeComment')?.addEventListener('click', () => {
+            const input = document.getElementById('animeCommentInput');
+            const text = input.value.trim();
+            if (!text || !playerPageCurrentAnimeUrl) return;
+            
+            const key = 'comments_' + playerPageCurrentAnimeUrl.hashCode();
+            const comments = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newComment = {
+                name: currentUser?.displayName || 'Анонім',
+                text: text,
+                time: 'щойно',
+                timestamp: Date.now()
+            };
+            
+            comments.unshift(newComment);
+            localStorage.setItem(key, JSON.stringify(comments));
+            input.value = '';
+            loadAnimeComments(playerPageCurrentAnimeUrl);
+        });
+        
+        // Add Enter key support
+        document.getElementById('animeCommentInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('sendAnimeComment').click();
+        });
+
+        // Initialize Lucide icons if not already done
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+
 
         // ====================================================================
         //  ГОДИННИК
@@ -14919,6 +15020,7 @@ function renderProfilePage() {
             updateLikeButton();
             updateDislikeButton();
             updateBookmarkButton(url);
+            loadAnimeComments(url);
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             modal.querySelector('.modal-content').scrollTop = 0;
@@ -15353,6 +15455,7 @@ function renderProfilePage() {
                 Storage.setBookmarks(bookmarks);
                 showToast('Видалено з закладок');
                 updateBookmarkButton(url);
+            loadAnimeComments(url);
                 if (Router.currentRoute === 'profile') renderProfilePage();
                 return;
             }
@@ -15371,6 +15474,7 @@ function renderProfilePage() {
             DailyStats.increment('bookmarksToday', 1);
             showToast('Додано до закладок');
             updateBookmarkButton(url);
+            loadAnimeComments(url);
             if (Router.currentRoute === 'profile') renderProfilePage();
         }
 
