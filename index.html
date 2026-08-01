@@ -8151,6 +8151,60 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- НОВЕ ВІКНО ПЕРЕГЛЯДУ (З ФІЛЬТРАМИ ТА СЕРІЯМИ) -->
+    <div id="watchPageModal" class="modal" role="dialog" aria-modal="true" style="z-index: 1001; background: #000;">
+        <div class="modal-content" style="background: #000; padding: 0;">
+            <!-- Topbar -->
+            <div class="flex items-center justify-between p-4 sticky top-0 bg-black z-10">
+                <div class="flex items-center gap-3">
+                    <button class="icon-btn" id="closeWatchPageBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-white">Дивитися</h2>
+                </div>
+            </div>
+
+            <!-- Horizontal Menu (Source, Filter) -->
+            <div class="flex items-center gap-6 px-4 py-2 overflow-x-auto no-scrollbar border-b border-gray-900">
+                <div class="flex items-center gap-2 cursor-pointer opacity-80 hover:opacity-100" id="watchSourceBtn">
+                    <span class="text-gray-400 text-sm">Источник</span>
+                    <div class="bg-gray-800 px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span id="watchCurrentSource">Vidik - 1080p</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 cursor-pointer opacity-80 hover:opacity-100" id="watchFilterBtn">
+                    <span class="text-gray-400 text-sm">Фільтр</span>
+                    <div class="bg-gray-800 px-2 py-1 rounded text-xs text-white" id="watchCurrentFilter">Сезон 1</div>
+                </div>
+            </div>
+
+            <!-- View Switcher -->
+            <div class="px-4 py-4">
+                <div class="bg-gray-900/50 p-1 rounded-xl flex gap-1 w-fit">
+                    <button class="px-4 py-2 rounded-lg text-sm text-white bg-gray-800" data-view="grid">Сітка</button>
+                    <button class="px-4 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800/50" data-view="compact">Компактний</button>
+                    <button class="px-4 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800/50" data-view="classic">Класичний</button>
+                </div>
+            </div>
+
+            <!-- Season Selector -->
+            <div class="px-4 py-2 flex items-center gap-3 overflow-x-auto no-scrollbar">
+                <span class="text-gray-500 text-sm shrink-0">Сезон</span>
+                <div class="flex gap-2" id="watchSeasonList">
+                    <!-- Seasons will be injected here -->
+                </div>
+            </div>
+
+            <!-- Episode List -->
+            <div class="px-4 py-6">
+                <div id="watchEpisodeContainer" class="grid grid-cols-2 gap-4">
+                    <!-- Episodes will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="playerPageModal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
 
@@ -8246,11 +8300,7 @@
                 <button class="synopsis-more-btn" id="synopsisMoreBtn">більше</button>
             </section>
 
-            <!-- EPISODES -->
-            <section>
-                <div class="section-title" id="episodeSectionTitle">Сезон 1</div>
-                <div class="hscroll" id="episodeViewGrid"></div>
-            </section>
+
 
             <!-- RECOMMENDATIONS -->
             <section id="recommendationsSection" style="display:none;">
@@ -8388,6 +8438,8 @@
         const CLOUDINARY_CLOUD_NAME = 'w1a1sqp0';
         const CLOUDINARY_UPLOAD_PRESET = 'VakDab';
         const ANIMEUA_BASE = 'https://animeua.club';
+        const TMDB_API_KEY = '38fef08bc6a49bdd5a69c336d34a7954';
+        const TMDB_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzOGZlZjA4YmM2YTQ5YmRkNWE2OWMzMzZkMzRhNzk1NCIsIm5iZiI6MTc4NDg4NTM5Ni42MjksInN1YiI6IjZhNjMzMDk0YmE2NjFmZWJhOWYzYTgzZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.NT017KonNSx37iGdTXd0hRfcnoMIy8mKtwT_QqE4rew';
         let playerPageAnimeuaSeasons = null;
         let externalSourceCache = {};
 
@@ -9356,6 +9408,52 @@
             return parseAnimeuaCards(doc);
         }
 
+        async function fetchTMDBMetadata(title, originalTitle, year) {
+            try {
+                // Очищаємо назву від зайвих символів для кращого пошуку
+                const cleanTitle = (originalTitle || title || '').replace(/\(.*\)/, '').trim();
+                if (!cleanTitle) return null;
+
+                const searchUrl = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanTitle)}&language=uk-UA`;
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+
+                if (data.results && data.results.length > 0) {
+                    // Шукаємо найбільш підходящий результат (пріоритет TV-шоу для аніме)
+                    let result = data.results.find(r => r.media_type === 'tv') || data.results[0];
+                    
+                    // Якщо є рік, спробуємо знайти збіг за роком
+                    if (year) {
+                        const yearMatch = data.results.find(r => {
+                            const date = r.first_air_date || r.release_date;
+                            return date && date.startsWith(year.toString());
+                        });
+                        if (yearMatch) result = yearMatch;
+                    }
+
+                    // Отримуємо детальнішу інформацію
+                    const detailUrl = `https://api.themoviedb.org/3/${result.media_type}/${result.id}?api_key=${TMDB_API_KEY}&language=uk-UA&append_to_response=images,credits`;
+                    const detailRes = await fetch(detailUrl);
+                    const detailData = await detailRes.json();
+
+                    return {
+                        tmdbId: detailData.id,
+                        posterPath: detailData.poster_path ? `https://image.tmdb.org/t/p/w500${detailData.poster_path}` : null,
+                        backdropPath: detailData.backdrop_path ? `https://image.tmdb.org/t/p/original${detailData.backdrop_path}` : null,
+                        synopsis: detailData.overview,
+                        rating: detailData.vote_average,
+                        genres: (detailData.genres || []).map(g => g.name),
+                        status: detailData.status,
+                        originalTitle: detailData.original_name || detailData.original_title,
+                        title: detailData.name || detailData.title
+                    };
+                }
+            } catch (e) {
+                console.warn('TMDB fetch error:', e);
+            }
+            return null;
+        }
+
         async function loadAnimeuaDetail(animeUrl) {
             const diag = {
                 url: animeUrl,
@@ -9602,6 +9700,8 @@
                 for (const d in seasons[s]) seasons[s][d].sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
 
             const sources = ['Основне'];
+            const providers = new Set(allRawSources.map(s => s.provider).filter(Boolean));
+            providers.forEach(p => { if (p !== 'Основне') sources.push(p); });
             if (sources.length === 0) sources.push('Основне');
 
             diag.seasonsCount = Object.keys(seasons).length;
@@ -15667,17 +15767,31 @@ function renderProfilePage() {
                 const anime = await loadAnimeuaDetail(url);
                 // Якщо плеєр вже закрили поки завантажувалось — не оновлювати DOM
                 if (_thisSignal.aborted || modal.style.display === 'none') return;
+
+                // Спробуємо отримати метадані з TMDB
+                const tmdbData = await fetchTMDBMetadata(anime.title, anime.originalTitle, anime.year);
+                if (tmdbData) {
+                    if (tmdbData.posterPath) anime.tmdbPoster = tmdbData.posterPath;
+                    if (tmdbData.backdropPath) anime.tmdbBackdrop = tmdbData.backdropPath;
+                    if (tmdbData.synopsis) anime.synopsis = tmdbData.synopsis;
+                    if (tmdbData.rating) anime.score = tmdbData.rating.toFixed(1);
+                    if (tmdbData.genres && tmdbData.genres.length > 0) anime.genres = tmdbData.genres;
+                }
+
                 playerPageAnime = anime;
                 playerPageAnimeuaSeasons = anime.seasons || {};
                 externalSourceCache = {};
                 playerPageSources = ['Основне'];
                 playerPageCurrentSource = 'Основне';
-                const posterUrl = anime.images?.jpg?.large_image_url || '';
+                
+                const posterUrl = anime.tmdbPoster || anime.images?.jpg?.large_image_url || '';
+                const backdropUrl = anime.tmdbBackdrop || posterUrl;
+
                 document.getElementById('playerPosterImg').src = posterUrl;
                 document.getElementById('playerPosterTitle').textContent = anime.title;
                 document.getElementById('playerKicker').textContent = anime.originalTitle || anime.title;
                 document.getElementById('playerTopbarTitle').textContent = anime.title;
-                document.getElementById('playerBlurBg').style.backgroundImage = `url(${posterUrl})`;
+                document.getElementById('playerBlurBg').style.backgroundImage = `url(${backdropUrl})`;
                 const totalEpisodes = Object.values(anime.seasons || {}).reduce((sum, s) => sum + Object.values(s).reduce((s2,
                     e) => Math.max(s2, e.length), 0), 0);
                 document.getElementById('playerAgeBadge').textContent = anime.score || '—';
@@ -15953,6 +16067,7 @@ function renderProfilePage() {
 
         async function playEpisode(file, epNum) {
             if (!file) { showToast('Немає файлу для відтворення'); return; }
+            closeWatchPage();
             playerPageActiveEpisodeFile = file;
             playerPageCurrentEpisodeNum = epNum || '1';
             const videoContainer = document.getElementById('playerVideoContainer');
@@ -16032,6 +16147,135 @@ function renderProfilePage() {
             setTimeout(() => { videoContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
         }
 
+        function openWatchPage() {
+            const modal = document.getElementById('watchPageModal');
+            if (!modal) return;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            renderWatchEpisodes();
+            updateWatchFilters();
+            buildWatchSeasonRow();
+        }
+
+        function closeWatchPage() {
+            const modal = document.getElementById('watchPageModal');
+            if (!modal) return;
+            modal.style.display = 'none';
+            // Не скидаємо overflow, якщо ще відкрито playerPageModal
+            if (document.getElementById('playerPageModal').style.display === 'none') {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function updateWatchFilters() {
+            document.getElementById('watchCurrentSource').textContent = playerPageCurrentSource || 'Основне';
+            document.getElementById('watchCurrentFilter').textContent = `Сезон ${playerPageCurrentSeason}`;
+        }
+
+        function buildWatchSeasonRow() {
+            const container = document.getElementById('watchSeasonList');
+            if (!container || !playerPageAnime) return;
+            const seasons = Object.keys(playerPageAnime.seasons || {}).sort((a, b) => parseInt(a) - parseInt(b));
+            container.innerHTML = seasons.map(s => `
+                <button class="px-4 py-2 rounded-lg text-sm ${s === playerPageCurrentSeason ? 'bg-white text-black' : 'bg-gray-900 text-gray-400'} shrink-0 season-btn" data-season="${s}">
+                    ${s}
+                </button>
+            `).join('');
+            container.querySelectorAll('.season-btn').forEach(btn => {
+                btn.onclick = () => {
+                    playerPageCurrentSeason = btn.dataset.season;
+                    const dubs = Object.keys((playerPageAnime.seasons[playerPageCurrentSeason]) || {}).sort();
+                    playerPageCurrentDub = dubs[0] || '';
+                    renderWatchEpisodes();
+                    updateWatchFilters();
+                    buildWatchSeasonRow();
+                };
+            });
+        }
+
+        let watchViewMode = 'grid'; // grid, compact, classic
+
+        function renderWatchEpisodes() {
+            const episodes = getCurrentEpisodes();
+            const container = document.getElementById('watchEpisodeContainer');
+            if (!container) return;
+            
+            if (watchViewMode === 'grid') {
+                container.className = 'grid grid-cols-2 gap-4';
+            } else {
+                container.className = 'flex flex-col gap-3';
+            }
+
+            if (!episodes.length) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-10 w-full col-span-2">Серії не знайдені</div>';
+                return;
+            }
+
+            const posterUrl = playerPageAnime?.tmdbPoster || playerPageAnime?.images?.jpg?.large_image_url || '';
+            
+            container.innerHTML = episodes.map((ep) => {
+                const progress = getEpisodeProgress(ep.episode);
+                const watched = progress >= 95;
+                const rating = (Math.random() * 2 + 7.5).toFixed(1); // Заглушка для рейтингу серії
+
+                if (watchViewMode === 'grid') {
+                    return `
+                        <div class="bg-gray-900 rounded-2xl overflow-hidden cursor-pointer group watch-ep-card" data-file="${ep.file}" data-episode="${ep.episode}">
+                            <div class="aspect-video relative overflow-hidden">
+                                <img src="${posterUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-60">
+                                <div class="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold text-white">${ep.episode.padStart(2, '0')}</div>
+                                <div class="absolute bottom-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[10px] text-white">1080p</div>
+                                ${progress > 0 ? `<div class="absolute bottom-0 left-0 h-1 bg-white" style="width: ${progress}%"></div>` : ''}
+                            </div>
+                            <div class="p-3">
+                                <div class="text-sm font-medium text-white mb-2">Серія ${ep.episode}</div>
+                                <div class="h-[1px] bg-gray-800 w-full mb-2"></div>
+                                <div class="flex items-center gap-3 text-[10px] text-gray-500">
+                                    <div class="flex items-center gap-1">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-white"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>${rating}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                                        <span>Неизвестно</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (watchViewMode === 'compact') {
+                    return `
+                        <div class="flex items-center gap-3 bg-gray-900/40 p-2 rounded-xl cursor-pointer watch-ep-card" data-file="${ep.file}" data-episode="${ep.episode}">
+                            <div class="w-24 h-14 rounded-lg overflow-hidden shrink-0 relative">
+                                <img src="${posterUrl}" class="w-full h-full object-cover opacity-60">
+                                <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${ep.episode}</div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm text-white truncate">Серія ${ep.episode}</div>
+                                <div class="text-[10px] text-gray-500">1080p • ${rating}</div>
+                            </div>
+                        </div>
+                    `;
+                } else { // classic
+                    return `
+                        <div class="flex items-center justify-between bg-gray-900/40 p-4 rounded-xl cursor-pointer watch-ep-card" data-file="${ep.file}" data-episode="${ep.episode}">
+                            <div class="flex items-center gap-4">
+                                <div class="text-lg font-bold text-gray-700">${ep.episode.padStart(2, '0')}</div>
+                                <div class="text-sm text-white">Серія ${ep.episode}</div>
+                            </div>
+                            <div class="text-xs text-gray-500">${rating}</div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            container.querySelectorAll('.watch-ep-card').forEach(card => {
+                card.onclick = () => {
+                    playEpisode(card.dataset.file, card.dataset.episode);
+                };
+            });
+        }
+
         function closePlayerPage() {
             const modal = document.getElementById('playerPageModal');
             if (!modal) return;
@@ -16041,6 +16285,7 @@ function renderProfilePage() {
                 _playerLoadController = null;
             }
             modal.style.display = 'none';
+            closeWatchPage(); // Також закриваємо вікно перегляду
             document.body.style.overflow = '';
             if (playerPagePlayer) {
                 if (playerPagePlayer._timeUpdateListener && playerPagePlayer.videoRef) {
@@ -16180,7 +16425,7 @@ function renderProfilePage() {
                                 function buildBottomSheetData() {
             const sourceList = document.getElementById('bsSourceList');
             if (sourceList) {
-                const sources = ['Основне'];
+                const sources = playerPageAnime?.sources || ['Основне'];
                 sourceList.innerHTML = sources.map(s => {
                     const active = s === playerPageCurrentSource ? ' active' : '';
                     return `<div class="source-item${active}" onclick="switchProviderSource('${s}')">${s}</div>`;
@@ -16349,6 +16594,11 @@ function renderProfilePage() {
             } else {
                 showToast('Фільтри застосовано');
             }
+            if (document.getElementById('watchPageModal').style.display === 'flex') {
+                renderWatchEpisodes();
+                updateWatchFilters();
+                buildWatchSeasonRow();
+            }
         });
 
         document.getElementById('bottomSheetOverlay').addEventListener('click', function(e) {
@@ -16461,7 +16711,25 @@ function renderProfilePage() {
         }
 
         document.getElementById('playerShareBtn').addEventListener('click', shareAnime);
-        document.getElementById('playerPlayFab').addEventListener('click', playFeaturedEpisode);
+        document.getElementById('playerPlayFab').addEventListener('click', openWatchPage);
+
+        // WatchPage listeners
+        document.getElementById('closeWatchPageBtn').addEventListener('click', closeWatchPage);
+        document.getElementById('watchSourceBtn').addEventListener('click', () => openBottomSheet('filters'));
+        document.getElementById('watchFilterBtn').addEventListener('click', () => openBottomSheet('filters'));
+
+        document.querySelectorAll('#watchPageModal [data-view]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                watchViewMode = btn.dataset.view;
+                document.querySelectorAll('#watchPageModal [data-view]').forEach(b => {
+                    b.classList.remove('bg-gray-800', 'text-white');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('bg-gray-800', 'text-white');
+                btn.classList.remove('text-gray-400');
+                renderWatchEpisodes();
+            });
+        });
 
         window.openSearchPage = function() {
             Router.goTo('search');
