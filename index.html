@@ -5396,7 +5396,16 @@
             max-height: 70vh;
             overflow-y: auto;
             animation: bsSheetUp 0.32s cubic-bezier(.16, 1, .3, 1);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.25) transparent;
         }
+        .bottom-sheet::-webkit-scrollbar { width: 5px; }
+        .bottom-sheet::-webkit-scrollbar-track { background: transparent; }
+        .bottom-sheet::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.22);
+            border-radius: 10px;
+        }
+        .bottom-sheet::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.38); }
         @media (min-width:480px) {
             .bottom-sheet {
                 padding: 1rem 1.2rem 1.5rem;
@@ -7669,6 +7678,11 @@
         background-size:cover;
         background-position:center;
         background-color:#141414;
+        filter: grayscale(100%) contrast(1.05);
+        transition: filter 0.4s ease;
+    }
+    #playerPageModal .modal-content .hero-img:hover{
+        filter: grayscale(0%) contrast(1);
     }
     #playerPageModal .modal-content .smoke{
         position:absolute; z-index:0; inset:0;
@@ -7984,6 +7998,12 @@
         background-size:cover; background-position:center;
         display:flex; align-items:flex-start; padding:8px;
         position:relative;
+        filter: grayscale(100%) contrast(1.05);
+        transition: filter 0.35s ease;
+    }
+    #playerPageModal .modal-content .ep-card:hover .ep-thumb,
+    #playerPageModal .modal-content .ep-card:focus-within .ep-thumb{
+        filter: grayscale(0%) contrast(1);
     }
     #playerPageModal .modal-content .ep-thumb::after{
         content:""; position:absolute; inset:0;
@@ -8017,6 +8037,12 @@
         overflow:hidden;
         background-size:cover; background-position:center;
         background-color:#141414;
+        filter: grayscale(100%) contrast(1.05);
+        transition: filter 0.35s ease;
+    }
+    #playerPageModal .modal-content .poster-card:hover .poster-thumb,
+    #playerPageModal .modal-content .poster-card:focus-within .poster-thumb{
+        filter: grayscale(0%) contrast(1);
     }
 
     #playerPageModal .modal-content .poster-badges{
