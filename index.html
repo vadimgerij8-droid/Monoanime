@@ -7527,6 +7527,133 @@
         }
         .player-play-fab svg { fill: currentColor; }
 
+    
+    /* --- User Provided Styles from Pasted_content_26.txt --- */
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root {
+        --user-bg: #0a0a0a;
+        --user-panel: rgba(255,255,255,0.06);
+        --user-panel-strong: rgba(255,255,255,0.10);
+        --user-line: rgba(255,255,255,0.12);
+        --user-text: #f2f2f2;
+        --user-text-dim: #9a9a9a;
+        --user-text-dimmer: #6b6b6b;
+        --user-accent: #e5e5e5;
+    }
+
+    .display { font-family: 'Space Grotesk', sans-serif; }
+    
+    #playerPageModal .modal-content {
+        background: var(--user-bg);
+        color: var(--user-text);
+        font-family: 'Inter', sans-serif;
+        padding: 0;
+        max-width: 520px;
+        margin: 0 auto;
+    }
+
+    .user-hero-img {
+        position: relative;
+        height: 380px;
+        isolation: isolate;
+        margin-bottom: -1px;
+        background-size: cover;
+        background-position: center;
+    }
+    .user-hero-img::after {
+        content: "";
+        position: absolute; inset: 0; z-index: 1;
+        background: linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.35) 45%, rgba(10,10,10,0.85) 72%, rgba(10,10,10,1) 88%);
+    }
+    
+    .user-topbar {
+        position: absolute; top: 16px; left: 16px; right: 16px;
+        display: flex; justify-content: space-between; align-items: flex-start;
+        z-index: 5;
+    }
+    
+    .user-icon-btn {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: var(--user-panel);
+        border: 1px solid var(--user-line);
+        backdrop-filter: blur(14px);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--user-text);
+        cursor: pointer;
+    }
+    
+    .user-badge {
+        padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+        background: var(--user-panel); border: 1px solid var(--user-line);
+        backdrop-filter: blur(14px); color: var(--user-text);
+    }
+    
+    .user-status-tag {
+        font-size: 10px; color: var(--user-text-dim);
+        background: var(--user-panel); border: 1px solid var(--user-line);
+        padding: 4px 8px; border-radius: 6px; backdrop-filter: blur(14px);
+    }
+    
+    .user-logo-wrap {
+        position: absolute; left: 0; right: 0; bottom: 80px; z-index: 5;
+        text-align: center; padding: 0 16px;
+    }
+    
+    .user-kicker {
+        font-family: 'Space Grotesk', sans-serif; font-style: italic;
+        font-size: 20px; font-weight: 700; color: #f2f2f2;
+        text-shadow: 0 2px 18px rgba(0,0,0,0.7);
+    }
+    
+    .user-content-top { padding: 0 16px 2px; text-align: center; }
+    .user-title { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #e9e9e9; margin-bottom: 6px; }
+    .user-meta-line { font-size: 13px; color: var(--user-text-dim); margin-bottom: 12px; }
+    
+    .user-tag-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 8px; }
+    .user-tag { font-size: 11px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--user-line); background: rgba(255,255,255,0.04); color: #d8d8d8; }
+    
+    .user-ratings-row { display: flex; gap: 8px; justify-content: center; margin: 16px 16px 10px; }
+    .user-rating-card { background: var(--user-panel); border: 1px solid var(--user-line); border-radius: 12px; padding: 10px 18px; text-align: center; backdrop-filter: blur(14px); }
+    .user-rating-num { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+    .user-rating-label { font-size: 9px; color: var(--user-text-dimmer); text-transform: uppercase; margin-top: 2px; }
+    
+    .user-actions { display: flex; align-items: center; justify-content: center; gap: 36px; padding: 10px 16px; }
+    .user-action-icon { cursor: pointer; color: #f2f2f2; transition: transform 0.2s; }
+    .user-action-icon:hover { transform: scale(1.1); }
+    
+    .user-section { padding: 20px 16px 10px; }
+    .user-section-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 10px; }
+    
+    .user-hscroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+    .user-hscroll::-webkit-scrollbar { display: none; }
+    
+    .user-ep-card { min-width: 120px; border-radius: 12px; overflow: hidden; border: 1px solid var(--user-line); background: #111; cursor: pointer; }
+    .user-ep-thumb { height: 76px; background: #1a1a1a; display: flex; align-items: flex-start; padding: 8px; background-size: cover; }
+    .user-ep-num { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+    .user-ep-info { padding: 8px 10px 10px; }
+    .user-ep-title { font-size: 11px; color: #ddd; margin-bottom: 2px; }
+    .user-ep-date { font-size: 10px; color: var(--user-text-dimmer); }
+    
+    /* Comments */
+    .user-comment-input-wrap { margin: 10px 16px; display: flex; gap: 8px; }
+    .user-comment-input { flex: 1; background: var(--user-panel); border: 1px solid var(--user-line); border-radius: 8px; padding: 10px 14px; color: var(--user-text); font-size: 13px; outline: none; }
+    .user-comment-send { background: var(--user-accent); color: #0a0a0a; border: none; border-radius: 8px; padding: 0 16px; cursor: pointer; }
+    
+    .user-comment-item { background: var(--user-panel); border: 1px solid var(--user-line); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
+    .user-comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .user-comment-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--user-accent); color: #0a0a0a; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+    .user-comment-name { font-size: 12px; font-weight: 600; }
+    .user-comment-text { font-size: 12px; color: var(--user-text-dim); }
+
+    /* Player Overlay */
+    .user-player-overlay {
+        position: fixed; inset: 0; background: #000; z-index: 1000;
+        display: none; flex-direction: column;
+    }
+    .user-player-overlay.active { display: flex; }
+    .user-player-header { padding: 16px; display: flex; align-items: center; gap: 12px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+    
     </style>
 </head>
 <body class="appletv-agnative-topnav">
@@ -7595,7 +7722,110 @@
     <div class="toast" id="toast"></div>
 
     <div id="playerPageModal" class="modal" role="dialog" aria-modal="true">
+
         <div class="modal-content">
+            <!-- HERO IMAGE -->
+            <div class="user-hero-img" id="userHeroImg">
+                <div class="user-topbar">
+                    <div class="user-icon-btn" id="userCloseBtn">
+                        <i data-lucide="chevron-left"></i>
+                    </div>
+                    <div class="user-top-right-col">
+                        <div class="user-status-tag" id="userStatusTag">Онгоїнг</div>
+                        <div class="user-badge" id="userAgeBadge">17+</div>
+                    </div>
+                </div>
+                <div class="user-logo-wrap">
+                    <div class="user-kicker" id="userKicker"></div>
+                </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="user-content-top">
+                <h1 class="user-title" id="userTitle"></h1>
+                <div class="user-meta-line" id="userMetaLine"></div>
+
+                <div class="user-tag-row" id="userTagRow1"></div>
+                <div class="user-tag-row" id="userTagRow2"></div>
+            </div>
+
+            <div class="user-ratings-row">
+                <div class="user-rating-card">
+                    <div class="user-rating-num"><span id="userScoreEmoji">😐</span><span id="userScore">0.0</span></div>
+                    <div class="user-rating-label" id="userVotes">0 ГОЛОСІВ</div>
+                </div>
+                <div class="user-rating-card">
+                    <div class="user-rating-num" id="userTmdbScore">8.3</div>
+                    <div class="user-rating-label">TMDB</div>
+                </div>
+            </div>
+
+            <div class="user-actions">
+                <div class="user-action-icon" id="userPlayBtn">
+                    <i data-lucide="play" fill="currentColor" size="32"></i>
+                </div>
+                <div class="user-action-icon" id="userBookmarkBtn">
+                    <i data-lucide="bookmark"></i>
+                </div>
+                <div class="user-action-icon" id="userLikeBtn">
+                    <i data-lucide="thumbs-up"></i>
+                </div>
+                <div class="user-action-icon" id="userShareBtn">
+                    <i data-lucide="share-2"></i>
+                </div>
+            </div>
+
+            <!-- EPISODES -->
+            <section class="user-section">
+                <div class="user-section-title" id="userSeasonTitle">Сезон 1</div>
+                <div class="user-hscroll" id="userEpisodesList">
+                    <!-- Серії будуть тут -->
+                </div>
+            </section>
+
+            <!-- DETAILS -->
+            <section class="user-section">
+                <div class="user-section-title">Детально</div>
+                <p class="details-text" id="userSynopsis"></p>
+            </section>
+
+            <!-- REVIEWS -->
+            <section class="user-section">
+                <div class="user-section-title">Відгуки</div>
+                <div id="userCommentsList"></div>
+                <div class="user-comment-input-wrap">
+                    <input type="text" class="user-comment-input" id="userCommentInput" placeholder="Напишіть відгук...">
+                    <button class="user-comment-send" id="userSendComment">
+                        <i data-lucide="send"></i>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- PLAYER OVERLAY -->
+        <div class="user-player-overlay" id="userPlayerOverlay">
+            <div class="user-player-header">
+                <div class="user-icon-btn" id="userPlayerBackBtn">
+                    <i data-lucide="arrow-left"></i>
+                </div>
+                <div style="flex:1">
+                    <div style="font-size:14px; font-weight:600;" id="userPlayerTitle"></div>
+                    <div style="font-size:12px; color:var(--user-text-dim);" id="userPlayerMeta"></div>
+                </div>
+                <div class="user-icon-btn" id="userSourceToggle">
+                    <i data-lucide="layers"></i>
+                </div>
+            </div>
+            <div id="userVideoContainer" style="flex:1; background:#000; position:relative;">
+                <!-- Iframe / Video will be here -->
+            </div>
+            <div class="user-section" style="background:#0a0a0a">
+                <div class="user-section-title">Вибір серії</div>
+                <div class="user-hscroll" id="userPlayerEpisodes"></div>
+            </div>
+        </div>
+    
+        <div class="modal-content" style="display:none !important">
             <div class="player-blur-bg" id="playerBlurBg"></div>
             <div class="player-topbar">
                 <button class="player-back-btn" id="closePlayerPageBtn" title="Назад">
@@ -9073,6 +9303,7 @@
             playerPageCurrentSource = providerName;
             updateSourceChip();
             buildBottomSheetData();
+                renderUserUI(anime);
 
             if (providerName === 'Основне') {
                 playerPageAnime.seasons = playerPageAnimeuaSeasons || {};
@@ -9101,6 +9332,7 @@
                 playerPageCurrentSource = prevSource;
                 updateSourceChip();
                 buildBottomSheetData();
+                renderUserUI(anime);
             }
         }
 
@@ -9113,6 +9345,7 @@
             buildEpisodeViews();
             updateFilterChip();
             buildBottomSheetData();
+                renderUserUI(anime);
             if (seasons.length === 0) {
                 document.getElementById('episodeViewGrid').innerHTML =
                     '<div class="episode-empty"><i class="fas fa-search"></i> Серії не знайдені на цьому джерелі.</div>';
@@ -10083,6 +10316,127 @@
             lucide.createIcons();
         }
 
+
+        
+        // --- Final User-Requested Logic ---
+        function renderUserUI(anime) {
+            if (!anime) return;
+            const url = playerPageCurrentAnimeUrl;
+            
+            // Populate Details
+            const poster = anime.images?.jpg?.large_image_url || '';
+            document.getElementById('userHeroImg').style.backgroundImage = `url(${poster})`;
+            document.getElementById('userKicker').textContent = anime.title_english || anime.title;
+            document.getElementById('userTitle').textContent = anime.title;
+            document.getElementById('userMetaLine').textContent = `${anime.year || '2026'}, Японія`;
+            document.getElementById('userSynopsis').textContent = anime.synopsis || 'Опис відсутній.';
+            
+            const score = anime.score || 0;
+            document.getElementById('userScore').textContent = score;
+            document.getElementById('userScoreEmoji').textContent = score > 7 ? '😊' : score > 5 ? '😐' : '😕';
+            document.getElementById('userVotes').textContent = `${anime.scored_by || 0} ГОЛОСІВ`;
+            
+            // Tags
+            const tags1 = document.getElementById('userTagRow1');
+            tags1.innerHTML = `
+                <span class="user-tag">Сезони: ${Object.keys(anime.seasons || {}).length || 1}</span>
+                <span class="user-tag">Серії: ${anime.episodes || '??'}</span>
+                ${(anime.genres || []).slice(0, 2).map(g => `<span class="user-tag">${g}</span>`).join('')}
+            `;
+            
+            // Episodes
+            const epList = document.getElementById('userEpisodesList');
+            const seasons = Object.keys(anime.seasons || {}).sort();
+            const currentSeason = seasons[0] || '1';
+            const dubs = Object.keys(anime.seasons[currentSeason] || {}).sort();
+            const currentDub = dubs[0] || '';
+            const eps = anime.seasons[currentSeason]?.[currentDub] || [];
+            
+            epList.innerHTML = eps.map(e => `
+                <div class="user-ep-card" onclick="startPlaying('${e.file}', '${e.episode}')">
+                    <div class="user-ep-thumb" style="background-image:url(${poster})">
+                        <span class="user-ep-num">${e.episode}</span>
+                    </div>
+                    <div class="user-ep-info">
+                        <div class="user-ep-title">Серія ${e.episode}</div>
+                        <div class="user-ep-date">Доступно</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Comments
+            loadUserComments(url);
+            
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function startPlaying(file, epNum) {
+            const overlay = document.getElementById('userPlayerOverlay');
+            overlay.classList.add('active');
+            
+            document.getElementById('userPlayerTitle').textContent = playerPageAnime.title;
+            document.getElementById('userPlayerMeta').textContent = `Серія ${epNum}`;
+            
+            const container = document.getElementById('userVideoContainer');
+            container.innerHTML = `<iframe src="${file}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>`;
+            
+            // Populate episodes in player
+            const seasons = Object.keys(playerPageAnime.seasons || {}).sort();
+            const eps = playerPageAnime.seasons[seasons[0]]?.[Object.keys(playerPageAnime.seasons[seasons[0]])[0]] || [];
+            
+            document.getElementById('userPlayerEpisodes').innerHTML = eps.map(e => `
+                <div class="user-ep-card" style="min-width:100px" onclick="startPlaying('${e.file}', '${e.episode}')">
+                    <div class="user-ep-thumb" style="height:60px; background-image:url(${playerPageAnime.images?.jpg?.large_image_url})">
+                        <span class="user-ep-num" style="font-size:16px">${e.episode}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadUserComments(url) {
+            const list = document.getElementById('userCommentsList');
+            const key = 'comments_' + btoa(url).substring(0, 16);
+            const comments = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            list.innerHTML = comments.map(c => `
+                <div class="user-comment-item">
+                    <div class="user-comment-header">
+                        <div class="user-comment-avatar">${c.name[0]}</div>
+                        <div class="user-comment-name">${c.name}</div>
+                    </div>
+                    <div class="user-comment-text">${c.text}</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('userSendComment')?.addEventListener('click', () => {
+            const input = document.getElementById('userCommentInput');
+            const text = input.value.trim();
+            if (!text || !playerPageCurrentAnimeUrl) return;
+            
+            const key = 'comments_' + btoa(playerPageCurrentAnimeUrl).substring(0, 16);
+            const comments = JSON.parse(localStorage.getItem(key) || '[]');
+            comments.unshift({ name: 'Ви', text: text });
+            localStorage.setItem(key, JSON.stringify(comments));
+            input.value = '';
+            loadUserComments(playerPageCurrentAnimeUrl);
+        });
+
+        document.getElementById('userCloseBtn')?.addEventListener('click', () => {
+            document.getElementById('playerPageModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        document.getElementById('userPlayerBackBtn')?.addEventListener('click', () => {
+            document.getElementById('userPlayerOverlay').classList.remove('active');
+            document.getElementById('userVideoContainer').innerHTML = '';
+        });
+
+        document.getElementById('userPlayBtn')?.addEventListener('click', () => {
+            const ep = document.querySelector('.user-ep-card');
+            if (ep) ep.click();
+        });
+    
 
         // ====================================================================
         //  ГОДИННИК
@@ -15082,6 +15436,7 @@ function renderProfilePage() {
                     console.warn('No episodes found for anime:', anime.url, anime._diagnostics);
                 }
                 buildBottomSheetData();
+                renderUserUI(anime);
             } catch (err) {
                 // Якщо запит скасовано (юзер закрив плеєр або відкрив інше) — мовчки ігноруємо
                 if (_thisSignal.aborted || modal.style.display === 'none') return;
@@ -15224,6 +15579,7 @@ function renderProfilePage() {
                     updateFilterChip();
                     updatePlayFabLabel();
                     buildBottomSheetData();
+                renderUserUI(anime);
                 });
             });
         }
@@ -15599,6 +15955,7 @@ function renderProfilePage() {
             buildEpisodeViews();
             updateFilterChip();
             buildBottomSheetData();
+                renderUserUI(anime);
             showToast(`Озвучка: ${dub}`);
         };
 
@@ -15609,18 +15966,21 @@ function renderProfilePage() {
             buildEpisodeViews();
             updateFilterChip();
             buildBottomSheetData();
+                renderUserUI(anime);
             showToast(`Сезон ${season}`);
         };
 
         window.selectQualityFromSheet = function(quality) {
             playerPageCurrentQuality = quality;
             buildBottomSheetData();
+                renderUserUI(anime);
             showToast(`Якість: ${quality}`);
         };
 
         function openBottomSheet(mode) {
             bottomSheetMode = mode || 'full';
             buildBottomSheetData();
+                renderUserUI(anime);
             document.getElementById('bottomSheetOverlay').classList.add('open');
         }
 
