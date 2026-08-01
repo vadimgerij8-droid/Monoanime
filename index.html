@@ -7846,6 +7846,16 @@
         border:1px solid var(--line);
         color:#c9c9c9;
         background:rgba(255,255,255,0.04);
+        transition:all 0.2s;
+    }
+    #playerPageModal .modal-content .format-pill[data-dub]:hover{
+        background:rgba(255,255,255,0.08);
+        color:#fff;
+    }
+    #playerPageModal .modal-content .format-pill.active-format{
+        background:var(--accent);
+        color:#0a0a0a;
+        border-color:var(--accent);
     }
 
     /* ---------- ACTIONS ---------- */
@@ -7874,6 +7884,28 @@
         font-weight:600;
         color:#fff;
         margin-bottom:10px;
+        display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    }
+
+    #playerPageModal .modal-content .season-tab{
+        font-size:12px;
+        font-weight:600;
+        padding:6px 12px;
+        border-radius:8px;
+        border:1px solid var(--line);
+        color:var(--text-dim);
+        background:rgba(255,255,255,0.04);
+        cursor:pointer;
+        transition:all 0.2s;
+    }
+    #playerPageModal .modal-content .season-tab:hover{
+        background:rgba(255,255,255,0.08);
+        color:#fff;
+    }
+    #playerPageModal .modal-content .season-tab.active-season-tab{
+        background:var(--accent);
+        color:#0a0a0a;
+        border-color:var(--accent);
     }
 
     #playerPageModal .modal-content .hscroll{
@@ -15787,13 +15819,35 @@ function renderProfilePage() {
             if (chip) chip.textContent = `Сезон ${playerPageCurrentSeason} · ${playerPageCurrentDub}`;
             const formatRow = document.getElementById('playerFormatRow');
             if (formatRow) {
-                const pills = [];
-                if (playerPageCurrentDub) pills.push(playerPageCurrentDub);
-                if (playerPageCurrentQuality) pills.push(playerPageCurrentQuality);
-                formatRow.innerHTML = pills.map(p => `<span class="format-pill">${String(p).toUpperCase()}</span>`).join('');
+                const dubs = Object.keys(playerPageAnime?.seasons?.[playerPageCurrentSeason] || {}).sort();
+                let html = dubs.map(d => {
+                    const active = d === playerPageCurrentDub ? ' active-format' : '';
+                    return `<span class="format-pill${active}" data-dub="${d}" style="cursor:pointer;">${String(d).toUpperCase()}</span>`;
+                }).join('');
+                if (playerPageCurrentQuality) html += `<span class="format-pill">${String(playerPageCurrentQuality).toUpperCase()}</span>`;
+                formatRow.innerHTML = html;
+                formatRow.querySelectorAll('.format-pill[data-dub]').forEach(pill => {
+                    pill.addEventListener('click', () => selectDubFromSheet(pill.dataset.dub));
+                });
             }
+            renderSeasonTabs();
+        }
+
+        function renderSeasonTabs() {
             const sectionTitle = document.getElementById('episodeSectionTitle');
-            if (sectionTitle) sectionTitle.textContent = `Сезон ${playerPageCurrentSeason || 1}`;
+            if (!sectionTitle) return;
+            const seasons = Object.keys(playerPageAnime?.seasons || {}).sort((a, b) => parseInt(a) - parseInt(b));
+            if (seasons.length <= 1) {
+                sectionTitle.textContent = `Сезон ${playerPageCurrentSeason || 1}`;
+                return;
+            }
+            sectionTitle.innerHTML = seasons.map(s => {
+                const active = s === playerPageCurrentSeason ? ' active-season-tab' : '';
+                return `<span class="season-tab${active}" data-season="${s}">Сезон ${s}</span>`;
+            }).join('');
+            sectionTitle.querySelectorAll('.season-tab').forEach(tab => {
+                tab.addEventListener('click', () => selectSeasonFromSheet(tab.dataset.season));
+            });
         }
 
         function buildSeasonRow(seasons) {
