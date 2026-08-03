@@ -7847,11 +7847,11 @@
         margin-top:2px;
     }
 
-    #playerPageModal .modal-content .format-row{
+    #playerPageModal .modal-content .format-row, #watchPageModal .modal-content .format-row{
         display:flex; gap:6px; justify-content:center; margin-bottom:16px; flex-wrap:wrap;
     }
 
-    #playerPageModal .modal-content .format-pill{
+    #playerPageModal .modal-content .format-pill, #watchPageModal .modal-content .format-pill{
         font-size:10px;
         font-weight:700;
         letter-spacing:0.05em;
@@ -7862,11 +7862,11 @@
         background:rgba(255,255,255,0.04);
         transition:all 0.2s;
     }
-    #playerPageModal .modal-content .format-pill[data-dub]:hover{
+    #playerPageModal .modal-content .format-pill[data-dub]:hover, #watchPageModal .modal-content .format-pill[data-dub]:hover{
         background:rgba(255,255,255,0.08);
         color:#fff;
     }
-    #playerPageModal .modal-content .format-pill.active-format{
+    #playerPageModal .modal-content .format-pill.active-format, #watchPageModal .modal-content .format-pill.active-format{
         background:var(--accent);
         color:#0a0a0a;
         border-color:var(--accent);
@@ -7892,7 +7892,7 @@
     /* ---------- SECTIONS ---------- */
     #playerPageModal .modal-content section{ padding:20px 16px 2px; }
 
-    #playerPageModal .modal-content .section-title{
+    #playerPageModal .modal-content .section-title, #watchPageModal .modal-content .section-title{
         font-family:'Space Grotesk', sans-serif;
         font-size:16px;
         font-weight:600;
@@ -7931,7 +7931,7 @@
     #playerPageModal .modal-content .hscroll::-webkit-scrollbar{ display:none; }
 
     /* reviews */
-    #playerPageModal .modal-content .review-empty{
+    #playerPageModal .modal-content .review-empty, #watchPageModal .modal-content .review-empty{
         flex:1;
         min-width:180px;
         border-radius:12px;
@@ -7983,7 +7983,7 @@
     #playerPageModal .modal-content .details-text.expanded{ -webkit-line-clamp:unset; }
 
     /* episodes */
-    #playerPageModal .modal-content .ep-card{
+    #playerPageModal .modal-content .ep-card, #watchPageModal .modal-content .ep-card{
         min-width:120px;
         border-radius:12px;
         overflow:hidden;
@@ -7993,7 +7993,7 @@
         cursor:pointer;
     }
 
-    #playerPageModal .modal-content .ep-thumb{
+    #playerPageModal .modal-content .ep-thumb, #watchPageModal .modal-content .ep-thumb{
         height:76px;
         background-size:cover; background-position:center;
         display:flex; align-items:flex-start; padding:8px;
@@ -8002,15 +8002,17 @@
         transition: filter 0.35s ease;
     }
     #playerPageModal .modal-content .ep-card:hover .ep-thumb,
-    #playerPageModal .modal-content .ep-card:focus-within .ep-thumb{
+    #playerPageModal .modal-content .ep-card:focus-within .ep-thumb,
+    #watchPageModal .modal-content .ep-card:hover .ep-thumb,
+    #watchPageModal .modal-content .ep-card:focus-within .ep-thumb{
         filter: grayscale(0%) contrast(1);
     }
-    #playerPageModal .modal-content .ep-thumb::after{
+    #playerPageModal .modal-content .ep-thumb::after, #watchPageModal .modal-content .ep-thumb::after{
         content:""; position:absolute; inset:0;
         background:linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55));
     }
 
-    #playerPageModal .modal-content .ep-num{
+    #playerPageModal .modal-content .ep-num, #watchPageModal .modal-content .ep-num{
         position:relative; z-index:1;
         font-family:'Space Grotesk', sans-serif;
         font-size:20px;
@@ -8019,10 +8021,10 @@
         text-shadow:0 2px 10px rgba(0,0,0,0.8);
     }
 
-    #playerPageModal .modal-content .ep-info{ padding:8px 10px 10px; }
-    #playerPageModal .modal-content .ep-info .ep-title{ font-size:11px; color:#ddd; margin-bottom:2px; }
-    #playerPageModal .modal-content .ep-info .ep-date{ font-size:10px; color:var(--text-dimmer); }
-    #playerPageModal .modal-content .ep-card.watched .ep-num{ color:#7CFC9A; }
+    #playerPageModal .modal-content .ep-info, #watchPageModal .modal-content .ep-info{ padding:8px 10px 10px; }
+    #playerPageModal .modal-content .ep-info .ep-title, #watchPageModal .modal-content .ep-info .ep-title{ font-size:13px; color:#ddd; margin-bottom:2px; font-weight:600; }
+    #playerPageModal .modal-content .ep-info .ep-date, #watchPageModal .modal-content .ep-info .ep-date{ font-size:10px; color:var(--text-dimmer); }
+    #playerPageModal .modal-content .ep-card.watched .ep-num, #watchPageModal .modal-content .ep-card.watched .ep-num{ color:#7CFC9A; }
 
     /* posters (рекомендації / подібні) */
     #playerPageModal .modal-content .poster-card{
@@ -8157,6 +8159,8 @@
     .ep-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px; }
     @media (min-width:480px){ .ep-grid{ grid-template-columns:repeat(3,1fr); } }
     .ep-grid.hidden, .ep-compact-list.hidden, .ep-classic-list.hidden{ display:none; }
+    #watchPageModal .modal-content .ep-grid .ep-card{ min-width:0; width:100%; }
+    #watchPageModal .modal-content .ep-grid .ep-thumb{ height:0; padding-top:56%; }
 
     .epv2-card{ cursor:pointer; }
     .epv2-thumb{
@@ -8440,13 +8444,15 @@
                 </button>
             </div>
 
+            <div class="format-row" id="watchFormatRow"></div>
+
+            <div class="section-title season-pills-row" id="episodeSectionTitle">Сезон 1</div>
+
             <div class="episode-view-tabs">
                 <button class="episode-view-tab active" data-view="grid">Сітка</button>
                 <button class="episode-view-tab" data-view="compact">Компактний</button>
                 <button class="episode-view-tab" data-view="classic">Класичний</button>
             </div>
-
-            <div class="section-title season-pills-row" id="episodeSectionTitle">Сезон 1</div>
 
             <div class="ep-grid" id="episodeViewGrid"></div>
             <div class="ep-compact-list hidden" id="episodeViewCompact"></div>
@@ -16036,19 +16042,19 @@ function renderProfilePage() {
             if (chip) chip.textContent = `Сезон ${playerPageCurrentSeason} · ${playerPageCurrentDub}`;
             const watchFilterValue = document.getElementById('watchFilterValue');
             if (watchFilterValue) watchFilterValue.textContent = `Сезон ${playerPageCurrentSeason} · ${playerPageCurrentDub}`;
-            const formatRow = document.getElementById('playerFormatRow');
-            if (formatRow) {
-                const dubs = Object.keys(playerPageAnime?.seasons?.[playerPageCurrentSeason] || {}).sort();
-                let html = dubs.map(d => {
-                    const active = d === playerPageCurrentDub ? ' active-format' : '';
-                    return `<span class="format-pill${active}" data-dub="${d}" style="cursor:pointer;">${String(d).toUpperCase()}</span>`;
-                }).join('');
-                if (playerPageCurrentQuality) html += `<span class="format-pill">${String(playerPageCurrentQuality).toUpperCase()}</span>`;
-                formatRow.innerHTML = html;
+            const dubs = Object.keys(playerPageAnime?.seasons?.[playerPageCurrentSeason] || {}).sort();
+            let formatHtml = dubs.map(d => {
+                const active = d === playerPageCurrentDub ? ' active-format' : '';
+                return `<span class="format-pill${active}" data-dub="${d}" style="cursor:pointer;">${String(d).toUpperCase()}</span>`;
+            }).join('');
+            if (playerPageCurrentQuality) formatHtml += `<span class="format-pill">${String(playerPageCurrentQuality).toUpperCase()}</span>`;
+            [document.getElementById('playerFormatRow'), document.getElementById('watchFormatRow')].forEach(formatRow => {
+                if (!formatRow) return;
+                formatRow.innerHTML = formatHtml;
                 formatRow.querySelectorAll('.format-pill[data-dub]').forEach(pill => {
                     pill.addEventListener('click', () => selectDubFromSheet(pill.dataset.dub));
                 });
-            }
+            });
             renderSeasonTabs();
         }
 
@@ -16221,18 +16227,13 @@ function renderProfilePage() {
             const rating = tmdbRatingFor(ep, epMap);
             const statusText = watched ? 'Переглянуто' : (progress > 0 ? `${Math.round(progress)}%` : 'Доступно');
             return `
-              <div class="epv2-card${watched ? ' watched' : ''}" data-file="${ep.file}" data-episode="${ep.episode}">
-                <div class="epv2-thumb" style="background-image:url(${img})">
-                  <span class="epv2-badge epv2-badge-num">${String(ep.episode).padStart(2, '0')}</span>
-                  <span class="epv2-badge epv2-badge-quality">${playerPageCurrentQuality || '—'}</span>
-                  ${progress > 0 ? `<div class="epv2-progress"><div class="epv2-progress-fill" style="width:${Math.min(progress, 100)}%"></div></div>` : ''}
+              <div class="ep-card${watched ? ' watched' : ''}" data-file="${ep.file}" data-episode="${ep.episode}">
+                <div class="ep-thumb" style="background-image:url(${img})">
+                  <div class="ep-num">${String(ep.episode).padStart(2, '0')}</div>
                 </div>
-                <div class="epv2-info">
-                  <div class="epv2-title">Серія ${ep.episode}</div>
-                  <div class="epv2-meta-row">
-                    ${rating ? `<span class="epv2-rating"><i data-lucide="star" style="width:11px;height:11px;"></i>${rating}</span><span class="epv2-dot">•</span>` : ''}
-                    <span class="epv2-status">${statusText}</span>
-                  </div>
+                <div class="ep-info">
+                  <div class="ep-title">Серія ${ep.episode}</div>
+                  <div class="ep-date">${rating ? `★ ${rating} · ` : ''}${statusText}</div>
                 </div>
               </div>`;
         }
