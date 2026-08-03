@@ -7701,62 +7701,586 @@
 }
 
 
-/* ===== Reference player UI: info screen + separate watch screen ===== */
-.player-reference-modal { background:#0a0a0a !important; align-items:flex-start !important; }
-.player-reference-content { max-width:520px !important; margin:0 auto !important; background:#0a0a0a !important; color:#f2f2f2; min-height:100vh; padding-bottom:40px !important; }
-.player-reference-content .player-blur-bg { opacity:.18; filter:blur(32px) brightness(.25); }
-.player-info-screen,.player-watch-screen { display:none; min-height:100vh; animation:refFadeIn .28s ease; }
-.player-reference-modal:not(.watch-mode) .player-info-screen { display:block; }
-.player-reference-modal.watch-mode .player-watch-screen { display:block; }
-@keyframes refFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-.ref-hero { position:relative; height:380px; isolation:isolate; overflow:hidden; }
-.ref-hero-image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-3; filter:saturate(.65) brightness(.75); }
-.ref-hero-fallback { position:absolute; inset:0; z-index:-4; background:radial-gradient(120% 90% at 15% 0%,rgba(255,255,255,.10),transparent 55%),repeating-linear-gradient(115deg,#050505 0 2px,#0d0d0d 2px 4px),linear-gradient(180deg,#1c1c1c 0%,#0a0a0a 65%); }
-.ref-hero-smoke { position:absolute; inset:0; z-index:-2; background:radial-gradient(220px 320px at 78% 18%,rgba(255,255,255,.16),transparent 60%),radial-gradient(160px 240px at 60% 8%,rgba(255,255,255,.10),transparent 65%); filter:blur(18px); opacity:.8; }
-.ref-hero-shade { position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,10,10,0) 0%,rgba(10,10,10,.32) 44%,rgba(10,10,10,.88) 76%,#0a0a0a 94%); }
-.ref-info-topbar,.ref-watch-topbar { position:absolute; top:16px; left:16px; right:16px; display:flex; justify-content:space-between; align-items:flex-start; z-index:5; }
-.ref-icon-btn { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(14px); color:#f2f2f2; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-.ref-top-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
-.ref-status,.ref-age,.ref-tv-badge { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(14px); }
-.ref-status { font-size:10px; color:#aaa; padding:4px 8px; border-radius:6px; }
-.ref-age { padding:6px 12px; border-radius:10px; font-size:13px; font-weight:700; }
-.ref-tv-badge { position:absolute; top:60px; left:16px; z-index:5; padding:4px 10px; border-radius:7px; font-size:11px; font-weight:700; background:#e5e5e5; color:#0a0a0a; }
-.ref-hero-title-wrap { position:absolute; left:0; right:0; bottom:38px; text-align:center; padding:0 16px; }
-.ref-kicker { font-family:'Space Grotesk',sans-serif; font-style:italic; font-size:20px; font-weight:700; color:#f2f2f2; text-shadow:0 2px 18px #000; }
-.ref-info-content { padding:0 16px 24px; text-align:center; position:relative; z-index:1; }
-.ref-title { font-family:'Space Grotesk',sans-serif; font-size:24px; line-height:1.2; font-weight:700; color:#e9e9e9; margin:0 0 6px; }
-.ref-meta-line { font-size:13px; color:#9a9a9a; margin-bottom:12px; }
-.ref-tag-row,.ref-format-row { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:8px; }
-.ref-tag,.ref-format-pill { font-size:11px; padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#d8d8d8; white-space:nowrap; }
-.ref-ratings-row { display:flex; gap:8px; justify-content:center; margin:16px 0 10px; }
-.ref-rating-card { min-width:108px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 18px; backdrop-filter:blur(14px); }
-.ref-rating-num { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:#fff; }
-.ref-rating-label { font-size:9px; color:#6b6b6b; text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
-.ref-format-row { margin-bottom:16px; }
-.ref-format-pill { font-size:10px; font-weight:700; letter-spacing:.05em; padding:6px 14px; border-radius:7px; }
-.ref-actions { display:flex; align-items:center; justify-content:center; gap:25px; padding:0 0 8px; }
-.ref-action-icon { display:flex; align-items:center; justify-content:center; color:#f2f2f2; background:none; border:0; padding:4px; cursor:pointer; transition:opacity .2s,transform .2s; }
-.ref-action-icon:hover { opacity:.72; transform:scale(1.06); }
-.ref-play-action { width:48px; height:48px; border-radius:50%; background:#f2f2f2; color:#0a0a0a; box-shadow:0 8px 24px rgba(255,255,255,.14); }
-.ref-play-action svg { margin-left:2px; }
-.ref-section { padding:20px 0 2px; text-align:left; }
-.ref-section-title { display:flex; justify-content:space-between; align-items:center; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; color:#fff; margin-bottom:10px; }
-.ref-muted-count { font-family:Inter,sans-serif; font-size:12px; color:#777; font-weight:400; }
-.ref-details-text { font-size:12px; line-height:1.65; color:#c7c7c7; margin:0; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; text-align:left; }
-.ref-details-text.expanded { display:block; }
-.ref-episode-preview { padding-bottom:0; }
-.ref-watch-wide { width:100%; border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:12px; color:#eee; background:rgba(255,255,255,.06); font-weight:700; cursor:pointer; }
-.ref-watch-wide span { margin-right:6px; }
-.ref-watch-topbar { position:sticky; top:0; align-items:center; gap:10px; padding:16px; background:rgba(10,10,10,.88); backdrop-filter:blur(18px); border-bottom:1px solid rgba(255,255,255,.08); }
-.ref-watch-heading { display:flex; flex-direction:column; flex:1; font-size:20px; color:#f2f2f2; }
-.ref-watch-heading small { display:block; font-size:11px; color:#777; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px; }
-.ref-watch-filter { position:static !important; margin-left:auto; background:rgba(255,255,255,.06) !important; }
-.ref-source-row { display:flex; align-items:center; gap:12px; padding:18px 16px 6px; color:#ddd; font-size:14px; }
-.ref-list-icon { font-size:22px; color:#eee; }
-.ref-source-row .watch-select-card { margin-left:auto; min-width:0; padding:8px 11px; }
-.player-watch-screen .player-video-container { width:calc(100% - 32px); margin:14px 16px 0; }
-.player-watch-screen .episode-panel { padding:8px 16px 30px; }
-@media (min-width:768px){ .player-reference-content{max-width:620px!important} .ref-hero{height:430px} }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg:#0a0a0a;
+    --panel:rgba(255,255,255,0.06);
+    --panel-strong:rgba(255,255,255,0.10);
+    --line:rgba(255,255,255,0.12);
+    --text:#f2f2f2;
+    --text-dim:#9a9a9a;
+    --text-dimmer:#6b6b6b;
+    --accent:#e5e5e5;
+  }
+
+  .reference-player *{box-sizing:border-box; margin:0; padding:0;}
+
+   .reference-player{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    width:100%;
+    overflow-x:hidden;
+  }
+
+   .reference-player{
+    max-width:520px;
+    margin:0 auto;
+    position:relative;
+    padding-bottom:40px;
+  }
+
+  .reference-player .hscroll::-webkit-scrollbar{ display:none; }
+  .reference-player .hscroll{ scrollbar-width:none; }
+
+  .reference-player .page{
+    display:none;
+    animation: fadeIn 0.3s ease;
+  }
+  .reference-player .page.active{
+    display:block;
+  }
+  @keyframes fadeIn{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .hero-img{
+    position:relative;
+    height:380px;
+    isolation:isolate;
+    margin-bottom:-1px;
+  }
+
+  .hero-bg{
+    position:absolute; inset:0; z-index:-2;
+    background:
+      radial-gradient(120% 90% at 15% 0%, rgba(255,255,255,0.10), transparent 55%),
+      repeating-linear-gradient(115deg, #050505 0 2px, #0d0d0d 2px 4px),
+      linear-gradient(180deg, #1c1c1c 0%, #0a0a0a 65%, #0a0a0a 100%);
+  }
+
+  .smoke{
+    position:absolute; z-index:-1; inset:0;
+    background:
+      radial-gradient(220px 320px at 78% 18%, rgba(255,255,255,0.16), transparent 60%),
+      radial-gradient(160px 240px at 60% 8%, rgba(255,255,255,0.10), transparent 65%),
+      radial-gradient(300px 200px at 20% 70%, rgba(255,255,255,0.05), transparent 70%);
+    filter: blur(18px);
+    opacity:0.9;
+  }
+
+  .hero-img::after{
+    content:"";
+    position:absolute; inset:0; z-index:-1;
+    background:linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.35) 45%, rgba(10,10,10,0.85) 72%, rgba(10,10,10,1) 88%);
+  }
+
+  .topbar{
+    position:absolute; top:16px; left:16px; right:16px;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    z-index:5;
+  }
+
+  .icon-btn{
+    width:34px; height:34px; border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text);
+    cursor:pointer;
+  }
+
+  .badge{
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    background:var(--panel);
+    border:1px solid var(--line);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color:var(--text);
+  }
+
+  .top-right-col{
+    display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+  }
+
+  .status-tag{
+    font-size:10px; color:var(--text-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:4px 8px; border-radius:6px;
+    backdrop-filter: blur(14px);
+  }
+
+  .age-badge{
+    padding:6px 12px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:700;
+  }
+
+  .tv-badge{
+    position:absolute; top:60px; left:16px; z-index:5;
+    padding:4px 10px;
+    border-radius:7px;
+    font-size:11px;
+    font-weight:700;
+    background:#e5e5e5;
+    color:#0a0a0a;
+    border:1px solid var(--line);
+  }
+
+  .logo-wrap{
+    position:absolute; left:0; right:0; bottom:100px; z-index:5;
+    text-align:center;
+    padding:0 16px;
+  }
+
+  .kicker{
+    font-family:'Space Grotesk', sans-serif;
+    font-style:italic;
+    font-size:20px;
+    font-weight:700;
+    color:#f2f2f2;
+    text-shadow:0 2px 18px rgba(0,0,0,0.7);
+  }
+
+  .content-top{
+    padding:0 16px 2px;
+    text-align:center;
+    background:var(--bg);
+    position:relative;
+    z-index:1;
+  }
+
+  h1.title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:24px;
+    line-height:1.2;
+    font-weight:700;
+    color:#e9e9e9;
+    margin-bottom:6px;
+  }
+
+  .meta-line{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-bottom:12px;
+  }
+
+  .tag-row{
+    display:flex; flex-wrap:wrap; gap:6px;
+    justify-content:center;
+    margin-bottom:8px;
+  }
+
+  .tag{
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.04);
+    color:#d8d8d8;
+    white-space:nowrap;
+  }
+
+  .ratings-row{
+    display:flex; gap:8px; justify-content:center;
+    margin:16px 16px 10px;
+  }
+
+  .rating-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 18px;
+    text-align:center;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .rating-num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:18px;
+    font-weight:700;
+    color:#fff;
+  }
+  .rating-num .emoji{ font-size:16px; margin-right:3px; }
+
+  .rating-label{
+    font-size:9px;
+    color:var(--text-dimmer);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-top:2px;
+  }
+
+  .format-row{
+    display:flex; gap:6px; justify-content:center; margin-bottom:16px;
+  }
+
+  .format-pill{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    padding:6px 14px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    color:#c9c9c9;
+    background:rgba(255,255,255,0.04);
+  }
+
+  .actions{
+    display:flex; align-items:center;
+    justify-content:center;
+    gap:36px;
+    padding:0 16px 6px;
+  }
+
+  .action-icon{
+    display:flex; align-items:center; justify-content:center;
+    color:#f2f2f2;
+    cursor:pointer;
+    transition: opacity 0.2s;
+  }
+  .action-icon:active{ opacity:0.6; }
+
+  .reference-player section{ padding:20px 16px 2px; }
+
+  .section-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16px;
+    font-weight:600;
+    color:#fff;
+    margin-bottom:10px;
+  }
+
+  .reference-player .hscroll{
+    display:flex; gap:10px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+
+  .review-add{
+    min-width:90px; height:90px;
+    border:1px dashed var(--line);
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+    color:var(--text-dim);
+    background:rgba(255,255,255,0.03);
+  }
+
+  .review-empty{
+    flex:1;
+    min-width:180px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center;
+    color:var(--text-dimmer);
+    font-size:11px;
+    padding:12px;
+    gap:3px;
+    backdrop-filter: blur(14px);
+  }
+
+  .details-text{
+    font-size:12px;
+    line-height:1.65;
+    color:#c7c7c7;
+  }
+
+  .ep-card{
+    min-width:120px;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#111;
+    position:relative;
+    cursor:pointer;
+  }
+
+  .ep-thumb{
+    height:76px;
+    background:
+      radial-gradient(80px 60px at 30% 20%, rgba(255,255,255,0.14), transparent 70%),
+      repeating-linear-gradient(120deg,#0c0c0c 0 3px,#151515 3px 6px);
+    display:flex; align-items:flex-start; padding:8px;
+  }
+
+  .ep-num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:20px;
+    font-weight:700;
+    color:#fff;
+    text-shadow:0 2px 10px rgba(0,0,0,0.8);
+  }
+
+  .ep-info{ padding:8px 10px 10px; }
+  .ep-info .ep-title{ font-size:11px; color:#ddd; margin-bottom:2px; }
+  .ep-info .ep-date{ font-size:10px; color:var(--text-dimmer); }
+
+  .cast-card{
+    min-width:84px;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center;
+  }
+
+  .cast-avatar{
+    width:68px; height:68px; border-radius:50%;
+    background:
+      radial-gradient(60px 60px at 35% 30%, rgba(255,255,255,0.22), transparent 70%),
+      linear-gradient(160deg,#2a2a2a,#0c0c0c);
+    border:1px solid var(--line);
+    margin-bottom:8px;
+  }
+
+  .cast-name{ font-size:11px; font-weight:600; color:#eee; }
+  .cast-role{ font-size:9px; color:var(--text-dimmer); margin-top:1px; line-height:1.3; }
+
+  .poster-card{
+    min-width:120px;
+  }
+
+  .poster-thumb{
+    height:170px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(155deg,#242424,#0a0a0a 60%);
+  }
+
+  .poster-thumb::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(90px 140px at 30% 15%, rgba(255,255,255,0.14), transparent 65%),
+      radial-gradient(70px 100px at 75% 70%, rgba(255,255,255,0.08), transparent 70%);
+  }
+
+  .poster-badges{
+    position:absolute; bottom:6px; left:6px; right:6px;
+    display:flex; gap:4px; align-items:center;
+    font-size:9px;
+  }
+
+  .pb-format{
+    background:rgba(255,255,255,0.14);
+    padding:2px 5px; border-radius:4px;
+    font-weight:700; letter-spacing:0.03em;
+    color:#eee;
+  }
+  .pb-rating{ color:#e8e8e8; font-weight:600; }
+  .pb-year{ color:var(--text-dimmer); margin-left:auto; }
+
+  .poster-title{
+    font-size:11px; color:#ccc;
+    margin-top:6px; line-height:1.3;
+  }
+
+  .reference-player svg{ display:block; }
+
+  /* ========== EPISODES PAGE ========== */
+  .episodes-page{
+    background:var(--bg);
+    min-height:100vh;
+  }
+
+  .episodes-topbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:16px;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    z-index:10;
+  }
+
+  .back-btn{
+    width:38px; height:38px; border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+
+  .episodes-tabs{
+    display:flex;
+    gap:8px;
+    flex:1;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .episodes-tabs::-webkit-scrollbar{ display:none; }
+
+  .ep-tab{
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--text-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    white-space:nowrap;
+    cursor:pointer;
+    transition: all 0.2s;
+  }
+  .ep-tab.active{
+    background:rgba(255,255,255,0.12);
+    color:var(--text);
+    border-color:var(--line);
+  }
+
+  .episodes-view-tabs{
+    display:flex;
+    gap:6px;
+    padding:0 16px 12px;
+  }
+
+  .view-tab{
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:500;
+    color:var(--text-dim);
+    background:transparent;
+    border:1px solid var(--line);
+    cursor:pointer;
+  }
+  .view-tab.active{
+    background:var(--panel);
+    color:var(--text);
+  }
+
+  .season-select{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 16px 12px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+
+  .season-num{
+    width:36px; height:36px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    font-weight:600;
+    color:var(--text);
+    background:var(--panel);
+    border:1px solid var(--line);
+    cursor:pointer;
+  }
+  .season-num.active{
+    background:rgba(255,255,255,0.15);
+    border-color:var(--text-dim);
+  }
+
+  .episodes-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    padding:0 16px 30px;
+  }
+
+  .episode-grid-card{
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#111;
+    cursor:pointer;
+    transition: transform 0.15s;
+  }
+  .episode-grid-card:active{ transform: scale(0.97); }
+
+  .episode-grid-thumb{
+    position:relative;
+    height:100px;
+    background:
+      radial-gradient(100px 80px at 30% 20%, rgba(255,255,255,0.12), transparent 70%),
+      repeating-linear-gradient(120deg,#0c0c0c 0 3px,#151515 3px 6px);
+    display:flex; align-items:flex-start; padding:8px;
+  }
+
+  .episode-grid-num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14px;
+    font-weight:700;
+    color:#fff;
+    background:rgba(0,0,0,0.5);
+    padding:3px 8px;
+    border-radius:6px;
+    backdrop-filter: blur(8px);
+  }
+
+  .episode-grid-info{
+    padding:10px 12px 12px;
+  }
+
+  .episode-grid-title{
+    font-size:13px;
+    font-weight:600;
+    color:#eee;
+    margin-bottom:6px;
+  }
+
+  .episode-grid-meta{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:var(--text-dimmer);
+  }
+
+  .episode-grid-rating{
+    display:flex;
+    align-items:center;
+    gap:3px;
+    color:#e5c100;
+  }
+
+  .episode-grid-progress{
+    width:100%;
+    height:3px;
+    background:rgba(255,255,255,0.08);
+    border-radius:2px;
+    margin-top:8px;
+    overflow:hidden;
+  }
+  .episode-grid-progress-bar{
+    height:100%;
+    background:rgba(255,255,255,0.3);
+    border-radius:2px;
+  }
+
+.reference-player{max-width:520px;margin:0 auto;position:relative;padding-bottom:40px;background:#0a0a0a;color:#f2f2f2;min-height:100vh;font-family:Inter,sans-serif;}
+#playerPageModal.reference-reference-modal .modal-content{max-width:520px;margin:0 auto;background:#0a0a0a;}
+#playerPageModal .reference-player{display:block;}
+#playerPageModal .reference-player .page{display:none;}
+#playerPageModal .reference-player .page.active{display:block;}
+#playerPageModal:not(.reference-watch-mode) .reference-player #ref-page-info{display:block;}
+#playerPageModal:not(.reference-watch-mode) .reference-player #ref-page-episodes{display:none;}
+#playerPageModal.reference-watch-mode .reference-player #ref-page-info{display:none;}
+#playerPageModal.reference-watch-mode .reference-player #ref-page-episodes{display:block;}
+#playerPageModal:not(.reference-watch-mode) .player-topbar,#playerPageModal:not(.reference-watch-mode) .player-video-container,#playerPageModal:not(.reference-watch-mode) .episode-panel,#playerPageModal:not(.reference-watch-mode) .player-poster-block{display:none!important;}
+#playerPageModal.reference-watch-mode .reference-player{display:none;}
+#playerPageModal.reference-watch-mode .player-topbar{display:flex!important;}
+#playerPageModal.reference-watch-mode .episode-panel{display:block!important;}
+#playerPageModal.reference-watch-mode .player-video-container{display:block!important;}
 </style>
 </head>
 <body class="appletv-agnative-topnav">
@@ -7824,73 +8348,226 @@
 
     <div class="toast" id="toast"></div>
 
-    <div id="playerPageModal" class="modal player-reference-modal" role="dialog" aria-modal="true">
-        <div class="modal-content player-reference-content">
+    <div id="playerPageModal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
             <div class="player-blur-bg" id="playerBlurBg"></div>
+<div class="reference-player" id="referencePlayer">
+<!-- ==================== PAGE 1: ANIME INFO ==================== -->
+<div class="page active" id="ref-page-info">
 
-            <!-- INFO SCREEN: separate from episodes and filters -->
-            <section class="player-info-screen" id="playerInfoScreen">
-                <div class="ref-hero">
-                    <img class="ref-hero-image" id="playerHeroImage" src="" alt="" />
-                    <div class="ref-hero-fallback"></div>
-                    <div class="ref-hero-smoke"></div>
-                    <div class="ref-hero-shade"></div>
-                    <div class="ref-info-topbar">
-                        <button class="ref-icon-btn" id="closePlayerPageBtn" title="Назад">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="hero-img">
+    <div class="hero-bg"></div>
+    <div class="smoke"></div>
+
+    <div class="topbar">
+      <div class="icon-btn" id="refInfoCloseBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#f2f2f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#f2f2f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="top-right-col">
+        <div class="status-tag">Онгоїнг</div>
+        <div class="badge age-badge">17+</div>
+      </div>
+    </div>
+
+    <div class="tv-badge">TV</div>
+
+    <div class="logo-wrap">
+      <div class="kicker" id="refAnimeKicker">Аніме</div>
+    </div>
+  </div>
+
+  <div class="content-top">
+    <h1 class="title" id="refAnimeTitle">Аніме</h1>
+    <div class="meta-line" id="refAnimeMeta">—</div>
+
+    <div class="tag-row" id="refAnimeTags"></div>
+  </div>
+
+  <div class="ratings-row">
+    <div class="rating-card">
+      <div class="rating-num" id="refLocalRating">—</div>
+      <div class="rating-label">2 ГОЛОСІВ</div>
+    </div>
+    <div class="rating-card">
+      <div class="rating-num" id="refTmdbRating">—</div>
+      <div class="rating-label">TMDB</div>
+    </div>
+  </div>
+
+  <div class="format-row">
+    <span class="format-pill">FULLHD</span>
+    <span class="format-pill">HEVC</span>
+  </div>
+
+  <div class="actions" id="refActions">
+    <div class="action-icon" id="refPlayAction" onclick="enterReferenceWatch()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#f2f2f2"><path d="M6 4l14 8-14 8V4z"/></svg>
+    </div>
+    <div class="action-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v13m0 0l-4-4m4 4l4-4M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="action-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-4.5-9.5-9C1 8.5 2.5 5 6 5c2 0 3.3 1.1 4 2.2C10.7 6.1 12 5 14 5c3.5 0 5 3.5 3.5 7-2.5 4.5-9.5 9-9.5 9z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="action-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 22V10M2 13v7a2 2 0 002 2h12.4a2 2 0 002-1.7l1.4-8A2 2 0 0018 10h-5l1-5.5A1.5 1.5 0 0012.6 3L7 10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <section style="padding-top:6px;">
+    <div class="section-title">Відгуки</div>
+    <div class="hscroll">
+      <div class="review-add">+</div>
+      <div class="review-empty">
+        Станьте першим, хто поділиться враженнями<br>Розкажіть про свої емоції від перегляду
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">Детально</div>
+    <p class="details-text" id="refAnimeSynopsis">Опис відсутній.</p>
+  </section>
+
+  <section>
+    <div class="section-title">Сезон 1</div>
+    <div class="hscroll" id="refEpisodePreview"></div>
+  </section>
+
+  <section>
+    <div class="section-title">Актори</div>
+    <div class="hscroll" id="refCastList"></div>
+  </section>
+
+  <section>
+    <div class="section-title">Рекомендації</div>
+    <div class="hscroll" id="refRecommendations"></div>
+  </section>
+
+  <section>
+    <div class="section-title">Подібні</div>
+    <div class="hscroll" id="refSimilar"></div>
+  </section>
+
+</div>
+<div class="page" id="ref-page-episodes">
+  <div class="episodes-page">
+
+    <div class="episodes-topbar">
+      <div class="back-btn" onclick="exitReferenceWatch()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#f2f2f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="episodes-tabs">
+        <div class="ep-tab active" onclick="switchReferenceTab(this)">● Основне</div>
+        <div class="ep-tab" onclick="switchReferenceTab(this)">☰ Сезон 1 · FanVoxUA</div>
+      </div>
+    </div>
+
+    <div class="episodes-view-tabs">
+      <div class="view-tab active" onclick="switchReferenceView(this, 'grid')">Сітка</div>
+      <div class="view-tab" onclick="switchReferenceView(this, 'compact')">Компактний</div>
+      <div class="view-tab" onclick="switchReferenceView(this, 'classic')">Класичний</div>
+    </div>
+
+    <div class="season-select">
+      <span>Сезон</span>
+      <div class="season-num active">1</div>
+      <div class="season-num">2</div>
+      <div class="season-num">3</div>
+      <div class="season-num">4</div>
+    </div>
+
+    <div class="episodes-grid" id="refEpisodesGrid"></div>
+
+  </div>
+</div>
+</div>
+            <div class="player-topbar">
+                <button class="player-back-btn" id="closePlayerPageBtn" title="Назад">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+                </button>
+                <div class="player-topbar-title" id="playerTopbarTitle"></div>
+                <div class="player-source-chip" id="playerSourceChip" title="Джерело">
+                    <span class="dot"></span>
+                    <span id="playerSourceLabel">Джерело</span>
+                </div>
+                <button class="player-filter-btn" id="playerFilterBtn" title="Фільтр">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
+                    <span class="player-filter-chip" id="playerFilterChip">Сезон 1</span>
+                </button>
+            </div>
+
+            <div class="player-video-container" id="playerVideoContainer">
+                <div id="playerPageVideo" style="width:100%;height:100%;min-height:200px;position:relative;"></div>
+                <button class="player-fullscreen-btn" id="playerFullscreenBtn" title="Повний екран" style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;z-index:9999;pointer-events:auto;transition:background 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18-5v3a2 2 0 01-2 2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
+                </button>
+            </div>
+
+            <div class="episode-panel episodes-page" id="episodePanel">
+                <div class="episode-glass-panel episodes-page-inner">
+                    <div class="watch-selection-row">
+                        <button class="watch-select-card" id="watchSourceCard" type="button">
+                            <span class="watch-select-label">ДЖЕРЕЛО</span>
+                            <strong id="watchSourceValue">Основне · 720p</strong>
                         </button>
-                        <div class="ref-top-right">
-                            <span class="ref-status" id="playerStatusTag">Онгоїнг</span>
-                            <span class="ref-age" id="playerAgeTag">17+</span>
-                        </div>
-                    </div>
-                    <span class="ref-tv-badge" id="playerFormatBadge">TV</span>
-                    <div class="ref-hero-title-wrap">
-                        <div class="ref-kicker" id="playerHeroKicker">Аніме</div>
-                    </div>
-                </div>
-
-                <div class="ref-info-content">
-                    <img id="playerPosterImg" src="" alt="" style="display:none">
-                    <h1 class="ref-title" id="playerPosterTitle"></h1>
-                    <div class="ref-meta-line" id="playerTopbarTitle"></div>
-                    <div class="ref-tag-row" id="playerInfoTags"></div>
-                    <div class="ref-ratings-row">
-                        <div class="ref-rating-card"><div class="ref-rating-num" id="playerLocalRating">—</div><div class="ref-rating-label">VAKDAB</div></div>
-                        <div class="ref-rating-card"><div class="ref-rating-num" id="playerTmdbRating">—</div><div class="ref-rating-label">TMDB</div></div>
-                    </div>
-                    <div class="ref-format-row"><span class="ref-format-pill">FULLHD</span><span class="ref-format-pill">anime.ua</span></div>
-                    <div class="ref-actions">
-                        <button class="ref-action-icon ref-play-action" id="playerPlayButton" title="Дивитися">
-                            <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
+                        <button class="watch-select-card" id="watchFilterCard" type="button">
+                            <span class="watch-select-label">ФІЛЬТР</span>
+                            <strong id="watchFilterValue">Сезон 1 · Озвучка</strong>
                         </button>
-                        <button class="ref-action-icon" id="playerShareBtn" title="Поділитися"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.6" x2="15.7" y2="6.6"/><line x1="8.3" y1="13.4" x2="15.7" y2="17.4"/></svg></button>
-                        <button class="ref-action-icon" id="playerBookmarkBtn" title="До закладок"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v13m0 0l-4-4m4 4l4-4M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                        <button class="ref-action-icon" id="likeBtn" title="Подобається"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 22V10M2 13v7a2 2 0 002 2h12.4a2 2 0 002-1.7l1.4-8A2 2 0 0018 10h-5l1-5.5A1.5 1.5 0 0012.6 3L7 10" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                        <button class="ref-action-icon" id="dislikeBtn" title="Не подобається"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="transform:scaleY(-1)"><path d="M7 22V10M2 13v7a2 2 0 002 2h12.4a2 2 0 002-1.7l1.4-8A2 2 0 0018 10h-5l1-5.5A1.5 1.5 0 0012.6 3L7 10" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     </div>
-
-                    <section class="ref-section ref-review-section">
-                        <div class="ref-section-title"><span>Відгуки</span><span id="animeCommentCount" class="ref-muted-count">0 коментарів</span></div>
-                        <div class="comments-container" id="animeCommentsList"></div>
-                        <div class="comment-input-wrap"><input type="text" class="comment-input" id="animeCommentInput" placeholder="Напишіть відгук..."><button class="comment-send" id="sendAnimeComment"><i class="fas fa-paper-plane"></i></button></div>
-                    </section>
-                    <section class="ref-section"><div class="ref-section-title">Детально</div><p class="ref-details-text" id="playerSynopsis"></p><button class="synopsis-more-btn" id="synopsisMoreBtn">більше</button></section>
-                    <section class="ref-section ref-episode-preview"><div class="ref-section-title">Сезони та серії</div><button class="ref-watch-wide" id="playerPlayButtonWide"><span>▶</span> Відкрити меню перегляду</button></section>
+                    <div class="episode-view-tabs" id="episodeViewTabs">
+                        <button class="episode-view-tab active" data-view="grid">Сітка</button>
+                        <button class="episode-view-tab" data-view="compact">Компактний</button>
+                        <button class="episode-view-tab" data-view="classic">Класичний</button>
+                    </div>
+                    <div class="episode-season-row" id="episodeSeasonRow">
+                        <span class="episode-season-label">Сезон</span>
+                    </div>
+                    <div id="episodeViewGrid" class="episode-grid-view"></div>
+                    <div id="episodeViewCompact" class="episode-compact-view hidden"></div>
+                    <div id="episodeViewClassic" class="episode-classic-view hidden"></div>
                 </div>
-            </section>
+            </div>
 
-            <!-- WATCH SCREEN: video, source/filter controls and episode grid -->
-            <section class="player-watch-screen" id="playerWatchScreen">
-                <div class="ref-watch-topbar">
-                    <button class="ref-icon-btn" id="watchBackButton" title="До інформації"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                    <div class="ref-watch-heading"><span>Дивитися</span><small id="watchTitleLabel"></small></div>
-                    <button class="player-filter-btn ref-watch-filter" id="playerFilterBtn" title="Фільтр"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2" fill="currentColor" stroke="none"/></svg><span class="player-filter-chip" id="playerFilterChip">Сезон 1</span></button>
+            <div class="player-poster-block" id="playerPosterBlock">
+                <img class="poster-img" id="playerPosterImg" src="" alt="" />
+                <div class="poster-title" id="playerPosterTitle"></div>
+                <div class="poster-meta" id="playerPosterMeta"></div>
+                <div class="poster-synopsis" id="playerSynopsis"></div>
+                <button class="synopsis-more-btn" id="synopsisMoreBtn">більше</button>
+
+                <div class="comments-section">
+                    <div class="section-title" style="margin-bottom:12px; justify-content: space-between; display: flex; align-items: center;">
+                        <span>Відгуки</span>
+                        <span id="animeCommentCount" style="font-size: 12px; color: var(--text-muted); font-weight: 400;">0 коментарів</span>
+                    </div>
+                    <div class="comments-container" id="animeCommentsList">
+                        <!-- Коментарі будуть тут -->
+                    </div>
+                    <div class="comment-input-wrap">
+                        <input type="text" class="comment-input" id="animeCommentInput" placeholder="Напишіть відгук...">
+                        <button class="comment-send" id="sendAnimeComment">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="ref-source-row"><span class="ref-list-icon">▤</span><span>Джерело</span><button class="watch-select-card" id="watchSourceCard" type="button"><span id="playerSourceChip" class="ref-source-chip"><span class="dot"></span><span id="playerSourceLabel">Основне · 720p</span></span><strong id="watchSourceValue">Основне · 720p</strong></button></div>
-                <div class="player-video-container" id="playerVideoContainer"><div id="playerPageVideo" style="width:100%;height:100%;min-height:200px;position:relative;"></div><button class="player-fullscreen-btn" id="playerFullscreenBtn" title="Повний екран"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18-5v3a2 2 0 01-2 2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg></button></div>
-                <div class="episode-panel episodes-page" id="episodePanel"><div class="episode-glass-panel episodes-page-inner"><div class="watch-selection-row"><button class="watch-select-card" id="watchFilterCard" type="button"><span class="watch-select-label">ФІЛЬТР</span><strong id="watchFilterValue">Сезон 1 · Озвучка</strong></button></div><div class="episode-view-tabs" id="episodeViewTabs"><button class="episode-view-tab active" data-view="grid">Сітка</button><button class="episode-view-tab" data-view="compact">Компактний</button><button class="episode-view-tab" data-view="classic">Класичний</button></div><div class="episode-season-row" id="episodeSeasonRow"><span class="episode-season-label">Сезон</span></div><div id="episodeViewGrid" class="episode-grid-view"></div><div id="episodeViewCompact" class="episode-compact-view hidden"></div><div id="episodeViewClassic" class="episode-classic-view hidden"></div></div></div>
-            </section>
+
+                <div class="player-actions-block">
+                    <button class="player-bookmark-btn" id="playerBookmarkBtn" title="Додати до закладок">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0l-4-4m4 4l4-4M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"/></svg>
+                    </button>
+                    <button class="like-btn" id="likeBtn" title="Лайк">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9C1 8.5 2.5 5 6 5c2 0 3.3 1.1 4 2.2C10.7 6.1 12 5 14 5c3.5 0 5 3.5 3.5 7-2.5 4.5-9.5 9-9.5 9z"/></svg>
+                    </button>
+                    <button class="dislike-btn" id="dislikeBtn" title="Дизлайк">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1);"><path d="M7 22V10M2 13v7a2 2 0 002 2h12.4a2 2 0 002-1.7l1.4-8A2 2 0 0018 10h-5l1-5.5A1.5 1.5 0 0012.6 3L7 10"/></svg>
+                    </button>
+                    <button class="player-share-btn" id="playerShareBtn" title="Поділитися">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.6" x2="15.7" y2="6.6"/><line x1="8.3" y1="13.4" x2="15.7" y2="17.4"/></svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -15205,6 +15882,68 @@ function renderProfilePage() {
 
         const QUALITY_OPTIONS = ['Максимальна', '2160p (4K)', '1440p', '1080p', '720p', '480p', '360p'];
 
+        function renderReferenceInfo(anime) {
+            if (!anime) return;
+            const title = anime.title || 'Аніме';
+            const poster = anime.images?.jpg?.large_image_url || '';
+            const seasons = Object.keys(anime.seasons || {}).length || 1;
+            const totalEpisodes = Object.values(anime.seasons || {}).reduce((sum, s) => sum + Object.values(s).reduce((n, e) => Math.max(n, e.length), 0), 0);
+            const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+            setText('refAnimeKicker', title);
+            setText('refAnimeTitle', title);
+            setText('refAnimeMeta', `${anime.year || '—'}, Японія`);
+            setText('refAnimeSynopsis', anime.synopsis || 'Опис відсутній.');
+            setText('refLocalRating', anime.score ? `★ ${anime.score}` : '—');
+            setText('refTmdbRating', anime.score || '—');
+            const tags = document.getElementById('refAnimeTags');
+            if (tags) {
+                tags.innerHTML = '';
+                [`Сезони: ${seasons}`, `Серії: ${totalEpisodes}`, 'Мультфільм', ...(anime.genres || []).slice(0, 4)].forEach(label => {
+                    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = label; tags.appendChild(tag);
+                });
+            }
+            const hero = document.querySelector('#ref-page-info .hero-bg');
+            if (hero && poster) hero.style.background = `linear-gradient(180deg,rgba(10,10,10,.12),#0a0a0a 88%),url("${poster}") center/cover no-repeat`;
+            const preview = document.getElementById('refEpisodePreview');
+            if (preview) {
+                const eps = getCurrentEpisodes().slice(0, 4);
+                preview.innerHTML = eps.map(ep => `<div class="ep-card" data-ref-file="${String(ep.file || '').replace(/"/g, '&quot;')}" data-ref-episode="${ep.episode}"><div class="ep-thumb" style="${poster ? `background-image:url("${poster}");background-size:cover;background-position:center;` : ''}"><span class="ep-num">${ep.episode}</span></div><div class="ep-info"><div class="ep-title">Серія ${ep.episode}</div><div class="ep-date">${playerPageCurrentDub || 'Озвучка'}</div></div></div>`).join('');
+                preview.querySelectorAll('[data-ref-file]').forEach(card => card.addEventListener('click', enterReferenceWatch));
+            }
+        }
+
+        function renderReferenceEpisodes() {
+            const grid = document.getElementById('refEpisodesGrid');
+            if (!grid) return;
+            const episodes = getCurrentEpisodes();
+            const poster = playerPageAnime?.images?.jpg?.large_image_url || '';
+            grid.innerHTML = episodes.map(ep => `<div class="episode-grid-card" data-ref-file="${String(ep.file || '').replace(/"/g, '&quot;')}" data-ref-episode="${ep.episode}"><div class="episode-grid-thumb" style="${poster ? `background-image:url("${poster}");background-size:cover;background-position:center;` : ''}"><span class="episode-grid-num">${String(ep.episode).padStart(2,'0')}</span></div><div class="episode-grid-info"><div class="episode-grid-title">Серія ${ep.episode}</div><div class="episode-grid-meta"><span class="episode-grid-rating">◆ ${playerPageAnime?.score || '—'}</span><span>· ${playerPageCurrentDub || 'Озвучка'}</span></div><div class="episode-grid-progress"><div class="episode-grid-progress-bar" style="width:${getEpisodeProgress(ep.episode)}%"></div></div></div></div>`).join('') || '<div class="episode-empty">Немає серій</div>';
+            grid.querySelectorAll('[data-ref-file]').forEach(card => card.addEventListener('click', () => {
+                const file = card.dataset.refFile, ep = card.dataset.refEpisode;
+                if (file) { enterReferenceWatch(); playEpisode(file, ep); }
+            }));
+        }
+
+        function enterReferenceWatch() {
+            const modal = document.getElementById('playerPageModal');
+            if (!modal) return;
+            modal.classList.add('reference-watch-mode');
+            renderReferenceEpisodes();
+            modal.querySelector('.modal-content')?.scrollTo(0, 0);
+        }
+        function exitReferenceWatch() {
+            document.getElementById('playerPageModal')?.classList.remove('reference-watch-mode');
+            document.getElementById('playerPageModal')?.querySelector('.modal-content')?.scrollTo(0, 0);
+        }
+        function switchReferenceTab(el) {
+            el.parentElement.querySelectorAll('.ep-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+        function switchReferenceView(el) {
+            el.parentElement.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
         async function openPlayerPage(url) {
             const modal = document.getElementById('playerPageModal');
             if (!modal) return;
@@ -15220,6 +15959,7 @@ function renderProfilePage() {
                 playerPagePlayer = null; }
             playerPageAnime = null;
             playerPageCurrentAnimeUrl = url;
+            modal.classList.remove('reference-watch-mode');
             playerPageHistoryUpdated = false;
             playerPageWatchStartTime = 0;
             document.getElementById('playerVideoContainer').classList.remove('active');
@@ -15234,11 +15974,6 @@ function renderProfilePage() {
             updateLikeButton();
             updateDislikeButton();
             updateBookmarkButton(url);
-            modal.classList.remove('watch-mode');
-            const heroImage = document.getElementById('playerHeroImage');
-            if (heroImage) heroImage.removeAttribute('src');
-            const watchTitle = document.getElementById('watchTitleLabel');
-            if (watchTitle) watchTitle.textContent = '';
             loadAnimeComments(url);
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -15248,29 +15983,24 @@ function renderProfilePage() {
                 // Якщо плеєр вже закрили поки завантажувалось — не оновлювати DOM
                 if (_thisSignal.aborted || modal.style.display === 'none') return;
                 playerPageAnime = anime;
+                renderReferenceInfo(anime);
                 playerPageAnimeuaSeasons = anime.seasons || {};
                 externalSourceCache = {};
                 playerPageSources = ['Основне'];
                 playerPageCurrentSource = 'Основне';
                 const posterUrl = anime.images?.jpg?.large_image_url || '';
                 document.getElementById('playerPosterImg').src = posterUrl;
-                document.getElementById('playerHeroImage').src = posterUrl;
                 document.getElementById('playerPosterTitle').textContent = anime.title;
-                document.getElementById('playerHeroKicker').textContent = anime.title || 'Аніме';
-                document.getElementById('playerTopbarTitle').textContent = `${anime.year || '—'}, Японія`;
-                document.getElementById('watchTitleLabel').textContent = anime.title || '';
+                document.getElementById('playerTopbarTitle').textContent = '';
                 document.getElementById('playerBlurBg').style.backgroundImage = `url(${posterUrl})`;
                 const totalEpisodes = Object.values(anime.seasons || {}).reduce((sum, s) => sum + Object.values(s).reduce((s2,
                     e) => Math.max(s2, e.length), 0), 0);
-                const infoTags = document.getElementById('playerInfoTags');
-                if (infoTags) infoTags.innerHTML = `
-                    <span class="ref-tag">Сезони: ${Object.keys(anime.seasons || {}).length || 1}</span>
-                    <span class="ref-tag">Серії: ${totalEpisodes}</span>
-                    <span class="ref-tag">Мультфільм</span>
-                    ${(anime.genres || []).slice(0, 4).map(g => `<span class="ref-tag">${g}</span>`).join('')}
-                `;
-                document.getElementById('playerLocalRating').textContent = anime.score ? `★ ${anime.score}` : '—';
-                document.getElementById('playerTmdbRating').textContent = anime.score ? anime.score : '—';
+                document.getElementById('playerPosterMeta').innerHTML = `
+              ${anime.score ? `<span class="meta-tag age-tag">${anime.score}</span>` : ''}
+              <span class="meta-tag">${anime.year||'—'}</span>
+              <span class="meta-tag">${totalEpisodes} еп.</span>
+              ${(anime.genres||[]).slice(0,3).map(g=>`<span class="meta-tag">${g}</span>`).join('')}
+            `;
                 const synopsisEl = document.getElementById('playerSynopsis');
                 synopsisEl.textContent = anime.synopsis || 'Опис відсутній.';
                 const moreBtn = document.getElementById('synopsisMoreBtn');
@@ -15291,6 +16021,7 @@ function renderProfilePage() {
                 playerPageCurrentQuality = '720p';
                 buildSeasonRow(seasons);
                 buildEpisodeViews();
+                renderReferenceEpisodes();
                 updateFilterChip();
                 // updatePlayFabLabel();
                 document.getElementById('episodePanel').classList.add('visible');
@@ -15645,17 +16376,6 @@ function renderProfilePage() {
         function closePlayerPage() {
             const modal = document.getElementById('playerPageModal');
             if (!modal) return;
-            if (modal.classList.contains('watch-mode')) {
-                modal.classList.remove('watch-mode');
-                if (playerPagePlayer) {
-                    if (playerPagePlayer._timeUpdateListener && playerPagePlayer.videoRef) playerPagePlayer.videoRef.removeEventListener('timeupdate', playerPagePlayer._timeUpdateListener);
-                    playerPagePlayer.destroy();
-                    playerPagePlayer = null;
-                }
-                document.getElementById('playerVideoContainer').classList.remove('active');
-                document.getElementById('playerPageVideo').innerHTML = '';
-                return;
-            }
             // Скасувати активне завантаження — щоб catch не показував помилку
             if (_playerLoadController) {
                 _playerLoadController.abort();
@@ -15928,17 +16648,7 @@ function renderProfilePage() {
 
         const cpBtn = document.getElementById('closePlayerPageBtn');
         if (cpBtn) cpBtn.addEventListener('click', closePlayerPage);
-        const enterWatchMode = () => {
-            const modal = document.getElementById('playerPageModal');
-            if (!modal || !playerPageAnime) return;
-            modal.classList.add('watch-mode');
-            const content = modal.querySelector('.modal-content');
-            if (content) content.scrollTop = 0;
-            setTimeout(() => document.getElementById('episodePanel')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);
-        };
-        document.getElementById('playerPlayButton')?.addEventListener('click', enterWatchMode);
-        document.getElementById('playerPlayButtonWide')?.addEventListener('click', enterWatchMode);
-        document.getElementById('watchBackButton')?.addEventListener('click', closePlayerPage);
+        document.getElementById('refInfoCloseBtn')?.addEventListener('click', closePlayerPage);
         // Fullscreen button — global handler
         const playerFsBtn = document.getElementById('playerFullscreenBtn');
         if (playerFsBtn) {
