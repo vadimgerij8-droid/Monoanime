@@ -8277,10 +8277,11 @@
 #playerPageModal.reference-watch-mode .reference-player #ref-page-info{display:none;}
 #playerPageModal.reference-watch-mode .reference-player #ref-page-episodes{display:block;}
 #playerPageModal:not(.reference-watch-mode) .player-topbar,#playerPageModal:not(.reference-watch-mode) .player-video-container,#playerPageModal:not(.reference-watch-mode) .episode-panel,#playerPageModal:not(.reference-watch-mode) .player-poster-block{display:none!important;}
-#playerPageModal.reference-watch-mode .reference-player{display:none;}
-#playerPageModal.reference-watch-mode .player-topbar{display:flex!important;}
-#playerPageModal.reference-watch-mode .episode-panel{display:block!important;}
-#playerPageModal.reference-watch-mode .player-video-container{display:block!important;}
+#playerPageModal.reference-watch-mode .reference-player{display:block!important;background:#0a0a0a!important;color:#f2f2f2!important;}
+#playerPageModal.reference-watch-mode .reference-player .episodes-page{background:#0a0a0a!important;color:#f2f2f2!important;}
+#playerPageModal.reference-watch-mode .player-topbar,#playerPageModal.reference-watch-mode .episode-panel,#playerPageModal.reference-watch-mode .player-poster-block{display:none!important;}
+#playerPageModal.reference-watch-mode .player-video-container{display:none!important;}
+#playerPageModal.reference-watch-mode .player-video-container.active{display:block!important;}
 </style>
 </head>
 <body class="appletv-agnative-topnav">
