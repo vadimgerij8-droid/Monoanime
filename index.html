@@ -7847,11 +7847,11 @@
         margin-top:2px;
     }
 
-    #playerPageModal .modal-content .format-row, #watchPageModal .modal-content .format-row{
+    #playerPageModal .modal-content .format-row, #playerPageModal .modal-content .format-row{
         display:flex; gap:6px; justify-content:center; margin-bottom:16px; flex-wrap:wrap;
     }
 
-    #playerPageModal .modal-content .format-pill, #watchPageModal .modal-content .format-pill{
+    #playerPageModal .modal-content .format-pill, #playerPageModal .modal-content .format-pill{
         font-size:10px;
         font-weight:700;
         letter-spacing:0.05em;
@@ -7862,11 +7862,11 @@
         background:rgba(255,255,255,0.04);
         transition:all 0.2s;
     }
-    #playerPageModal .modal-content .format-pill[data-dub]:hover, #watchPageModal .modal-content .format-pill[data-dub]:hover{
+    #playerPageModal .modal-content .format-pill[data-dub]:hover, #playerPageModal .modal-content .format-pill[data-dub]:hover{
         background:rgba(255,255,255,0.08);
         color:#fff;
     }
-    #playerPageModal .modal-content .format-pill.active-format, #watchPageModal .modal-content .format-pill.active-format{
+    #playerPageModal .modal-content .format-pill.active-format, #playerPageModal .modal-content .format-pill.active-format{
         background:var(--accent);
         color:#0a0a0a;
         border-color:var(--accent);
@@ -7892,7 +7892,7 @@
     /* ---------- SECTIONS ---------- */
     #playerPageModal .modal-content section{ padding:20px 16px 2px; }
 
-    #playerPageModal .modal-content .section-title, #watchPageModal .modal-content .section-title{
+    #playerPageModal .modal-content .section-title, #playerPageModal .modal-content .section-title{
         font-family:'Space Grotesk', sans-serif;
         font-size:16px;
         font-weight:600;
@@ -7931,7 +7931,7 @@
     #playerPageModal .modal-content .hscroll::-webkit-scrollbar{ display:none; }
 
     /* reviews */
-    #playerPageModal .modal-content .review-empty, #watchPageModal .modal-content .review-empty{
+    #playerPageModal .modal-content .review-empty, #playerPageModal .modal-content .review-empty{
         flex:1;
         min-width:180px;
         border-radius:12px;
@@ -7983,7 +7983,7 @@
     #playerPageModal .modal-content .details-text.expanded{ -webkit-line-clamp:unset; }
 
     /* episodes */
-    #playerPageModal .modal-content .ep-card, #watchPageModal .modal-content .ep-card{
+    #playerPageModal .modal-content .ep-card, #playerPageModal .modal-content .ep-card{
         min-width:120px;
         border-radius:12px;
         overflow:hidden;
@@ -7993,7 +7993,7 @@
         cursor:pointer;
     }
 
-    #playerPageModal .modal-content .ep-thumb, #watchPageModal .modal-content .ep-thumb{
+    #playerPageModal .modal-content .ep-thumb, #playerPageModal .modal-content .ep-thumb{
         height:76px;
         background-size:cover; background-position:center;
         display:flex; align-items:flex-start; padding:8px;
@@ -8003,16 +8003,16 @@
     }
     #playerPageModal .modal-content .ep-card:hover .ep-thumb,
     #playerPageModal .modal-content .ep-card:focus-within .ep-thumb,
-    #watchPageModal .modal-content .ep-card:hover .ep-thumb,
-    #watchPageModal .modal-content .ep-card:focus-within .ep-thumb{
+    #playerPageModal .modal-content .ep-card:hover .ep-thumb,
+    #playerPageModal .modal-content .ep-card:focus-within .ep-thumb{
         filter: grayscale(0%) contrast(1);
     }
-    #playerPageModal .modal-content .ep-thumb::after, #watchPageModal .modal-content .ep-thumb::after{
+    #playerPageModal .modal-content .ep-thumb::after, #playerPageModal .modal-content .ep-thumb::after{
         content:""; position:absolute; inset:0;
         background:linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55));
     }
 
-    #playerPageModal .modal-content .ep-num, #watchPageModal .modal-content .ep-num{
+    #playerPageModal .modal-content .ep-num, #playerPageModal .modal-content .ep-num{
         position:relative; z-index:1;
         font-family:'Space Grotesk', sans-serif;
         font-size:20px;
@@ -8021,10 +8021,10 @@
         text-shadow:0 2px 10px rgba(0,0,0,0.8);
     }
 
-    #playerPageModal .modal-content .ep-info, #watchPageModal .modal-content .ep-info{ padding:8px 10px 10px; }
-    #playerPageModal .modal-content .ep-info .ep-title, #watchPageModal .modal-content .ep-info .ep-title{ font-size:13px; color:#ddd; margin-bottom:2px; font-weight:600; }
-    #playerPageModal .modal-content .ep-info .ep-date, #watchPageModal .modal-content .ep-info .ep-date{ font-size:10px; color:var(--text-dimmer); }
-    #playerPageModal .modal-content .ep-card.watched .ep-num, #watchPageModal .modal-content .ep-card.watched .ep-num{ color:#7CFC9A; }
+    #playerPageModal .modal-content .ep-info, #playerPageModal .modal-content .ep-info{ padding:8px 10px 10px; }
+    #playerPageModal .modal-content .ep-info .ep-title, #playerPageModal .modal-content .ep-info .ep-title{ font-size:13px; color:#ddd; margin-bottom:2px; font-weight:600; }
+    #playerPageModal .modal-content .ep-info .ep-date, #playerPageModal .modal-content .ep-info .ep-date{ font-size:10px; color:var(--text-dimmer); }
+    #playerPageModal .modal-content .ep-card.watched .ep-num, #playerPageModal .modal-content .ep-card.watched .ep-num{ color:#7CFC9A; }
 
     /* posters (рекомендації / подібні) */
     #playerPageModal .modal-content .poster-card{
@@ -8093,15 +8093,7 @@
        відгуками). Той самий локальний дизайн-скоуп, що і в
        #playerPageModal, але фокус лише на джерелі/фільтрах/серіях.
        ================================================================== */
-    #watchPageModal {
-        display:none;
-        position:fixed; inset:0;
-        background:rgba(0,0,0,0.92);
-        z-index:2050;
-        justify-content:center; align-items:flex-start;
-        padding:0; overflow-y:auto;
-    }
-    #watchPageModal .modal-content{
+    #playerPageModal .modal-content{
         --bg:#0a0a0a;
         --panel:rgba(255,255,255,0.06);
         --panel-strong:rgba(255,255,255,0.10);
@@ -8113,16 +8105,16 @@
         background:var(--bg); color:var(--text); font-family:'Inter', sans-serif;
         max-width:520px; margin:0 auto; position:relative; padding-bottom:40px; min-height:100%;
     }
-    #watchPageModal .modal-content *{ box-sizing:border-box; }
+    #playerPageModal .modal-content *{ box-sizing:border-box; }
 
-    #watchPageModal .icon-btn{
+    #playerPageModal .icon-btn{
         width:34px; height:34px; border-radius:50%;
         display:flex; align-items:center; justify-content:center;
         background:var(--panel); border:1px solid var(--line); color:var(--text);
         cursor:pointer; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
         transition:background .2s ease;
     }
-    #watchPageModal .icon-btn:hover{ background:var(--panel-strong); }
+    #playerPageModal .icon-btn:hover{ background:var(--panel-strong); }
 
     .watch-topbar{
         display:flex; align-items:center; justify-content:space-between;
@@ -8145,22 +8137,22 @@
 
     .season-pills-row{ display:flex; gap:8px; flex-wrap:wrap; padding:14px 16px 4px; }
     .season-pills-row.single{ font-size:13px; font-weight:600; color:var(--text-dim); padding:14px 16px 4px; }
-    #watchPageModal .season-tab{
+    #playerPageModal .season-tab{
         display:inline-flex; align-items:center; justify-content:center;
         min-width:38px; height:32px; padding:0 12px;
         border-radius:10px; background:var(--panel); border:1px solid var(--line);
         font-size:12px; font-weight:600; color:var(--text-dim); cursor:pointer;
         transition:all .2s ease;
     }
-    #watchPageModal .season-tab:hover{ background:var(--panel-strong); color:var(--text); }
-    #watchPageModal .season-tab.active-season-tab{ background:var(--text); color:#0a0a0a; border-color:var(--text); }
+    #playerPageModal .season-tab:hover{ background:var(--panel-strong); color:var(--text); }
+    #playerPageModal .season-tab.active-season-tab{ background:var(--text); color:#0a0a0a; border-color:var(--text); }
 
     /* ---------- GRID VIEW ---------- */
     .ep-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px; }
     @media (min-width:480px){ .ep-grid{ grid-template-columns:repeat(3,1fr); } }
     .ep-grid.hidden, .ep-compact-list.hidden, .ep-classic-list.hidden{ display:none; }
-    #watchPageModal .modal-content .ep-grid .ep-card{ min-width:0; width:100%; }
-    #watchPageModal .modal-content .ep-grid .ep-thumb{ height:0; padding-top:56%; }
+    #playerPageModal .modal-content .ep-grid .ep-card{ min-width:0; width:100%; }
+    #playerPageModal .modal-content .ep-grid .ep-thumb{ height:0; padding-top:56%; }
 
     .epv2-card{ cursor:pointer; }
     .epv2-thumb{
@@ -8272,57 +8264,57 @@
     #playerPageModal .modal-content .cast-role{ font-size:9px; color:var(--text-dimmer); margin-top:1px; line-height:1.3; }
 
     #playerPageModal .modal-content .pb-rating{ color:#e8e8e8; font-weight:600; }
-    #watchPageModal .modal-content .pb-rating{ color:#e8e8e8; font-weight:600; }
+    #playerPageModal .modal-content .pb-rating{ color:#e8e8e8; font-weight:600; }
 
     /* Episodes page (design ref) */
-    #watchPageModal .modal-content .episodes-page{ background:var(--bg); min-height:100vh; }
-    #watchPageModal .modal-content .episodes-topbar{
+    #playerPageModal .modal-content .episodes-page{ background:var(--bg); min-height:100vh; }
+    #playerPageModal .modal-content .episodes-topbar{
         display:flex; align-items:center; gap:10px;
         padding:16px; position:sticky; top:0;
         background:var(--bg); z-index:10;
     }
-    #watchPageModal .modal-content .back-btn{
+    #playerPageModal .modal-content .back-btn{
         width:38px; height:38px; border-radius:50%;
         background:var(--panel); border:1px solid var(--line);
         display:flex; align-items:center; justify-content:center;
         color:var(--text); cursor:pointer; flex-shrink:0;
     }
-    #watchPageModal .modal-content .episodes-tabs{
+    #playerPageModal .modal-content .episodes-tabs{
         display:flex; gap:8px; flex:1; overflow-x:auto; scrollbar-width:none;
     }
-    #watchPageModal .modal-content .episodes-tabs::-webkit-scrollbar{ display:none; }
-    #watchPageModal .modal-content .ep-tab{
+    #playerPageModal .modal-content .episodes-tabs::-webkit-scrollbar{ display:none; }
+    #playerPageModal .modal-content .ep-tab{
         padding:8px 16px; border-radius:20px;
         font-size:13px; font-weight:500;
         color:var(--text-dim); background:var(--panel);
         border:1px solid var(--line); white-space:nowrap;
         cursor:pointer; transition:all 0.2s; flex-shrink:0;
     }
-    #watchPageModal .modal-content .ep-tab.active{
+    #playerPageModal .modal-content .ep-tab.active{
         background:rgba(255,255,255,0.12);
         color:var(--text); border-color:var(--line);
     }
-    #watchPageModal .modal-content .episodes-view-tabs{
+    #playerPageModal .modal-content .episodes-view-tabs{
         display:flex; gap:6px; padding:0 16px 12px;
     }
-    #watchPageModal .modal-content .view-tab{
+    #playerPageModal .modal-content .view-tab{
         padding:6px 14px; border-radius:20px;
         font-size:12px; font-weight:500;
         color:var(--text-dim); background:transparent;
         border:1px solid var(--line); cursor:pointer;
         transition:all 0.2s;
     }
-    #watchPageModal .modal-content .view-tab.active{
+    #playerPageModal .modal-content .view-tab.active{
         background:var(--panel); color:var(--text);
     }
-    #watchPageModal .modal-content .season-select{
+    #playerPageModal .modal-content .season-select{
         display:flex; align-items:center; gap:10px;
         padding:0 16px 12px;
         font-size:13px; color:var(--text-dim);
         overflow-x:auto; scrollbar-width:none;
     }
-    #watchPageModal .modal-content .season-select::-webkit-scrollbar{ display:none; }
-    #watchPageModal .modal-content .season-num{
+    #playerPageModal .modal-content .season-select::-webkit-scrollbar{ display:none; }
+    #playerPageModal .modal-content .season-num{
         width:36px; height:36px; border-radius:50%;
         display:flex; align-items:center; justify-content:center;
         font-size:14px; font-weight:600;
@@ -8330,27 +8322,41 @@
         border:1px solid var(--line); cursor:pointer;
         flex-shrink:0; transition:all 0.2s;
     }
-    #watchPageModal .modal-content .season-num.active{
+    #playerPageModal .modal-content .season-num.active{
         background:rgba(255,255,255,0.15);
         border-color:var(--text-dim);
     }
-    #watchPageModal .modal-content .episodes-grid{
+    #playerPageModal .modal-content .episodes-grid{
         display:grid; grid-template-columns:1fr 1fr;
         gap:10px; padding:0 16px 30px;
     }
-    #watchPageModal .modal-content .episode-grid-num{
+    #playerPageModal .modal-content .episode-grid-num{
         font-family:'Space Grotesk', sans-serif;
         font-size:14px; font-weight:700;
         color:#fff; background:rgba(0,0,0,0.5);
         padding:3px 8px; border-radius:6px;
         backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
     }
-    #watchPageModal .modal-content .episode-grid-rating{
+    #playerPageModal .modal-content .episode-grid-rating{
         display:flex; align-items:center; gap:3px;
         color:#e5c100;
     }
-    #watchPageModal .modal-content .episode-grid-progress-bar{
+    #playerPageModal .modal-content .episode-grid-progress-bar{
         height:100%; background:rgba(255,255,255,0.3); border-radius:2px;
+    }
+
+    
+    /* ---------- PAGE TOGGLE (design ref pattern: page-info / page-episodes) ---------- */
+    #playerPageModal .modal-content > .page{
+        display:none;
+        animation: pageFadeIn 0.3s ease;
+    }
+    #playerPageModal .modal-content > .page.active{
+        display:block;
+    }
+    @keyframes pageFadeIn{
+        from{ opacity:0; transform: translateY(8px); }
+        to{ opacity:1; transform: translateY(0); }
     }
 
     </style>
@@ -8422,6 +8428,9 @@
 
     <div id="playerPageModal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
+
+          <!-- ==================== PAGE 1: ANIME INFO ==================== -->
+          <div class="page active" id="page-info">
 
             <!-- HERO IMAGE -->
             <div class="hero-img" id="playerBlurBg">
@@ -8545,64 +8554,60 @@
                 <div id="playerSourceChip"></div>
                 <span id="playerFilterChip"></span>
                 <div id="episodePanel" class="visible"></div>
-                <div id="episodeSeasonRow"></div>
                 <span id="playerPlayFabLabel"></span>
                 <div id="dislikeBtn"></div>
             </div>
 
-        </div>
-    </div>
+          </div>
+          <!-- ==================== /PAGE 1 ==================== -->
 
-    <!-- ================= WATCH PAGE ("Дивитися") — окрема сторінка серій ================= -->
-    <div id="watchPageModal" class="modal" role="dialog" aria-modal="true">
-        <div class="modal-content">
+          <!-- ==================== PAGE 2: EPISODES GRID ==================== -->
+          <div class="page" id="page-episodes">
+            <div class="episodes-page">
 
-            <!-- VIDEO OVERLAY (fullscreen player, real playback engine) -->
-            <div class="player-video-container" id="playerVideoContainer">
-                <div class="video-overlay-topbar">
-                    <button class="icon-btn" id="videoBackBtn" title="Назад">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-                    </button>
-                    <div class="video-overlay-title" id="playerTopbarTitle"></div>
-                    <button class="icon-btn" id="playerFullscreenBtn" title="Повний екран">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18-5v3a2 2 0 01-2 2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
-                    </button>
-                </div>
-                <div id="playerPageVideo" style="width:100%;height:100%;min-height:200px;position:relative;"></div>
+              <!-- VIDEO OVERLAY (fullscreen player, real playback engine) -->
+              <div class="player-video-container" id="playerVideoContainer">
+                  <div class="video-overlay-topbar">
+                      <button class="icon-btn" id="videoBackBtn" title="Назад">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+                      </button>
+                      <div class="video-overlay-title" id="playerTopbarTitle"></div>
+                      <button class="icon-btn" id="playerFullscreenBtn" title="Повний екран">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18-5v3a2 2 0 01-2 2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
+                      </button>
+                  </div>
+                  <div id="playerPageVideo" style="width:100%;height:100%;min-height:200px;position:relative;"></div>
+              </div>
+
+              <div class="episodes-topbar">
+                  <div class="back-btn" id="watchBackBtn">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+                  </div>
+                  <div class="episodes-tabs">
+                      <div class="ep-tab active" id="watchSourcePill">● <span id="watchSourceValue">Основне</span></div>
+                      <div class="ep-tab" id="watchFilterPill">☰ <span id="watchFilterValue">Сезон 1</span></div>
+                  </div>
+              </div>
+
+              <div class="episodes-view-tabs">
+                  <div class="view-tab active" data-view="grid">Сітка</div>
+                  <div class="view-tab" data-view="compact">Компактний</div>
+                  <div class="view-tab" data-view="classic">Класичний</div>
+              </div>
+
+              <div class="season-select" id="episodeSeasonRow">
+                  <span>Сезон</span>
+              </div>
+
+              <div class="episodes-grid">
+                  <div class="ep-grid" id="episodeViewGrid"></div>
+                  <div class="ep-compact-list hidden" id="episodeViewCompact"></div>
+                  <div class="ep-classic-list hidden" id="episodeViewClassic"></div>
+              </div>
+
             </div>
-
-            <div class="watch-topbar">
-                <button class="icon-btn" id="watchBackBtn" title="Назад">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-                </button>
-                <div class="watch-topbar-title">Дивитися</div>
-                <div class="watch-topbar-spacer"></div>
-            </div>
-
-            <div class="watch-controls-row">
-                <button class="watch-pill" id="watchSourcePill">
-                    <span class="watch-pill-label">Джерело</span>
-                    <span class="watch-pill-value" id="watchSourceValue">Основне</span>
-                </button>
-                <button class="watch-pill" id="watchFilterPill">
-                    <span class="watch-pill-label">Фільтр</span>
-                    <span class="watch-pill-value" id="watchFilterValue">Сезон 1</span>
-                </button>
-            </div>
-
-            <div class="format-row" id="watchFormatRow"></div>
-
-            <div class="section-title season-pills-row" id="episodeSectionTitle">Сезон 1</div>
-
-            <div class="episode-view-tabs">
-                <button class="episode-view-tab active" data-view="grid">Сітка</button>
-                <button class="episode-view-tab" data-view="compact">Компактний</button>
-                <button class="episode-view-tab" data-view="classic">Класичний</button>
-            </div>
-
-            <div class="ep-grid" id="episodeViewGrid"></div>
-            <div class="ep-compact-list hidden" id="episodeViewCompact"></div>
-            <div class="ep-classic-list hidden" id="episodeViewClassic"></div>
+          </div>
+          <!-- ==================== /PAGE 2 ==================== -->
 
         </div>
     </div>
@@ -15994,6 +15999,8 @@ function renderProfilePage() {
             document.getElementById('episodeViewCompact').innerHTML = '';
             document.getElementById('episodeViewClassic').innerHTML = '';
             document.getElementById('episodePanel').classList.remove('visible');
+            document.getElementById('page-episodes').classList.remove('active');
+            document.getElementById('page-info').classList.add('active');
             document.getElementById('playerSynopsis').textContent = '';
             document.getElementById('synopsisMoreBtn').style.display = 'none';
             document.getElementById('playerTopbarTitle').textContent = '';
@@ -16165,7 +16172,7 @@ function renderProfilePage() {
                     updateFilterChip();
                     const row = document.getElementById('episodeSeasonRow');
                     if (row) {
-                        row.querySelectorAll('.episode-season-btn').forEach(b => b.classList.toggle('active', b.dataset.season === cw.season));
+                        row.querySelectorAll('.season-num').forEach(b => b.classList.toggle('active', b.dataset.season === cw.season));
                     }
                 }
                 playEpisode(cw.ep.file, cw.ep.episode);
@@ -16228,10 +16235,10 @@ function renderProfilePage() {
         // ====================================================================
         function openWatchPage() {
             if (!playerPageAnime) { showToast('Аніме ще завантажується'); return; }
-            const modal = document.getElementById('watchPageModal');
-            if (!modal) return;
-            modal.style.display = 'flex';
-            modal.querySelector('.modal-content').scrollTop = 0;
+            document.getElementById('page-info').classList.remove('active');
+            document.getElementById('page-episodes').classList.add('active');
+            const mc = document.querySelector('#playerPageModal .modal-content');
+            if (mc) mc.scrollTop = 0;
             const cw = findContinueWatching(playerPageAnime);
             if (cw && cw.progress < 95 && (cw.season !== playerPageCurrentSeason || cw.dub !== playerPageCurrentDub)) {
                 playerPageCurrentSeason = cw.season;
@@ -16242,9 +16249,8 @@ function renderProfilePage() {
         }
 
         function closeWatchPage() {
-            const modal = document.getElementById('watchPageModal');
-            if (!modal) return;
-            modal.style.display = 'none';
+            document.getElementById('page-episodes').classList.remove('active');
+            document.getElementById('page-info').classList.add('active');
             if (playerPagePlayer) {
                 if (playerPagePlayer._timeUpdateListener && playerPagePlayer.videoRef) {
                     playerPagePlayer.videoRef.removeEventListener('timeupdate', playerPagePlayer._timeUpdateListener);
@@ -16259,20 +16265,20 @@ function renderProfilePage() {
         function buildSeasonRow(seasons) {
             const row = document.getElementById('episodeSeasonRow');
             if (!row) return;
-            let html = `<span class="episode-season-label">Сезон</span>`;
+            let html = `<span>Сезон</span>`;
             seasons.forEach(s => {
                 const active = s === playerPageCurrentSeason ? ' active' : '';
-                html += `<button class="episode-season-btn${active}" data-season="${s}">${s}</button>`;
+                html += `<div class="season-num${active}" data-season="${s}">${s}</div>`;
             });
             row.innerHTML = html;
-            row.querySelectorAll('.episode-season-btn').forEach(btn => {
+            row.querySelectorAll('.season-num').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const season = btn.dataset.season;
                     if (season === playerPageCurrentSeason) return;
                     playerPageCurrentSeason = season;
                     const dubs = Object.keys((playerPageAnime.seasons[season]) || {}).sort();
                     playerPageCurrentDub = dubs[0] || '';
-                    row.querySelectorAll('.episode-season-btn').forEach(b => b.classList.remove('active'));
+                    row.querySelectorAll('.season-num').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     buildEpisodeViews();
                     updateFilterChip();
@@ -16874,7 +16880,7 @@ function renderProfilePage() {
             if (e.target === this) closeBottomSheet();
         });
 
-        document.querySelectorAll('.episode-view-tab').forEach(tab => {
+        document.querySelectorAll('.view-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const mode = tab.dataset.view;
                 showViewMode(mode);
@@ -17046,7 +17052,7 @@ function renderProfilePage() {
             grid.classList.toggle('hidden', mode !== 'grid');
             compact.classList.toggle('hidden', mode !== 'compact');
             classic.classList.toggle('hidden', mode !== 'classic');
-            document.querySelectorAll('.episode-view-tab').forEach(tab => {
+            document.querySelectorAll('.view-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.view === mode);
             });
             playerPageCurrentView = mode;
