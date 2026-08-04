@@ -7765,6 +7765,14 @@
         text-shadow:0 2px 18px rgba(0,0,0,0.7);
     }
 
+    #playerPageModal .modal-content .title-logo-img{
+        max-width:70%;
+        max-height:110px;
+        margin:0 auto;
+        display:block;
+        filter:drop-shadow(0 4px 20px rgba(0,0,0,0.6));
+    }
+
     /* ---------- CONTENT BELOW IMAGE ---------- */
     #playerPageModal .modal-content .content-top{
         padding:0 16px 2px;
@@ -8414,7 +8422,8 @@
                     </div>
                 </div>
                 <div class="tv-badge">TV</div>
-                <div class="logo-wrap">
+                <div class="logo-wrap" id="playerKickerWrap">
+                    <img id="playerTitleLogo" class="title-logo-img" alt="" style="display:none;">
                     <div class="kicker" id="playerKicker"></div>
                 </div>
             </div>
@@ -8430,6 +8439,10 @@
                 <div class="rating-card">
                     <div class="rating-num" id="playerRatingNum">—</div>
                     <div class="rating-label" id="playerRatingLabel">ОЦІНКА ГЛЯДАЧІВ</div>
+                </div>
+                <div class="rating-card" id="playerTmdbRating" style="display:none;">
+                    <div class="rating-num" id="playerTmdbRatingNum">—</div>
+                    <div class="rating-label">TMDB</div>
                 </div>
                 <div class="rating-card">
                     <div class="rating-num" id="playerEpisodeCountNum">0</div>
@@ -15968,6 +15981,12 @@ function renderProfilePage() {
             document.getElementById('playerSynopsis').textContent = '';
             document.getElementById('synopsisMoreBtn').style.display = 'none';
             document.getElementById('playerTopbarTitle').textContent = '';
+            document.getElementById('playerKicker').style.display = '';
+            const _resetLogoImg = document.getElementById('playerTitleLogo');
+            if (_resetLogoImg) { _resetLogoImg.style.display = 'none'; _resetLogoImg.src = ''; }
+            document.getElementById('castSection').style.display = 'none';
+            const _resetTmdbTile = document.getElementById('playerTmdbRating');
+            if (_resetTmdbTile) _resetTmdbTile.style.display = 'none';
             updateLikeButton();
             updateDislikeButton();
             updateBookmarkButton(url);
@@ -16037,6 +16056,69 @@ function renderProfilePage() {
                 }
                 buildBottomSheetData();
                 if (window.lucide) lucide.createIcons();
+
+                // ============================================================
+                //  TMDB — заміна метаданих на офіційні (жанр/рік/опис/постер/
+                //  актори/лого/віковий рейтинг). Відео залишається з anime-ua.
+                // ============================================================
+                (async () => {
+                    try {
+                        const tmdbInfo = await fetchTmdbForAnime(anime);
+                        if (_thisSignal.aborted || playerPageCurrentAnimeUrl !== url) return;
+                        if (!tmdbInfo) return;
+                        const details = await fetchTmdbFullDetails(tmdbInfo);
+                        if (_thisSignal.aborted || playerPageCurrentAnimeUrl !== url) return;
+                        if (!details) return;
+
+                        const tmdbPoster = tmdbImgUrl(details.poster_path, 'w500') || posterUrl;
+                        const tmdbBackdrop = tmdbImgUrl(details.backdrop_path, 'original') || tmdbPoster;
+                        const title = details.name || anime.title;
+                        const originalTitle = details.original_name || anime.originalTitle || anime.title;
+                        const year = (details.first_air_date || '').slice(0, 4) || anime.year || '—';
+                        const numEpisodes = details.number_of_episodes || totalEpisodes;
+                        const statusLabel = TMDB_STATUS_LABELS[details.status] || (totalEpisodes > 0 ? 'Онгоїнг' : 'Завершено');
+                        const genres = (details.genres || []).map(g => g.name).filter(Boolean);
+                        const overview = details.overview || anime.synopsis || '';
+                        const ageRating = tmdbAgeRating(details);
+                        const logoUrl = tmdbBestLogo(details);
+
+                        document.getElementById('playerPosterImg').src = tmdbPoster;
+                        document.getElementById('playerBlurBg').style.backgroundImage = `url(${tmdbBackdrop})`;
+                        document.getElementById('playerPosterTitle').textContent = title;
+                        document.getElementById('playerKicker').textContent = originalTitle;
+                        document.getElementById('playerTopbarTitle').textContent = title;
+                        document.getElementById('playerAgeBadge').textContent = ageRating || anime.score || '—';
+                        document.getElementById('playerStatusTag').textContent = statusLabel;
+                        document.getElementById('playerMetaLine').textContent = `${year}, ${numEpisodes} еп.`;
+                        if (genres.length) {
+                            document.getElementById('playerTagRow').innerHTML =
+                                genres.slice(0, 4).map(g => `<span class="tag">${escapeHtml(g)}</span>`).join('');
+                        }
+                        document.getElementById('playerEpisodeCountNum').textContent = numEpisodes;
+                        if (overview) {
+                            synopsisEl.textContent = overview;
+                            moreBtn.style.display = 'none';
+                            setTimeout(() => {
+                                if (synopsisEl.scrollHeight > synopsisEl.clientHeight + 2) moreBtn.style.display = 'block';
+                            }, 100);
+                        }
+                        const tmdbTile = document.getElementById('playerTmdbRating');
+                        if (tmdbTile && details.vote_average) {
+                            tmdbTile.style.display = '';
+                            document.getElementById('playerTmdbRatingNum').textContent = details.vote_average.toFixed(1);
+                        }
+                        const logoImg = document.getElementById('playerTitleLogo');
+                        const kickerEl = document.getElementById('playerKicker');
+                        if (logoUrl && logoImg) {
+                            logoImg.onerror = () => { logoImg.style.display = 'none'; if (kickerEl) kickerEl.style.display = ''; };
+                            logoImg.onload = () => { logoImg.style.display = 'block'; if (kickerEl) kickerEl.style.display = 'none'; };
+                            logoImg.src = logoUrl;
+                        }
+                        renderCast(details);
+                    } catch (e) {
+                        console.warn('TMDB metadata enrich failed', e);
+                    }
+                })();
             } catch (err) {
                 // Якщо запит скасовано (юзер закрив плеєр або відкрив інше) — мовчки ігноруємо
                 if (_thisSignal.aborted || modal.style.display === 'none') return;
@@ -16318,6 +16400,76 @@ function renderProfilePage() {
                 tmdbInfo.seasonsCache[seasonNum] = data.episodes || [];
                 return tmdbInfo.seasonsCache[seasonNum];
             } catch (e) { tmdbInfo.seasonsCache[seasonNum] = null; return null; }
+        }
+
+        // ====================================================================
+        //  TMDB — ПОВНІ МЕТАДАНІ (жанр/рік/опис/постер/актори/лого/віковий рейтинг)
+        //  Відео завжди залишається з anime-ua/uaserials — TMDB тут лише дані для UI.
+        // ====================================================================
+        async function fetchTmdbFullDetails(tmdbInfo) {
+            if (!tmdbInfo || !tmdbInfo.id) return null;
+            if (tmdbInfo.fullDetails !== undefined) return tmdbInfo.fullDetails;
+            try {
+                const res = await fetch(`${TMDB_BASE}/tv/${tmdbInfo.id}?api_key=${TMDB_API_KEY}&language=uk-UA&append_to_response=credits,images,content_ratings&include_image_language=uk,en,ja,null`);
+                if (!res.ok) { tmdbInfo.fullDetails = null; return null; }
+                const data = await res.json();
+                // Якщо опис або жанри порожні українською — донасичуємо з англійської версії
+                if (!data.overview || !(data.genres || []).length) {
+                    try {
+                        const resEn = await fetch(`${TMDB_BASE}/tv/${tmdbInfo.id}?api_key=${TMDB_API_KEY}&language=en-US`);
+                        if (resEn.ok) {
+                            const dataEn = await resEn.json();
+                            if (!data.overview) data.overview = dataEn.overview || '';
+                            if (!(data.genres || []).length) data.genres = dataEn.genres || [];
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+                tmdbInfo.fullDetails = data;
+                return data;
+            } catch (e) { console.warn('TMDB full details failed', e); tmdbInfo.fullDetails = null; return null; }
+        }
+
+        function tmdbBestLogo(details) {
+            const logos = (details && details.images && details.images.logos) || [];
+            if (!logos.length) return null;
+            const pick = logos.find(l => l.iso_639_1 === 'uk') || logos.find(l => l.iso_639_1 === 'en') ||
+                logos.find(l => !l.iso_639_1) || logos[0];
+            return pick ? tmdbImgUrl(pick.file_path, 'w500') : null;
+        }
+
+        function tmdbAgeRating(details) {
+            const results = (details && details.content_ratings && details.content_ratings.results) || [];
+            const pick = results.find(r => r.iso_3166_1 === 'UA') || results.find(r => r.iso_3166_1 === 'US') ||
+                results.find(r => r.iso_3166_1 === 'JP') || results[0];
+            return (pick && pick.rating) ? pick.rating : null;
+        }
+
+        const TMDB_STATUS_LABELS = {
+            'Returning Series': 'Онгоїнг',
+            'Ended': 'Завершено',
+            'Canceled': 'Завершено',
+            'In Production': 'Готується',
+            'Planned': 'Заплановано',
+            'Pilot': 'Пілот'
+        };
+
+        function renderCast(details) {
+            const section = document.getElementById('castSection');
+            const list = document.getElementById('castList');
+            if (!section || !list) return;
+            const cast = ((details && details.credits && details.credits.cast) || []).slice(0, 8);
+            if (!cast.length) { section.style.display = 'none'; return; }
+            section.style.display = '';
+            list.innerHTML = cast.map(c => {
+                const avatar = c.profile_path ? tmdbImgUrl(c.profile_path, 'w185') : '';
+                const avatarStyle = avatar ? `background-image:url(${avatar});background-size:cover;background-position:center;` : '';
+                return `
+                <div class="cast-card">
+                    <div class="cast-avatar" style="${avatarStyle}"></div>
+                    <div class="cast-name">${escapeHtml(c.name || '')}</div>
+                    <div class="cast-role">${escapeHtml(c.character || '')}</div>
+                </div>`;
+            }).join('');
         }
 
         function tmdbStillFor(ep, epMap, tmdbInfo, fallback) {
