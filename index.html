@@ -5010,13 +5010,8 @@
             width: 100%;
             aspect-ratio: 16/9;
             object-fit: cover;
-            filter: grayscale(100%);
-            transition: filter 0.4s ease;
             display: block;
             background: rgba(255, 255, 255, 0.03);
-        }
-        .episode-grid-card:hover .episode-grid-thumb {
-            filter: grayscale(20%);
         }
 
         .episode-grid-badge {
@@ -8412,9 +8407,6 @@
                         <button class="icon-btn" id="closePlayerPageBtn" title="Назад">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
                         </button>
-                        <button class="icon-btn" id="playerFilterBtn" title="Сезон, озвучка, джерело, якість">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
-                        </button>
                     </div>
                     <div class="top-right-col">
                         <div class="status-tag" id="playerStatusTag">Онгоїнг</div>
@@ -8527,6 +8519,7 @@
                 <div id="episodePanel" class="visible"></div>
                 <span id="playerPlayFabLabel"></span>
                 <div id="dislikeBtn"></div>
+                <button id="playerFilterBtn"></button>
             </div>
 
           </div>
