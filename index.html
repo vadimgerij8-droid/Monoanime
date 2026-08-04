@@ -7678,11 +7678,6 @@
         background-size:cover;
         background-position:center;
         background-color:#141414;
-        filter: grayscale(100%) contrast(1.05);
-        transition: filter 0.4s ease;
-    }
-    #playerPageModal .modal-content .hero-img:hover{
-        filter: grayscale(0%) contrast(1);
     }
     #playerPageModal .modal-content .smoke{
         position:absolute; z-index:0; inset:0;
@@ -7998,14 +7993,6 @@
         background-size:cover; background-position:center;
         display:flex; align-items:flex-start; padding:8px;
         position:relative;
-        filter: grayscale(100%) contrast(1.05);
-        transition: filter 0.35s ease;
-    }
-    #playerPageModal .modal-content .ep-card:hover .ep-thumb,
-    #playerPageModal .modal-content .ep-card:focus-within .ep-thumb,
-    #playerPageModal .modal-content .ep-card:hover .ep-thumb,
-    #playerPageModal .modal-content .ep-card:focus-within .ep-thumb{
-        filter: grayscale(0%) contrast(1);
     }
     #playerPageModal .modal-content .ep-thumb::after, #playerPageModal .modal-content .ep-thumb::after{
         content:""; position:absolute; inset:0;
@@ -8039,12 +8026,6 @@
         overflow:hidden;
         background-size:cover; background-position:center;
         background-color:#141414;
-        filter: grayscale(100%) contrast(1.05);
-        transition: filter 0.35s ease;
-    }
-    #playerPageModal .modal-content .poster-card:hover .poster-thumb,
-    #playerPageModal .modal-content .poster-card:focus-within .poster-thumb{
-        filter: grayscale(0%) contrast(1);
     }
 
     #playerPageModal .modal-content .poster-badges{
@@ -8159,10 +8140,8 @@
         position:relative; aspect-ratio:3/4; border-radius:14px; overflow:hidden;
         background-size:cover; background-position:center; background-color:#141414;
         border:1px solid var(--line);
-        filter:grayscale(100%) contrast(1.05);
-        transition:filter .35s ease, transform .2s ease;
+        transition: transform .2s ease;
     }
-    .epv2-card:hover .epv2-thumb{ filter:grayscale(0%) contrast(1); }
     .epv2-card:active .epv2-thumb{ transform:scale(0.97); }
     .epv2-thumb::after{
         content:''; position:absolute; inset:0;
@@ -8198,9 +8177,8 @@
     .epv2c-row:hover{ background:var(--panel-strong); }
     .epv2c-thumb{
         width:56px; height:56px; flex-shrink:0; border-radius:10px; background-size:cover; background-position:center;
-        background-color:#141414; filter:grayscale(100%); transition:filter .3s ease; position:relative; overflow:hidden;
+        background-color:#141414; position:relative; overflow:hidden;
     }
-    .epv2c-row:hover .epv2c-thumb{ filter:grayscale(0%); }
     .epv2c-num{ position:absolute; bottom:2px; left:2px; font-size:9px; font-weight:700; background:rgba(10,10,10,.75); color:var(--text); padding:1px 5px; border-radius:5px; }
     .epv2c-body{ flex:1; min-width:0; }
     .epv2c-title{ font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
@@ -8212,9 +8190,7 @@
     .epv2l-thumb{
         position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden;
         background-size:cover; background-position:center; background-color:#141414; border:1px solid var(--line);
-        filter:grayscale(100%) contrast(1.05); transition:filter .35s ease;
     }
-    .epv2l-row:hover .epv2l-thumb{ filter:grayscale(0%) contrast(1); }
     .epv2l-thumb::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.75) 100%); }
     .epv2l-badge{ position:absolute; z-index:2; top:10px; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:700; background:rgba(10,10,10,.75); color:var(--text); backdrop-filter:blur(8px); }
     .epv2l-badge-num{ left:10px; }
@@ -8226,13 +8202,6 @@
 
     
     /* ---------- MISSING FROM DESIGN: hero-bg, review-add, cast, pb-rating, episodes page ---------- */
-    #playerPageModal .modal-content .hero-bg{
-        position:absolute; inset:0; z-index:-2;
-        background:
-            radial-gradient(120% 90% at 15% 0%, rgba(255,255,255,0.10), transparent 55%),
-            repeating-linear-gradient(115deg, #050505 0 2px, #0d0d0d 2px 4px),
-            linear-gradient(180deg, #1c1c1c 0%, #0a0a0a 65%, #0a0a0a 100%);
-    }
 
     #playerPageModal .modal-content .review-add{
         min-width:90px; height:90px;
@@ -8327,8 +8296,7 @@
         border-color:var(--text-dim);
     }
     #playerPageModal .modal-content .episodes-grid{
-        display:grid; grid-template-columns:1fr 1fr;
-        gap:10px; padding:0 16px 30px;
+        padding-bottom:20px;
     }
     #playerPageModal .modal-content .episode-grid-num{
         font-family:'Space Grotesk', sans-serif;
@@ -8341,6 +8309,10 @@
         display:flex; align-items:center; gap:3px;
         color:#e5c100;
     }
+    #playerPageModal .modal-content .episode-grid-card.watched .episode-grid-num{
+        background:rgba(124,252,154,0.25); color:#7CFC9A;
+    }
+    #playerPageModal .modal-content .episode-grid-card{ cursor:pointer; }
     #playerPageModal .modal-content .episode-grid-progress-bar{
         height:100%; background:rgba(255,255,255,0.3); border-radius:2px;
     }
@@ -8434,7 +8406,6 @@
 
             <!-- HERO IMAGE -->
             <div class="hero-img" id="playerBlurBg">
-                <div class="hero-bg"></div>
                 <div class="smoke"></div>
                 <div class="topbar">
                     <div style="display:flex; gap:8px;">
@@ -8513,18 +8484,6 @@
                 <button class="synopsis-more-btn" id="synopsisMoreBtn">більше</button>
             </section>
 
-            <!-- RECOMMENDATIONS -->
-            <section id="recommendationsSection" style="display:none;">
-                <div class="section-title">Рекомендації</div>
-                <div class="hscroll" id="recommendationsHscroll"></div>
-            </section>
-
-            <!-- SIMILAR -->
-            <section id="similarSection" style="display:none;">
-                <div class="section-title">Подібні</div>
-                <div class="hscroll" id="similarHscroll"></div>
-            </section>
-
             <!-- CAST -->
             <section id="castSection">
                 <div class="section-title">Актори</div>
@@ -8545,6 +8504,18 @@
                         <div class="cast-role"></div>
                     </div>
                 </div>
+            </section>
+
+            <!-- RECOMMENDATIONS -->
+            <section id="recommendationsSection" style="display:none;">
+                <div class="section-title">Рекомендації</div>
+                <div class="hscroll" id="recommendationsHscroll"></div>
+            </section>
+
+            <!-- SIMILAR -->
+            <section id="similarSection" style="display:none;">
+                <div class="section-title">Подібні</div>
+                <div class="hscroll" id="similarHscroll"></div>
             </section>
 
             <!-- прихована технічна розмітка для сумісності зі старою логікою (не показується) -->
@@ -16379,13 +16350,17 @@ function renderProfilePage() {
             const rating = tmdbRatingFor(ep, epMap);
             const statusText = watched ? 'Переглянуто' : (progress > 0 ? `${Math.round(progress)}%` : 'Доступно');
             return `
-              <div class="ep-card${watched ? ' watched' : ''}" data-file="${ep.file}" data-episode="${ep.episode}">
-                <div class="ep-thumb" style="background-image:url(${img})">
-                  <div class="ep-num">${String(ep.episode).padStart(2, '0')}</div>
+              <div class="episode-grid-card${watched ? ' watched' : ''}" data-file="${ep.file}" data-episode="${ep.episode}">
+                <div class="episode-grid-thumb" style="background-image:url(${img})">
+                  <span class="episode-grid-num">${String(ep.episode).padStart(2, '0')}</span>
                 </div>
-                <div class="ep-info">
-                  <div class="ep-title">Серія ${ep.episode}</div>
-                  <div class="ep-date">${rating ? `★ ${rating} · ` : ''}${statusText}</div>
+                <div class="episode-grid-info">
+                  <div class="episode-grid-title">Серія ${ep.episode}</div>
+                  <div class="episode-grid-meta">
+                    ${rating ? `<span class="episode-grid-rating">★ ${rating}</span><span>·</span>` : ''}
+                    <span>${statusText}</span>
+                  </div>
+                  <div class="episode-grid-progress"><div class="episode-grid-progress-bar" style="width:${Math.min(progress, 100)}%"></div></div>
                 </div>
               </div>`;
         }
